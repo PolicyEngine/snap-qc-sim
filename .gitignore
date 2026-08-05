@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 examples/results_by_state.json
 uv.lock
+app/node_modules/
+app/public/.vercel/
+app/public/.env.local
+app/bun.lock

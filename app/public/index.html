@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNAP payment error simulator | PolicyEngine</title>
+<meta name="description" content="Simulate a state's SNAP payment error rate distribution, cost-share tier probabilities, and expected dollars under audit-volume and policy simplification choices.">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">PolicyEngine</div>
+    <h1>SNAP payment error simulator</h1>
+    <p class="lede">
+      Beginning fiscal year 2028, a state's SNAP payment error rate sets its
+      share of benefit costs — 0% below a 6% rate, 5% from 6–8, 10% from
+      8–10, 15% at or above 10 — keyed to the FY 2025–26 rates being measured
+      now. This simulator draws from the state's own USDA Quality Control
+      sample to show the <em>distribution</em> of its measured rate, and what
+      audit volume and policy simplification choices do to the bill.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls" aria-label="Scenario controls">
+    <div class="control">
+      <label for="state">State</label>
+      <select id="state"></select>
+      <div id="verified-badge" class="badge" hidden></div>
+    </div>
+    <div class="control">
+      <label for="audits">Additional QC reviews <span class="val" id="audits-val">+0</span></label>
+      <input type="range" id="audits" min="0" max="1000" step="50" value="0">
+      <div class="hint">Beyond the state's FY 2024 sample size</div>
+    </div>
+    <div class="control levers">
+      <span class="label">Simplification options</span>
+      <label><input type="checkbox" id="lever-smd"> Standard medical deduction</label>
+      <label><input type="checkbox" id="lever-ssed"> Standard self-employment deduction</label>
+      <label><input type="checkbox" id="lever-heat_and_eat"> Heat-and-eat</label>
+      <label><input type="checkbox" id="lever-bbce_resources"> BBCE resource exemption</label>
+    </div>
+    <div class="control">
+      <label for="eff">Suppression effectiveness <span class="val" id="eff-val">50%</span></label>
+      <input type="range" id="eff" min="25" max="100" step="25" value="50">
+      <div class="hint">How much of the selected categories' error dollars the option removes — a scenario dial, not a causal estimate</div>
+    </div>
+  </section>
+
+  <section class="tiles" aria-label="Headline results">
+    <div class="tile"><div class="k" id="t-official">–</div><div class="l">Official FY 2024 payment error rate</div></div>
+    <div class="tile"><div class="k" id="t-expected">–</div><div class="l">Expected annual cost share, scenario</div><div class="d" id="t-delta"></div></div>
+    <div class="tile"><div class="k" id="t-tier">–</div><div class="l">Most likely tier, scenario</div><div class="d" id="t-tierp"></div></div>
+    <div class="tile"><div class="k" id="t-sd">–</div><div class="l">Std. dev. of the annual bill</div><div class="d" id="t-sdd"></div></div>
+  </section>
+
+  <section class="chart-card">
+    <h2>Measured-rate distribution</h2>
+    <p class="sub">Scenario draws (filled) vs. baseline (outline); bands mark the cost-share tiers; the dashed line is the official FY 2024 rate.</p>
+    <div id="hist" class="chart" role="img" aria-label="Histogram of simulated measured payment error rates with cost-share tier bands"></div>
+  </section>
+
+  <section class="chart-card">
+    <h2>Cost-share tier probabilities</h2>
+    <div id="tiers" class="chart" role="img" aria-label="Stacked probability bars of landing in each cost-share tier, baseline versus scenario"></div>
+  </section>
+
+  <section class="fine">
+    <details open>
+      <summary>Method and caveats</summary>
+      <ul>
+        <li>Error process from the FY 2024 SNAP QC public-use file (errors counted above the official $56 threshold); scenarios re-draw QC-style samples and recompute the weighted rate, centered on the state's official published rate.</li>
+        <li>Simplification options suppress the error contribution of the finding-element categories they standardize (medical 365, self-employment 312, utilities 364, resources 211–225) at the chosen effectiveness — a scenario dial, not a causal estimate; states adopt options endogenously.</li>
+        <li>The underlying error process is held fixed: no behavioral response, and no corrective-feedback channel from auditing more cases.</li>
+        <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
+        <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="verify-cta" id="verify-cta"></section>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  Built by <a href="https://policyengine.org">PolicyEngine</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>
+</div></footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

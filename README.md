@@ -1,5 +1,11 @@
 # snap-qc-sim
 
+**Interactive tool: https://snap-qc-sim.vercel.app** — pick a state, adjust
+audit volume and simplification options, watch the measured-rate
+distribution and the cost-share bill respond. States whose encoded rules
+are verified against their full QC sample (CO, NY, CA, AZ, GA, MD, TX)
+carry a verification badge.
+
 Monte Carlo simulation of SNAP payment error rates: given a state's USDA
 Quality Control sample, simulate the distribution of its **measured** payment
 error rate — and therefore its 7 USC 2013(a)(2) cost-share tier and dollars —
