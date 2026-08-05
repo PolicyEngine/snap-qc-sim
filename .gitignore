@@ -1,0 +1,5 @@
+__pycache__/
+*.egg-info/
+.venv/
+examples/results_by_state.json
+uv.lock
