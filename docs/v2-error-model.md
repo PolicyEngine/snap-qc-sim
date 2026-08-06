@@ -99,9 +99,18 @@ Two tiers:
   small engine-verified class) enter as a separate additive process.
 
 The rule-mining program this grew alongside solves a different problem —
-explainable review guidance for auditors — and its outputs are review
-lists, not predictions. The shared substrate is the features and the
-holdout discipline, not the product shape.
+explainable review guidance for auditors under the CURRENT policy regime —
+and its outputs are review lists, not predictions. What transfers is
+mechanics (holdout discipline, budget-denominated reporting, household
+observables); its benchmarks do not (an explainability-constrained
+per-state list and an unconstrained pooled score are different objects),
+and neither do regime-embedded features. Feature discipline for the
+counterfactual tiers: any feature that encodes the policy regime — direct
+option indicators, and regime-carrying case facts like the categorical-
+eligibility code, which embeds BBCE adoption — is either excluded or
+promoted to an engine-recomputed intermediate. It must never enter as a
+static covariate, or the counterfactual silently holds the old regime
+fixed.
 
 ## Staging
 

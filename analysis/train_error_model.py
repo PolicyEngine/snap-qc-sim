@@ -52,7 +52,8 @@ SMD_DOC = {
            "MI","MO","NH","ND","OR","RI","SC","SD","TX","VT","VA","WY"},
 }
 
-COLS = ["STATE","YRMONTH","HWGT","STATUS","AMTERR","RAWBEN","FSBEN","FSUSIZE",
+COLS = ["FSNKID","EXPEDSER","FSERNDED",
+        "STATE","YRMONTH","HWGT","STATUS","AMTERR","RAWBEN","FSBEN","FSUSIZE",
         "CERTHHSZ","FSNELDER","FSNDIS","FSEARN","FSUNEARN","FSGRINC","FSNETINC",
         "FSMEDEXP","FSMEDDED","FSDEPDED","FSCSDED","FSSLTDED","FSSTDDED",
         "RENT","UTIL","SUA1","BENMAX","MINIMUM_BEN","CAT_ELIG","HOMEDED",
@@ -126,11 +127,19 @@ def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
     f["net_share_of_gross"] = (
         df["FSNETINC"].fillna(0) / df["FSGRINC"].replace(0, np.nan)
     ).fillna(0).clip(0, 2)
+    # Features from the giannella/snap_qc data dictionary (Jesse Shaw):
+    f["children"] = (df.get("FSNKID", pd.Series(0, index=df.index)).fillna(0) > 0).astype(int)
+    f["expedited"] = (df.get("EXPEDSER", pd.Series(3, index=df.index)).fillna(3) < 3).astype(int)
+    f["cat_elig_code"] = df["CAT_ELIG"].fillna(0).astype(int)
+    total_ded = sum(df.get(c, pd.Series(0, index=df.index)).fillna(0)
+                    for c in ["FSDEPDED", "FSCSDED", "FSSLTDED", "FSMEDDED", "FSERNDED"])
+    f["deductions_per_member"] = (total_ded / f["size"].clip(lower=1)).astype(float)
     return f
 
 
 COVARIATES = ["size", "elderly_or_disabled", "has_earnings", "earned", "unearned",
-              "gross", "cat_elig", "year"]
+              "gross", "cat_elig", "year", "children", "expedited",
+              "cat_elig_code", "deductions_per_member"]
 INTERMEDIATES = ["claims_medical", "med_doc_required", "se_records",
                  "utility_actuals", "deduction_count", "at_max", "at_min",
                  "ben_rel_max", "net_share_of_gross"]
@@ -143,8 +152,13 @@ def fit_score(train, test, cols, label):
     p = m.predict_proba(test[cols])[:, 1]
     auc = roc_auc_score(test["error"], p, sample_weight=test["w"])
     ap = average_precision_score(test["error"], p, sample_weight=test["w"])
-    print(f"{label:<28} AUC {auc:.4f}  PR-AUC {ap:.4f}")
-    return m, p, auc, ap
+    order = np.argsort(-p)
+    w_s = test["w"].to_numpy()[order]
+    e_s = test["error"].to_numpy()[order]
+    k = int(np.searchsorted(np.cumsum(w_s), 0.05 * w_s.sum())) + 1
+    pb = float(np.average(e_s[:k], weights=w_s[:k]))
+    print(f"{label:<28} AUC {auc:.4f}  PR-AUC {ap:.4f}  P@5%budget {pb:.3f}")
+    return m, p, auc, ap, pb
 
 
 def main() -> None:
@@ -161,8 +175,8 @@ def main() -> None:
           f"test {len(test):,} ({test['error'].mean():.1%})")
 
     print("\n== FY2024 holdout ==")
-    _, p_base, auc0, ap0 = fit_score(train, test, COVARIATES, "covariates only")
-    m_full, p_full, auc1, ap1 = fit_score(train, test, COVARIATES + INTERMEDIATES,
+    _, p_base, auc0, ap0, pb0 = fit_score(train, test, COVARIATES, "covariates only")
+    m_full, p_full, auc1, ap1, pb1 = fit_score(train, test, COVARIATES + INTERMEDIATES,
                                           "with intermediates")
     print(f"lift: AUC {auc1 - auc0:+.4f}, PR-AUC {ap1 - ap0:+.4f}")
 
@@ -214,6 +228,8 @@ def main() -> None:
 
     json.dump({"auc_covariates": auc0, "auc_with_intermediates": auc1,
                "pr_covariates": ap0, "pr_with_intermediates": ap1,
+        "p_at_5pct_budget_covariates": pb0,
+        "p_at_5pct_budget_with_intermediates": pb1,
                "train_n": int(len(train)), "test_n": int(len(test))},
               open(OUT / "model_results.json", "w"), indent=1)
     print(f"\nwrote {OUT / 'model_results.json'}")

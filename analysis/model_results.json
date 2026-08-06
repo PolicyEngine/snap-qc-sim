@@ -1,8 +1,10 @@
 {
- "auc_covariates": 0.7397332558157839,
- "auc_with_intermediates": 0.7632152644993502,
- "pr_covariates": 0.34198544018709515,
- "pr_with_intermediates": 0.35220887529542805,
+ "auc_covariates": 0.7621134091261413,
+ "auc_with_intermediates": 0.7641311902580588,
+ "pr_covariates": 0.3609700391929045,
+ "pr_with_intermediates": 0.3603317930356822,
+ "p_at_5pct_budget_covariates": 0.48812880848465856,
+ "p_at_5pct_budget_with_intermediates": 0.48990796753302973,
  "train_n": 217693,
  "test_n": 44891
 }
