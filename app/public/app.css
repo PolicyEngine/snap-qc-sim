@@ -28,7 +28,10 @@ body {
 }
 .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
 .site-header { padding: 40px 0 8px; }
-.brand { font-weight: 700; color: var(--primary); letter-spacing: 0.01em; margin-bottom: 12px; }
+.brand { display: inline-block; margin-bottom: 14px; }
+.brand .logo { height: 26px; width: auto; display: none; }
+:root:not(.dark) .logo-light { display: block; }
+.dark .logo-dark { display: block; }
 h1 { font-size: 1.9rem; margin: 0 0 10px; }
 .lede { color: var(--muted-foreground); max-width: 760px; margin: 0; }
 h2 { font-size: 1.05rem; margin: 0 0 4px; }

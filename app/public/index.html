@@ -11,7 +11,10 @@
 <body>
 <header class="site-header">
   <div class="wrap">
-    <div class="brand">PolicyEngine</div>
+    <a class="brand" href="https://policyengine.org">
+      <img class="logo logo-light" src="pe-logo-teal.svg" alt="PolicyEngine" height="26">
+      <img class="logo logo-dark" src="pe-logo-white.svg" alt="PolicyEngine" height="26">
+    </a>
     <h1>SNAP payment error simulator</h1>
     <p class="lede">
       Beginning fiscal year 2028, a state's SNAP payment error rate sets its
@@ -46,7 +49,7 @@
     <div class="control">
       <label for="eff">Suppression effectiveness <span class="val" id="eff-val">50%</span></label>
       <input type="range" id="eff" min="25" max="100" step="25" value="50">
-      <div class="hint">How much of the selected categories' error dollars the option removes — a scenario dial, not a causal estimate</div>
+      <div class="hint">Share of the selected categories' observed FY 2024 error dollars removed — an accounting bound, not a case-level prediction</div>
     </div>
   </section>
 
