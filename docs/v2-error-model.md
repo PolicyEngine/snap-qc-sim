@@ -87,6 +87,28 @@ Two tiers:
   intermediates and covariates. Under policy P′: engine recomputes true′
   and the intermediates; predict D′; assigned′ = true′ + D′. Fast, one
   model, moderately portable.
+- **v2a structure — hurdle on the deviation, true benefit as anchor and
+  covariate.** Modeling assigned levels directly would spend model capacity
+  re-learning the deterministic benefit function and let its approximation
+  error masquerade as deviation; most cases deviate by exactly zero. So the
+  target is the differenced deviation with a hurdle: P(D ≠ 0 | features),
+  then the conditional distribution of D given a deviation (quantile
+  models). The engine-computed true benefit enters twice — as the anchor
+  (via the difference) and as a covariate of both stages (with position
+  features: relative-to-maximum, distance-to-thresholds), because deviation
+  propensity and size depend on where the true benefit sits. Threshold
+  crossings compose: P(|D| > threshold) = P(D≠0) · P(|D| > threshold | D≠0).
+- **The mixture: agency computation failures are a separate channel.** The
+  input-noise mechanism assumes the agency computed correctly on wrong
+  facts — true for 86.9% of replayable error cases, false for the rest: a
+  small class where no input value explains the issuance, part of it
+  QC-coded as computation failure (proration, wrong standards, programming
+  errors). The deviation process is therefore a mixture: with
+  state-specific probability π, D draws from a computation-failure
+  distribution (estimable from the unexplained class and the cause codes);
+  otherwise from the input-noise channel. π is itself a lever — replacing
+  the calculation engine with a verified one sets π to zero, which
+  expresses the rules-infrastructure intervention as a model parameter.
 - **v2b — input-noise model (fully mechanistic).** Most deviations are
   correct arithmetic on wrong inputs (86.9% of replayable error cases in
   the Colorado AMTERR replay), so model the input-misreport process —
