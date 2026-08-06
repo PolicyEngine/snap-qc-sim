@@ -157,7 +157,7 @@ function histogram(el, base, scen, official) {
   });
 }
 
-function tierBars(el, rows) {
+function tierBars(el, rows, issuance) {
   const W = 920, H = 46 * rows.length + 8, L = 78, R = 12;
   const ink = cssVar("--muted-foreground") || "#475569";
   let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
@@ -172,7 +172,8 @@ function tierBars(el, rows) {
       if (pt[t] >= 0.07) {
         const darkMode = document.documentElement.classList.contains("dark");
         const light = darkMode ? t >= 10 : t <= 5;
-        s += `<text x="${xacc + w / 2}" y="${y0 + 20}" text-anchor="middle" font-size="11" fill="${light ? "#1E293B" : "white"}">${TIER_LABELS[t].split(" ")[0]} · ${(pt[t] * 100).toFixed(0)}%</text>`;
+        const cost = t > 0 && pt[t] >= 0.18 ? ` · ${fmtM((t / 100) * issuance)}/yr` : "";
+        s += `<text x="${xacc + w / 2}" y="${y0 + 20}" text-anchor="middle" font-size="11" fill="${light ? "#1E293B" : "white"}">${TIER_LABELS[t].split(" ")[0]} · ${(pt[t] * 100).toFixed(0)}%${cost}</text>`;
       }
       xacc += w;
     }
@@ -181,13 +182,115 @@ function tierBars(el, rows) {
   el.innerHTML = s;
   el.querySelectorAll(".seg").forEach((r) => {
     r.addEventListener("mousemove", (ev) => {
-      tooltip.textContent = `${r.dataset.row}: ${(r.dataset.p * 100).toFixed(1)}% chance of the ${TIER_LABELS[r.dataset.t]} tier`;
+      const t = +r.dataset.t;
+      const cost = t > 0 ? ` — ${fmtM((t / 100) * issuance)}/yr if it lands there` : " — no state share";
+      tooltip.textContent = `${r.dataset.row}: ${(r.dataset.p * 100).toFixed(1)}% chance of the ${TIER_LABELS[t]} tier${cost}`;
       tooltip.style.left = ev.clientX + 12 + "px";
       tooltip.style.top = ev.clientY + 12 + "px";
       tooltip.hidden = false;
     });
     r.addEventListener("mouseleave", () => (tooltip.hidden = true));
   });
+}
+
+// ---- All-states baseline table -------------------------------------------
+
+const NAT = new Map(); // code -> {code, official, tier, pmis, eShare, sd, verified}
+let natSort = { k: "pmis", dir: -1 };
+
+function computeNational() {
+  const codes = Object.keys(DATA.states);
+  let i = 0;
+  const step = () => {
+    const t0 = performance.now();
+    while (i < codes.length && performance.now() - t0 < 40) {
+      const code = codes[i++];
+      const st = DATA.states[code];
+      const sm = summarize(simulate(st, {}), st.issuance);
+      const tier = tierOf(st.official);
+      NAT.set(code, {
+        code,
+        official: st.official,
+        tier,
+        pmis: 1 - sm.pt[tier],
+        eShare: sm.eShare,
+        sd: sm.sd,
+        verified: !!st.verified,
+      });
+    }
+    renderNatTable();
+    if (i < codes.length) setTimeout(step, 40); // leave the main thread room to paint
+    else renderNatTakeaway();
+  };
+  step();
+}
+
+function renderNatTakeaway() {
+  const rows = [...NAT.values()];
+  const flip = rows.filter((r) => r.pmis >= 0.4).length;
+  const totalE = rows.reduce((a, r) => a + r.eShare, 0);
+  $("nat-takeaway").textContent =
+    `At official FY 2024 rates and sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
+    `of drawing into a different cost-share tier than their point rate implies. Summed expected cost across all ` +
+    `jurisdictions under the FY 2028 tiers: ${fmtM(totalE)}/yr.`;
+}
+
+function renderNatTable() {
+  const { k, dir } = natSort;
+  const rows = [...NAT.values()].sort((a, b) => {
+    const va = a[k], vb = b[k];
+    return (typeof va === "string" ? va.localeCompare(vb) : va - vb) * dir;
+  });
+  const body = document.querySelector("#nat-table tbody");
+  body.innerHTML = rows
+    .map(
+      (r) => `<tr data-code="${r.code}" class="${r.code === $("state").value ? "current" : ""}">
+      <td>${r.code}${r.verified ? ' <span class="vmark" title="Rules verified against every FY 2024 QC case">✓</span>' : ""}</td>
+      <td class="num">${r.official.toFixed(2)}%</td>
+      <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}</td>
+      <td class="num">${(r.pmis * 100).toFixed(0)}%</td>
+      <td class="num">${fmtM(r.eShare)}</td>
+      <td class="num">${fmtM(r.sd)}</td>
+    </tr>`
+    )
+    .join("");
+  const pending = Object.keys(DATA.states).length - NAT.size;
+  $("nat-note").textContent = pending > 0 ? `Computing… ${NAT.size}/${NAT.size + pending}` : "";
+  document.querySelectorAll("#nat-table th button").forEach((b) => {
+    b.classList.toggle("sorted", b.dataset.k === k);
+    b.classList.toggle("desc", b.dataset.k === k && dir === -1);
+  });
+  body.querySelectorAll("tr").forEach((tr) => {
+    tr.addEventListener("click", () => {
+      $("state").value = tr.dataset.code;
+      $("state").dispatchEvent(new Event("change"));
+      document.querySelector(".controls").scrollIntoView({ behavior: "smooth" });
+    });
+  });
+}
+
+// ---- URL state -----------------------------------------------------------
+
+function readUrl() {
+  const p = new URLSearchParams(location.search);
+  const st = p.get("state");
+  if (st && DATA.states[st]) $("state").value = st;
+  if (p.get("audits")) $("audits").value = Math.min(1000, Math.max(0, +p.get("audits") || 0));
+  if (p.get("eff")) $("eff").value = Math.min(100, Math.max(25, +p.get("eff") || 50));
+  const levers = (p.get("levers") || "").split(",");
+  for (const id of LEVER_IDS) $("lever-" + id).checked = levers.includes(id);
+}
+
+function writeUrl() {
+  const p = new URLSearchParams();
+  p.set("state", $("state").value);
+  if (+$("audits").value) p.set("audits", $("audits").value);
+  const on = LEVER_IDS.filter((id) => $("lever-" + id).checked);
+  if (on.length) {
+    p.set("levers", on.join(","));
+    p.set("eff", $("eff").value);
+  }
+  history.replaceState(null, "", "?" + p.toString());
 }
 
 function render() {
@@ -216,7 +319,11 @@ function render() {
   $("t-sdd").textContent = "baseline " + fmtM(sb.sd);
 
   histogram($("hist"), base, scen, st.official);
-  tierBars($("tiers"), [["Baseline", sb.pt], ["Scenario", ss.pt]]);
+  tierBars($("tiers"), [["Baseline", sb.pt], ["Scenario", ss.pt]], st.issuance);
+  writeUrl();
+  document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
+    tr.classList.toggle("current", tr.dataset.code === code)
+  );
 
   const badge = $("verified-badge");
   const cta = $("verify-cta");
@@ -240,16 +347,25 @@ async function main() {
     sel.appendChild(o);
   }
   sel.value = "CO";
+  readUrl();
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
   setMode();
-  let raf = 0;
-  const queue = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(render); };
+  let pending = 0;
+  const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
   sel.addEventListener("change", queue);
   $("audits").addEventListener("input", queue);
   $("eff").addEventListener("input", queue);
   for (const id of LEVER_IDS) $("lever-" + id).addEventListener("change", queue);
+  document.querySelectorAll("#nat-table th button").forEach((b) => {
+    b.addEventListener("click", () => {
+      const k = b.dataset.k;
+      natSort = { k, dir: natSort.k === k ? -natSort.dir : k === "code" ? 1 : -1 };
+      renderNatTable();
+    });
+  });
   render();
+  setTimeout(computeNational, 60);
 }
 main();
