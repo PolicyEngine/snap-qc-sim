@@ -5,10 +5,16 @@ description = "Monte Carlo simulation of SNAP payment error rates, QC sampling, 
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
-dependencies = ["numpy>=1.26"]
+dependencies = ["numpy>=1.26,<3"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.4"]
+analysis = [
+    "pandas>=2.2,<3",
+    "pyreadstat>=1.2.8,<2",
+    "scikit-learn>=1.8,<1.9",
+    "scipy>=1.17,<1.18",
+]
+dev = ["pytest>=8,<10", "ruff>=0.4,<1"]
 
 [build-system]
 requires = ["hatchling"]
