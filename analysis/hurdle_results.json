@@ -1,373 +1,2580 @@
 {
- "stage1_auc": 0.8277900666825502,
- "stage2_auc_among_deviators": 0.7419917327711544,
- "calibration_corr": 0.5354356686906211,
- "calibration_mae_pp": 1.6623785000035574,
- "calibration_slope": 0.9959530352064913,
- "states": [
-  {
-   "state": "DC",
-   "n": 1019,
-   "pred_rate": 9.588657850247467,
-   "obs_rate": 15.738369346424907,
-   "state_factor": 1.6413526890021137
+  "calibration": {
+    "fy2023_fit_factor_validation": {
+      "factor_fit_year": 2023,
+      "factors": [
+        {
+          "effective_n": 88.11223030343182,
+          "factor_sampling_variance": 0.11488205780872833,
+          "issuance_total": 102867679.48441565,
+          "n": 207,
+          "obs_rate": 3.5774292961781824,
+          "observed_to_predicted_ratio": 0.959399172996955,
+          "pred_rate": 3.7288225765330494,
+          "raw_factor": 0.959399172996955,
+          "shrinkage_weight": 0.5694584442788343,
+          "state": "AK",
+          "state_factor": 0.9768795162184118
+        },
+        {
+          "effective_n": 1060.800974285973,
+          "factor_sampling_variance": 0.012542923928879297,
+          "issuance_total": 1736448132.2942564,
+          "n": 1079,
+          "obs_rate": 5.555028812905689,
+          "observed_to_predicted_ratio": 1.1125411975950448,
+          "pred_rate": 4.993099424015821,
+          "raw_factor": 1.1125411975950448,
+          "shrinkage_weight": 0.9237476930580857,
+          "state": "AL",
+          "state_factor": 1.1039596716524167
+        },
+        {
+          "effective_n": 746.7415843312077,
+          "factor_sampling_variance": 0.008103995339199744,
+          "issuance_total": 489091148.1429057,
+          "n": 797,
+          "obs_rate": 2.5126107343685065,
+          "observed_to_predicted_ratio": 0.512260172026552,
+          "pred_rate": 4.904950397428654,
+          "raw_factor": 0.512260172026552,
+          "shrinkage_weight": 0.9493669461708917,
+          "state": "AR",
+          "state_factor": 0.5369559289909317
+        },
+        {
+          "effective_n": 886.9414733916469,
+          "factor_sampling_variance": 0.015545687734048793,
+          "issuance_total": 1849548310.377604,
+          "n": 903,
+          "obs_rate": 8.49328927394964,
+          "observed_to_predicted_ratio": 1.3538367243571041,
+          "pred_rate": 6.273495999292562,
+          "raw_factor": 1.3538367243571041,
+          "shrinkage_weight": 0.9071872366133928,
+          "state": "AZ",
+          "state_factor": 1.320996160181856
+        },
+        {
+          "effective_n": 847.8922967936367,
+          "factor_sampling_variance": 0.013688346479070489,
+          "issuance_total": 10639996457.670908,
+          "n": 867,
+          "obs_rate": 8.082330129616135,
+          "observed_to_predicted_ratio": 1.1738627427842268,
+          "pred_rate": 6.885242912170511,
+          "raw_factor": 1.1738627427842268,
+          "shrinkage_weight": 0.9173597708455539,
+          "state": "CA",
+          "state_factor": 1.1594946858791177
+        },
+        {
+          "effective_n": 831.928960766984,
+          "factor_sampling_variance": 0.01667937149501181,
+          "issuance_total": 1209044548.8638606,
+          "n": 874,
+          "obs_rate": 5.702328141168758,
+          "observed_to_predicted_ratio": 1.0661606894150515,
+          "pred_rate": 5.348469698594251,
+          "raw_factor": 1.0661606894150515,
+          "shrinkage_weight": 0.9010882592630065,
+          "state": "CO",
+          "state_factor": 1.059616620456649
+        },
+        {
+          "effective_n": 933.074492064542,
+          "factor_sampling_variance": 0.013284809992114654,
+          "issuance_total": 880200425.4182949,
+          "n": 954,
+          "obs_rate": 6.969039507774017,
+          "observed_to_predicted_ratio": 1.135151942891866,
+          "pred_rate": 6.139301043717532,
+          "raw_factor": 1.135151942891866,
+          "shrinkage_weight": 0.9196001543563886,
+          "state": "CT",
+          "state_factor": 1.1242857475449257
+        },
+        {
+          "effective_n": 911.7024692470096,
+          "factor_sampling_variance": 0.019196603943409135,
+          "issuance_total": 300913654.909298,
+          "n": 948,
+          "obs_rate": 15.361192101348408,
+          "observed_to_predicted_ratio": 2.066068475308388,
+          "pred_rate": 7.434986925617529,
+          "raw_factor": 2.066068475308388,
+          "shrinkage_weight": 0.8878349683514268,
+          "state": "DC",
+          "state_factor": 1.9464928710358769
+        },
+        {
+          "effective_n": 304.1108577216128,
+          "factor_sampling_variance": 0.03692973324008955,
+          "issuance_total": 172197538.93491971,
+          "n": 382,
+          "obs_rate": 8.004494470533217,
+          "observed_to_predicted_ratio": 1.0873333206038391,
+          "pred_rate": 7.361582983668712,
+          "raw_factor": 1.0873333206038391,
+          "shrinkage_weight": 0.804479613952017,
+          "state": "DE",
+          "state_factor": 1.0702578760445243
+        },
+        {
+          "effective_n": 905.4661517568898,
+          "factor_sampling_variance": 0.015943553404654448,
+          "issuance_total": 6332079343.157658,
+          "n": 955,
+          "obs_rate": 8.439836676026731,
+          "observed_to_predicted_ratio": 1.4136906728009249,
+          "pred_rate": 5.970073113169097,
+          "raw_factor": 1.4136906728009249,
+          "shrinkage_weight": 0.9050374231943116,
+          "state": "FL",
+          "state_factor": 1.37440554051127
+        },
+        {
+          "effective_n": 1005.3183833535717,
+          "factor_sampling_variance": 0.019773232837907977,
+          "issuance_total": 3298658850.136162,
+          "n": 1038,
+          "obs_rate": 11.94151014340416,
+          "observed_to_predicted_ratio": 2.0021252170875226,
+          "pred_rate": 5.96441723099387,
+          "raw_factor": 2.0021252170875226,
+          "shrinkage_weight": 0.8848537008159447,
+          "state": "GA",
+          "state_factor": 1.8867342070208764
+        },
+        {
+          "effective_n": 127.15745084322619,
+          "factor_sampling_variance": 0.10555914297764138,
+          "issuance_total": 117949049.5728286,
+          "n": 180,
+          "obs_rate": 6.833663430440938,
+          "observed_to_predicted_ratio": 1.8365544473607902,
+          "pred_rate": 3.7209152390016063,
+          "raw_factor": 1.8365544473607902,
+          "shrinkage_weight": 0.5900752798556547,
+          "state": "GU",
+          "state_factor": 1.4936300996409109
+        },
+        {
+          "effective_n": 440.5388020341833,
+          "factor_sampling_variance": 0.02762764096272156,
+          "issuance_total": 601879519.6411324,
+          "n": 466,
+          "obs_rate": 3.3865784717943725,
+          "observed_to_predicted_ratio": 1.1150077119648965,
+          "pred_rate": 3.0372691017772904,
+          "raw_factor": 1.1150077119648965,
+          "shrinkage_weight": 0.8461516504521828,
+          "state": "HI",
+          "state_factor": 1.0973139652938264
+        },
+        {
+          "effective_n": 995.5538640462938,
+          "factor_sampling_variance": 0.007478426605740094,
+          "issuance_total": 509563911.56479377,
+          "n": 1016,
+          "obs_rate": 4.035830356414052,
+          "observed_to_predicted_ratio": 0.6128609338002332,
+          "pred_rate": 6.585230243651918,
+          "raw_factor": 0.6128609338002332,
+          "shrinkage_weight": 0.9530921054385626,
+          "state": "IA",
+          "state_factor": 0.6310208122981452
+        },
+        {
+          "effective_n": 1018.2615544194537,
+          "factor_sampling_variance": 0.0020437945839146673,
+          "issuance_total": 273414938.239445,
+          "n": 1039,
+          "obs_rate": 1.383567025000945,
+          "observed_to_predicted_ratio": 0.2593479974351324,
+          "pred_rate": 5.334789698335727,
+          "raw_factor": 0.2593479974351324,
+          "shrinkage_weight": 0.9867280254702064,
+          "state": "ID",
+          "state_factor": 0.26917791194861396
+        },
+        {
+          "effective_n": 824.7636939971432,
+          "factor_sampling_variance": 0.018895864893741465,
+          "issuance_total": 4442898428.973096,
+          "n": 866,
+          "obs_rate": 7.495004244274614,
+          "observed_to_predicted_ratio": 1.4032546635537546,
+          "pred_rate": 5.341157552466957,
+          "raw_factor": 1.4032546635537546,
+          "shrinkage_weight": 0.8893978243506884,
+          "state": "IL",
+          "state_factor": 1.3586538204239782
+        },
+        {
+          "effective_n": 909.1524017761574,
+          "factor_sampling_variance": 0.019611605036409192,
+          "issuance_total": 1307543582.7549071,
+          "n": 953,
+          "obs_rate": 6.441622220900695,
+          "observed_to_predicted_ratio": 1.3959568235565871,
+          "pred_rate": 4.61448528507413,
+          "raw_factor": 1.3959568235565871,
+          "shrinkage_weight": 0.8856873221059126,
+          "state": "IN",
+          "state_factor": 1.3506939387253971
+        },
+        {
+          "effective_n": 456.4162227309489,
+          "factor_sampling_variance": 0.01886201712311119,
+          "issuance_total": 379809604.37241435,
+          "n": 909,
+          "obs_rate": 4.19186024093976,
+          "observed_to_predicted_ratio": 0.858537406685641,
+          "pred_rate": 4.882559814280329,
+          "raw_factor": 0.858537406685641,
+          "shrinkage_weight": 0.8895740662148116,
+          "state": "KS",
+          "state_factor": 0.8741585456480535
+        },
+        {
+          "effective_n": 1031.6654936457714,
+          "factor_sampling_variance": 0.007594778682045228,
+          "issuance_total": 1053465927.6719842,
+          "n": 1063,
+          "obs_rate": 3.45542686904079,
+          "observed_to_predicted_ratio": 0.5979024307780021,
+          "pred_rate": 5.779248738869522,
+          "raw_factor": 0.5979024307780021,
+          "shrinkage_weight": 0.952397036505621,
+          "state": "KY",
+          "state_factor": 0.6170434666868554
+        },
+        {
+          "effective_n": 870.864965380043,
+          "factor_sampling_variance": 0.014622064588235681,
+          "issuance_total": 1940754300.3534536,
+          "n": 887,
+          "obs_rate": 4.558454086706252,
+          "observed_to_predicted_ratio": 0.9251328440573485,
+          "pred_rate": 4.927350829654121,
+          "raw_factor": 0.9251328440573485,
+          "shrinkage_weight": 0.9122175028580232,
+          "state": "LA",
+          "state_factor": 0.9317048699599123
+        },
+        {
+          "effective_n": 897.6813145815478,
+          "factor_sampling_variance": 0.012702213943927454,
+          "issuance_total": 2545132550.5953913,
+          "n": 950,
+          "obs_rate": 5.7632830230440275,
+          "observed_to_predicted_ratio": 1.0401858349345767,
+          "pred_rate": 5.5406282507264795,
+          "raw_factor": 1.0401858349345767,
+          "shrinkage_weight": 0.9228540259711097,
+          "state": "MA",
+          "state_factor": 1.0370856595563847
+        },
+        {
+          "effective_n": 675.0399600313395,
+          "factor_sampling_variance": 0.02562786400652115,
+          "issuance_total": 1225881213.1723106,
+          "n": 707,
+          "obs_rate": 11.4254076874097,
+          "observed_to_predicted_ratio": 1.5710284891976916,
+          "pred_rate": 7.272565561967969,
+          "raw_factor": 1.5710284891976916,
+          "shrinkage_weight": 0.8556805391152331,
+          "state": "MD",
+          "state_factor": 1.4886179654868377
+        },
+        {
+          "effective_n": 926.4939747889028,
+          "factor_sampling_variance": 0.014201664458756182,
+          "issuance_total": 327755530.2417905,
+          "n": 953,
+          "obs_rate": 8.598765128189171,
+          "observed_to_predicted_ratio": 1.2542217494596297,
+          "pred_rate": 6.85585713363197,
+          "raw_factor": 1.2542217494596297,
+          "shrinkage_weight": 0.9145256205557993,
+          "state": "ME",
+          "state_factor": 1.2324923031833488
+        },
+        {
+          "effective_n": 904.5283794660508,
+          "factor_sampling_variance": 0.012652835249555653,
+          "issuance_total": 2839293305.5983973,
+          "n": 934,
+          "obs_rate": 9.61671713713546,
+          "observed_to_predicted_ratio": 1.1685518147438092,
+          "pred_rate": 8.229602672127815,
+          "raw_factor": 1.1685518147438092,
+          "shrinkage_weight": 0.9231308709942965,
+          "state": "MI",
+          "state_factor": 1.155595383552122
+        },
+        {
+          "effective_n": 1027.0624783689595,
+          "factor_sampling_variance": 0.006553199279438044,
+          "issuance_total": 800340635.0157936,
+          "n": 1056,
+          "obs_rate": 5.783717532286731,
+          "observed_to_predicted_ratio": 0.6822349037755622,
+          "pred_rate": 8.47760426838177,
+          "raw_factor": 0.6822349037755622,
+          "shrinkage_weight": 0.9586555884193252,
+          "state": "MN",
+          "state_factor": 0.6953727146998381
+        },
+        {
+          "effective_n": 719.4422687710484,
+          "factor_sampling_variance": 0.012920761128498678,
+          "issuance_total": 1381593316.722044,
+          "n": 746,
+          "obs_rate": 3.7619854798409014,
+          "observed_to_predicted_ratio": 0.8145852151492036,
+          "pred_rate": 4.618283526238365,
+          "raw_factor": 0.8145852151492036,
+          "shrinkage_weight": 0.9216307174507525,
+          "state": "MO",
+          "state_factor": 0.8291160388119836
+        },
+        {
+          "effective_n": 1163.900748406802,
+          "factor_sampling_variance": 0.010882565397710856,
+          "issuance_total": 812137727.8915341,
+          "n": 1181,
+          "obs_rate": 5.08578363612716,
+          "observed_to_predicted_ratio": 1.0447287550555848,
+          "pred_rate": 4.868042170291916,
+          "raw_factor": 1.0447287550555848,
+          "shrinkage_weight": 0.933166923316041,
+          "state": "MS",
+          "state_factor": 1.0417393947389768
+        },
+        {
+          "effective_n": 578.7148066662428,
+          "factor_sampling_variance": 0.014804238826688104,
+          "issuance_total": 166875148.06653354,
+          "n": 600,
+          "obs_rate": 4.307762994762601,
+          "observed_to_predicted_ratio": 0.6707244805379967,
+          "pred_rate": 6.4225522099734444,
+          "raw_factor": 0.6707244805379967,
+          "shrinkage_weight": 0.9112209281031368,
+          "state": "MT",
+          "state_factor": 0.6999572555541909
+        },
+        {
+          "effective_n": 1094.8922191746187,
+          "factor_sampling_variance": 0.0075724569833221355,
+          "issuance_total": 3065589621.990282,
+          "n": 1126,
+          "obs_rate": 6.550661869010403,
+          "observed_to_predicted_ratio": 0.8686846821286405,
+          "pred_rate": 7.540897179122053,
+          "raw_factor": 0.8686846821286405,
+          "shrinkage_weight": 0.9525303042082741,
+          "state": "NC",
+          "state_factor": 0.8749181803207877
+        },
+        {
+          "effective_n": 361.8166255279426,
+          "factor_sampling_variance": 0.02758384769933003,
+          "issuance_total": 96343711.9124442,
+          "n": 404,
+          "obs_rate": 4.665002240699354,
+          "observed_to_predicted_ratio": 0.9698333785321337,
+          "pred_rate": 4.8101069152310965,
+          "raw_factor": 0.9698333785321337,
+          "shrinkage_weight": 0.8463580508248225,
+          "state": "ND",
+          "state_factor": 0.9744682370544864
+        },
+        {
+          "effective_n": 896.5620679356845,
+          "factor_sampling_variance": 0.007763285906651231,
+          "issuance_total": 318433415.45484674,
+          "n": 924,
+          "obs_rate": 3.43408274164452,
+          "observed_to_predicted_ratio": 0.638895566190556,
+          "pred_rate": 5.375029853658861,
+          "raw_factor": 0.638895566190556,
+          "shrinkage_weight": 0.9513921963592542,
+          "state": "NE",
+          "state_factor": 0.6564480596029681
+        },
+        {
+          "effective_n": 609.3922749819923,
+          "factor_sampling_variance": 0.012380997414922471,
+          "issuance_total": 137128692.24702504,
+          "n": 635,
+          "obs_rate": 5.421593815055263,
+          "observed_to_predicted_ratio": 0.7299449426100286,
+          "pred_rate": 7.427401025164354,
+          "raw_factor": 0.7299449426100286,
+          "shrinkage_weight": 0.9246579274961672,
+          "state": "NH",
+          "state_factor": 0.7502914503239306
+        },
+        {
+          "effective_n": 574.8724823486427,
+          "factor_sampling_variance": 0.016210968744119092,
+          "issuance_total": 1374451272.6427693,
+          "n": 615,
+          "obs_rate": 4.214329279023116,
+          "observed_to_predicted_ratio": 0.8225364828645864,
+          "pred_rate": 5.123577332820771,
+          "raw_factor": 0.8225364828645864,
+          "shrinkage_weight": 0.9035981970448353,
+          "state": "NJ",
+          "state_factor": 0.839644285875205
+        },
+        {
+          "effective_n": 970.9399842854651,
+          "factor_sampling_variance": 0.010072786806279696,
+          "issuance_total": 1049989808.3810158,
+          "n": 991,
+          "obs_rate": 7.356513950913541,
+          "observed_to_predicted_ratio": 1.2611027530305632,
+          "pred_rate": 5.833397741171416,
+          "raw_factor": 1.2611027530305632,
+          "shrinkage_weight": 0.937830842010067,
+          "state": "NM",
+          "state_factor": 1.2448702147257995
+        },
+        {
+          "effective_n": 1011.099342173756,
+          "factor_sampling_variance": 0.005651976644308144,
+          "issuance_total": 961272478.4693433,
+          "n": 1047,
+          "obs_rate": 4.3738826357527545,
+          "observed_to_predicted_ratio": 0.556974202310469,
+          "pred_rate": 7.852935769033449,
+          "raw_factor": 0.556974202310469,
+          "shrinkage_weight": 0.9641375314842973,
+          "state": "NV",
+          "state_factor": 0.5728622010317539
+        },
+        {
+          "effective_n": 824.5047936083043,
+          "factor_sampling_variance": 0.01633091836662301,
+          "issuance_total": 6913635969.155161,
+          "n": 856,
+          "obs_rate": 5.748099051283264,
+          "observed_to_predicted_ratio": 1.3316582464618518,
+          "pred_rate": 4.316497169266717,
+          "raw_factor": 1.3316582464618518,
+          "shrinkage_weight": 0.9029541156482817,
+          "state": "NY",
+          "state_factor": 1.2994721786314212
+        },
+        {
+          "effective_n": 894.3617497616395,
+          "factor_sampling_variance": 0.009948584575041523,
+          "issuance_total": 2952460018.6655297,
+          "n": 915,
+          "obs_rate": 4.511797008710621,
+          "observed_to_predicted_ratio": 0.861747236752904,
+          "pred_rate": 5.235638498489698,
+          "raw_factor": 0.861747236752904,
+          "shrinkage_weight": 0.9385503113632002,
+          "state": "OH",
+          "state_factor": 0.8702428260076153
+        },
+        {
+          "effective_n": 1067.1190281206884,
+          "factor_sampling_variance": 0.015599014746995172,
+          "issuance_total": 1427399199.4246836,
+          "n": 1093,
+          "obs_rate": 6.907282286755971,
+          "observed_to_predicted_ratio": 1.3161738732002628,
+          "pred_rate": 5.248001367753173,
+          "raw_factor": 1.3161738732002628,
+          "shrinkage_weight": 0.9068984987725774,
+          "state": "OK",
+          "state_factor": 1.2867376109564295
+        },
+        {
+          "effective_n": 727.1683270341938,
+          "factor_sampling_variance": 0.018758685706395144,
+          "issuance_total": 1421559512.5024269,
+          "n": 769,
+          "obs_rate": 11.007854570900424,
+          "observed_to_predicted_ratio": 1.3597515669140228,
+          "pred_rate": 8.09548952819589,
+          "raw_factor": 1.3597515669140228,
+          "shrinkage_weight": 0.8901125346451544,
+          "state": "OR",
+          "state_factor": 1.3202193790684067
+        },
+        {
+          "effective_n": 799.1898865088839,
+          "factor_sampling_variance": 0.010693926347431859,
+          "issuance_total": 3598024731.8284807,
+          "n": 817,
+          "obs_rate": 6.5538837293108,
+          "observed_to_predicted_ratio": 0.9416894117285708,
+          "pred_rate": 6.959708421570178,
+          "raw_factor": 0.9416894117285708,
+          "shrinkage_weight": 0.9342492404244429,
+          "state": "PA",
+          "state_factor": 0.9455233771987148
+        },
+        {
+          "effective_n": 961.8735375522755,
+          "factor_sampling_variance": 0.016110863100591673,
+          "issuance_total": 319797361.4875988,
+          "n": 984,
+          "obs_rate": 10.495610843533564,
+          "observed_to_predicted_ratio": 1.6987126053917552,
+          "pred_rate": 6.178567704872642,
+          "raw_factor": 1.6987126053917552,
+          "shrinkage_weight": 0.9041364280565729,
+          "state": "RI",
+          "state_factor": 1.6317315192770032
+        },
+        {
+          "effective_n": 772.7873035913676,
+          "factor_sampling_variance": 0.016262475885159847,
+          "issuance_total": 1141179594.211513,
+          "n": 805,
+          "obs_rate": 6.62256806901044,
+          "observed_to_predicted_ratio": 1.285087967648574,
+          "pred_rate": 5.153396682351848,
+          "raw_factor": 1.285087967648574,
+          "shrinkage_weight": 0.903321511809144,
+          "state": "SC",
+          "state_factor": 1.2575260939349062
+        },
+        {
+          "effective_n": 597.4341569536915,
+          "factor_sampling_variance": 0.005366309377351176,
+          "issuance_total": 164249414.7559762,
+          "n": 616,
+          "obs_rate": 1.128089324614876,
+          "observed_to_predicted_ratio": 0.27416598428188643,
+          "pred_rate": 4.11462175940477,
+          "raw_factor": 0.27416598428188643,
+          "shrinkage_weight": 0.9658882938557285,
+          "state": "SD",
+          "state_factor": 0.2989254209355793
+        },
+        {
+          "effective_n": 913.6374142898524,
+          "factor_sampling_variance": 0.012164940712456083,
+          "issuance_total": 1672169659.6758327,
+          "n": 973,
+          "obs_rate": 3.6924049953428355,
+          "observed_to_predicted_ratio": 0.9242882165417629,
+          "pred_rate": 3.994863213942097,
+          "raw_factor": 0.9242882165417629,
+          "shrinkage_weight": 0.9258752401694276,
+          "state": "TN",
+          "state_factor": 0.929900334306949
+        },
+        {
+          "effective_n": 803.1876280720343,
+          "factor_sampling_variance": 0.01124383857016005,
+          "issuance_total": 7003273360.794373,
+          "n": 842,
+          "obs_rate": 4.920106615986868,
+          "observed_to_predicted_ratio": 0.9134926868874356,
+          "pred_rate": 5.386038319311847,
+          "raw_factor": 0.9134926868874356,
+          "shrinkage_weight": 0.9311011021524868,
+          "state": "TX",
+          "state_factor": 0.919452945416641
+        },
+        {
+          "effective_n": 1020.0101862943203,
+          "factor_sampling_variance": 0.006617251347835363,
+          "issuance_total": 326555544.49625504,
+          "n": 1055,
+          "obs_rate": 2.2041301907408526,
+          "observed_to_predicted_ratio": 0.4397008909951867,
+          "pred_rate": 5.0127944606893715,
+          "raw_factor": 0.4397008909951867,
+          "shrinkage_weight": 0.9582683452717362,
+          "state": "UT",
+          "state_factor": 0.46308309995672947
+        },
+        {
+          "effective_n": 766.1045292482943,
+          "factor_sampling_variance": 0.01229360284059187,
+          "issuance_total": 1684940652.9765866,
+          "n": 789,
+          "obs_rate": 6.784880869897365,
+          "observed_to_predicted_ratio": 1.044450480833642,
+          "pred_rate": 6.496124990513597,
+          "raw_factor": 1.044450480833642,
+          "shrinkage_weight": 0.9251499427047023,
+          "state": "VA",
+          "state_factor": 1.0411233597964402
+        },
+        {
+          "effective_n": 229.70662857051528,
+          "factor_sampling_variance": 0.05238358488810052,
+          "issuance_total": 60100790.02667545,
+          "n": 259,
+          "obs_rate": 8.596371357498578,
+          "observed_to_predicted_ratio": 1.544650621343601,
+          "pred_rate": 5.5652529049068065,
+          "raw_factor": 1.544650621343601,
+          "shrinkage_weight": 0.7436362566227892,
+          "state": "VI",
+          "state_factor": 1.4050219492232316
+        },
+        {
+          "effective_n": 652.1277230542413,
+          "factor_sampling_variance": 0.009615330599461541,
+          "issuance_total": 159132328.02624124,
+          "n": 694,
+          "obs_rate": 3.635770027043207,
+          "observed_to_predicted_ratio": 0.6253054247790589,
+          "pred_rate": 5.814390668892478,
+          "raw_factor": 0.6253054247790589,
+          "shrinkage_weight": 0.9404862258456507,
+          "state": "VT",
+          "state_factor": 0.6476049131056179
+        },
+        {
+          "effective_n": 786.5452876235573,
+          "factor_sampling_variance": 0.014548330789873354,
+          "issuance_total": 1839909682.5511034,
+          "n": 817,
+          "obs_rate": 6.080516730439104,
+          "observed_to_predicted_ratio": 0.9438338160960893,
+          "pred_rate": 6.442359477635057,
+          "raw_factor": 0.9438338160960893,
+          "shrinkage_weight": 0.9126214797525272,
+          "state": "WA",
+          "state_factor": 0.9487415341335604
+        },
+        {
+          "effective_n": 1089.6146904183277,
+          "factor_sampling_variance": 0.005981935979258244,
+          "issuance_total": 1270478536.1404696,
+          "n": 1128,
+          "obs_rate": 4.829148721888732,
+          "observed_to_predicted_ratio": 0.5485797150605893,
+          "pred_rate": 8.803002716488276,
+          "raw_factor": 0.5485797150605893,
+          "shrinkage_weight": 0.9621232000591657,
+          "state": "WI",
+          "state_factor": 0.5656780708824738
+        },
+        {
+          "effective_n": 777.7340958486767,
+          "factor_sampling_variance": 0.01082743086396708,
+          "issuance_total": 537109183.8480188,
+          "n": 816,
+          "obs_rate": 4.968963502618616,
+          "observed_to_predicted_ratio": 0.6790520724581965,
+          "pred_rate": 7.317499944637179,
+          "raw_factor": 0.6790520724581965,
+          "shrinkage_weight": 0.9334829984186139,
+          "state": "WV",
+          "state_factor": 0.7004005662620373
+        },
+        {
+          "effective_n": 264.35517671429113,
+          "factor_sampling_variance": 0.00783234996117904,
+          "issuance_total": 62012519.764936455,
+          "n": 291,
+          "obs_rate": 1.2453067711926322,
+          "observed_to_predicted_ratio": 0.250102632486497,
+          "pred_rate": 4.979182981050254,
+          "raw_factor": 0.250102632486497,
+          "shrinkage_weight": 0.9509809668108326,
+          "state": "WY",
+          "state_factor": 0.2868618764331107
+        }
+      ],
+      "frozen_model_smear": 1.1783311380729717,
+      "fy2023_unfactored": {
+        "equal_jurisdiction": {
+          "corr": 0.4715895485280595,
+          "intercept_pp": -0.004146016897028204,
+          "mae_pp": 1.9213256768749691,
+          "rmse_pp": 2.4736563285311632,
+          "slope": 1.020424871261162,
+          "states": 53
+        },
+        "issuance_weighted": {
+          "corr": 0.4781523774759691,
+          "intercept_pp": 1.3794524410581444,
+          "mae_pp": 1.5692471309535996,
+          "rmse_pp": 2.061918769420244,
+          "slope": 0.8952909482419567,
+          "states": 53
+        }
+      },
+      "fy2024_factor_adjusted": {
+        "equal_jurisdiction": {
+          "corr": 0.9056698344799438,
+          "intercept_pp": 0.8344051246806048,
+          "mae_pp": 0.8850573350793923,
+          "rmse_pp": 1.16227436455686,
+          "slope": 0.9077666808858353,
+          "states": 53
+        },
+        "issuance_weighted": {
+          "corr": 0.8782103570188547,
+          "intercept_pp": 1.4722030438759202,
+          "mae_pp": 0.7846871906987936,
+          "rmse_pp": 1.0494435186775295,
+          "slope": 0.8424731330817729,
+          "states": 53
+        },
+        "states": [
+          {
+            "applied_state_factor": 0.9768795162184118,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.4680407746388164,
+            "effective_n": 413.43856079967736,
+            "factor_sampling_variance": 0.08398008597551382,
+            "issuance_total": 250125742.49001917,
+            "n": 546,
+            "obs_rate": 4.793155232321578,
+            "pred_rate": 3.2650014326072396,
+            "state": "AK"
+          },
+          {
+            "applied_state_factor": 1.1039596716524167,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1466409904887664,
+            "effective_n": 1054.5714242710137,
+            "factor_sampling_variance": 0.010445777196225381,
+            "issuance_total": 1718946265.15912,
+            "n": 1082,
+            "obs_rate": 6.154123810656484,
+            "pred_rate": 5.367088619458153,
+            "state": "AL"
+          },
+          {
+            "applied_state_factor": 0.5369559289909317,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.3037305649524054,
+            "effective_n": 877.9371306672105,
+            "factor_sampling_variance": 0.03505889911084128,
+            "issuance_total": 485570140.1489811,
+            "n": 920,
+            "obs_rate": 3.6911143416631993,
+            "pred_rate": 2.8311941446260014,
+            "state": "AR"
+          },
+          {
+            "applied_state_factor": 1.320996160181856,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.8539331956071217,
+            "effective_n": 869.0178056089181,
+            "factor_sampling_variance": 0.008810327483193043,
+            "issuance_total": 1955000573.3576064,
+            "n": 925,
+            "obs_rate": 6.544904870050901,
+            "pred_rate": 7.664422584482929,
+            "state": "AZ"
+          },
+          {
+            "applied_state_factor": 1.1594946858791177,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9851226920338206,
+            "effective_n": 860.8902993464256,
+            "factor_sampling_variance": 0.00909853866887334,
+            "issuance_total": 11963412984.101929,
+            "n": 883,
+            "obs_rate": 7.952736030236783,
+            "pred_rate": 8.072838129246701,
+            "state": "CA"
+          },
+          {
+            "applied_state_factor": 1.059616620456649,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1570404919792794,
+            "effective_n": 838.7348089831545,
+            "factor_sampling_variance": 0.019117694485989378,
+            "issuance_total": 1267963387.746441,
+            "n": 856,
+            "obs_rate": 7.420781462010687,
+            "pred_rate": 6.41358838644999,
+            "state": "CO"
+          },
+          {
+            "applied_state_factor": 1.1242857475449257,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1671800452243293,
+            "effective_n": 903.0345191594447,
+            "factor_sampling_variance": 0.009160082179297747,
+            "issuance_total": 897556830.2467902,
+            "n": 941,
+            "obs_rate": 8.845547641623254,
+            "pred_rate": 7.578563116989514,
+            "state": "CT"
+          },
+          {
+            "applied_state_factor": 1.9464928710358769,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9829713305369598,
+            "effective_n": 984.7013405646875,
+            "factor_sampling_variance": 0.005024112001756691,
+            "issuance_total": 305269663.9944997,
+            "n": 1019,
+            "obs_rate": 14.034150921526164,
+            "pred_rate": 14.277273899595667,
+            "state": "DC"
+          },
+          {
+            "applied_state_factor": 1.0702578760445243,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9055992890338131,
+            "effective_n": 750.0221730953987,
+            "factor_sampling_variance": 0.00898860191885915,
+            "issuance_total": 244804651.81463996,
+            "n": 776,
+            "obs_rate": 6.3061024720138965,
+            "pred_rate": 6.963457843194529,
+            "state": "DE"
+          },
+          {
+            "applied_state_factor": 1.37440554051127,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.987151339289444,
+            "effective_n": 892.3426657271614,
+            "factor_sampling_variance": 0.007643424983233156,
+            "issuance_total": 6493567217.643099,
+            "n": 968,
+            "obs_rate": 7.8771907767044835,
+            "pred_rate": 7.979719484931785,
+            "state": "FL"
+          },
+          {
+            "applied_state_factor": 1.8867342070208764,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9058545516927627,
+            "effective_n": 915.5603052639457,
+            "factor_sampling_variance": 0.0049848081881082185,
+            "issuance_total": 3091872324.8568463,
+            "n": 945,
+            "obs_rate": 10.406335484784314,
+            "pred_rate": 11.487865756525794,
+            "state": "GA"
+          },
+          {
+            "applied_state_factor": 1.4936300996409109,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1909003492375598,
+            "effective_n": 155.23105649603676,
+            "factor_sampling_variance": 0.06819914963490657,
+            "issuance_total": 122370429.29056834,
+            "n": 197,
+            "obs_rate": 5.404047346377086,
+            "pred_rate": 4.537782989010688,
+            "state": "GU"
+          },
+          {
+            "applied_state_factor": 1.0973139652938264,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.7114021761243404,
+            "effective_n": 509.1100457522617,
+            "factor_sampling_variance": 0.010770878289866469,
+            "issuance_total": 706745704.649487,
+            "n": 571,
+            "obs_rate": 2.5335312977228397,
+            "pred_rate": 3.5613207026232425,
+            "state": "HI"
+          },
+          {
+            "applied_state_factor": 0.6310208122981452,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9928723881973931,
+            "effective_n": 960.2083093240025,
+            "factor_sampling_variance": 0.017767702575483754,
+            "issuance_total": 518525669.8464328,
+            "n": 980,
+            "obs_rate": 4.098479838976362,
+            "pred_rate": 4.127901921431562,
+            "state": "IA"
+          },
+          {
+            "applied_state_factor": 0.26917791194861396,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.436579968055612,
+            "effective_n": 1106.8400040350477,
+            "factor_sampling_variance": 0.052808737396698766,
+            "issuance_total": 282362400.2935263,
+            "n": 1130,
+            "obs_rate": 2.129378483321586,
+            "pred_rate": 1.4822554474316285,
+            "state": "ID"
+          },
+          {
+            "applied_state_factor": 1.3586538204239782,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0244300823140684,
+            "effective_n": 834.8089040119359,
+            "factor_sampling_variance": 0.007875049023038712,
+            "issuance_total": 4433526933.008031,
+            "n": 861,
+            "obs_rate": 9.241555168559854,
+            "pred_rate": 9.021167308640775,
+            "state": "IL"
+          },
+          {
+            "applied_state_factor": 1.3506939387253971,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9740409103896621,
+            "effective_n": 890.4885888742665,
+            "factor_sampling_variance": 0.007896692483945136,
+            "issuance_total": 1400792252.0685906,
+            "n": 916,
+            "obs_rate": 5.96942544283534,
+            "pred_rate": 6.128516142558415,
+            "state": "IN"
+          },
+          {
+            "applied_state_factor": 0.8741585456480535,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.8248317705868676,
+            "effective_n": 895.7301027751319,
+            "factor_sampling_variance": 0.008715567513963424,
+            "issuance_total": 379767811.5861132,
+            "n": 920,
+            "obs_rate": 3.8414834064470726,
+            "pred_rate": 4.657293212304198,
+            "state": "KS"
+          },
+          {
+            "applied_state_factor": 0.6170434666868554,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.2072711379961827,
+            "effective_n": 972.8024154199414,
+            "factor_sampling_variance": 0.022842263577191706,
+            "issuance_total": 1182964974.6237373,
+            "n": 1016,
+            "obs_rate": 4.374022331675708,
+            "pred_rate": 3.6230654357691923,
+            "state": "KY"
+          },
+          {
+            "applied_state_factor": 0.9317048699599123,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0928867756353586,
+            "effective_n": 912.2013312443129,
+            "factor_sampling_variance": 0.014022644383809455,
+            "issuance_total": 1856166454.199241,
+            "n": 939,
+            "obs_rate": 5.733692288598088,
+            "pred_rate": 5.246373564420486,
+            "state": "LA"
+          },
+          {
+            "applied_state_factor": 1.0370856595563847,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.3834963612461926,
+            "effective_n": 873.7344618419971,
+            "factor_sampling_variance": 0.01366555800832973,
+            "issuance_total": 2578894646.3410625,
+            "n": 907,
+            "obs_rate": 10.646330253861437,
+            "pred_rate": 7.6952354571223385,
+            "state": "MA"
+          },
+          {
+            "applied_state_factor": 1.4886179654868377,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9564318350935143,
+            "effective_n": 724.8708247587981,
+            "factor_sampling_variance": 0.010826371563306679,
+            "issuance_total": 1469889149.1093783,
+            "n": 745,
+            "obs_rate": 8.90907249654762,
+            "pred_rate": 9.314905850741097,
+            "state": "MD"
+          },
+          {
+            "applied_state_factor": 1.2324923031833488,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.7594308362640533,
+            "effective_n": 928.5347993216764,
+            "factor_sampling_variance": 0.006285045470113194,
+            "issuance_total": 351374407.9409651,
+            "n": 960,
+            "obs_rate": 7.184814789427834,
+            "pred_rate": 9.460788851783839,
+            "state": "ME"
+          },
+          {
+            "applied_state_factor": 1.155595383552122,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.8985524466288374,
+            "effective_n": 870.6942043585439,
+            "factor_sampling_variance": 0.0076740663092580855,
+            "issuance_total": 3009273865.327772,
+            "n": 920,
+            "obs_rate": 8.159213084201113,
+            "pred_rate": 9.080397159690131,
+            "state": "MI"
+          },
+          {
+            "applied_state_factor": 0.6953727146998381,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.498410964645109,
+            "effective_n": 803.4825742219251,
+            "factor_sampling_variance": 0.02707482966380706,
+            "issuance_total": 714382930.6874795,
+            "n": 922,
+            "obs_rate": 9.126889298219306,
+            "pred_rate": 6.091045456531988,
+            "state": "MN"
+          },
+          {
+            "applied_state_factor": 0.8291160388119836,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0877766349186648,
+            "effective_n": 766.8808451734786,
+            "factor_sampling_variance": 0.02053557206591745,
+            "issuance_total": 1473302882.4495962,
+            "n": 793,
+            "obs_rate": 4.191684008885053,
+            "pred_rate": 3.853441850402012,
+            "state": "MO"
+          },
+          {
+            "applied_state_factor": 1.0417393947389768,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.2216839923499196,
+            "effective_n": 1121.7453629693646,
+            "factor_sampling_variance": 0.0130066318496714,
+            "issuance_total": 794913695.017332,
+            "n": 1137,
+            "obs_rate": 6.14018672160634,
+            "pred_rate": 5.026002436027371,
+            "state": "MS"
+          },
+          {
+            "applied_state_factor": 0.6999572555541909,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0810633099546711,
+            "effective_n": 569.3116009129644,
+            "factor_sampling_variance": 0.026438989919070417,
+            "issuance_total": 161946232.93189004,
+            "n": 608,
+            "obs_rate": 4.971048161723013,
+            "pred_rate": 4.598295137711639,
+            "state": "MT"
+          },
+          {
+            "applied_state_factor": 0.8749181803207877,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0987371682215443,
+            "effective_n": 924.0229425514134,
+            "factor_sampling_variance": 0.011049249831446244,
+            "issuance_total": 2815418370.8732595,
+            "n": 955,
+            "obs_rate": 7.169476621131681,
+            "pred_rate": 6.525197134030202,
+            "state": "NC"
+          },
+          {
+            "applied_state_factor": 0.9744682370544864,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1498523111102754,
+            "effective_n": 375.4138532734969,
+            "factor_sampling_variance": 0.04339099414085258,
+            "issuance_total": 108854893.73439921,
+            "n": 463,
+            "obs_rate": 6.275223956045145,
+            "pred_rate": 5.457417353004152,
+            "state": "ND"
+          },
+          {
+            "applied_state_factor": 0.6564480596029681,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9436948065447827,
+            "effective_n": 926.114200229717,
+            "factor_sampling_variance": 0.024317888366789706,
+            "issuance_total": 329559450.486612,
+            "n": 950,
+            "obs_rate": 3.3184438894775874,
+            "pred_rate": 3.516437588151665,
+            "state": "NE"
+          },
+          {
+            "applied_state_factor": 0.7502914503239306,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0456826389159646,
+            "effective_n": 630.5131341683995,
+            "factor_sampling_variance": 0.017925696681704982,
+            "issuance_total": 152705882.23927796,
+            "n": 666,
+            "obs_rate": 5.782557801700615,
+            "pred_rate": 5.529935743884265,
+            "state": "NH"
+          },
+          {
+            "applied_state_factor": 0.839644285875205,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9732816774053317,
+            "effective_n": 593.0983242631216,
+            "factor_sampling_variance": 0.020948268536725594,
+            "issuance_total": 1931133088.2913263,
+            "n": 651,
+            "obs_rate": 4.466978702993723,
+            "pred_rate": 4.589605256827836,
+            "state": "NJ"
+          },
+          {
+            "applied_state_factor": 1.2448702147257995,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1099324218101763,
+            "effective_n": 971.8261513062239,
+            "factor_sampling_variance": 0.009897138187928365,
+            "issuance_total": 971346107.8618726,
+            "n": 1017,
+            "obs_rate": 9.384338298922708,
+            "pred_rate": 8.454873571147598,
+            "state": "NM"
+          },
+          {
+            "applied_state_factor": 0.5728622010317539,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.393142301530171,
+            "effective_n": 943.2009650249718,
+            "factor_sampling_variance": 0.02002229395360277,
+            "issuance_total": 1016087779.1222489,
+            "n": 1005,
+            "obs_rate": 6.142769898003309,
+            "pred_rate": 4.409291061836497,
+            "state": "NV"
+          },
+          {
+            "applied_state_factor": 1.2994721786314212,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.2770204341212565,
+            "effective_n": 858.0613152842125,
+            "factor_sampling_variance": 0.016515763536036825,
+            "issuance_total": 7205819469.019428,
+            "n": 885,
+            "obs_rate": 7.83690416251406,
+            "pred_rate": 6.1368666883602305,
+            "state": "NY"
+          },
+          {
+            "applied_state_factor": 0.8702428260076153,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0260091413490466,
+            "effective_n": 895.9574962520371,
+            "factor_sampling_variance": 0.016157614252425317,
+            "issuance_total": 3048283115.29743,
+            "n": 934,
+            "obs_rate": 4.705982210976209,
+            "pred_rate": 4.586686435160368,
+            "state": "OH"
+          },
+          {
+            "applied_state_factor": 1.2867376109564295,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.184727687619009,
+            "effective_n": 912.1963741256926,
+            "factor_sampling_variance": 0.012374504816796444,
+            "issuance_total": 1503608260.6050448,
+            "n": 932,
+            "obs_rate": 8.376323980296233,
+            "pred_rate": 7.070252571821326,
+            "state": "OK"
+          },
+          {
+            "applied_state_factor": 1.3202193790684067,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.002013657473614,
+            "effective_n": 849.5922442346516,
+            "factor_sampling_variance": 0.008963279475200111,
+            "issuance_total": 1577820636.8352447,
+            "n": 868,
+            "obs_rate": 10.837823794235646,
+            "pred_rate": 10.81604398642744,
+            "state": "OR"
+          },
+          {
+            "applied_state_factor": 0.9455233771987148,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.153256706961937,
+            "effective_n": 772.4438140307163,
+            "factor_sampling_variance": 0.01595355076157818,
+            "issuance_total": 4181460867.3737125,
+            "n": 814,
+            "obs_rate": 7.821855285276573,
+            "pred_rate": 6.782406066279858,
+            "state": "PA"
+          },
+          {
+            "applied_state_factor": 1.6317315192770032,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.088480110834887,
+            "effective_n": 959.9375810910335,
+            "factor_sampling_variance": 0.0054768067757691805,
+            "issuance_total": 338938382.84996575,
+            "n": 980,
+            "obs_rate": 11.47407972003079,
+            "pred_rate": 10.541377472878152,
+            "state": "RI"
+          },
+          {
+            "applied_state_factor": 1.2575260939349062,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9177368184893657,
+            "effective_n": 940.3273141819421,
+            "factor_sampling_variance": 0.00879533911091692,
+            "issuance_total": 1256603297.4989107,
+            "n": 961,
+            "obs_rate": 5.785291217459833,
+            "pred_rate": 6.303867406107418,
+            "state": "SC"
+          },
+          {
+            "applied_state_factor": 0.2989254209355793,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.6599277338233356,
+            "effective_n": 640.4931588498682,
+            "factor_sampling_variance": 0.10162659216990898,
+            "issuance_total": 176194526.73210558,
+            "n": 667,
+            "obs_rate": 2.273603041438197,
+            "pred_rate": 1.3697000147117095,
+            "state": "SD"
+          },
+          {
+            "applied_state_factor": 0.929900334306949,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9579773027742964,
+            "effective_n": 919.4754285504215,
+            "factor_sampling_variance": 0.012901372956294885,
+            "issuance_total": 1536937054.1798232,
+            "n": 964,
+            "obs_rate": 4.208451988209803,
+            "pred_rate": 4.393060228068194,
+            "state": "TN"
+          },
+          {
+            "applied_state_factor": 0.919452945416641,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.286628090896663,
+            "effective_n": 918.2427834405706,
+            "factor_sampling_variance": 0.01614659908049851,
+            "issuance_total": 6852329085.977169,
+            "n": 955,
+            "obs_rate": 6.301421822159726,
+            "pred_rate": 4.897624936642108,
+            "state": "TX"
+          },
+          {
+            "applied_state_factor": 0.46308309995672947,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9000714567502651,
+            "effective_n": 1035.8058169205667,
+            "factor_sampling_variance": 0.02565954942236956,
+            "issuance_total": 372829004.0432507,
+            "n": 1065,
+            "obs_rate": 1.9066659695873296,
+            "pred_rate": 2.1183495546802518,
+            "state": "UT"
+          },
+          {
+            "applied_state_factor": 1.0411233597964402,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.1045248653648607,
+            "effective_n": 723.9945751081742,
+            "factor_sampling_variance": 0.012545892525265289,
+            "issuance_total": 1728186950.4595327,
+            "n": 770,
+            "obs_rate": 7.598357637379005,
+            "pred_rate": 6.8792997565238325,
+            "state": "VA"
+          },
+          {
+            "applied_state_factor": 1.4050219492232316,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.473415326940023,
+            "effective_n": 248.67208665424872,
+            "factor_sampling_variance": 0.010904260757579444,
+            "issuance_total": 65606300.302175075,
+            "n": 278,
+            "obs_rate": 3.052223530579677,
+            "pred_rate": 6.447242742029694,
+            "state": "VI"
+          },
+          {
+            "applied_state_factor": 0.6476049131056179,
+            "descriptive_residual_factor_fy2024_after_adjustment": 1.0451147534349015,
+            "effective_n": 620.782362233713,
+            "factor_sampling_variance": 0.030473958041838594,
+            "issuance_total": 150613080.0453964,
+            "n": 657,
+            "obs_rate": 4.239149357743139,
+            "pred_rate": 4.056156841926344,
+            "state": "VT"
+          },
+          {
+            "applied_state_factor": 0.9487415341335604,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.9168266557573318,
+            "effective_n": 804.065083763681,
+            "factor_sampling_variance": 0.011353375431884803,
+            "issuance_total": 1901882109.0049195,
+            "n": 861,
+            "obs_rate": 5.294448138001485,
+            "pred_rate": 5.7747537168060195,
+            "state": "WA"
+          },
+          {
+            "applied_state_factor": 0.5656780708824738,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.7612299302908383,
+            "effective_n": 1018.0805252455118,
+            "factor_sampling_variance": 0.010989713060519391,
+            "issuance_total": 1323713178.8960638,
+            "n": 1044,
+            "obs_rate": 3.7271243859312064,
+            "pred_rate": 4.896187390460604,
+            "state": "WI"
+          },
+          {
+            "applied_state_factor": 0.7004005662620373,
+            "descriptive_residual_factor_fy2024_after_adjustment": 0.8454184550985894,
+            "effective_n": 721.7761748595989,
+            "factor_sampling_variance": 0.019298433477128746,
+            "issuance_total": 518820323.9596393,
+            "n": 772,
+            "obs_rate": 4.005628940742806,
+            "pred_rate": 4.7380429378912545,
+            "state": "WV"
+          },
+          {
+            "applied_state_factor": 0.2868618764331107,
+            "descriptive_residual_factor_fy2024_after_adjustment": 2.3085607304021156,
+            "effective_n": 275.14913410914005,
+            "factor_sampling_variance": 0.33403822406388595,
+            "issuance_total": 60424568.33517275,
+            "n": 303,
+            "obs_rate": 3.5218592773163016,
+            "pred_rate": 1.525564924905765,
+            "state": "WY"
+          }
+        ]
+      },
+      "fy2024_unfactored_frozen_model": {
+        "equal_jurisdiction": {
+          "corr": 0.5175564416490154,
+          "intercept_pp": -0.011274426129704196,
+          "mae_pp": 1.8097454302441827,
+          "rmse_pp": 2.2436801022922546,
+          "slope": 1.0508524233458114,
+          "states": 53
+        },
+        "issuance_weighted": {
+          "corr": 0.4585363396246108,
+          "intercept_pp": 2.2607570083380235,
+          "mae_pp": 1.646576412248263,
+          "rmse_pp": 2.0281706218527025,
+          "slope": 0.8070505794990157,
+          "states": 53
+        }
+      },
+      "label": "model and smear trained through FY2022; factors fit on OOS FY2023 and frozen for FY2024",
+      "model_training_years": [
+        2017,
+        2018,
+        2019,
+        2022
+      ],
+      "shrinkage": {
+        "estimated_between_state_variance": 0.15194946235962942,
+        "method": "empirical-Bayes precision weighting around factor 1; observation variance uses a ratio influence function and the Kish effective sample size",
+        "prior_mean": 1.0
+      },
+      "validation_year": 2024
+    },
+    "headline_fy2024_unfactored": {
+      "equal_jurisdiction": {
+        "corr": 0.5074937543673864,
+        "intercept_pp": 0.14231028756534325,
+        "mae_pp": 1.8274110414225389,
+        "rmse_pp": 2.2451115510252118,
+        "slope": 0.9543875056369069,
+        "states": 53
+      },
+      "issuance_weighted": {
+        "corr": 0.45775869209285425,
+        "intercept_pp": 2.1601001844149055,
+        "mae_pp": 1.4544287643601035,
+        "rmse_pp": 1.841924202786979,
+        "slope": 0.7686796825994211,
+        "states": 53
+      },
+      "label": "unfactored FY2024 validation; equal and issuance weighted",
+      "states": [
+        {
+          "descriptive_anchor_factor_fy2024": 1.555943375406742,
+          "effective_n": 413.43856079967736,
+          "factor_sampling_variance": 0.09192839653056722,
+          "issuance_total": 250125742.49001917,
+          "n": 546,
+          "obs_rate": 4.793155232321578,
+          "pred_rate": 3.080546058476318,
+          "state": "AK"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.162523381469936,
+          "effective_n": 1054.5714242710137,
+          "factor_sampling_variance": 0.010729621262335858,
+          "issuance_total": 1718946265.15912,
+          "n": 1082,
+          "obs_rate": 6.154123810656484,
+          "pred_rate": 5.293763470696813,
+          "state": "AL"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.6371542280817614,
+          "effective_n": 877.9371306672105,
+          "factor_sampling_variance": 0.00850832593261585,
+          "issuance_total": 485570140.1489811,
+          "n": 920,
+          "obs_rate": 3.6911143416631993,
+          "pred_rate": 5.793125398815598,
+          "state": "AR"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0418379766455685,
+          "effective_n": 869.0178056089181,
+          "factor_sampling_variance": 0.012891029011881355,
+          "issuance_total": 1955000573.3576064,
+          "n": 925,
+          "obs_rate": 6.544904870050901,
+          "pred_rate": 6.282075540309726,
+          "state": "AZ"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0779580238128317,
+          "effective_n": 860.8902993464256,
+          "factor_sampling_variance": 0.010870105588837756,
+          "issuance_total": 11963412984.101929,
+          "n": 883,
+          "obs_rate": 7.952736030236783,
+          "pred_rate": 7.377593426233112,
+          "state": "CA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.1428817035352559,
+          "effective_n": 838.7348089831545,
+          "factor_sampling_variance": 0.017864371598304455,
+          "issuance_total": 1267963387.746441,
+          "n": 856,
+          "obs_rate": 7.420781462010687,
+          "pred_rate": 6.493044239885996,
+          "state": "CO"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.2460407557986082,
+          "effective_n": 903.0345191594447,
+          "factor_sampling_variance": 0.010171789653000777,
+          "issuance_total": 897556830.2467902,
+          "n": 941,
+          "obs_rate": 8.845547641623254,
+          "pred_rate": 7.098923209742041,
+          "state": "CT"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.8012621268039168,
+          "effective_n": 984.7013405646875,
+          "factor_sampling_variance": 0.01650599287606944,
+          "issuance_total": 305269663.9944997,
+          "n": 1019,
+          "obs_rate": 14.034150921526164,
+          "pred_rate": 7.791287404919663,
+          "state": "DC"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.9111850759273427,
+          "effective_n": 750.0221730953987,
+          "factor_sampling_variance": 0.008971600496648734,
+          "issuance_total": 244804651.81463996,
+          "n": 776,
+          "obs_rate": 6.3061024720138965,
+          "pred_rate": 6.920770147158052,
+          "state": "DE"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.246227971013572,
+          "effective_n": 892.3426657271614,
+          "factor_sampling_variance": 0.012104316633852657,
+          "issuance_total": 6493567217.643099,
+          "n": 968,
+          "obs_rate": 7.8771907767044835,
+          "pred_rate": 6.320826493966326,
+          "state": "FL"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.568977871290711,
+          "effective_n": 915.5603052639457,
+          "factor_sampling_variance": 0.014695674060918174,
+          "issuance_total": 3091872324.8568463,
+          "n": 945,
+          "obs_rate": 10.406335484784314,
+          "pred_rate": 6.632557205044326,
+          "state": "GA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.8866363618291586,
+          "effective_n": 155.23105649603676,
+          "factor_sampling_variance": 0.15858821129534942,
+          "issuance_total": 122370429.29056834,
+          "n": 197,
+          "obs_rate": 5.404047346377086,
+          "pred_rate": 2.8643820588391913,
+          "state": "GU"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.7006119655382544,
+          "effective_n": 509.1100457522617,
+          "factor_sampling_variance": 0.010349456721239492,
+          "issuance_total": 706745704.649487,
+          "n": 571,
+          "obs_rate": 2.5335312977228397,
+          "pred_rate": 3.6161690384154666,
+          "state": "HI"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.576324433245918,
+          "effective_n": 960.2083093240025,
+          "factor_sampling_variance": 0.006034405595179758,
+          "issuance_total": 518525669.8464328,
+          "n": 980,
+          "obs_rate": 4.098479838976362,
+          "pred_rate": 7.111410869557111,
+          "state": "IA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.3537134311784015,
+          "effective_n": 1106.8400040350477,
+          "factor_sampling_variance": 0.0032478002117775954,
+          "issuance_total": 282362400.2935263,
+          "n": 1130,
+          "obs_rate": 2.129378483321586,
+          "pred_rate": 6.020066798785475,
+          "state": "ID"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.3311004084555194,
+          "effective_n": 834.8089040119359,
+          "factor_sampling_variance": 0.012817630860677791,
+          "issuance_total": 4433526933.008031,
+          "n": 861,
+          "obs_rate": 9.241555168559854,
+          "pred_rate": 6.942793428545983,
+          "state": "IL"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.1976779677708853,
+          "effective_n": 890.4885888742665,
+          "factor_sampling_variance": 0.01175130619488682,
+          "issuance_total": 1400792252.0685906,
+          "n": 916,
+          "obs_rate": 5.96942544283534,
+          "pred_rate": 4.984165696848893,
+          "state": "IN"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.6560621622093452,
+          "effective_n": 895.7301027751319,
+          "factor_sampling_variance": 0.005575584708302315,
+          "issuance_total": 379767811.5861132,
+          "n": 920,
+          "obs_rate": 3.8414834064470726,
+          "pred_rate": 5.855364975645829,
+          "state": "KS"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.695521948464142,
+          "effective_n": 972.8024154199414,
+          "factor_sampling_variance": 0.007431635591010203,
+          "issuance_total": 1182964974.6237373,
+          "n": 1016,
+          "obs_rate": 4.374022331675708,
+          "pred_rate": 6.288834365808965,
+          "state": "KY"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.9293717668325789,
+          "effective_n": 912.2013312443129,
+          "factor_sampling_variance": 0.010201755386564712,
+          "issuance_total": 1856166454.199241,
+          "n": 939,
+          "obs_rate": 5.733692288598088,
+          "pred_rate": 6.169428094571094,
+          "state": "LA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.315871684612524,
+          "effective_n": 873.7344618419971,
+          "factor_sampling_variance": 0.011855179490401073,
+          "issuance_total": 2578894646.3410625,
+          "n": 907,
+          "obs_rate": 10.646330253861437,
+          "pred_rate": 8.090705483184244,
+          "state": "MA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.3427007602076584,
+          "effective_n": 724.8708247587981,
+          "factor_sampling_variance": 0.021430416171260496,
+          "issuance_total": 1469889149.1093783,
+          "n": 745,
+          "obs_rate": 8.90907249654762,
+          "pred_rate": 6.635188390874051,
+          "state": "MD"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.873249961758348,
+          "effective_n": 928.5347993216764,
+          "factor_sampling_variance": 0.00843015473588736,
+          "issuance_total": 351374407.9409651,
+          "n": 960,
+          "obs_rate": 7.184814789427834,
+          "pred_rate": 8.227672607005585,
+          "state": "ME"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.9548259841410783,
+          "effective_n": 870.6942043585439,
+          "factor_sampling_variance": 0.008928396266184751,
+          "issuance_total": 3009273865.327772,
+          "n": 920,
+          "obs_rate": 8.159213084201113,
+          "pred_rate": 8.545235697100138,
+          "state": "MI"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.974907807498692,
+          "effective_n": 803.4825742219251,
+          "factor_sampling_variance": 0.011063403489787906,
+          "issuance_total": 714382930.6874795,
+          "n": 922,
+          "obs_rate": 9.126889298219306,
+          "pred_rate": 9.361797318698311,
+          "state": "MN"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.8500431280090388,
+          "effective_n": 766.8808451734786,
+          "factor_sampling_variance": 0.012080806055416083,
+          "issuance_total": 1473302882.4495962,
+          "n": 793,
+          "obs_rate": 4.191684008885053,
+          "pred_rate": 4.931142751195186,
+          "state": "MO"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0984351025565944,
+          "effective_n": 1121.7453629693646,
+          "factor_sampling_variance": 0.010478360888827802,
+          "issuance_total": 794913695.017332,
+          "n": 1137,
+          "obs_rate": 6.14018672160634,
+          "pred_rate": 5.589940368179358,
+          "state": "MS"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.6975196751613685,
+          "effective_n": 569.3116009129644,
+          "factor_sampling_variance": 0.011468428862437518,
+          "issuance_total": 161946232.93189004,
+          "n": 608,
+          "obs_rate": 4.971048161723013,
+          "pred_rate": 7.126749737307383,
+          "state": "MT"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.900170623613655,
+          "effective_n": 924.0229425514134,
+          "factor_sampling_variance": 0.007473339775769141,
+          "issuance_total": 2815418370.8732595,
+          "n": 955,
+          "obs_rate": 7.169476621131681,
+          "pred_rate": 7.964575196144986,
+          "state": "NC"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.014989238880229,
+          "effective_n": 375.4138532734969,
+          "factor_sampling_variance": 0.03332539255429242,
+          "issuance_total": 108854893.73439921,
+          "n": 463,
+          "obs_rate": 6.275223956045145,
+          "pred_rate": 6.182552204167394,
+          "state": "ND"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.5919893323720108,
+          "effective_n": 926.114200229717,
+          "factor_sampling_variance": 0.009790760373113574,
+          "issuance_total": 329559450.486612,
+          "n": 950,
+          "obs_rate": 3.3184438894775874,
+          "pred_rate": 5.605580553590535,
+          "state": "NE"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.7332798927954192,
+          "effective_n": 630.5131341683995,
+          "factor_sampling_variance": 0.008831209407111141,
+          "issuance_total": 152705882.23927796,
+          "n": 666,
+          "obs_rate": 5.782557801700615,
+          "pred_rate": 7.8858807646508255,
+          "state": "NH"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.7594605500435994,
+          "effective_n": 593.0983242631216,
+          "factor_sampling_variance": 0.012905284546302541,
+          "issuance_total": 1931133088.2913263,
+          "n": 651,
+          "obs_rate": 4.466978702993723,
+          "pred_rate": 5.881778458061161,
+          "state": "NJ"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.286551524756923,
+          "effective_n": 971.8261513062239,
+          "factor_sampling_variance": 0.012688440371320964,
+          "issuance_total": 971346107.8618726,
+          "n": 1017,
+          "obs_rate": 9.384338298922708,
+          "pred_rate": 7.294179920773678,
+          "state": "NM"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.74073368951806,
+          "effective_n": 943.2009650249718,
+          "factor_sampling_variance": 0.005808567688310181,
+          "issuance_total": 1016087779.1222489,
+          "n": 1005,
+          "obs_rate": 6.142769898003309,
+          "pred_rate": 8.29281830289095,
+          "state": "NV"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.5545307557341546,
+          "effective_n": 858.0613152842125,
+          "factor_sampling_variance": 0.025055352347831353,
+          "issuance_total": 7205819469.019428,
+          "n": 885,
+          "obs_rate": 7.83690416251406,
+          "pred_rate": 5.041331047074038,
+          "state": "NY"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.8433966006793873,
+          "effective_n": 895.9574962520371,
+          "factor_sampling_variance": 0.01115349171483736,
+          "issuance_total": 3048283115.29743,
+          "n": 934,
+          "obs_rate": 4.705982210976209,
+          "pred_rate": 5.579797460868784,
+          "state": "OH"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.4021881179305966,
+          "effective_n": 912.1963741256926,
+          "factor_sampling_variance": 0.016338847151393984,
+          "issuance_total": 1503608260.6050448,
+          "n": 932,
+          "obs_rate": 8.376323980296233,
+          "pred_rate": 5.973751933270077,
+          "state": "OK"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.2618037221895684,
+          "effective_n": 849.5922442346516,
+          "factor_sampling_variance": 0.013750659000681677,
+          "issuance_total": 1577820636.8352447,
+          "n": 868,
+          "obs_rate": 10.837823794235646,
+          "pred_rate": 8.589151865417794,
+          "state": "OR"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0413255380276565,
+          "effective_n": 772.4438140307163,
+          "factor_sampling_variance": 0.012816070584756905,
+          "issuance_total": 4181460867.3737125,
+          "n": 814,
+          "obs_rate": 7.821855285276573,
+          "pred_rate": 7.511440946787607,
+          "state": "PA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.6111680368119177,
+          "effective_n": 959.9375810910335,
+          "factor_sampling_variance": 0.011973012640869411,
+          "issuance_total": 338938382.84996575,
+          "n": 980,
+          "obs_rate": 11.47407972003079,
+          "pred_rate": 7.1215909562946695,
+          "state": "RI"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0423304914980067,
+          "effective_n": 940.3273141819421,
+          "factor_sampling_variance": 0.011553604893535829,
+          "issuance_total": 1256603297.4989107,
+          "n": 961,
+          "obs_rate": 5.785291217459833,
+          "pred_rate": 5.550342491799681,
+          "state": "SC"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.4694646422174095,
+          "effective_n": 640.4931588498682,
+          "factor_sampling_variance": 0.008198859447830973,
+          "issuance_total": 176194526.73210558,
+          "n": 667,
+          "obs_rate": 2.273603041438197,
+          "pred_rate": 4.842969708430756,
+          "state": "SD"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.8230800265290891,
+          "effective_n": 919.4754285504215,
+          "factor_sampling_variance": 0.009494761101084884,
+          "issuance_total": 1536937054.1798232,
+          "n": 964,
+          "obs_rate": 4.208451988209803,
+          "pred_rate": 5.113053230020362,
+          "state": "TN"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.1089105024808175,
+          "effective_n": 918.2427834405706,
+          "factor_sampling_variance": 0.011988068753730326,
+          "issuance_total": 6852329085.977169,
+          "n": 955,
+          "obs_rate": 6.301421822159726,
+          "pred_rate": 5.682534170307156,
+          "state": "TX"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.3781420810521289,
+          "effective_n": 1035.8058169205667,
+          "factor_sampling_variance": 0.0044408546481708895,
+          "issuance_total": 372829004.0432507,
+          "n": 1065,
+          "obs_rate": 1.9066659695873296,
+          "pred_rate": 5.042194627697323,
+          "state": "UT"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 1.0602340952892282,
+          "effective_n": 723.9945751081742,
+          "factor_sampling_variance": 0.011661730597859103,
+          "issuance_total": 1728186950.4595327,
+          "n": 770,
+          "obs_rate": 7.598357637379005,
+          "pred_rate": 7.166679199565073,
+          "state": "VA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.6408864448519804,
+          "effective_n": 248.67208665424872,
+          "factor_sampling_variance": 0.020074471558095136,
+          "issuance_total": 65606300.302175075,
+          "n": 278,
+          "obs_rate": 3.052223530579677,
+          "pred_rate": 4.762502866298913,
+          "state": "VI"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.6262886689657816,
+          "effective_n": 620.782362233713,
+          "factor_sampling_variance": 0.010949707024811937,
+          "issuance_total": 150613080.0453964,
+          "n": 657,
+          "obs_rate": 4.239149357743139,
+          "pred_rate": 6.768682825993698,
+          "state": "VT"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.8117353512603372,
+          "effective_n": 804.065083763681,
+          "factor_sampling_variance": 0.008844073788749632,
+          "issuance_total": 1901882109.0049195,
+          "n": 861,
+          "obs_rate": 5.294448138001485,
+          "pred_rate": 6.522382116019814,
+          "state": "WA"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.40756024209335256,
+          "effective_n": 1018.0805252455118,
+          "factor_sampling_variance": 0.0032995924266547598,
+          "issuance_total": 1323713178.8960638,
+          "n": 1044,
+          "obs_rate": 3.7271243859312064,
+          "pred_rate": 9.14496558051779,
+          "state": "WI"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.5506454031239069,
+          "effective_n": 721.7761748595989,
+          "factor_sampling_variance": 0.007789690347663706,
+          "issuance_total": 518820323.9596393,
+          "n": 772,
+          "obs_rate": 4.005628940742806,
+          "pred_rate": 7.274425461500593,
+          "state": "WV"
+        },
+        {
+          "descriptive_anchor_factor_fy2024": 0.5948673147594481,
+          "effective_n": 275.14913410914005,
+          "factor_sampling_variance": 0.022142913598165104,
+          "issuance_total": 60424568.33517275,
+          "n": 303,
+          "obs_rate": 3.5218592773163016,
+          "pred_rate": 5.920411476533162,
+          "state": "WY"
+        }
+      ]
+    }
   },
-  {
-   "state": "RI",
-   "n": 980,
-   "pred_rate": 8.348598203610443,
-   "obs_rate": 12.827016053408894,
-   "state_factor": 1.5364275223907302
+  "calibration_corr": 0.5074937543673864,
+  "calibration_intercept_pp": 0.14231028756534325,
+  "calibration_issuance_weighted": {
+    "corr": 0.45775869209285425,
+    "intercept_pp": 2.1601001844149055,
+    "mae_pp": 1.4544287643601035,
+    "rmse_pp": 1.841924202786979,
+    "slope": 0.7686796825994211,
+    "states": 53
   },
-  {
-   "state": "OR",
-   "n": 868,
-   "pred_rate": 10.31110857651928,
-   "obs_rate": 12.23063864837045,
-   "state_factor": 1.1861613673841407
+  "calibration_mae_pp": 1.8274110414225389,
+  "calibration_rmse_pp": 2.2451115510252118,
+  "calibration_slope": 0.9543875056369069,
+  "data_quality": {
+    "dropped_missing_target_or_weight_by_year": {
+      "2017": 0,
+      "2018": 0,
+      "2019": 0,
+      "2022": 0,
+      "2023": 0,
+      "2024": 0
+    },
+    "hurdle_population_nesting": {
+      "fy2024": {
+        "official_error_dollars_outside_stage2_weighted_share": 4.424354780631003e-05,
+        "official_error_n": 5428,
+        "official_errors_inside_stage2_n": 5427,
+        "official_errors_outside_stage2_n": 1,
+        "stage1_positive_n": 17828,
+        "stage2_population_n": 17828
+      },
+      "training_through_fy2023": {
+        "official_error_dollars_outside_stage2_weighted_share": 0.0002633532435687135,
+        "official_error_n": 22150,
+        "official_errors_inside_stage2_n": 22142,
+        "official_errors_outside_stage2_n": 8,
+        "stage1_positive_n": 79919,
+        "stage2_population_n": 79919
+      }
+    }
   },
-  {
-   "state": "AK",
-   "n": 546,
-   "pred_rate": 4.880442025693926,
-   "obs_rate": 12.045585263852939,
-   "state_factor": 2.4681340748311085
+  "definitions": {
+    "formula_benefit": "FSBEN; intentional engine-computable formula anchor feature, not target",
+    "observed_rate": "weighted official AMTERR dollars divided by weighted RAWBEN issuance",
+    "official_error": "STATUS in {2,3} and AMTERR greater than the fiscal-year threshold",
+    "probability_calibration": "weighted isotonic regression; reported training metrics use nested outer/inner cross-fitting, while deployment fits the calibrator on all full-training OOF classifier predictions",
+    "signed_deviation_D": "RAWBEN - BENFIX",
+    "stage1_deviates": "abs(D) > 0.5 dollars; reconciliation anomalies are not promoted",
+    "stage2_crosses": "official_error, modeled only in the stage1-positive population"
   },
-  {
-   "state": "GA",
-   "n": 945,
-   "pred_rate": 8.079270789764108,
-   "obs_rate": 11.523076206170778,
-   "state_factor": 1.4262520103633287
+  "features": [
+    "size",
+    "size_missing",
+    "elderly_or_disabled",
+    "elderly_disabled_missing",
+    "has_earnings",
+    "earned",
+    "earned_missing",
+    "unearned",
+    "unearned_missing",
+    "gross",
+    "gross_missing",
+    "year",
+    "children",
+    "children_missing",
+    "expedited",
+    "expedited_missing",
+    "formula_benefit",
+    "formula_benefit_missing",
+    "claims_medical",
+    "claims_medical_missing",
+    "medical_expense_above_floor",
+    "med_doc_required",
+    "se_records",
+    "se_records_missing",
+    "utility_actuals",
+    "utility_actuals_missing",
+    "deduction_count",
+    "deduction_components_missing",
+    "at_max",
+    "at_min",
+    "ben_rel_max",
+    "benefit_position_missing",
+    "net_share_of_gross",
+    "net_share_undefined",
+    "deductions_per_member",
+    "deductions_missing"
+  ],
+  "fy2023_fit_factor_adjusted_fy2024_mae_pp": 0.8850573350793923,
+  "prevalence": {
+    "fy2024": {
+      "deviates": {
+        "n": 44800,
+        "unweighted": 0.3979464285714286,
+        "weighted": 0.41008880068842823
+      },
+      "official_error": {
+        "n": 44800,
+        "unweighted": 0.12116071428571429,
+        "weighted": 0.13393880241335565
+      }
+    },
+    "training_through_fy2023": {
+      "deviates": {
+        "n": 217656,
+        "unweighted": 0.36718032124085714,
+        "weighted": 0.37636973210819985
+      },
+      "official_error": {
+        "n": 217656,
+        "unweighted": 0.10176608960929173,
+        "weighted": 0.10621059934662634
+      }
+    }
   },
-  {
-   "state": "MA",
-   "n": 907,
-   "pred_rate": 9.555695022055332,
-   "obs_rate": 11.367982055334465,
-   "state_factor": 1.1896551772630066
+  "provenance": {
+    "deviation_tolerance_dollars": 0.5,
+    "input_sha256": {
+      "qc_pub_fy2017.sav": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9",
+      "qc_pub_fy2018.sav": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82",
+      "qc_pub_fy2019.sav": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846",
+      "qc_pub_fy2022.sav": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
+      "qc_pub_fy2023.sav": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
+      "qc_pub_fy2024.sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
+      "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca"
+    },
+    "model_parameters": {
+      "learning_rate": 0.08,
+      "max_iter": 300,
+      "max_leaf_nodes": 63,
+      "random_state": 7
+    },
+    "oof_design": {
+      "deployable_duan_smear": "weighted mean exp(residual) over all full-training OOF residuals",
+      "deployable_probability_calibrator": "weighted isotonic fit on all full-training OOF base scores",
+      "magnitude_training_metrics": "outer-fold log predictions multiplied by Duan smears fit on inner OOF residuals from the corresponding outer training set",
+      "probability_training_metrics": "nested outer/inner cross-fitting; each outer calibrator is fit on inner OOF base scores from its outer training set"
+    },
+    "oof_folds": 5,
+    "package_versions": {
+      "numpy": "2.5.1",
+      "pandas": "2.3.3",
+      "pyreadstat": "1.3.5",
+      "python": "3.14.4",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1"
+    },
+    "random_state": 7,
+    "threshold_dollars_by_fiscal_year": {
+      "2017": 38,
+      "2018": 37,
+      "2019": 37,
+      "2022": 48,
+      "2023": 54,
+      "2024": 56
+    }
   },
-  {
-   "state": "MN",
-   "n": 1011,
-   "pred_rate": 9.796952674810232,
-   "obs_rate": 11.157397982337983,
-   "state_factor": 1.138864129764116
+  "schema_version": 2,
+  "smear": 1.1725136368152118,
+  "stage1": {
+    "fy2024": {
+      "auc_calibrated": 0.8354833959545563,
+      "auc_raw": 0.8356166630653237,
+      "calibration_in_the_large_calibrated": 0.050720067527046,
+      "calibration_in_the_large_raw": 0.05389106576272104,
+      "effective_n": 16845.499916996247,
+      "mean_calibration_error_calibrated": -0.00813491832625296,
+      "mean_calibration_error_raw": -0.008683147679543146,
+      "mean_probability_calibrated": 0.4019538823621753,
+      "mean_probability_raw": 0.4014056530088851,
+      "n": 44800,
+      "pr_auc_calibrated": 0.7303787670552168,
+      "pr_auc_raw": 0.737310903568046,
+      "unweighted_prevalence": 0.3979464285714286,
+      "weighted_brier_calibrated": 0.15950162649512278,
+      "weighted_brier_raw": 0.1594568902497416,
+      "weighted_prevalence": 0.41008880068842823
+    },
+    "permutation_importance_fy2024_scoring_roc_auc": [
+      {
+        "feature": "net_share_of_gross",
+        "roc_auc_decrease_mean": 0.11287679414902514,
+        "roc_auc_decrease_std": 0.0017632195207845942
+      },
+      {
+        "feature": "at_min",
+        "roc_auc_decrease_mean": 0.036448774095075964,
+        "roc_auc_decrease_std": 0.0011680568714796656
+      },
+      {
+        "feature": "earned",
+        "roc_auc_decrease_mean": 0.02157311467598196,
+        "roc_auc_decrease_std": 0.0006536400249584001
+      },
+      {
+        "feature": "gross",
+        "roc_auc_decrease_mean": 0.01652906099685177,
+        "roc_auc_decrease_std": 0.0007464867093595686
+      },
+      {
+        "feature": "deductions_per_member",
+        "roc_auc_decrease_mean": 0.009705401883248236,
+        "roc_auc_decrease_std": 0.0006534825696988792
+      },
+      {
+        "feature": "at_max",
+        "roc_auc_decrease_mean": 0.009083077632467814,
+        "roc_auc_decrease_std": 0.0002406943881635833
+      },
+      {
+        "feature": "unearned",
+        "roc_auc_decrease_mean": 0.008921039676992279,
+        "roc_auc_decrease_std": 0.00032179462659782596
+      },
+      {
+        "feature": "ben_rel_max",
+        "roc_auc_decrease_mean": 0.004881948963419498,
+        "roc_auc_decrease_std": 0.0002467989598039904
+      },
+      {
+        "feature": "elderly_or_disabled",
+        "roc_auc_decrease_mean": 0.004105507910213395,
+        "roc_auc_decrease_std": 0.0009162312243168662
+      },
+      {
+        "feature": "deduction_count",
+        "roc_auc_decrease_mean": 0.003696240439951278,
+        "roc_auc_decrease_std": 0.0003367642725890226
+      },
+      {
+        "feature": "expedited",
+        "roc_auc_decrease_mean": 0.002361439669669544,
+        "roc_auc_decrease_std": 0.0001623620516175144
+      },
+      {
+        "feature": "deduction_components_missing",
+        "roc_auc_decrease_mean": 0.001774186527690495,
+        "roc_auc_decrease_std": 0.00016320083400637867
+      },
+      {
+        "feature": "formula_benefit",
+        "roc_auc_decrease_mean": 0.0017238384372649795,
+        "roc_auc_decrease_std": 0.00042159356960999703
+      },
+      {
+        "feature": "size",
+        "roc_auc_decrease_mean": 0.0007352122347982956,
+        "roc_auc_decrease_std": 6.3762524972691e-05
+      },
+      {
+        "feature": "children",
+        "roc_auc_decrease_mean": 0.0005006270403452584,
+        "roc_auc_decrease_std": 0.0001026104482918538
+      },
+      {
+        "feature": "claims_medical",
+        "roc_auc_decrease_mean": 0.00035612140345124094,
+        "roc_auc_decrease_std": 9.509182888371648e-05
+      },
+      {
+        "feature": "med_doc_required",
+        "roc_auc_decrease_mean": 0.00032122173956735295,
+        "roc_auc_decrease_std": 8.070050016246427e-05
+      },
+      {
+        "feature": "se_records",
+        "roc_auc_decrease_mean": 0.00020169848973857393,
+        "roc_auc_decrease_std": 0.00011403468167429314
+      },
+      {
+        "feature": "has_earnings",
+        "roc_auc_decrease_mean": 0.0001831638003725692,
+        "roc_auc_decrease_std": 7.806448943738394e-05
+      },
+      {
+        "feature": "utility_actuals",
+        "roc_auc_decrease_mean": 0.00012217549717008502,
+        "roc_auc_decrease_std": 0.000169683567104989
+      },
+      {
+        "feature": "medical_expense_above_floor",
+        "roc_auc_decrease_mean": 5.336849678964454e-05,
+        "roc_auc_decrease_std": 7.812647555328253e-05
+      },
+      {
+        "feature": "expedited_missing",
+        "roc_auc_decrease_mean": 4.179462939994198e-06,
+        "roc_auc_decrease_std": 3.996469269161742e-07
+      },
+      {
+        "feature": "benefit_position_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "net_share_undefined",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "utility_actuals_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "formula_benefit_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "claims_medical_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "children_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "year",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "gross_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "unearned_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "earned_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "elderly_disabled_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "size_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "se_records_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "deductions_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      }
+    ],
+    "training_oof_cross_fitted": {
+      "auc_calibrated": 0.8297932912006047,
+      "auc_raw": 0.8300647436903273,
+      "calibration_in_the_large_calibrated": -0.0020628477834251924,
+      "calibration_in_the_large_raw": 0.0027946160026713907,
+      "effective_n": 90704.99931102023,
+      "inner_folds_by_outer_fold": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "mean_calibration_error_calibrated": 0.00032957352048745836,
+      "mean_calibration_error_raw": -0.0004478260080390539,
+      "mean_probability_calibrated": 0.3766993056286873,
+      "mean_probability_raw": 0.3759219061001608,
+      "n": 217656,
+      "oof_method": "nested_outer_inner",
+      "outer_folds": 5,
+      "pr_auc_calibrated": 0.6978021374000032,
+      "pr_auc_raw": 0.6995973855753332,
+      "unweighted_prevalence": 0.36718032124085714,
+      "weighted_brier_calibrated": 0.1600165595759556,
+      "weighted_brier_raw": 0.15992569592363984,
+      "weighted_prevalence": 0.37636973210819985
+    }
   },
-  {
-   "state": "WV",
-   "n": 772,
-   "pred_rate": 9.22249756880848,
-   "obs_rate": 11.073024519594163,
-   "state_factor": 1.2006535579954365
+  "stage1_auc": 0.8356166630653237,
+  "stage2": {
+    "fy2024_among_stage1_positives": {
+      "auc_calibrated": 0.721819801010001,
+      "auc_raw": 0.7233219955594599,
+      "calibration_in_the_large_calibrated": 0.030823489278342442,
+      "calibration_in_the_large_raw": 0.025612739418685693,
+      "effective_n": 6679.405058973172,
+      "mean_calibration_error_calibrated": -0.005857445032890596,
+      "mean_calibration_error_raw": -0.004833700473410307,
+      "mean_probability_calibrated": 0.3207343981936771,
+      "mean_probability_raw": 0.3217581427531574,
+      "n": 17828,
+      "pr_auc_calibrated": 0.5651091174364472,
+      "pr_auc_raw": 0.5784220390376291,
+      "unweighted_prevalence": 0.30440879515369085,
+      "weighted_brier_calibrated": 0.18793502146305388,
+      "weighted_brier_raw": 0.18761686933360483,
+      "weighted_prevalence": 0.3265918432265677
+    },
+    "permutation_importance_fy2024_scoring_roc_auc": [
+      {
+        "feature": "net_share_of_gross",
+        "roc_auc_decrease_mean": 0.0680550210338926,
+        "roc_auc_decrease_std": 0.0012678242535741986
+      },
+      {
+        "feature": "ben_rel_max",
+        "roc_auc_decrease_mean": 0.03286521791665623,
+        "roc_auc_decrease_std": 0.001136244833511027
+      },
+      {
+        "feature": "elderly_or_disabled",
+        "roc_auc_decrease_mean": 0.022736272743251,
+        "roc_auc_decrease_std": 0.0012982384724873593
+      },
+      {
+        "feature": "formula_benefit",
+        "roc_auc_decrease_mean": 0.022448239632895956,
+        "roc_auc_decrease_std": 0.0013424077991808434
+      },
+      {
+        "feature": "gross",
+        "roc_auc_decrease_mean": 0.02150178967407838,
+        "roc_auc_decrease_std": 0.002669527459024969
+      },
+      {
+        "feature": "expedited",
+        "roc_auc_decrease_mean": 0.010174753551395263,
+        "roc_auc_decrease_std": 0.0010839539667392868
+      },
+      {
+        "feature": "deductions_per_member",
+        "roc_auc_decrease_mean": 0.007972070088354396,
+        "roc_auc_decrease_std": 0.002690875005309188
+      },
+      {
+        "feature": "size",
+        "roc_auc_decrease_mean": 0.007380309854093807,
+        "roc_auc_decrease_std": 0.00032804202530771904
+      },
+      {
+        "feature": "earned",
+        "roc_auc_decrease_mean": 0.006962366529002469,
+        "roc_auc_decrease_std": 0.0016284952835652988
+      },
+      {
+        "feature": "unearned",
+        "roc_auc_decrease_mean": 0.006611508654459993,
+        "roc_auc_decrease_std": 0.0006751955025455554
+      },
+      {
+        "feature": "deduction_count",
+        "roc_auc_decrease_mean": 0.002855690851195636,
+        "roc_auc_decrease_std": 0.000864172580794944
+      },
+      {
+        "feature": "at_max",
+        "roc_auc_decrease_mean": 0.0024370465907358105,
+        "roc_auc_decrease_std": 0.00025685143169672806
+      },
+      {
+        "feature": "at_min",
+        "roc_auc_decrease_mean": 0.0008484361230855312,
+        "roc_auc_decrease_std": 0.00022592435639438177
+      },
+      {
+        "feature": "claims_medical",
+        "roc_auc_decrease_mean": 0.00030938178557008794,
+        "roc_auc_decrease_std": 0.00026609907706050506
+      },
+      {
+        "feature": "deduction_components_missing",
+        "roc_auc_decrease_mean": 0.00010842556417981856,
+        "roc_auc_decrease_std": 3.2458560584550405e-05
+      },
+      {
+        "feature": "children",
+        "roc_auc_decrease_mean": 7.463032183785412e-05,
+        "roc_auc_decrease_std": 0.0008500396216508874
+      },
+      {
+        "feature": "medical_expense_above_floor",
+        "roc_auc_decrease_mean": 7.35526911402884e-05,
+        "roc_auc_decrease_std": 6.972838972015076e-05
+      },
+      {
+        "feature": "se_records_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "utility_actuals_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "benefit_position_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "net_share_undefined",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "formula_benefit_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "claims_medical_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "expedited_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "children_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "year",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "gross_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "unearned_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "earned_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "elderly_disabled_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "size_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "deductions_missing",
+        "roc_auc_decrease_mean": 0.0,
+        "roc_auc_decrease_std": 0.0
+      },
+      {
+        "feature": "utility_actuals",
+        "roc_auc_decrease_mean": -1.3050725847822223e-05,
+        "roc_auc_decrease_std": 2.3830592890231028e-05
+      },
+      {
+        "feature": "has_earnings",
+        "roc_auc_decrease_mean": -3.564957500490351e-05,
+        "roc_auc_decrease_std": 4.820849465078846e-05
+      },
+      {
+        "feature": "med_doc_required",
+        "roc_auc_decrease_mean": -0.0001650880162720932,
+        "roc_auc_decrease_std": 0.00011807175046285857
+      },
+      {
+        "feature": "se_records",
+        "roc_auc_decrease_mean": -0.0007050393966313573,
+        "roc_auc_decrease_std": 0.00017821787159372663
+      }
+    ],
+    "population": "rows with abs(D) > 0.5 dollars only",
+    "training_oof_cross_fitted": {
+      "auc_calibrated": 0.698411285129901,
+      "auc_raw": 0.6989878033283367,
+      "calibration_in_the_large_calibrated": 0.0011693255753531528,
+      "calibration_in_the_large_raw": 0.008386871421282041,
+      "effective_n": 33167.04240286211,
+      "inner_folds_by_outer_fold": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "mean_calibration_error_calibrated": -0.00020978010286359927,
+      "mean_calibration_error_raw": -0.0014921560086114671,
+      "mean_probability_calibrated": 0.2818886673909378,
+      "mean_probability_raw": 0.28060629148518995,
+      "n": 79919,
+      "oof_method": "nested_outer_inner",
+      "outer_folds": 5,
+      "pr_auc_calibrated": 0.4898637477010802,
+      "pr_auc_raw": 0.49333803724904907,
+      "unweighted_prevalence": 0.2770555187126966,
+      "weighted_brier_calibrated": 0.18017359216963288,
+      "weighted_brier_raw": 0.18013369094152798,
+      "weighted_prevalence": 0.2820984474938014
+    }
   },
-  {
-   "state": "MI",
-   "n": 920,
-   "pred_rate": 10.193828228572505,
-   "obs_rate": 10.82765157583391,
-   "state_factor": 1.0621771657368964
+  "stage2_auc_among_deviators": 0.7233219955594599,
+  "stage3": {
+    "fy2024": {
+      "effective_n": 2153.267182679265,
+      "n": 5427,
+      "observed_AMTERR_mean_weighted": 189.30241981489877,
+      "observed_abs_D_mean_unweighted": 186.30772065597935,
+      "observed_abs_D_mean_weighted": 189.30241981489877,
+      "observed_signed_D_mean_weighted": 111.0359065055785,
+      "predicted_abs_D_mean_unweighted": 182.64654799242754,
+      "predicted_abs_D_mean_weighted": 183.35235421615366
+    },
+    "oof_n": 22142,
+    "smear": 1.1725136368152118,
+    "smear_method": "deployable weighted mean exp(full-training OOF log-magnitude residual)",
+    "target": "abs(RAWBEN - BENFIX) among official errors in the stage1-positive population",
+    "training_oof": {
+      "fold_smears": [
+        1.1738216262629069,
+        1.1714419461668233,
+        1.1697183838961678,
+        1.1750079290021123,
+        1.169177895672583
+      ],
+      "inner_folds_by_outer_fold": [
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "mae_weighted": 66.26497786422549,
+      "method": "nested outer/inner cross-fitting; each outer-fold log prediction uses a Duan smear fit on inner OOF residuals from that outer training set",
+      "observed_abs_D_mean_weighted": 148.2872451066034,
+      "outer_folds": 5,
+      "predicted_abs_D_mean_weighted": 147.27929174755405
+    },
+    "zero_magnitude_official_errors_excluded": 0
   },
-  {
-   "state": "IL",
-   "n": 861,
-   "pred_rate": 8.36993483022696,
-   "obs_rate": 10.706042176331284,
-   "state_factor": 1.2791069934819288
-  },
-  {
-   "state": "MD",
-   "n": 745,
-   "pred_rate": 8.40391275386126,
-   "obs_rate": 10.587480296709932,
-   "state_factor": 1.2598274883143463
-  },
-  {
-   "state": "NM",
-   "n": 1017,
-   "pred_rate": 8.7886564051496,
-   "obs_rate": 10.515996908200242,
-   "state_factor": 1.1965420450432591
-  },
-  {
-   "state": "OK",
-   "n": 932,
-   "pred_rate": 7.663402468844767,
-   "obs_rate": 10.454260334979743,
-   "state_factor": 1.3641799941319914
-  },
-  {
-   "state": "FL",
-   "n": 968,
-   "pred_rate": 7.621294826535127,
-   "obs_rate": 10.242573008565167,
-   "state_factor": 1.3439413172816137
-  },
-  {
-   "state": "CA",
-   "n": 883,
-   "pred_rate": 8.774339733972438,
-   "obs_rate": 10.024108253622448,
-   "state_factor": 1.142434480261935
-  },
-  {
-   "state": "CT",
-   "n": 941,
-   "pred_rate": 8.51287956709794,
-   "obs_rate": 9.81435261423737,
-   "state_factor": 1.1528828214802416
-  },
-  {
-   "state": "TX",
-   "n": 955,
-   "pred_rate": 7.719891580042763,
-   "obs_rate": 9.778383013645518,
-   "state_factor": 1.266647712893314
-  },
-  {
-   "state": "CO",
-   "n": 856,
-   "pred_rate": 8.342077348232179,
-   "obs_rate": 9.760118558585015,
-   "state_factor": 1.1699865814182773
-  },
-  {
-   "state": "NC",
-   "n": 955,
-   "pred_rate": 9.473516999747968,
-   "obs_rate": 9.64529103147157,
-   "state_factor": 1.0181320233792974
-  },
-  {
-   "state": "PA",
-   "n": 814,
-   "pred_rate": 8.908130572092693,
-   "obs_rate": 9.566814382094634,
-   "state_factor": 1.073941867451456
-  },
-  {
-   "state": "NY",
-   "n": 885,
-   "pred_rate": 6.270717878982616,
-   "obs_rate": 9.402246288720761,
-   "state_factor": 1.4993891401547499
-  },
-  {
-   "state": "VA",
-   "n": 770,
-   "pred_rate": 8.791722389405756,
-   "obs_rate": 9.079838303267078,
-   "state_factor": 1.032771270645273
-  },
-  {
-   "state": "NV",
-   "n": 1005,
-   "pred_rate": 9.699915653451395,
-   "obs_rate": 8.871088858344999,
-   "state_factor": 0.9145531956443884
-  },
-  {
-   "state": "AZ",
-   "n": 925,
-   "pred_rate": 8.283603605990018,
-   "obs_rate": 8.291381748233162,
-   "state_factor": 1.0009389804984776
-  },
-  {
-   "state": "DE",
-   "n": 778,
-   "pred_rate": 8.290763153792003,
-   "obs_rate": 8.186484356630855,
-   "state_factor": 0.9874222921066736
-  },
-  {
-   "state": "ME",
-   "n": 960,
-   "pred_rate": 9.544240435028465,
-   "obs_rate": 8.02475979938095,
-   "state_factor": 0.8407960648108942
-  },
-  {
-   "state": "MT",
-   "n": 608,
-   "pred_rate": 8.60113384531662,
-   "obs_rate": 7.908652909840989,
-   "state_factor": 0.9194895756851068
-  },
-  {
-   "state": "LA",
-   "n": 939,
-   "pred_rate": 7.841968193270227,
-   "obs_rate": 7.81912298823316,
-   "state_factor": 0.9970868021300224
-  },
-  {
-   "state": "NH",
-   "n": 666,
-   "pred_rate": 9.08095107752625,
-   "obs_rate": 7.6592224982859,
-   "state_factor": 0.8434383615655769
-  },
-  {
-   "state": "SC",
-   "n": 961,
-   "pred_rate": 6.8302200885652296,
-   "obs_rate": 7.638349014954529,
-   "state_factor": 1.1183166744132043
-  },
-  {
-   "state": "ID",
-   "n": 1130,
-   "pred_rate": 7.341416212237042,
-   "obs_rate": 7.629771224168144,
-   "state_factor": 1.0392778455266516
-  },
-  {
-   "state": "MS",
-   "n": 1137,
-   "pred_rate": 6.387329643506248,
-   "obs_rate": 7.585320661281644,
-   "state_factor": 1.1875574120389023
-  },
-  {
-   "state": "AL",
-   "n": 1082,
-   "pred_rate": 6.666609193739311,
-   "obs_rate": 7.48549136686926,
-   "state_factor": 1.1228333849086234
-  },
-  {
-   "state": "IN",
-   "n": 916,
-   "pred_rate": 6.555183263749898,
-   "obs_rate": 7.417330799501674,
-   "state_factor": 1.131521500019602
-  },
-  {
-   "state": "WA",
-   "n": 861,
-   "pred_rate": 8.53628736722057,
-   "obs_rate": 7.299222960940007,
-   "state_factor": 0.8550816821103161
-  },
-  {
-   "state": "WY",
-   "n": 303,
-   "pred_rate": 7.123482761709029,
-   "obs_rate": 7.297018583192617,
-   "state_factor": 1.024361092360102
-  },
-  {
-   "state": "KY",
-   "n": 1016,
-   "pred_rate": 7.714208681767453,
-   "obs_rate": 7.124057738361226,
-   "state_factor": 0.9234981878567726
-  },
-  {
-   "state": "ND",
-   "n": 463,
-   "pred_rate": 7.52452612334376,
-   "obs_rate": 6.8582688619056125,
-   "state_factor": 0.9114552530595674
-  },
-  {
-   "state": "WI",
-   "n": 1044,
-   "pred_rate": 10.997274528044061,
-   "obs_rate": 6.681953832828894,
-   "state_factor": 0.6076008938204914
-  },
-  {
-   "state": "AR",
-   "n": 920,
-   "pred_rate": 6.562645971264023,
-   "obs_rate": 6.161517448091374,
-   "state_factor": 0.9388770131850662
-  },
-  {
-   "state": "NJ",
-   "n": 651,
-   "pred_rate": 7.4178736210472795,
-   "obs_rate": 6.123789502105323,
-   "state_factor": 0.825545137993433
-  },
-  {
-   "state": "VT",
-   "n": 657,
-   "pred_rate": 7.8976961758023885,
-   "obs_rate": 5.80494531609767,
-   "state_factor": 0.7350175528255112
-  },
-  {
-   "state": "OH",
-   "n": 934,
-   "pred_rate": 6.77416411248965,
-   "obs_rate": 5.76402363558906,
-   "state_factor": 0.8508833768821491
-  },
-  {
-   "state": "KS",
-   "n": 920,
-   "pred_rate": 6.842945889884585,
-   "obs_rate": 5.5481987285252625,
-   "state_factor": 0.8107909689490238
-  },
-  {
-   "state": "IA",
-   "n": 980,
-   "pred_rate": 8.552525638584166,
-   "obs_rate": 5.540247893372169,
-   "state_factor": 0.6477908547128698
-  },
-  {
-   "state": "TN",
-   "n": 964,
-   "pred_rate": 5.979123312828377,
-   "obs_rate": 5.267926581426879,
-   "state_factor": 0.8810533427407986
-  },
-  {
-   "state": "MO",
-   "n": 793,
-   "pred_rate": 6.368625070153931,
-   "obs_rate": 5.185219426954959,
-   "state_factor": 0.814181926214355
-  },
-  {
-   "state": "NE",
-   "n": 950,
-   "pred_rate": 7.073124032159338,
-   "obs_rate": 4.974937327057447,
-   "state_factor": 0.703357852122757
-  },
-  {
-   "state": "VI",
-   "n": 278,
-   "pred_rate": 6.771080561150992,
-   "obs_rate": 4.957026572459743,
-   "state_factor": 0.7320879625772929
-  },
-  {
-   "state": "UT",
-   "n": 1065,
-   "pred_rate": 6.148626554359628,
-   "obs_rate": 4.133945287807635,
-   "state_factor": 0.6723363748407356
-  },
-  {
-   "state": "SD",
-   "n": 667,
-   "pred_rate": 6.264592999771462,
-   "obs_rate": 4.063097570945268,
-   "state_factor": 0.6485812519813328
-  },
-  {
-   "state": "HI",
-   "n": 571,
-   "pred_rate": 4.576976649417831,
-   "obs_rate": 3.5674147084937777,
-   "state_factor": 0.7794260232783874
+  "stage3_observed_mean": 189.30241981489877,
+  "stage3_predicted_mean": 183.35235421615366,
+  "target_concordance": {
+    "all_years": {
+      "abs_RAWBEN_minus_BENFIX_equals_AMTERR_unweighted": 0.999824732526595,
+      "abs_RAWBEN_minus_BENFIX_equals_AMTERR_weighted": 0.9998768056766417,
+      "abs_RAWBEN_minus_FSBEN_equals_AMTERR_unweighted": 0.8546118206480324,
+      "abs_RAWBEN_minus_FSBEN_equals_AMTERR_weighted": 0.8519425244298184,
+      "formula_valid_n": 262456,
+      "n": 262456
+    },
+    "fy2024": {
+      "abs_RAWBEN_minus_BENFIX_equals_AMTERR_unweighted": 0.9999330357142857,
+      "abs_RAWBEN_minus_BENFIX_equals_AMTERR_weighted": 0.9999688802738583,
+      "abs_RAWBEN_minus_FSBEN_equals_AMTERR_unweighted": 0.84953125,
+      "abs_RAWBEN_minus_FSBEN_equals_AMTERR_weighted": 0.8364471979542242,
+      "formula_valid_n": 44800,
+      "n": 44800
+    }
   }
- ]
 }

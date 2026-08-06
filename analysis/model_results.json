@@ -1,10 +1,1027 @@
 {
- "auc_covariates": 0.7621134091261413,
- "auc_with_intermediates": 0.7641311902580588,
- "pr_covariates": 0.3609700391929045,
- "pr_with_intermediates": 0.3603317930356822,
- "p_at_5pct_budget_covariates": 0.48812880848465856,
- "p_at_5pct_budget_with_intermediates": 0.48990796753302973,
- "train_n": 217693,
- "test_n": 44891
+  "schema_version": 2,
+  "auc_covariates": 0.7608905023931776,
+  "auc_with_intermediates": 0.7666262908275983,
+  "pr_covariates": 0.3522564685938263,
+  "pr_with_intermediates": 0.3553041682372305,
+  "p_at_5pct_budget_covariates": 0.4762910976010614,
+  "p_at_5pct_budget_with_intermediates": 0.47760784361005676,
+  "train_n": 217656,
+  "test_n": 44800,
+  "prevalence": {
+    "train": {
+      "n": 217656,
+      "weighted": 0.10621059934662634,
+      "unweighted": 0.10176608960929173,
+      "weighted_population": 1198774429.025765
+    },
+    "test": {
+      "n": 44800,
+      "weighted": 0.13393880241335565,
+      "unweighted": 0.12116071428571429,
+      "weighted_population": 259927031.4967715
+    }
+  },
+  "models": {
+    "covariates_only": {
+      "roc_auc": 0.7608905023931776,
+      "pr_auc": 0.3522564685938263,
+      "precision_at_5pct_weight_budget": 0.4762910976010614
+    },
+    "with_intermediates": {
+      "roc_auc": 0.7666262908275983,
+      "pr_auc": 0.3553041682372305,
+      "precision_at_5pct_weight_budget": 0.47760784361005676
+    },
+    "lift": {
+      "roc_auc": 0.0057357884344206855,
+      "pr_auc": 0.003047699643404178,
+      "precision_at_5pct_weight_budget": 0.0013167460089953398
+    }
+  },
+  "feature_sets": {
+    "covariates": [
+      "size",
+      "size_missing",
+      "elderly_or_disabled",
+      "elderly_disabled_missing",
+      "has_earnings",
+      "earned",
+      "earned_missing",
+      "unearned",
+      "unearned_missing",
+      "gross",
+      "gross_missing",
+      "year",
+      "children",
+      "children_missing",
+      "expedited",
+      "expedited_missing",
+      "formula_benefit",
+      "formula_benefit_missing"
+    ],
+    "intermediates": [
+      "claims_medical",
+      "claims_medical_missing",
+      "medical_expense_above_floor",
+      "med_doc_required",
+      "se_records",
+      "se_records_missing",
+      "utility_actuals",
+      "utility_actuals_missing",
+      "deduction_count",
+      "deduction_components_missing",
+      "at_max",
+      "at_min",
+      "ben_rel_max",
+      "benefit_position_missing",
+      "net_share_of_gross",
+      "net_share_undefined",
+      "deductions_per_member",
+      "deductions_missing"
+    ]
+  },
+  "smd_treatment_by_year": {
+    "2017": {
+      "treated_state_count": 20,
+      "treated_states": [
+        "AL",
+        "AR",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "MA",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    },
+    "2018": {
+      "treated_state_count": 21,
+      "treated_states": [
+        "AL",
+        "AR",
+        "CA",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "MA",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    },
+    "2019": {
+      "treated_state_count": 21,
+      "treated_states": [
+        "AL",
+        "AR",
+        "CA",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "MA",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    },
+    "2022": {
+      "treated_state_count": 23,
+      "treated_states": [
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "MA",
+        "MI",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    },
+    "2023": {
+      "treated_state_count": 24,
+      "treated_states": [
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "LA",
+        "MA",
+        "MI",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    },
+    "2024": {
+      "treated_state_count": 25,
+      "treated_states": [
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "MI",
+        "MO",
+        "ND",
+        "NH",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TX",
+        "VA",
+        "VT",
+        "WY"
+      ]
+    }
+  },
+  "permutation_importance_weighted_roc_auc": {
+    "size": {
+      "mean_auc_decrease": 0.014333622328226858,
+      "std": 0.001339357761748594
+    },
+    "size_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "elderly_or_disabled": {
+      "mean_auc_decrease": 0.009958483877877945,
+      "std": 0.0006140855599540093
+    },
+    "elderly_disabled_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "has_earnings": {
+      "mean_auc_decrease": 3.0360753430103138e-05,
+      "std": 5.578551726611868e-05
+    },
+    "earned": {
+      "mean_auc_decrease": 0.025168221709034322,
+      "std": 0.0026197444126321904
+    },
+    "earned_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "unearned": {
+      "mean_auc_decrease": 0.010697987094204376,
+      "std": 0.00045923434783715804
+    },
+    "unearned_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "gross": {
+      "mean_auc_decrease": 0.035061822340936334,
+      "std": 0.002274502307116033
+    },
+    "gross_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "year": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "children": {
+      "mean_auc_decrease": 0.0007562964158396746,
+      "std": 0.0004237129377816353
+    },
+    "children_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "expedited": {
+      "mean_auc_decrease": 0.00822647240007739,
+      "std": 0.0012427577125297617
+    },
+    "expedited_missing": {
+      "mean_auc_decrease": 3.629769761712698e-05,
+      "std": 4.462339413247226e-06
+    },
+    "formula_benefit": {
+      "mean_auc_decrease": 0.006050466440904479,
+      "std": 0.0010746014510084674
+    },
+    "formula_benefit_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "claims_medical": {
+      "mean_auc_decrease": 0.0005357089921199209,
+      "std": 0.00012304286164796282
+    },
+    "claims_medical_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "medical_expense_above_floor": {
+      "mean_auc_decrease": 0.00044131002774743243,
+      "std": 0.0001541679831565836
+    },
+    "med_doc_required": {
+      "mean_auc_decrease": 0.00028411904443865766,
+      "std": 5.738776829863624e-05
+    },
+    "se_records": {
+      "mean_auc_decrease": 0.0002081211275458905,
+      "std": 0.00010205995307521041
+    },
+    "se_records_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "utility_actuals": {
+      "mean_auc_decrease": 0.000131882146567075,
+      "std": 0.00018020396373808197
+    },
+    "utility_actuals_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "deduction_count": {
+      "mean_auc_decrease": -5.545809718614514e-05,
+      "std": 0.00011359759007002427
+    },
+    "deduction_components_missing": {
+      "mean_auc_decrease": 0.0003754213259706374,
+      "std": 0.00015632997222566017
+    },
+    "at_max": {
+      "mean_auc_decrease": -8.449648950970001e-07,
+      "std": 2.310811628064945e-06
+    },
+    "at_min": {
+      "mean_auc_decrease": 0.0024015975844609238,
+      "std": 0.00025093291554929674
+    },
+    "ben_rel_max": {
+      "mean_auc_decrease": 0.0249753972534388,
+      "std": 0.0012186452344695173
+    },
+    "benefit_position_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "net_share_of_gross": {
+      "mean_auc_decrease": 0.05931347350596141,
+      "std": 0.0013398646194578516
+    },
+    "net_share_undefined": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "deductions_per_member": {
+      "mean_auc_decrease": 0.007452209529936615,
+      "std": 0.0012155761262927077
+    },
+    "deductions_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    }
+  },
+  "self_employment_cross_check": {
+    "definition": "positive income in any available SLFEMP1-18 slot compared with positive published FSSLFEMP aggregate",
+    "mismatch_count": 0,
+    "mismatch_weighted_rate": 0.0,
+    "by_year": {
+      "2017": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      },
+      "2018": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      },
+      "2019": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      },
+      "2022": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      },
+      "2023": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      },
+      "2024": {
+        "mismatch_count": 0,
+        "mismatch_weighted_rate": 0.0
+      }
+    }
+  },
+  "medical_cross_section": {
+    "population_labels": {
+      "claimant_conditioned": "post-treatment-conditioned elderly/disabled medical claimants",
+      "all_elderly_disabled": "stable denominator: all elderly/disabled households, claiming or not"
+    },
+    "claimant_conditioned": {
+      "0": {
+        "rate": 0.02973358092161585,
+        "event_count": 248,
+        "weighted_event_count": 1214368.2607345553,
+        "n": 8490,
+        "weighted_population": 40841641.77654527
+      },
+      "1": {
+        "rate": 0.026014525274121056,
+        "event_count": 216,
+        "weighted_event_count": 1058247.9471901944,
+        "n": 6529,
+        "weighted_population": 40679118.14800353
+      }
+    },
+    "all_elderly_disabled": {
+      "0": {
+        "rate": 0.009083572833162013,
+        "event_count": 889,
+        "weighted_event_count": 6012456.8573965635,
+        "n": 121000,
+        "weighted_population": 661904403.4574678
+      },
+      "1": {
+        "rate": 0.026014525274121056,
+        "event_count": 216,
+        "weighted_event_count": 1058247.9471901944,
+        "n": 6529,
+        "weighted_population": 40679118.14800353
+      }
+    },
+    "limitations": "med_doc_required applies the $35 excess gate but does not incorporate the state standard amount, whether that standard binds, or whether actuals above the standard require documentation"
+  },
+  "smd_adoption_contrasts": {
+    "interpretation": "descriptive weighted contrasts; not causal estimates",
+    "population_labels": {
+      "claimant_conditioned": "post-treatment-conditioned elderly/disabled medical claimants",
+      "all_elderly_disabled": "stable denominator: all elderly/disabled households, claiming or not"
+    },
+    "claimant_conditioning_note": "This is explicitly post-treatment-conditioned: observed medical claiming may itself respond to SMD adoption.",
+    "calendar_window_rule": "pre uses every available pre-adoption training year in {2017,2018,2019,2022,2023}; post uses every available year on or after adoption; controls use the identical calendar cells",
+    "eligible_adopters": {
+      "AZ": 2022,
+      "CA": 2018,
+      "KY": 2024,
+      "LA": 2023,
+      "MI": 2021
+    },
+    "adopters_without_pre_period": {
+      "AL": 2017,
+      "AR": 2017,
+      "CO": 2017,
+      "GA": 2017,
+      "IA": 2017,
+      "ID": 2017,
+      "IL": 2017,
+      "KS": 2017,
+      "MA": 2017,
+      "MO": 2017,
+      "ND": 2017,
+      "NH": 2017,
+      "OR": 2017,
+      "RI": 2017,
+      "SC": 2017,
+      "SD": 2017,
+      "TX": 2017,
+      "VA": 2017,
+      "VT": 2017,
+      "WY": 2017
+    },
+    "never_treated_controls": [
+      "AK",
+      "CT",
+      "DC",
+      "DE",
+      "FL",
+      "HI",
+      "IN",
+      "MD",
+      "ME",
+      "MN",
+      "MS",
+      "MT",
+      "NC",
+      "NE",
+      "NJ",
+      "NM",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "PA",
+      "TN",
+      "UT",
+      "WA",
+      "WI",
+      "WV"
+    ],
+    "populations": {
+      "claimant_conditioned": {
+        "AZ": {
+          "adoption_year": 2022,
+          "pre_years": [
+            2017,
+            2018,
+            2019
+          ],
+          "post_years": [
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.016460800925142308,
+            "event_count": 1,
+            "weighted_event_count": 5801.609092777236,
+            "n": 63,
+            "weighted_population": 352449.9882576084
+          },
+          "state_post": {
+            "rate": 0.03550565268084992,
+            "event_count": 3,
+            "weighted_event_count": 15966.447735735908,
+            "n": 83,
+            "weighted_population": 449687.4872081273
+          },
+          "control_pre": {
+            "rate": 0.027053849741071046,
+            "event_count": 105,
+            "weighted_event_count": 544659.5395241984,
+            "n": 3206,
+            "weighted_population": 20132422.732330725
+          },
+          "control_post": {
+            "rate": 0.025415087895622305,
+            "event_count": 100,
+            "weighted_event_count": 502378.856743414,
+            "n": 3085,
+            "weighted_population": 19766953.347029254
+          },
+          "state_change_pp": 1.9044851755707608,
+          "control_change_pp": -0.16387618454487413,
+          "descriptive_contrast_pp": 2.068361360115635
+        },
+        "CA": {
+          "adoption_year": 2018,
+          "pre_years": [
+            2017
+          ],
+          "post_years": [
+            2018,
+            2019,
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.058099055398019545,
+            "event_count": 1,
+            "weighted_event_count": 28532.099281452625,
+            "n": 17,
+            "weighted_population": 491094.0304620721
+          },
+          "state_post": {
+            "rate": 0.05430319151214536,
+            "event_count": 8,
+            "weighted_event_count": 294442.84647775244,
+            "n": 149,
+            "weighted_population": 5422201.500107002
+          },
+          "control_pre": {
+            "rate": 0.03025159284891277,
+            "event_count": 38,
+            "weighted_event_count": 218612.5576659191,
+            "n": 1100,
+            "weighted_population": 7226480.891692152
+          },
+          "control_post": {
+            "rate": 0.02535514021158362,
+            "event_count": 167,
+            "weighted_event_count": 828425.8386016933,
+            "n": 5191,
+            "weighted_population": 32672895.18766782
+          },
+          "state_change_pp": -0.37958638858741833,
+          "control_change_pp": -0.48964526373291506,
+          "descriptive_contrast_pp": 0.11005887514549673
+        },
+        "KY": {
+          "adoption_year": 2024,
+          "pre_years": [
+            2017,
+            2018,
+            2019,
+            2022,
+            2023
+          ],
+          "post_years": [
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.007629805555357692,
+            "event_count": 1,
+            "weighted_event_count": 3720.8990491584673,
+            "n": 173,
+            "weighted_population": 487679.40705194394
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 42,
+            "weighted_population": 132771.99979909605
+          },
+          "control_pre": {
+            "rate": 0.026827777000832737,
+            "event_count": 165,
+            "weighted_event_count": 885040.3213215604,
+            "n": 5169,
+            "weighted_population": 32989700.238453925
+          },
+          "control_post": {
+            "rate": 0.02344510490448847,
+            "event_count": 40,
+            "weighted_event_count": 161998.074946052,
+            "n": 1122,
+            "weighted_population": 6909675.840906052
+          },
+          "state_change_pp": -0.7629805555357692,
+          "control_change_pp": -0.3382672096344266,
+          "descriptive_contrast_pp": -0.4247133459013426
+        },
+        "LA": {
+          "adoption_year": 2023,
+          "pre_years": [
+            2017,
+            2018,
+            2019,
+            2022
+          ],
+          "post_years": [
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 147,
+            "weighted_population": 844104.6343628496
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 82,
+            "weighted_population": 457975.1286436414
+          },
+          "control_pre": {
+            "rate": 0.025972089127038377,
+            "event_count": 135,
+            "weighted_event_count": 694262.4551410575,
+            "n": 4184,
+            "weighted_population": 26731097.82371307
+          },
+          "control_post": {
+            "rate": 0.02678983039983038,
+            "event_count": 70,
+            "weighted_event_count": 352775.94112655486,
+            "n": 2107,
+            "weighted_population": 13168278.255646905
+          },
+          "state_change_pp": 0.0,
+          "control_change_pp": 0.08177412727920046,
+          "descriptive_contrast_pp": -0.08177412727920046
+        },
+        "MI": {
+          "adoption_year": 2021,
+          "pre_years": [
+            2017,
+            2018,
+            2019
+          ],
+          "post_years": [
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 195,
+            "weighted_population": 1756858.9066622567
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 196,
+            "weighted_population": 2014816.7255233997
+          },
+          "control_pre": {
+            "rate": 0.027053849741071046,
+            "event_count": 105,
+            "weighted_event_count": 544659.5395241984,
+            "n": 3206,
+            "weighted_population": 20132422.732330725
+          },
+          "control_post": {
+            "rate": 0.025415087895622305,
+            "event_count": 100,
+            "weighted_event_count": 502378.856743414,
+            "n": 3085,
+            "weighted_population": 19766953.347029254
+          },
+          "state_change_pp": 0.0,
+          "control_change_pp": -0.16387618454487413,
+          "descriptive_contrast_pp": 0.16387618454487413
+        }
+      },
+      "all_elderly_disabled": {
+        "AZ": {
+          "adoption_year": 2022,
+          "pre_years": [
+            2017,
+            2018,
+            2019
+          ],
+          "post_years": [
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0047914593461949925,
+            "event_count": 4,
+            "weighted_event_count": 22797.464185883025,
+            "n": 851,
+            "weighted_population": 4757937.517300865
+          },
+          "state_post": {
+            "rate": 0.013102482264204834,
+            "event_count": 13,
+            "weighted_event_count": 74109.23410368824,
+            "n": 1015,
+            "weighted_population": 5656121.688189577
+          },
+          "control_pre": {
+            "rate": 0.006204612970388868,
+            "event_count": 196,
+            "weighted_event_count": 1106235.112454369,
+            "n": 32802,
+            "weighted_population": 178292363.71935004
+          },
+          "control_post": {
+            "rate": 0.008117713032859427,
+            "event_count": 235,
+            "weighted_event_count": 1525639.130259683,
+            "n": 32855,
+            "weighted_population": 187939524.849437
+          },
+          "state_change_pp": 0.8311022918009842,
+          "control_change_pp": 0.1913100062470559,
+          "descriptive_contrast_pp": 0.6397922855539282
+        },
+        "CA": {
+          "adoption_year": 2018,
+          "pre_years": [
+            2017
+          ],
+          "post_years": [
+            2018,
+            2019,
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.029548965799415534,
+            "event_count": 4,
+            "weighted_event_count": 116564.13864524293,
+            "n": 136,
+            "weighted_population": 3944778.9623672217
+          },
+          "state_post": {
+            "rate": 0.018474210302499846,
+            "event_count": 31,
+            "weighted_event_count": 1080083.1481061196,
+            "n": 1617,
+            "weighted_population": 58464374.41279791
+          },
+          "control_pre": {
+            "rate": 0.004726070140951779,
+            "event_count": 57,
+            "weighted_event_count": 289655.39174566616,
+            "n": 10841,
+            "weighted_population": 61288847.41590668
+          },
+          "control_post": {
+            "rate": 0.007680840468152005,
+            "event_count": 374,
+            "weighted_event_count": 2342218.8509683856,
+            "n": 54816,
+            "weighted_population": 304943041.1528803
+          },
+          "state_change_pp": -1.1074755496915687,
+          "control_change_pp": 0.2954770327200227,
+          "descriptive_contrast_pp": -1.4029525824115914
+        },
+        "KY": {
+          "adoption_year": 2024,
+          "pre_years": [
+            2017,
+            2018,
+            2019,
+            2022,
+            2023
+          ],
+          "post_years": [
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0004838440593560208,
+            "event_count": 1,
+            "weighted_event_count": 3720.8990491584673,
+            "n": 2642,
+            "weighted_population": 7690285.6968231695
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 519,
+            "weighted_population": 1637354.0437786542
+          },
+          "control_pre": {
+            "rate": 0.007258838562844953,
+            "event_count": 353,
+            "weighted_event_count": 2194333.764690209,
+            "n": 54361,
+            "weighted_population": 302298190.7769809
+          },
+          "control_post": {
+            "rate": 0.006843659809083002,
+            "event_count": 78,
+            "weighted_event_count": 437540.478023843,
+            "n": 11296,
+            "weighted_population": 63933697.791806236
+          },
+          "state_change_pp": -0.04838440593560208,
+          "control_change_pp": -0.041517875376195085,
+          "descriptive_contrast_pp": -0.006866530559406996
+        },
+        "LA": {
+          "adoption_year": 2023,
+          "pre_years": [
+            2017,
+            2018,
+            2019,
+            2022
+          ],
+          "post_years": [
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 1531,
+            "weighted_population": 8785605.294007428
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 834,
+            "weighted_population": 4670608.494415671
+          },
+          "control_pre": {
+            "rate": 0.006683685988322722,
+            "event_count": 274,
+            "weighted_event_count": 1606345.8251679046,
+            "n": 43298,
+            "weighted_population": 240338314.51303995
+          },
+          "control_post": {
+            "rate": 0.008145994942458552,
+            "event_count": 157,
+            "weighted_event_count": 1025528.4175461472,
+            "n": 22359,
+            "weighted_population": 125893574.0557471
+          },
+          "state_change_pp": 0.0,
+          "control_change_pp": 0.146230895413583,
+          "descriptive_contrast_pp": -0.146230895413583
+        },
+        "MI": {
+          "adoption_year": 2021,
+          "pre_years": [
+            2017,
+            2018,
+            2019
+          ],
+          "post_years": [
+            2022,
+            2023,
+            2024
+          ],
+          "state_pre": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 1343,
+            "weighted_population": 11962007.577129096
+          },
+          "state_post": {
+            "rate": 0.0,
+            "event_count": 0,
+            "weighted_event_count": 0.0,
+            "n": 1426,
+            "weighted_population": 14007989.74744528
+          },
+          "control_pre": {
+            "rate": 0.006204612970388868,
+            "event_count": 196,
+            "weighted_event_count": 1106235.112454369,
+            "n": 32802,
+            "weighted_population": 178292363.71935004
+          },
+          "control_post": {
+            "rate": 0.008117713032859427,
+            "event_count": 235,
+            "weighted_event_count": 1525639.130259683,
+            "n": 32855,
+            "weighted_population": 187939524.849437
+          },
+          "state_change_pp": 0.0,
+          "control_change_pp": 0.1913100062470559,
+          "descriptive_contrast_pp": -0.1913100062470559
+        }
+      }
+    }
+  },
+  "provenance": {
+    "packages": {
+      "numpy": "2.5.1",
+      "pandas": "2.3.3",
+      "pyreadstat": "1.3.5",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1"
+    },
+    "input_sha256": {
+      "qc_pub_fy2017.sav": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9",
+      "qc_pub_fy2018.sav": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82",
+      "qc_pub_fy2019.sav": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846",
+      "qc_pub_fy2022.sav": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
+      "qc_pub_fy2023.sav": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
+      "qc_pub_fy2024.sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
+      "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca"
+    },
+    "threshold_map": {
+      "2017": 38,
+      "2018": 37,
+      "2019": 37,
+      "2022": 48,
+      "2023": 54,
+      "2024": 56
+    },
+    "years_train": [
+      2017,
+      2018,
+      2019,
+      2022,
+      2023
+    ],
+    "year_test": 2024,
+    "random_state": 7,
+    "case_filter": "CASE == 1",
+    "official_error_label": "STATUS in {2,3} and AMTERR > fiscal-year threshold",
+    "signed_deviation": "RAWBEN - BENFIX",
+    "formula_benefit_feature": "FSBEN",
+    "medical_outcome": "official error and same-slot ELEMENTi == 365, E_FINDGi in {2,3,4}, AMOUNTi > 0, i=1..9",
+    "person_self_employment_slots_by_year": {
+      "2017": 16,
+      "2018": 16,
+      "2019": 16,
+      "2022": 16,
+      "2023": 17,
+      "2024": 18
+    },
+    "smd_registry": "/Users/maxghenis/.cache/axiom-oracles/snap_qc_repo/additional_data/standard_medical_deductions.csv"
+  }
 }

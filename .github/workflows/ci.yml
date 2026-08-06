@@ -8,5 +8,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv run --extra dev pytest -q
-      - run: uv run --extra dev ruff check snap_qc_sim tests
+      - run: uv run --frozen --extra dev --extra analysis pytest -q
+      - run: uv run --frozen --extra dev --extra analysis ruff check snap_qc_sim analysis tests
