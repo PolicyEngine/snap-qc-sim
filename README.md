@@ -80,6 +80,12 @@ FNS's published payment error rate tables.
 
 ## Roadmap
 
+The lever mechanism in v0.1 is an accounting bound. The v2 design —
+a case-level error model trained on policy-affected intermediate
+variables (documentation and verification burdens) that the rules engine
+recomputes under alternative policies — is specified in
+[docs/v2-error-model.md](docs/v2-error-model.md).
+
 - Caseload-based v2: state caseloads from calibrated survey microdata aged
   to FY 2026–28, benefits repriced under changed rules by
   [PolicyEngine](https://github.com/PolicyEngine/policyengine-us) /
