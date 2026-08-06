@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SNAP payment error simulator | PolicyEngine</title>
 <meta name="description" content="Simulate a state's SNAP payment error rate distribution, cost-share tier probabilities, and expected dollars under audit-volume and policy simplification choices.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SNAP payment error simulator | PolicyEngine">
+<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show the distribution of its measured payment error rate — and what audit volume and simplification options do to its FY 2028 cost-share bill.">
+<meta property="og:url" content="https://snap-qc-sim.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SNAP payment error simulator | PolicyEngine">
+<meta name="twitter:description" content="The distribution of each state's measured SNAP payment error rate, and what it means in cost-share dollars.">
+<link rel="icon" href="pe-logo-teal.svg" type="image/svg+xml">
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app.css">
 </head>
@@ -71,6 +79,25 @@
     <div id="tiers" class="chart" role="img" aria-label="Stacked probability bars of landing in each cost-share tier, baseline versus scenario"></div>
   </section>
 
+  <section class="chart-card" id="national">
+    <h2>All states at a glance</h2>
+    <p class="sub">Baseline simulation for every jurisdiction — official FY 2024 rate and sample size, no levers. Click a column to sort, a row to load that state above. <span id="nat-note"></span></p>
+    <div class="table-scroll">
+      <table id="nat-table" aria-label="Baseline simulation results for all jurisdictions">
+        <thead><tr>
+          <th scope="col"><button data-k="code">State</button></th>
+          <th scope="col" class="num"><button data-k="official">Official rate</button></th>
+          <th scope="col"><button data-k="tier">Point tier</button></th>
+          <th scope="col" class="num"><button data-k="pmis">P(different tier)</button></th>
+          <th scope="col" class="num"><button data-k="eShare">Expected cost / yr</button></th>
+          <th scope="col" class="num"><button data-k="sd">Bill std. dev.</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint" id="nat-takeaway"></p>
+  </section>
+
   <section class="fine">
     <details open>
       <summary>Method and caveats</summary>
@@ -79,6 +106,7 @@
         <li>Simplification options suppress the error contribution of the finding-element categories they standardize (medical 365, self-employment 312, utilities 364, resources 211–225) at the chosen effectiveness — a scenario dial, not a causal estimate; states adopt options endogenously.</li>
         <li>The underlying error process is held fixed: no behavioral response, and no corrective-feedback channel from auditing more cases.</li>
         <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
+        <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
         <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
       </ul>
     </details>
