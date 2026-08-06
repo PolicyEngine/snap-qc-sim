@@ -51,3 +51,28 @@ FY2022-23 unwinding turbulence, and post-adoption claimant composition.
 - Category-specific models (P(medical-element error)) rather than pooled.
 - This is the collaboration surface with the giannella/snap_qc modeling
   program: their machinery, these features, shared natural experiments.
+
+## Hurdle deviation model + calibration gate (v2a, 2026-08-06)
+
+Target reframed per design: D = assigned − true (RAWBEN − FSBEN), hurdle
+structure, true benefit as anchor and covariate. `hurdle_deviation_model.py`,
+metrics in `hurdle_results.json`.
+
+- Stage 1 P(any deviation): AUC 0.828 on the FY2024 holdout (42.8% of
+  training cases deviate — far more signal than the above-threshold error
+  label alone).
+- Stage 2 P(cross official threshold | deviate): AUC 0.742.
+- Stage 3 E[|D| | cross]: log-GBM with Duan smearing (factor 1.136);
+  predicted mean $179 vs observed $194 on the holdout.
+- State calibration (52 states, dollar-weighted rates): slope 1.00,
+  MAE 1.66pp, corr 0.535. State baseline factors: median 1.03,
+  IQR 0.85–1.19, max 2.47 (Alaska).
+
+Reading: household composition and burden features carry within-state
+gradients and about half of cross-state variance; the residual state
+factor is administration (Alaska, DC, Rhode Island under-predicted;
+Wisconsin over-predicted). The simulator therefore anchors baselines with
+the state factor — exactly the calibration philosophy used elsewhere in
+PolicyEngine — while the model carries counterfactual deltas, and the
+administration residual is the surface the audit-feedback and
+engine-replacement (π→0) levers act on.
