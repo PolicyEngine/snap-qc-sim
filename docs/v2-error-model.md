@@ -68,6 +68,41 @@ administrative ground truth.
   ships, so measured-rate distributions, tier probabilities, and
   cost-share dollars come out the other end unchanged in form.
 
+## The modeling target: assigned benefits, not errors
+
+(Reframe, 2026-08-06.) For policy counterfactuals the error cannot be the
+modeling target: an error is defined relative to a true benefit that the
+policy changes. The estimand is the ASSIGNED benefit — what the agency
+actually issues — modeled as a distribution conditional on the household
+and its intermediates; the rules engine computes the TRUE benefit under
+any policy; the error is their difference, and the measured rate is a
+threshold-crossing probability, P(|assigned − true| > the official
+threshold). Distributional models (quantile regression forests) rather
+than classifiers, because threshold crossings live in the tails.
+
+Two tiers:
+
+- **v2a — deviation model.** Learn D = assigned − true directly from the
+  QC file (RAWBEN − FSBEN per case) as a conditional distribution on
+  intermediates and covariates. Under policy P′: engine recomputes true′
+  and the intermediates; predict D′; assigned′ = true′ + D′. Fast, one
+  model, moderately portable.
+- **v2b — input-noise model (fully mechanistic).** Most deviations are
+  correct arithmetic on wrong inputs (86.9% of replayable error cases in
+  the Colorado AMTERR replay), so model the input-misreport process —
+  which inputs deviate, by how much, given documentation and verification
+  burdens — and run the engine twice per case (true inputs, noised
+  inputs). The ML surface shrinks to input noise; the engine carries all
+  policy geometry, including new thresholds and cliffs. Training pairs
+  (original vs corrected inputs per error case) already exist from the
+  giannella/snap_qc raw-value reconstruction. Computation-side errors (the
+  small engine-verified class) enter as a separate additive process.
+
+The rule-mining program this grew alongside solves a different problem —
+explainable review guidance for auditors — and its outputs are review
+lists, not predictions. The shared substrate is the features and the
+holdout discipline, not the product shape.
+
 ## Staging
 
 1. Feature extraction: per-case intermediates for the QC file via the
