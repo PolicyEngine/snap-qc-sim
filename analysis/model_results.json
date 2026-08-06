@@ -1,0 +1,8 @@
+{
+ "auc_covariates": 0.7397332558157839,
+ "auc_with_intermediates": 0.7632152644993502,
+ "pr_covariates": 0.34198544018709515,
+ "pr_with_intermediates": 0.35220887529542805,
+ "train_n": 217693,
+ "test_n": 44891
+}
