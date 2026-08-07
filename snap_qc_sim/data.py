@@ -81,16 +81,24 @@ def load_cases(
             state = FIPS.get((row.get("STATE") or "").strip())
             if state is None:
                 continue
+            # Official error-rate universe only (CASE == 1).
+            case_flag = _num(row.get("CASE"))
+            if case_flag is not None and case_flag != 1:
+                continue
             issued = _num(row.get("RAWBEN"))
             if issued is None:
                 continue
             weight = _num(row.get("HWGT")) or 0.0
-            correct = _num(row.get("FSBEN"))
+            # Zero-weight rows contribute nothing to weighted sums but would
+            # occupy bootstrap slots; drop them.
+            if weight <= 0:
+                continue
             amterr = _num(row.get("AMTERR")) or 0.0
+            # The official error definition: adjudicated status with the
+            # recorded error amount above the year's tolerance threshold.
             counted = (
                 (row.get("STATUS") or "").strip() in ("2", "3")
-                and correct is not None
-                and abs(issued - correct) > threshold
+                and amterr > threshold
             )
             elements = frozenset(
                 int(e)

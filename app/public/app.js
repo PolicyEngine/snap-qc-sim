@@ -245,7 +245,7 @@ function renderNatTable() {
   body.innerHTML = rows
     .map(
       (r) => `<tr data-code="${r.code}" class="${r.code === $("state").value ? "current" : ""}">
-      <td>${r.code}${r.verified ? ' <span class="vmark" title="Rules verified against every FY 2024 QC case">✓</span>' : ""}</td>
+      <td>${r.code}${r.verified ? ' <span class="vmark" title="Benefit computation verified against every replayable FY 2024 QC case">✓</span>' : ""}</td>
       <td class="num">${r.official.toFixed(2)}%</td>
       <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}</td>
       <td class="num">${(r.pmis * 100).toFixed(0)}%</td>
@@ -279,10 +279,9 @@ function readUrl() {
   if (p.get("eff")) $("eff").value = Math.min(100, Math.max(25, +p.get("eff") || 50));
   const levers = (p.get("levers") || "").split(",");
   for (const id of LEVER_IDS) $("lever-" + id).checked = levers.includes(id);
-  if (p.get("mode") === "model") {
-    MODE = "model";
-    document.querySelector('input[name="mode"][value="model"]').checked = true;
-  }
+  // Model mode is disabled pending the 2026-08-06 adversarial-review fixes
+  // (tail refit, state-level factors, dollar-rate validation); the URL param
+  // is ignored so shared links cannot reach the unvalidated mode.
 }
 
 function writeUrl() {
@@ -316,11 +315,16 @@ function prepModelState(code) {
   const n = st.n;
   const q = new Float64Array(n * 9);
   const minLog = Math.log(MODEL.deviation_tolerance);
+  // The export guarantees floored, monotone quantile vectors (enforced at
+  // predict time and re-validated at export). Assert rather than silently
+  // repair with a non-equivalent operator.
   for (let i = 0; i < n; i++) {
-    for (let k = 0; k < 9; k++) q[i * 9 + k] = Math.max(st.q[i][k], minLog);
-    for (let k = 1; k < 9; k++) {
-      const a = i * 9 + k;
-      if (q[a] < q[a - 1]) q[a] = q[a - 1];
+    for (let k = 0; k < 9; k++) {
+      const v = st.q[i][k];
+      if (v < minLog) throw new Error(`model_data ${code}[${i}][${k}] below floor`);
+      if (k > 0 && v < st.q[i][k - 1])
+        throw new Error(`model_data ${code}[${i}] not monotone at ${k}`);
+      q[i * 9 + k] = v;
     }
   }
   MODEL_PREP[code] = {
@@ -390,7 +394,7 @@ function setModeUi() {
   document.querySelector(".levers").classList.toggle("off", model);
   $("eff").closest(".control").classList.toggle("off", model);
   $("mode-hint").textContent = model
-    ? "Each draw samples cases and draws each case's error from its fitted distribution; level anchored to the official rate. Simplification options need engine-computed counterfactuals (in progress) and stay in observed mode."
+    ? "Each draw samples cases and draws each case's error from its fitted distribution; level anchored to the official rate. Simplification options need engine-computed counterfactuals (future work) and stay in observed mode."
     : "Resamples the state's observed FY 2024 QC error dollars.";
 }
 
@@ -413,7 +417,9 @@ function render() {
     };
     base = lift(raw);
     scen = extra ? lift(simulateModel(code, { extra })) : base;
-    issuance = MODEL.states[code].issuance;
+    // data.json's full-sample total is the design-consistent issuance
+    // estimate; the model roster drops rows with missing fields (MN −89).
+    issuance = st.issuance;
   } else {
     base = simulate(st, {});
     scen = simulate(st, { extra, levers, eff });
@@ -444,8 +450,8 @@ function render() {
   const cta = $("verify-cta");
   if (st.verified) {
     badge.hidden = false;
-    badge.textContent = `Rules verified: ${st.verified}/${st.verified} QC cases exact`;
-    cta.innerHTML = `This state's encoded SNAP rules are verified against all ${st.verified} of its FY 2024 QC reviews — every case and every computation stage exact. <a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · <a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a>`;
+    badge.textContent = `Benefit computation verified: ${st.verified} of ${st.n} FY 2024 QC cases exact`;
+    cta.innerHTML = `This state's encoded SNAP benefit computation is verified against its FY 2024 QC file — ${st.verified} of ${st.n} replayable reviews, each exact at every compared stage (gross income, standard and shelter deductions, net income, maximum allotment, benefit). QC-adjudicated deductions, utility allowances, and eligibility findings enter as inputs; excluded cases are enumerated program-structure classes. <a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · <a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a>`;
   } else {
     badge.hidden = true;
     cta.innerHTML = `Simulation for this state uses the public QC file only — its encoded rules are not yet independently verified. Seven states are (CO, NY, CA, AZ, GA, MD, TX). Interested in verification for your state? <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>`;
