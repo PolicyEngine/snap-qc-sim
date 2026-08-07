@@ -58,6 +58,9 @@ div.csl-indent {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-8ffd5f67044e5306d9846f29df41dda5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -136,7 +139,7 @@ than their official point rate implies.
 <meta name="citation_reference" content="citation_title=Administrative burden: Policymaking by other means;,citation_author=Pamela Herd;,citation_author=Donald P. Moynihan;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;">
 <meta name="citation_reference" content="citation_title=Errors and fraud in the supplemental nutrition assistance program (SNAP);,citation_author=Congressional Research Service;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_fulltext_html_url=https://www.congress.gov/crs-product/IF10860;">
 <meta name="citation_reference" content="citation_title=FNS handbook 310: SNAP quality control review handbook;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://www.fns.usda.gov/snap/fns-handbook-310;">
-<meta name="citation_reference" content="citation_title=False claims act settlements concerning bias in SNAP quality control processes (virginia, wisconsin, alaska, texas, louisiana, mississippi, florida, tennessee), cumulative recoveries exceeding $67 million;,citation_author=U.S. Department of Justice;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims;">
+<meta name="citation_reference" content="citation_title=False claims act settlements concerning bias in SNAP quality control processes (virginia, wisconsin, alaska, texas, louisiana, mississippi, florida, tennessee), cumulative recoveries exceeding $67 million;,citation_author=U.S. Department of Justice;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability;">
 <meta name="citation_reference" content="citation_title=Errors and fraud in the supplemental nutrition assistance program (SNAP);,citation_author=Congressional Research Service;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;,citation_fulltext_html_url=https://www.congress.gov/crs_external_products/R/PDF/R45147/R45147.4.pdf;">
 </head>
 
@@ -432,8 +435,18 @@ Table&nbsp;3: Fiscal 2024 state-level calibration of predicted official-error ra
 <section id="sec-simulate" class="level2">
 <h2 class="anchored" data-anchor-id="sec-simulate">Simulating measured rates under cost sharing</h2>
 <p>The public simulator resamples each state’s own sampled cases with replacement at the realized or a hypothetical sample size and recomputes the weighted error rate <span class="citation" data-cites="efron1979bootstrap">(<a href="#ref-efron1979bootstrap" role="doc-biblioref">Efron 1979</a>)</span>, centered on the official rate. The error definition is the official one — adjudicated status with the recorded amount above the threshold; an adversarial review found the deployed version initially gated on the banned benefit-difference definition, now corrected. Three findings, all on fiscal 2024 data, all inheriting the file’s truncation of ineligible-case error (which understates the variability shown) and an i.i.d. approximation to each state’s actual sampling design; the official rate’s federal re-review adjustment enters only as a fixed level. All figures quote the committed simulation artifact.</p>
-<p><strong>Tier assignment approaches a coin flip for boundary states</strong> (<strong>?@fig-co</strong>, <a href="#tbl-boundary" class="quarto-xref">Table&nbsp;4</a>). With no policy change at all, the probability that a fresh QC-style sample lands in a different cost-share tier than the official point rate implies is 46–50% for the five states nearest boundaries.</p>
-<p><img src="figures/co_measured_rate.svg" id="fig-co" class="img-fluid" alt="Colorado’s simulated measured-rate distribution (100,000 resampled QC-style measurements, official error definition, centered on the official 9.97% rate) against the cost-share tier bands. The state’s official rate sits 0.03 points below the 15%-share boundary; 52% of simulated measurements fall below it and 48% above. Generated by the committed paper/generate_figures.py (seed 11)."> The formula maps a point estimate to a tier with no adjustment for sampling uncertainty; near a boundary, tier assignment turns as much on the sampling draw as on the underlying rate. This is the accountability-measurement problem documented for school accountability ratings <span class="citation" data-cites="kane2002volatility">(<a href="#ref-kane2002volatility" role="doc-biblioref">Kane and Staiger 2002</a>)</span>, now carrying direct fiscal prices.</p>
+<p><strong>Tier assignment approaches a coin flip for boundary states</strong> (<a href="#fig-co" class="quarto-xref">Figure&nbsp;1</a>, <a href="#tbl-boundary" class="quarto-xref">Table&nbsp;4</a>). With no policy change at all, the probability that a fresh QC-style sample lands in a different cost-share tier than the official point rate implies is 46–50% for the five states nearest boundaries.</p>
+<div id="fig-co" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-co-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/co_measured_rate.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Colorado’s simulated measured-rate distribution (100,000 resampled QC-style measurements, official error definition, centered on the official 9.97% rate) against the cost-share tier bands. The state’s official rate sits 0.03 points below the 15%-share boundary; 52% of simulated measurements fall below it and 48% above. Generated by the committed paper/generate_figures.py (seed 11)."><img src="figures/co_measured_rate.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-co-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Colorado’s simulated measured-rate distribution (100,000 resampled QC-style measurements, official error definition, centered on the official 9.97% rate) against the cost-share tier bands. The state’s official rate sits 0.03 points below the 15%-share boundary; 52% of simulated measurements fall below it and 48% above. Generated by the committed <code>paper/generate_figures.py</code> (seed 11).
+</figcaption>
+</figure>
+</div>
+<p>The formula maps a point estimate to a tier with no adjustment for sampling uncertainty; near a boundary, tier assignment turns as much on the sampling draw as on the underlying rate. This is the accountability-measurement problem documented for school accountability ratings <span class="citation" data-cites="kane2002volatility">(<a href="#ref-kane2002volatility" role="doc-biblioref">Kane and Staiger 2002</a>)</span>, now carrying direct fiscal prices.</p>
 <div id="tbl-boundary" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -575,7 +588,7 @@ U.S. Department of Agriculture, Food and Nutrition Service. 2025a. <em>Supplemen
 U.S. Department of Agriculture, Food and Nutrition Service. 2025b. <em>Technical Documentation for the Fiscal Year 2024 Supplemental Nutrition Assistance Program Quality Control Database and the QC Minimodel</em>. <a href="https://snapqcdata.net/datafiles">https://snapqcdata.net/datafiles</a>.
 </div>
 <div id="ref-doj2021snapqc" class="csl-entry" role="listitem">
-U.S. Department of Justice. 2021. <em>False Claims Act Settlements Concerning Bias in SNAP Quality Control Processes (Virginia, Wisconsin, Alaska, Texas, Louisiana, Mississippi, Florida, Tennessee), Cumulative Recoveries Exceeding $67 Million</em>. <a href="https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims">https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims</a>.
+U.S. Department of Justice. 2021. <em>False Claims Act Settlements Concerning Bias in SNAP Quality Control Processes (Virginia, Wisconsin, Alaska, Texas, Louisiana, Mississippi, Florida, Tennessee), Cumulative Recoveries Exceeding $67 Million</em>. <a href="https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability">https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability</a>.
 </div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
@@ -985,6 +998,38 @@ U.S. Department of Justice. 2021. <em>False Claims Act Settlements Concerning Bi
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
