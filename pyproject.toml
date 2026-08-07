@@ -11,6 +11,7 @@ dependencies = ["numpy>=1.26,<3"]
 analysis = [
     "pandas>=2.2,<3",
     "pyreadstat>=1.2.8,<2",
+    "quantile-forest==1.4.1",
     "scikit-learn>=1.8,<1.9",
     "scipy>=1.17,<1.18",
 ]
