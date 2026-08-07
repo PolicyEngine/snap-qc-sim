@@ -101,15 +101,19 @@ The analysis pipeline, simulator, and this manuscript live in one public
 repository; a fact catalog maps every quantitative claim to a committed
 artifact (@sec-availability). Because the claims depend on it, the
 project's verification discipline applies to itself: the pipeline is
-deterministic (independent clean-room reruns reproduce all five
-analysis-pipeline artifacts byte-for-byte, and the headline simulation
-artifact was independently reproduced from the raw file to four
-decimals), and this revision incorporates three rounds of adversarial
-review — archived unedited in the repository — whose findings included
-two direction-of-effect errors in an earlier draft of this manuscript,
-a data-definition defect in the deployed simulator, and a validation
-claim that had gone stale against the corrected model pipeline, all
-corrected here.
+deterministic (independent clean-room reruns reproduce every
+analysis-pipeline artifact byte-for-byte, most recently on
+2026-08-07, and the headline simulation artifact was independently
+reproduced from the raw file to four decimals), and this revision
+incorporates three rounds of adversarial review — seventeen referee
+reports, archived unedited in the repository — whose findings included
+two direction-of-effect errors in an earlier draft of this manuscript
+and a data-definition defect in the deployed simulator. An author
+verification pass between the second and third rounds additionally
+caught validation claims that had gone stale when the model pipeline
+was refit after publication; the third round then found two further
+stale siblings from the same refit. All are corrected here, with the
+superseded figures preserved in the fact catalog.
 
 ## The QC system and the money attached to it {#sec-qc}
 
@@ -386,7 +390,8 @@ error.
 distribution of the signed deviation with a hurdle structure: a
 deviation probability $P(|D| > 0.5)$ and an above-threshold probability,
 each estimated by gradient boosting with nested out-of-fold isotonic
-calibration; a sign model (calibrated AUC 0.700); nine conditional
+calibration; a sign model (calibrated AUC 0.686 in the shipped frozen
+configuration); nine conditional
 quantiles of $\log|D|$ fitted by quantile-loss gradient boosting
 [@koenker1978quantile], made monotone per case by rearrangement
 [@chernozhukov2010rearrange]; and an exponential tail in logs beyond the
@@ -398,26 +403,38 @@ magnitude is $183 against $189 observed.
 adversarial statistical review of the first deployed model found the
 tail fitted at one depth but attached at another (overstating
 extreme-tail mass) and cross-state level gaps propagating into simulated
-spreads. The fix round — refitting the tail at its attachment depth (log
-scale 0.271), capping each case's magnitude at a physical maximum, and
-freezing fiscal-2023-fit state dollar factors — repaired those defects
-and made the remaining one starker: weighted quantile coverage on fiscal
-2024 deviators is within 3 points of nominal at only two of nine levels,
-all nine gaps negative (−0.2 to −7.4 points, worst at the 75th–90th
-percentiles). This is one-sided *under*-coverage — predicted quantiles
-sit too low, understating mid-to-upper magnitudes, coherent with the
-$183-versus-$189 comparison. An earlier version of this section
-described the pre-correction pipeline's coverage (seven of nine levels
-within 3 points), which the corrected pipeline no longer attains; the
-fact catalog records the change. A benchmark against a quantile
-regression forest on the identical protocol, with the decision rule
-fixed in the protocol code before results existed, indicates the failure
-is structural rather than an estimator artifact: the forest improves
-mean absolute coverage (4.10 against 4.38 points) but shifts
-under-coverage from the tail to the central levels with a worse maximum
-gap, degrades probability-integral-transform calibration, and loses the
-factor-adjusted state-calibration comparison (0.951 against 0.928
-points), so the gradient-boosted stack is retained. The deployed
+spreads. The fix round repaired both — refitting the tail at its
+attachment depth (log scale 0.271, from 0.467), capping each case's
+magnitude at a physical maximum, and freezing fiscal-2023-fit state
+dollar factors — and also moved the coverage evaluation to the
+configuration that actually ships: the frozen model trained through
+fiscal 2022 (62,984 training deviators, against the through-2023
+primary model's 79,919), with fiscal 2023 held out for factor
+fitting. That
+evaluation-frame change, not the three fixes — none of which enters the
+coverage computation, which compares observed log-magnitudes with the
+raw conditional quantiles — is what moved the coverage figures. An
+earlier version of this section reported the through-2023 primary
+model's coverage: within 3 points of nominal at seven of nine levels,
+gaps −0.3 to −3.5 points; the fact catalog's E3 row records the
+supersession. The shipped frozen configuration does not attain it:
+within 3 points at only two of nine levels, all nine gaps negative
+(−0.2 to −7.4 points, worst at the 75th–90th percentiles). This is
+one-sided *under*-coverage — predicted quantiles sit too low,
+understating mid-to-upper magnitudes, coherent with the
+$183-versus-$189 comparison. A benchmark against a quantile regression
+forest on the identical protocol, with the decision rule fixed in the
+protocol code before results existed, shows the failure is not specific
+to the gradient-boosted quantile stack: the forest improves mean
+absolute coverage (4.10 against 4.38 points) but shifts under-coverage
+from the tail to the central levels with a worse maximum gap, degrades
+probability-integral-transform calibration, and loses the
+factor-adjusted state dollar-rate comparison (0.951 against 0.928
+points — a different object from @tbl-validate's official-error-rate
+MAE), so the gradient-boosted stack is retained; causes the two
+estimators share — the feature set, the tree-ensemble family, the
+temporal gap from the frozen training window to fiscal 2024 — remain
+candidates. The deployed
 simulator serves this model in exactly one place — a
 standard-medical-deduction scenario whose flipped per-case parameters,
 paired-bootstrap intervals, and level gate ship in an export pinned to
@@ -562,22 +579,35 @@ structural: the certified parity chain never consumes Colorado's
 standard-medical-deduction rule, because QC editing bakes the deduction
 into the stored expense fields and the federal computation path
 reproduces every case exactly without it — a sharper instance of the
-Minimodel-canon scope point of @sec-oracle-scope. A simulation-only
+Minimodel-canon scope point of @sec-oracle-scope. (A separate
+raw-facts leg, reconstructing inputs rather than supplying the file's
+intermediates, agrees on 845 of 856 cases, its eleven divergences
+diagnosed to missing public TANF facts and one utility-allowance tier
+conflict; only the supplied-intermediates certified chain is exact.) A simulation-only
 composition adapter that binds the state rule into the federal path,
 validated by exact baseline invariance on all 856 cases, reprices the
 option's removal only as bounds, because the public file censors 46
 medical-expense records at exactly $165: between −$1.46 and $0 per
 case-month. The second is a sign disagreement: feeding the
-engine-recomputed intermediates through the error model implies a
-cost-share change of roughly −$1.6M to −$2.2M per year for removing
-the deduction (intervals spanning zero in two of three censoring
-variants), where the accounting-reverse bound for the same flip is
-+$7.1M. The two mechanisms answer different questions — one scales
-observed error dollars by finding category, the other predicts how
-re-adjudication risk shifts when the documentation feature flips — and
-their disagreement on a real case is the concrete argument for retiring
-accounting levers from the public simulator, which now serves only the
-model scenario. What remains open is breadth: engine legs for the
+engine-recomputed intermediates through the error model's direct
+crossing classifier, applied as a level shift, implies a cost-share
+change of −$1.55M to −$2.20M per year for removing the
+deduction. That figure is a range across the three censoring variants,
+not a confidence interval; the paired-bootstrap intervals are wider —
+the point variant's is [−$4.1M, +$0.3M] — and span zero in two of the
+three. The accounting-reverse bound for the same flip is +$7.1M, and
+the robust form of the disagreement survives the intervals: all three
+exclude it, with a maximum upper bound of +$0.6M. Neither sign is
+validated — the artifact itself warns that the fitted models implying
+lower error without the deduction is not evidence that documentation
+requirements reduce errors. The argument for retiring the accounting
+levers from the public simulator is accordingly not that the model is
+right but that the two mechanisms answer different questions — one is
+an upper-bound identity scaling observed error dollars by finding
+category, the other a model-implied association of re-adjudication
+risk with the flipped feature — and their divergence on a real case
+shows the substitution was never innocuous. The simulator now serves
+only the model scenario, level-gated and labeled as an association. What remains open is breadth: engine legs for the
 remaining options (self-employment is not identified from public data,
 which records net rather than gross income) and the other verified
 states, feeding the harness raw facts instead of file-derived
@@ -628,8 +658,8 @@ dataset showing that most measured error among eligible cases is
 information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
 assignment for boundary states. The modeling bar cannot be exact, and
-this paper went through eleven adversarial reviews, archived unedited
-in the repository, which found — among other things — two
+this paper went through three rounds of adversarial review, archived
+unedited in the repository, which found — among other things — two
 direction-of-effect errors and one wrong external figure in earlier
 drafts. The system this points toward is one in
 which the rules that compute benefits, the requirements they impose on
@@ -645,8 +675,9 @@ recorded in `.python-version` and each artifact's provenance block), the simulat
 simulation, decomposition, and certification artifacts under
 `paper/snapshot/` (including the complete per-case replay output, the
 layer-1 and layer-2 classification outputs, and the reconstruction
-scripts), the eleven
-adversarial review reports under `paper/reviews/`, the fact catalog
+scripts), the seventeen
+adversarial review reports and round-1 editorial synthesis under
+`paper/reviews/`, the fact catalog
 (`paper/FACTS.md`), and this manuscript. The verification harness and
 per-case suite reports are public in `TheAxiomFoundation/axiom-oracles`;
 the encodings in `TheAxiomFoundation/rulespec-us`; the engine in
@@ -660,8 +691,9 @@ commands are in the repository README.
 The author leads PolicyEngine, which builds the simulator described
 here, and contributed to the axiom-oracles verification harness and the
 rulespec-us encodings whose parity this paper reports. The adversarial
-review protocol — eleven independent reviews, archived unedited in the
-repository — is the mitigation offered for that entanglement.
+review protocol — seventeen independent reviews across three rounds,
+archived unedited in the repository — is the mitigation offered for
+that entanglement.
 
 ## Acknowledgments
 

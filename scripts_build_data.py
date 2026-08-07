@@ -1,6 +1,12 @@
-"""Build app/public/data.json: per-state case arrays for in-browser Monte Carlo."""
+"""Build app/public/data.json: per-state case arrays for in-browser Monte Carlo.
+
+Usage: python scripts_build_data.py [QC_CSV] [PER_PDF]
+Positional arguments default to the author's cache paths so existing
+invocations keep working; pass explicit paths to reproduce elsewhere.
+"""
 
 import json
+import sys
 from pathlib import Path
 
 from snap_qc_sim import LEVERS, load_cases, load_official_rates
@@ -10,8 +16,13 @@ PER = "/Users/maxghenis/.cache/axiom-oracles/snap-qc/snap-fy24QC-PER.pdf"
 VERIFIED = {"CO": 856, "NY": 847, "CA": 883, "AZ": 922, "GA": 945, "MD": 722, "TX": 906}
 LEVER_KEYS = ["smd", "ssed", "heat_and_eat", "bbce_resources"]
 
-cases_by_state = load_cases(QC)
-official = load_official_rates(PER)
+if len(sys.argv) > 3:
+    raise SystemExit("usage: python scripts_build_data.py [QC_CSV] [PER_PDF]")
+qc_path = sys.argv[1] if len(sys.argv) > 1 else QC
+per_path = sys.argv[2] if len(sys.argv) > 2 else PER
+
+cases_by_state = load_cases(qc_path)
+official = load_official_rates(per_path)
 out = {}
 for state, cases in sorted(cases_by_state.items()):
     if state not in official:

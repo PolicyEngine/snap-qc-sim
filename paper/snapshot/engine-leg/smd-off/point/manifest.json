@@ -1,0 +1,588 @@
+{
+  "artifact_class": "counterfactual simulation artifact — not an oracle report; produced on a certified pinned toolchain with a locally modified input bridge (raw-facts mode)",
+  "assumption_label": "point",
+  "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $57. This is the nearest whole dollar to the $57.4207276 conditional mean E[X | 0 < X <= $165] from an HWGT-weighted left-censored lognormal maximum-likelihood fit to the 46 censored Colorado records and the seven exact non-recoded Colorado excesses above $165 ($175, $200, $227, $314, $314, $360, $470; ln-dollar mu = 4.014722652 and sigma = 0.959967962). The engine therefore receives $92 in total medical expenses and, with Colorado's SMD set to $0, computes a $57 actual-excess medical deduction. This point estimate is a deterministic parametric imputation, not recovery of the censored actuals.",
+  "baseline_invariance_check": {
+    "adapter_jsonl_sha256_both_runs": [
+      "018be313b53bf4e2893ce60d5b15159c6a33dfdb6f6317a90b2d08fb5152e067",
+      "018be313b53bf4e2893ce60d5b15159c6a33dfdb6f6317a90b2d08fb5152e067"
+    ],
+    "branch_proof": {
+      "case_count": 46,
+      "condition": "the materialized SMD parameter is $165 and medical_excess == medical_deduction == $165, so strict medical_excess > standard is false and the positive SMD branch governs; adapter surface == $200 and federal deduction == $165",
+      "failure_count": 0,
+      "materialized_smd_standard_amount": 165
+    },
+    "byte_identical": true,
+    "case_count": 856,
+    "compared_fields": "benefit and every round-1 outputs member, keyed by case_id",
+    "composition_variant": {
+      "candidate_encoding_change": false,
+      "file": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+      "label": "simulation composition variant — not a candidate encoding change",
+      "materialized_file_sha256_after": "ae9eb431767c82ff8d2adc5af6be02846a2c904cedd260bc8eed258e6d78188c",
+      "materialized_file_sha256_before": "1aeb049a959ce990408ff793927162417b1677dbaa699156da6460c1ba9cea96",
+      "rule": "snap_total_medical_expenses",
+      "source_checkout_file_sha256": "abfc6da46483e403877f0a4de737e8da20733e3961a87b6c13ac0247019943bb",
+      "source_checkout_modified": false,
+      "structural_patch": {
+        "from": "total_medical_expenses",
+        "to": "if medical_deduction > 0:\n    medical_deduction + snap_medical_expense_threshold\nelse: 0"
+      }
+    },
+    "divergence_count": 0,
+    "engine_execution_count": 2,
+    "round_1_cases_jsonl": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/simulations/fy2024/us-co/baseline/cases.jsonl",
+    "round_1_cases_jsonl_sha256": "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5",
+    "status": "passed"
+  },
+  "candidate_encoding_change": false,
+  "case_count": 856,
+  "censoring_and_imputation": {
+    "censored": {
+      "HWGT": 187630.897622,
+      "case_count": 46,
+      "definition": "MED_DED_DEMO = 1 and public FSMEDEXP = $165",
+      "identified_total_medical_expense_support": {
+        "maximum": 200,
+        "minimum": 36
+      },
+      "identified_whole_dollar_excess_support": {
+        "maximum": 165,
+        "minimum": 1
+      }
+    },
+    "non_recoded_donors_above_standard": {
+      "HWGT": 27000.6344,
+      "case_count": 7,
+      "cases": [
+        {
+          "FSMEDEXP_excess_above_35": 175,
+          "HWGT": 4238.1997997,
+          "case_id": "2024-202404-33668"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 200,
+          "HWGT": 4378.9047195,
+          "case_id": "2024-202403-33654"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 227,
+          "HWGT": 3978.6021806,
+          "case_id": "2024-202407-33922"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 314,
+          "HWGT": 3531.4701856,
+          "case_id": "2024-202406-33863"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 314,
+          "HWGT": 2847.2959649,
+          "case_id": "2024-202407-33927"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 360,
+          "HWGT": 4316.5149567,
+          "case_id": "2024-202405-33756"
+        },
+        {
+          "FSMEDEXP_excess_above_35": 470,
+          "HWGT": 3709.6465929,
+          "case_id": "2024-202406-33829"
+        }
+      ],
+      "definition": "MED_DED_DEMO = 1 and public FSMEDEXP > $165",
+      "weighted_mean_excess_above_35": 289.660618
+    },
+    "point_imputation_fit": {
+      "conditional_mean_excess_above_35": 57.420728,
+      "distribution": "lognormal on positive pre-recode FSMEDEXP",
+      "fit_method": "HWGT-weighted maximum likelihood: seven exact density terms above $165 plus one left-censored probability term for the summed HWGT of the 46 cases with 0 < X <= $165",
+      "fitted_censored_share_among_positive_HWGT": 0.872174,
+      "fitted_mean_conditional_above_165": 295.37769,
+      "ln_dollar_mu": 4.014723,
+      "observed_censored_share_among_positive_HWGT": 0.8742,
+      "observed_donor_weighted_mean_above_165": 289.660618,
+      "rounded_point_excess_above_35": 57,
+      "sigma": 0.959968
+    },
+    "zero_medical_expense_case_count": 803
+  },
+  "certified_original_bridge_regression_guard": {
+    "comparison_cell_count": 5136,
+    "error_count": 0,
+    "match_count": 856,
+    "mismatch_cell_count": 0,
+    "mismatch_count": 0,
+    "original_bridge_sha256": "8e8eee114e6fce507effae7f08e55202fd4b5c17c7337f84e90e327b464abee1",
+    "status": "passed"
+  },
+  "changed_and_added_file_sha256": {
+    "axiom_oracles/bridges/simulation_driver.py": "31d5af8458fe64aba3693ae4c5746f17f8d77ab906f8e9d5422f5b71217b0878",
+    "materialized-simulation-variant/us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml": "ae9eb431767c82ff8d2adc5af6be02846a2c904cedd260bc8eed258e6d78188c",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.206.yaml": "34485b43cd50936ffe4fbeb09bd8f90ffac106694b91fb394aea2458161fa6e8",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.207.2.yaml": "48a5c480c9b1e12dbf4ddf5ed23f45fcafd66070a49f857ac74cd00777919151",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.207.3.yaml": "2a9ded5c9c76845879f3076f6958eff585577244fdbdfcb01d8409115c37dc17",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.305.2.yaml": "eb9a0afe85c76bf6f38603e96003fb7c5fc9c019524200740c5eb1fec9d296ae",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.401.1.yaml": "d8c502cbdc420acaf4d8cb4dc5540e77243259e2827e582bd05ba1e1e5517394",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.401.2.yaml": "e078346cb009c129ed00c730d51cc9da6df920b89308c855589bc5fa2bd0025f",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.401.yaml": "305d3af1498ec8248d49d11828723a6c76742d0c9832f8d9152770f4aede2ca0",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.407.1.yaml": "908bcc422eb419b8c79e590579dacb5d36c1349fd917478d8e63d8f74fce7e46",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.407.3.yaml": "58dd5c645252c39eeaaa2075384479af6f9dab941e44ecc2759eff8bc7b68a67",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.407.31.yaml": "d373620707c58558261814f99709c40b1d9c423c0df2b1202e96e1702ff92131",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.407.61.yaml": "03efcd78e4905cdf382b68a34975c97175636f7e97b99431dd0018f65e0f9763",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.408.2.yaml": "4117a54e621d393bdfd98d7919d47ae896551397a0a188703356e832077cc04e",
+    "materialized-simulation-variant/us-co/regulations/10-ccr-2506-1/4.408.yaml": "2da03ac3e36421501f90d938f62f56bdd39e871891f35eec192866971dc33b68",
+    "materialized-simulation-variant/us/regulations/7-cfr/273/10.yaml": "b30b75666b34a4c625c480b6a243340c40994e37d5cc9334142c9fd3723ddf78",
+    "materialized-simulation-variant/us/regulations/7-cfr/273/8.yaml": "2eb57902785375c837abb8d7a1b7326c20926b1cedd93463c64bbc0ca8981aee",
+    "materialized-simulation-variant/us/regulations/7-cfr/273/9.yaml": "9ce1454e8d41621559d88ac8bff912e7fcf6618a54c9c48feb9de621de2baf36",
+    "materialized-simulation-variant/us/statutes/7/2017/a.yaml": "772f90b2817a0c5f421d90288cf2e76b490fccf06b4c4ce7731350eb9de61da9",
+    "simulations/fy2024/us-co/smd-off/point/cases.jsonl": "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1"
+  },
+  "compiled_artifact_sha256": "5b5d796681554746e07d22add35b457a26ea99efab186c35eb21809a5b54e29c",
+  "composition_variant": "simulation composition variant — not a candidate encoding change",
+  "counterfactual_parameter": {
+    "file": "us-co/regulations/10-ccr-2506-1/4.407.61.yaml",
+    "materialized_formula": 0,
+    "rule": "snap_state_sme_flat_amount",
+    "sha256": "03efcd78e4905cdf382b68a34975c97175636f7e97b99431dd0018f65e0f9763"
+  },
+  "determinism": {
+    "byte_identical": true,
+    "engine_execution_count": 2,
+    "fixed_order": "YRMONTH ascending, then case_id ascending",
+    "jsonl_sha256_both_runs": [
+      "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1",
+      "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1"
+    ],
+    "manifest_serialization_count": 2,
+    "serialization": "UTF-8; LF; terminal newline; sorted keys; compact JSONL"
+  },
+  "diagnostics": {
+    "benefit_delta_distribution_smd_off_minus_smd_on": [
+      {
+        "HWGT": 43467.959464,
+        "case_count": 10,
+        "delta": -49
+      },
+      {
+        "HWGT": 12044.355254,
+        "case_count": 3,
+        "delta": -48
+      },
+      {
+        "HWGT": 4098.699947,
+        "case_count": 1,
+        "delta": -47
+      },
+      {
+        "HWGT": 4500.536956,
+        "case_count": 1,
+        "delta": -41
+      },
+      {
+        "HWGT": 3440.388941,
+        "case_count": 1,
+        "delta": -35
+      },
+      {
+        "HWGT": 5052.002671,
+        "case_count": 1,
+        "delta": -34
+      },
+      {
+        "HWGT": 1760.505416,
+        "case_count": 1,
+        "delta": -33
+      },
+      {
+        "HWGT": 8013.621289,
+        "case_count": 2,
+        "delta": -32
+      },
+      {
+        "HWGT": 3845.991838,
+        "case_count": 1,
+        "delta": -5
+      },
+      {
+        "HWGT": 3577130.94744,
+        "case_count": 835,
+        "delta": 0
+      }
+    ],
+    "cases_with_changed_medical_deduction": 46,
+    "censored_case_contribution": {
+      "HWGT": 187630.897622,
+      "benefit_delta_distribution": [
+        {
+          "HWGT": 43467.959464,
+          "case_count": 10,
+          "delta": -49
+        },
+        {
+          "HWGT": 12044.355254,
+          "case_count": 3,
+          "delta": -48
+        },
+        {
+          "HWGT": 4098.699947,
+          "case_count": 1,
+          "delta": -47
+        },
+        {
+          "HWGT": 4500.536956,
+          "case_count": 1,
+          "delta": -41
+        },
+        {
+          "HWGT": 3440.388941,
+          "case_count": 1,
+          "delta": -35
+        },
+        {
+          "HWGT": 5052.002671,
+          "case_count": 1,
+          "delta": -34
+        },
+        {
+          "HWGT": 1760.505416,
+          "case_count": 1,
+          "delta": -33
+        },
+        {
+          "HWGT": 8013.621289,
+          "case_count": 2,
+          "delta": -32
+        },
+        {
+          "HWGT": 3845.991838,
+          "case_count": 1,
+          "delta": -5
+        },
+        {
+          "HWGT": 101406.835845,
+          "case_count": 25,
+          "delta": 0
+        }
+      ],
+      "case_count": 46,
+      "changed_medical_deduction_HWGT": 187630.897622,
+      "changed_medical_deduction_case_count": 46,
+      "overall_weighted_mean_benefit_change_contribution": -1.013051,
+      "subgroup_weighted_mean_benefit_change": -19.779068,
+      "weighted_sum_benefit_change": -3711164.201581
+    },
+    "changed_medical_deduction_HWGT": 187630.897622,
+    "delta_direction": "SMD-off minus adapter/SMD-on baseline",
+    "medical_deduction_delta_distribution_smd_off_minus_smd_on": [
+      {
+        "HWGT": 187630.897622,
+        "case_count": 46,
+        "delta": -108
+      },
+      {
+        "HWGT": 3475724.111595,
+        "case_count": 810,
+        "delta": 0
+      }
+    ],
+    "noncensored_case_contribution": {
+      "HWGT": 3475724.111595,
+      "benefit_delta_distribution": [
+        {
+          "HWGT": 3475724.111595,
+          "case_count": 810,
+          "delta": 0
+        }
+      ],
+      "case_count": 810,
+      "changed_medical_deduction_HWGT": 0,
+      "changed_medical_deduction_case_count": 0,
+      "overall_weighted_mean_benefit_change_contribution": 0,
+      "subgroup_weighted_mean_benefit_change": 0,
+      "weighted_sum_benefit_change": 0
+    },
+    "total_HWGT": 3663355.009217,
+    "weighted_mean_benefit_change": -1.013051,
+    "weighted_sum_benefit_change": -3711164.201581
+  },
+  "driver_file_sha256": {
+    "axiom_oracles/bridges/simulation_driver.py": "31d5af8458fe64aba3693ae4c5746f17f8d77ab906f8e9d5422f5b71217b0878"
+  },
+  "exclusions": {
+    "by_reason": {},
+    "total_excluded": 0,
+    "total_loaded": 856
+  },
+  "fiscal_year": 2024,
+  "jurisdiction": "us-co",
+  "nominal_engine_period": "2026-01",
+  "output_file": {
+    "name": "cases.jsonl",
+    "row_count": 856,
+    "sha256": "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1"
+  },
+  "overlay": {
+    "materialization": {
+      "file_sha256": {
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml": "ae9eb431767c82ff8d2adc5af6be02846a2c904cedd260bc8eed258e6d78188c",
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml": "34485b43cd50936ffe4fbeb09bd8f90ffac106694b91fb394aea2458161fa6e8",
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml": "48a5c480c9b1e12dbf4ddf5ed23f45fcafd66070a49f857ac74cd00777919151",
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml": "2a9ded5c9c76845879f3076f6958eff585577244fdbdfcb01d8409115c37dc17",
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml": "eb9a0afe85c76bf6f38603e96003fb7c5fc9c019524200740c5eb1fec9d296ae",
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml": "d8c502cbdc420acaf4d8cb4dc5540e77243259e2827e582bd05ba1e1e5517394",
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml": "e078346cb009c129ed00c730d51cc9da6df920b89308c855589bc5fa2bd0025f",
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml": "305d3af1498ec8248d49d11828723a6c76742d0c9832f8d9152770f4aede2ca0",
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml": "908bcc422eb419b8c79e590579dacb5d36c1349fd917478d8e63d8f74fce7e46",
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml": "58dd5c645252c39eeaaa2075384479af6f9dab941e44ecc2759eff8bc7b68a67",
+        "us-co/regulations/10-ccr-2506-1/4.407.31.yaml": "d373620707c58558261814f99709c40b1d9c423c0df2b1202e96e1702ff92131",
+        "us-co/regulations/10-ccr-2506-1/4.407.61.yaml": "03efcd78e4905cdf382b68a34975c97175636f7e97b99431dd0018f65e0f9763",
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml": "4117a54e621d393bdfd98d7919d47ae896551397a0a188703356e832077cc04e",
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml": "2da03ac3e36421501f90d938f62f56bdd39e871891f35eec192866971dc33b68",
+        "us/regulations/7-cfr/273/10.yaml": "b30b75666b34a4c625c480b6a243340c40994e37d5cc9334142c9fd3723ddf78",
+        "us/regulations/7-cfr/273/8.yaml": "2eb57902785375c837abb8d7a1b7326c20926b1cedd93463c64bbc0ca8981aee",
+        "us/regulations/7-cfr/273/9.yaml": "9ce1454e8d41621559d88ac8bff912e7fcf6618a54c9c48feb9de621de2baf36",
+        "us/statutes/7/2017/a.yaml": "772f90b2817a0c5f421d90288cf2e76b490fccf06b4c4ce7731350eb9de61da9"
+      },
+      "module_id_rewrites": {
+        "us:policies/usda/snap/fy-2026-cola/deductions": "us:policies/usda/snap/fy-2024-cola/deductions",
+        "us:policies/usda/snap/fy-2026-cola/income-eligibility-standards": "us:policies/usda/snap/fy-2024-cola/income-eligibility-standards",
+        "us:policies/usda/snap/fy-2026-cola/maximum-allotments": "us:policies/usda/snap/fy-2024-cola/maximum-allotments"
+      },
+      "overlay": "us-co-snap-fy2024-smd-off-composition-variant",
+      "patches": [
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "594",
+          "rule": "colorado_snap_heating_cooling_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "560"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "377",
+          "rule": "colorado_snap_basic_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "356"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "71",
+          "rule": "colorado_snap_one_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "67"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "97",
+          "rule": "colorado_snap_telephone_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "91"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.61.yaml",
+          "from": "165",
+          "rule": "snap_state_sme_flat_amount",
+          "source": "approved counterfactual semantics: SMD off while actual-expense medical deduction remains",
+          "to": "0"
+        }
+      ],
+      "program": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+      "rewrite_counts": {
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml": 4,
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml": 2,
+        "us/regulations/7-cfr/273/10.yaml": 5,
+        "us/regulations/7-cfr/273/8.yaml": 1,
+        "us/regulations/7-cfr/273/9.yaml": 1,
+        "us/statutes/7/2017/a.yaml": 3
+      },
+      "rulespec_root": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/rulespec-us",
+      "schema": "axiom_oracles.rulespec_overlay.v1",
+      "simulation_composition_variant": {
+        "candidate_encoding_change": false,
+        "file": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+        "label": "simulation composition variant — not a candidate encoding change",
+        "materialized_file_sha256_after": "ae9eb431767c82ff8d2adc5af6be02846a2c904cedd260bc8eed258e6d78188c",
+        "materialized_file_sha256_before": "1aeb049a959ce990408ff793927162417b1677dbaa699156da6460c1ba9cea96",
+        "rule": "snap_total_medical_expenses",
+        "source_checkout_file_sha256": "abfc6da46483e403877f0a4de737e8da20733e3961a87b6c13ac0247019943bb",
+        "source_checkout_modified": false,
+        "structural_patch": {
+          "from": "total_medical_expenses",
+          "to": "if medical_deduction > 0:\n    medical_deduction + snap_medical_expense_threshold\nelse: 0"
+        }
+      }
+    },
+    "spec": {
+      "module_id_rewrites": {
+        "us:policies/usda/snap/fy-2026-cola/deductions": "us:policies/usda/snap/fy-2024-cola/deductions",
+        "us:policies/usda/snap/fy-2026-cola/income-eligibility-standards": "us:policies/usda/snap/fy-2024-cola/income-eligibility-standards",
+        "us:policies/usda/snap/fy-2026-cola/maximum-allotments": "us:policies/usda/snap/fy-2024-cola/maximum-allotments"
+      },
+      "name": "us-co-snap-fy2024-smd-off-composition-variant",
+      "notes": "Compile-time overlay that replays the Colorado SNAP benefit composition against fiscal year 2024 federal parameters. The rulespec-us monorepo ships the composition wired to the FY 2026 cost-of-living (COLA) parameter set, so this overlay rewrites the three USDA cola module ids (fy-2026-cola -> fy-2024-cola) across the composition and every module that imports them, then patches the four Colorado standard-utility-allowance amounts down to their FY 2024 values. The overlay is materialized as a single self-contained rulespec root (a real copy of the us and us-co prefix trees with the rewrites and patches applied) and compiled with that root alone: the engine unions module ids across repo roots rather than shadowing, so a sparse overlay fronting the monorepo would compile both cola vintages and abort with a duplicate-rule error. This is a stopgap: once TheAxiomFoundation/rulespec-us#759 lands the parameter-set inversion (a program selects its cola set by period rather than by hardcoded module id), the fiscal year becomes a run-time choice and this overlay retires. The copy-then-patch discipline follows the EUROMOD platform patcher precedent in axiom_oracles/adapters/euromod/_runner.py, which patches policy switches and DefConst values into a copy of the model tree because the source model must never be mutated in place. Simulation-only SMD-off scalar patch, executed only with the materialized Colorado medical composition adapter; this is not a candidate encoding change.",
+      "parameter_patches": [
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "594",
+          "rule": "colorado_snap_heating_cooling_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "560"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "377",
+          "rule": "colorado_snap_basic_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "356"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "71",
+          "rule": "colorado_snap_one_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "67"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "97",
+          "rule": "colorado_snap_telephone_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "91"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.61.yaml",
+          "from_value": "165",
+          "rule": "snap_state_sme_flat_amount",
+          "source": "approved counterfactual semantics: SMD off while actual-expense medical deduction remains",
+          "to_value": "0"
+        }
+      ],
+      "program": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+      "rewrite_files": [
+        "us/statutes/7/2017/a.yaml",
+        "us/regulations/7-cfr/273/8.yaml",
+        "us/regulations/7-cfr/273/9.yaml",
+        "us/regulations/7-cfr/273/10.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml",
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml"
+      ]
+    },
+    "spec_file": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/axiom-oracles/axiom_oracles/bridges/overlays/us-co-snap-fy2024.yaml",
+    "spec_file_sha256": "0590adf05d940dacf36120db178333dd2275b15fc0d86a7a778ce92f515cb617"
+  },
+  "pins": {
+    "engine": {
+      "binary": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/cargo-target/release/axiom-rules-engine",
+      "binary_sha256": "bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee",
+      "commit": "de0efdc73b469132ee268e1c832e8f7148b91431"
+    },
+    "harness": {
+      "commit": "d30566266932dbd0b6f62e69dcea8ca3c8801690",
+      "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/axiom-oracles"
+    },
+    "qc_csv": {
+      "path": "/Users/maxghenis/.cache/axiom-oracles/snap-qc/qc_pub_fy2024.csv",
+      "sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9"
+    },
+    "rulespec": {
+      "commit": "b53ce208771085030939db4b9691762506b6bca2",
+      "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/rulespec-us"
+    }
+  },
+  "queried_outputs": {
+    "categorical_resource_exemption": "us-co:regulations/10-ccr-2506-1/4.408#snap_categorically_eligible_for_resource_exemption",
+    "child_support_deduction": "us-co:regulations/10-ccr-2506-1/4.407.5#child_support_deduction",
+    "co_expanded_categorical_gross_income_limit": "us-co:regulations/10-ccr-2506-1/4.401.1#co_snap_expanded_categorical_gross_income_limit",
+    "dependent_care_deduction": "us-co:regulations/10-ccr-2506-1/4.407.4#dependent_care_deduction",
+    "federal_medical_deduction": "us:regulations/7-cfr/273/10#snap_excess_medical_deduction_for_net_income",
+    "federal_medical_surface": "us-co:policies/cdhs/snap/fy-2026-benefit-calculation#snap_total_medical_expenses",
+    "medical_deduction": "us-co:regulations/10-ccr-2506-1/4.407.61#medical_deduction",
+    "medical_excess": "us-co:regulations/10-ccr-2506-1/4.407.6#medical_excess",
+    "passes_gross_income_test": "us-co:regulations/10-ccr-2506-1/4.401#passes_gross_income_test",
+    "snap_basic_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_basic_utility_allowance_eligible",
+    "snap_countable_financial_resources": "us-co:regulations/10-ccr-2506-1/4.408#snap_countable_financial_resources",
+    "snap_eligible": "us-co:policies/cdhs/snap/fy-2026-benefit-calculation#snap_eligible",
+    "snap_excess_shelter_deduction": "us:regulations/7-cfr/273/10#snap_excess_shelter_deduction_for_net_income",
+    "snap_financial_resources_within_limit": "us:regulations/7-cfr/273/8#snap_financial_resources_within_limit",
+    "snap_gross_monthly_income": "us:regulations/7-cfr/273/10#snap_total_gross_income",
+    "snap_heating_cooling_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_heating_cooling_utility_allowance_eligible",
+    "snap_income_eligible": "us-co:regulations/10-ccr-2506-1/4.401#snap_income_eligible",
+    "snap_individual_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_individual_utility_allowance",
+    "snap_limited_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_limited_utility_allowance",
+    "snap_maximum_allotment": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+    "snap_net_income": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+    "snap_one_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_one_utility_allowance",
+    "snap_one_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_one_utility_allowance_eligible",
+    "snap_regular_month_allotment": "us-co:regulations/10-ccr-2506-1/4.207.2#snap_allotment",
+    "snap_resource_eligible": "us:regulations/7-cfr/273/8#snap_resource_eligible",
+    "snap_resource_limit_categorical_exemption_applies": "us:regulations/7-cfr/273/8#snap_resource_limit_categorical_exemption_applies",
+    "snap_standard_deduction": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+    "snap_standard_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_standard_utility_allowance",
+    "snap_telephone_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_telephone_allowance_eligible"
+  },
+  "scenario": "smd-off-point",
+  "scenario_definition": "Materialized simulation composition adapter plus Colorado's $165 standard medical deduction set to $0; actual-excess path governs, with the labeled bounded assumption applied only to the 46 censored cases.",
+  "scenario_fingerprint": "50f70c91749ce2f0e5b971bb910f74e76a112e6214aa3a3964e0507c45e39fcc",
+  "scenario_fingerprint_inputs": {
+    "adapter_file_sha256": "ae9eb431767c82ff8d2adc5af6be02846a2c904cedd260bc8eed258e6d78188c",
+    "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $57. This is the nearest whole dollar to the $57.4207276 conditional mean E[X | 0 < X <= $165] from an HWGT-weighted left-censored lognormal maximum-likelihood fit to the 46 censored Colorado records and the seven exact non-recoded Colorado excesses above $165 ($175, $200, $227, $314, $314, $360, $470; ln-dollar mu = 4.014722652 and sigma = 0.959967962). The engine therefore receives $92 in total medical expenses and, with Colorado's SMD set to $0, computes a $57 actual-excess medical deduction. This point estimate is a deterministic parametric imputation, not recovery of the censored actuals.",
+    "compiled_artifact_sha256": "5b5d796681554746e07d22add35b457a26ea99efab186c35eb21809a5b54e29c",
+    "driver_file_sha256": {
+      "axiom_oracles/bridges/simulation_driver.py": "31d5af8458fe64aba3693ae4c5746f17f8d77ab906f8e9d5422f5b71217b0878"
+    },
+    "qc_csv_sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9",
+    "round_1_baseline_sha256": "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5",
+    "scenario": "point",
+    "smd_parameter_file_sha256": "03efcd78e4905cdf382b68a34975c97175636f7e97b99431dd0018f65e0f9763"
+  },
+  "schema": "axiom.snap_qc_simulation_manifest.v1",
+  "source_documents": {
+    "fy2024_snap_qc_technical_documentation": {
+      "path": "/Users/maxghenis/.cache/axiom-oracles/snap-qc/FY-2024-Tech-Doc.pdf",
+      "sha256": "59b6999d1b9e51ebe920e00899d9aab066d69f1227ea83b0a3e9f16fd8137e33"
+    }
+  },
+  "status": "complete_bounded_sensitivity_run",
+  "wall_times_note": "Measured on the first complete generation for this exact scenario fingerprint and retained on later full regenerations so cases and manifest remain byte-identical.",
+  "wall_times_seconds": {
+    "adapter_smd_off_overlay_materialization": 0.733257,
+    "adapter_smd_off_program_compile": 0.42765,
+    "adapter_smd_on_case_mapping": 0.630546,
+    "adapter_smd_on_engine_executions": [
+      0.81568,
+      0.832179
+    ],
+    "adapter_smd_on_overlay_materialization": 0.577046,
+    "adapter_smd_on_program_compile": 0.519939,
+    "certified_regression_guard": 4.993857,
+    "qc_load": 1.437101,
+    "scenario_case_mapping": 0.624894,
+    "scenario_engine_executions": [
+      0.842753,
+      0.886313
+    ]
+  }
+}
