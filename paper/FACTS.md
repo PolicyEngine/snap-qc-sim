@@ -21,7 +21,7 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 |---|---|---|
 | B1 | SNAP QC public-use files FY2017–19, 2022–24; FY2024 has 44,891 records, 44,800 in the CASE==1 official universe across 53 jurisdictions | snapqcdata.net; analysis/FINDINGS.md |
 | B2 | Weighted official-error prevalence: 10.62% train years, 13.39% FY2024 | analysis/FINDINGS.md; model_results.json |
-| B3 | |RAWBEN−BENFIX| equals AMTERR for 99.997% of FY2024 weighted cases; |RAWBEN−FSBEN| only 83.65% — BENFIX (allotment adjusted for errors) is the deviation anchor; FSBEN is the full formula benefit | hurdle_results.json target_concordance; independently verified 2026-08-06 |
+| B3 | |RAWBEN−BENFIX| equals AMTERR for 99.997% of FY2024 weighted cases; |RAWBEN−FSBEN| only 83.64% — BENFIX (allotment adjusted for errors) is the deviation anchor; FSBEN is the full formula benefit | hurdle_results.json target_concordance (0.836447); independently verified 2026-08-06 |
 | B4 | HWGT weights sum to annual case-months; weight × monthly dollars = annual dollars | FY2024 technical documentation |
 
 ## C. Verification oracle (external artifacts: TheAxiomFoundation/axiom-oracles)
@@ -44,19 +44,19 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 | D3 | Finding-nature classification: pure-math 3.3%, input-with-system-cause 6.6%, mixed 4.2%, other input 86.0% of error dollars | paper/snapshot/labs/phase_a_classification.json |
 | D4 | Replay: reconstructing pre-edit original values (public $3-shift solver, FY2024 adaptation) and replaying through the verified engine explains 246/283 filtered error cases (86.9%) as correct arithmetic on wrong facts; solver and engine partition the 283 cases identically; 37 cases form the computation-side upper bound | paper/snapshot/labs/amterr/amterr_replay_results.json (283 per-case rows) + reconstruct_co_fy2024.R + amterr_replay.py |
 
-## E. Error models (corrected pipeline, PRs #7–#8 only)
+## E. Error models (corrected pipeline: PRs #7–#8 as refit by #13)
 
 | # | Fact | Source |
 |---|---|---|
 | E1 | Official-error classifier, FY2024 weighted: ROC AUC 0.7609 (covariates + formula anchor) → 0.7666 (+ burden intermediates), +0.0057; PR-AUC +0.0030; precision at a 5% weighted review budget 47.6% → 47.8% | model_results.json; FINDINGS.md |
 | E2 | Hurdle: stage-1 P(deviate) AUC 0.8356; stage-2 P(cross | deviate) 0.7233; OOF Duan smear 1.1725; predicted vs observed conditional magnitude $183 vs $189 | hurdle_results.json |
-| E3 | Distributional model: nine conditional quantiles of log|D|, per-case monotone, exponential-in-logs tail (scale 0.4674) fitted on top-decile OOF residuals; weighted FY2024 quantile coverage within 3pp at 7 of 9 levels; ALL NINE gaps negative (under-coverage; q.75 −3.5pp, q.90 −3.3pp — the model UNDERSTATES mid-upper magnitudes) | distributional_results.json; FINDINGS.md |
-| E4 | Sign model P(D>0 | deviate) calibrated AUC 0.6996 | distributional_results.json |
-| E5 | State calibration, FY2024. Primary-model unfactored: equal-jurisdiction MAE 1.83pp (slope 0.954), issuance-weighted 1.45pp (slope 0.769); matched FROZEN-model unfactored: 1.81pp / 1.65pp (the manuscript quotes the matched frozen pair). With factors fit on out-of-sample FY2023 (train ≤ FY2022, empirical-Bayes shrinkage, frozen): equal 0.885pp, issuance-weighted 0.785pp, corr 0.906 | hurdle_results.json state_calibration |
-| E6 | Model-vs-bootstrap simulated measured rate (official-centering convention): the model's raw level underpredicts high-error states (NY model mean 11.02% vs bootstrap 14.10%; CO 8.62 vs 9.98) — any app use must anchor levels and disclose per-state gaps (model mode currently disabled pending review fixes) | distributional_results.json simulation_validation; FINDINGS.md |
+| E3 | Distributional model (post-#13 refit): nine conditional quantiles of log|D|, per-case monotone; exponential-in-logs tail refit at its q99 attachment depth, scale 0.2713; per-case physical caps at max(BENMAX, observed |D|). Weighted FY2024 quantile coverage within 3pp at only TWO of nine levels; ALL NINE gaps negative, −0.25 to −7.44pp (worst q.75 −6.89, q.90 −7.44 — the model UNDERSTATES mid-upper magnitudes). SUPERSEDES the pre-#13 claim "within 3pp at 7 of 9, tail 0.4674" that an earlier revision of this catalog and manuscript carried. CHANNEL (verified in the PR #13 code diff): the pre-#13 pipeline computed coverage on the through-FY2023 PRIMARY model (`weighted_quantile_coverage(predicted_2024)`); #13 evaluates the shipped frozen-through-FY2022 configuration (`weighted_quantile_coverage(frozen_2024)`, FY2023 held out for factor fitting). None of the three #13 fixes (tail, caps, factors) enters the coverage computation, which compares observed log-magnitudes with raw conditional quantiles | distributional_results.json (coverage_flags_over_3pp = 7); FINDINGS.md; PR #13 diff of analysis/distributional_deviation_model.py; round-3 methodology review |
+| E4 | Sign model P(D>0 | deviate), shipped frozen configuration: calibrated AUC 0.6861 on FY2024 deviators (raw 0.6862; training OOF 0.6659). SUPERSEDES 0.6996, the pre-#13 primary-model value this row carried until revision 3 (same staleness event as E3; caught by round-3 round-diff) | distributional_results.json sign.fy2024_among_deviators |
+| E5 | State calibration, FY2024. Primary-model unfactored: equal-jurisdiction MAE 1.83pp (slope 0.954), issuance-weighted 1.45pp (slope 0.769); matched FROZEN-model unfactored: 1.81pp / 1.65pp (the manuscript quotes the matched frozen pair). With factors fit on out-of-sample FY2023 (train ≤ FY2022, empirical-Bayes shrinkage, frozen): equal 0.885pp, issuance-weighted 0.785pp, corr 0.906 | hurdle_results.json calibration.fy2023_fit_factor_validation |
+| E6 | The model's raw level underpredicts high-error states, reported post-#13 in ratio form: raw model-to-observed dollar-rate ratio NY 0.508, CO 0.692 (factor-adjusted: NY 0.779, CO 0.832); the measured-rate simulation block now anchors the model mean to the official rate by construction. The deployed app anchors levels to the official rate and disables the seven jurisdictions whose factor-adjusted ratio falls outside [0.7, 1.4] (AK, HI, ID, MN, SD, VI, WY). SUPERSEDES the pre-#13 pair "NY model mean 11.02% vs bootstrap 14.10%; CO 8.62 vs 9.98", which this row carried until revision 3 with a nonexistent source key (same staleness event as E3; caught by round-3 red-team and round-diff — the current ratios imply a LARGER raw gap than the stale numbers conveyed) | distributional_results.json measured_rate_simulation + state raw_model_to_observed_ratio; FINDINGS.md state table; model_scenarios.json level_ratio_gate |
 | E7 | Cross-sectional medical-event rates under the corrected event definition (element 365 paired with payment-impact finding, slots 1–9): 2.97% where no standard medical deduction requires documentation vs 2.60% where it does (claimant denominator) | model_results.json |
 | E8 | SMD adoption contrasts are descriptive, calendar-aligned, both denominators, with unweighted event counts: AZ +2.07pp claimant-conditioned (+0.64 stable), CA +0.11 (−1.40), KY −0.42 (−0.01), LA −0.08 (−0.15), MI +0.16 (−0.19) | model_results.json; FINDINGS.md |
-| E9 | Two complete pipeline reruns are byte-identical; independently reproduced (SHA-256 match on all artifacts) 2026-08-06; 46 tests | run_all.py provenance; PR #8 |
+| E9 | Independent clean-room reruns reproduce every run_all-managed artifact byte-for-byte: 2026-08-06 (46 tests, PR #8 era) and re-verified 2026-08-07 after the #13/#16 refits and the revision-3 provenance-string change (111 tests; the two regenerated files changed in exactly the one intended string each) | run_all.py provenance; PR #16 gate record; alignment-pass regen |
 
 ## F. Simulation and stakes (FY2024 basis)
 
@@ -74,9 +74,13 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 - Parity claims always carry the C2 scope caveat.
 - No numbers from the pre-correction pipeline (superseded by PR #7).
 - Unfactored cross-state correlation ≈0.51 (frozen model; factored 0.91) — never "about half of variance", and always say which configuration.
-- The engine-recomputed-counterfactual leg is future work; the live tool's
-  levers are accounting bounds and its model mode covers baseline + audit
-  volume only. Say so wherever relevant.
+- The live tool's only policy lever is the model-based SMD scenario
+  (level-gated; accounting levers removed 2026-08-07); its simulation
+  results in this paper all come from the observed-resample engine. The
+  engine-repricing leg exists for Colorado SMD only, as bounds and as a
+  validation reference; broader engine recomputation is future work. Say
+  so wherever relevant, and never describe the accounting bounds as
+  something the tool currently serves.
 - No references to private conversations; the reconstruction solver is cited
   as the public software it is.
 
@@ -92,3 +96,15 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 | H6 | OBBBA § 10103 restricts the LIHEAP-triggered heat-and-eat utility allowance to households with an elderly or disabled member | Pub. L. 119-21 § 10103; state implementation letters |
 | H7 | Colorado deviation universe: 305 = 110 above-threshold official errors + 195 sub-threshold deviations; sub-threshold dollars $18.5M of $112.6M (16%); official-gate file-derived rate 7.42% | recomputed from qc_pub_fy2024.csv (official gate); paper/snapshot/labs/amterr/amterr_replay_results.json |
 | H8 | Replay explanation rates by threshold status: 76/97 = 78.4% above threshold; 170/186 = 91.4% below; 33 of 246 explained cases have deviations ≤ $5 (within comparison tolerance mechanically) | paper/snapshot/labs/amterr/amterr_replay_results.json |
+
+## I. Engine counterfactuals and the model-primary round (added in revision 3)
+
+| # | Fact | Source |
+|---|---|---|
+| I1 | The certified CO parity chain never consumes Colorado's SMD rule: QC editing bakes the deduction into stored expense fields (46 medical-expense records censored at exactly $165; FSMEDEXP is already excess-of-$35) and the federal 273.10 path reproduces all 856 cases exactly without the state rule (regression guard 856 matches / 0 mismatches). The separate raw-facts leg agrees on 845/856; its 11 divergences are diagnosed (10 categorical 200%-FPL cases lacking public TANF facts at −$23; 1 utility-allowance tier conflict at +$22) | paper/snapshot/engine-leg/baseline/manifest.json (hash-pinned in analysis/COUNTERFACTUAL.md); analysis/COUNTERFACTUAL.md |
+| I2 | Simulation-only composition adapter binding the state SMD rule into the federal path passes exact baseline invariance on all 856 CO cases (856 cases / 0 divergences / byte-identical ×2); SMD-off repricing is bounded, not point-identified, by the $165 censoring: −$1.46 to $0 per case-month (floor/point/ceiling variants) | paper/snapshot/engine-leg/smd-off/{floor,point,ceiling}/manifest.json (hash-pinned in analysis/COUNTERFACTUAL.md) |
+| I3 | Model-implied CO SMD-off cost-share change (engine-recomputed intermediates through the error model, 10k bootstrap): ≈ −$1.6M / −$1.85M / −$2.2M per year across censoring variants, CIs spanning zero in 2 of 3 — OPPOSITE IN SIGN to the +$7.1M accounting-reverse bound for the same flip; 53 cases flip documentation status | analysis/counterfactual_co_smd.json; analysis/COUNTERFACTUAL.md (PR #14) |
+| I4 | QRF-vs-GBM benchmark under a decision rule fixed in the protocol commit before the results commit (branch history: protocol 3e1b347 → results 1d06262, preserved in PR #15's refs; the rule is also embedded in the results artifact and the verdict follows it): QRF wins mean absolute coverage (4.097 vs 4.376pp) but loses factored equal-state dollar-rate MAE (0.9512 vs 0.9279pp), both PIT diagnostics, and runtime (229s vs 23s); QRF max coverage gap 8.61pp is worse than GBM's 7.44; GBM retained. Deterministic core SHA-256 817d5925… reproduced twice in-process by the benchmark AND in a separate process from a clean invocation (attestation: paper/snapshot/qrf-cross-process-attestation.md) | analysis/qrf_benchmark_results.json; analysis/QRF_BENCHMARK.md (PR #15); paper/snapshot/qrf-cross-process-attestation.md |
+| I5 | Scenario export: SMD is the only included lever (exact bidirectional flip via the canonical med_doc_required predicate, validated against the FY2024 registry); SSED, heat-and-eat, and BBCE excluded with machine-readable reasons; per-state adoption deltas −0.111 to +0.145pp with 10,000-draw paired-bootstrap CIs (25 of 53 include zero at inclusive endpoints — 24 strictly span it and IN's upper bound is exactly 0.0 at the export's 6-decimal rounding); export pins model_data.json by SHA-256 | app/public/model_scenarios.json; analysis/MODEL_SCENARIOS.md (PR #16) |
+| I6 | CO reconciliation: exported SMD-off delta −0.0335pp, 95% CI [−0.0773, +0.0044]; reference direct estimate −0.0727 and hurdle −0.0433 both inside the interval; same predicate, 53 = 53 flipped cases; export freezes the model after FY2022 while the reference fits through FY2023 | analysis/MODEL_SCENARIOS.md § Colorado reconciliation |
+| I7 | Deployed app (2026-08-07): accounting levers removed; the SMD model scenario is the only policy lever, displayed with the exported CI and labeled an association, not causal; browser verifies the base-model SHA-256 pin before use; seven level-gated jurisdictions disabled with their ratios shown | app/public/app.js (PR #17); live at snap-qc-sim.vercel.app |

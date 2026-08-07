@@ -1917,7 +1917,7 @@
     "validation_year": 2024
   },
   "export": {
-    "browser_consumer_status": "model mode remains disabled; model_data contains factor/cap/gate metadata and run_all pairs it with the SMD-only model_scenarios export, but app.js is unchanged",
+    "browser_consumer_status": "browser scenario consumer live since 2026-08-07: app.js applies the SMD-only model_scenarios patch as its single policy lever, verifies the base-model sha256 pin before use, and disables the seven level-gated jurisdictions; the observed resample remains the no-scenario engine and the accounting-bound levers are removed",
     "case_filter": "CASE == 1",
     "configuration": "frozen-through-FY2022 distributional predictions, FY2023-fit dollar factors, per-case physical caps",
     "fy2024_cases": 44800,

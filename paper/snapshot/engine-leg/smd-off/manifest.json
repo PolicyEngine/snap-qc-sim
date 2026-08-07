@@ -1,0 +1,40 @@
+{
+  "artifact_class": "counterfactual simulation artifact — not an oracle report; produced on a certified pinned toolchain with a locally modified input bridge (raw-facts mode)",
+  "candidate_encoding_change": false,
+  "child_file_sha256": {
+    "ceiling/cases.jsonl": "f6a9a56cd18fcae2a2f55d817ff88a745992230629bf9868770fc4a32e3ce014",
+    "ceiling/manifest.json": "06e96f8c00ca77669720ca9e2c261aa1f4c4a3db4cf9ab1b0dd3647159837424",
+    "floor/cases.jsonl": "4a626c379a46a20cc0d6da703af19c5b045e4a66a04c5c57bad4133a25ba46a1",
+    "floor/manifest.json": "d23a0a4bc0384e92665dd0c6b055e7c0fc1d7e755a765655fb8989df30d684a0",
+    "point/cases.jsonl": "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1",
+    "point/manifest.json": "fb489193fd411d4718a31c5d26ede1023ac21234f9b1f832608a76bbc7ebd0a5"
+  },
+  "composition_variant": "simulation composition variant — not a candidate encoding change",
+  "honest_delta_interval_weighted_mean_benefit_change": {
+    "maximum": 0,
+    "minimum": -1.461777
+  },
+  "runs": {
+    "ceiling": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $165, the maximum amount consistent with the QC minimodel condition 0 < excess <= $165. The engine therefore receives $200 in total medical expenses and, with Colorado's SMD set to $0, computes a $165 actual-excess medical deduction.",
+      "cases_jsonl_sha256": "f6a9a56cd18fcae2a2f55d817ff88a745992230629bf9868770fc4a32e3ce014",
+      "manifest_sha256": "06e96f8c00ca77669720ca9e2c261aa1f4c4a3db4cf9ab1b0dd3647159837424",
+      "weighted_mean_benefit_change": 0
+    },
+    "floor": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $1, the minimum positive whole-dollar amount consistent with the QC minimodel condition 0 < excess <= $165. The engine therefore receives $36 in total medical expenses and, with Colorado's SMD set to $0, computes a $1 actual-excess medical deduction.",
+      "cases_jsonl_sha256": "4a626c379a46a20cc0d6da703af19c5b045e4a66a04c5c57bad4133a25ba46a1",
+      "manifest_sha256": "d23a0a4bc0384e92665dd0c6b055e7c0fc1d7e755a765655fb8989df30d684a0",
+      "weighted_mean_benefit_change": -1.461777
+    },
+    "point": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $57. This is the nearest whole dollar to the $57.4207276 conditional mean E[X | 0 < X <= $165] from an HWGT-weighted left-censored lognormal maximum-likelihood fit to the 46 censored Colorado records and the seven exact non-recoded Colorado excesses above $165 ($175, $200, $227, $314, $314, $360, $470; ln-dollar mu = 4.014722652 and sigma = 0.959967962). The engine therefore receives $92 in total medical expenses and, with Colorado's SMD set to $0, computes a $57 actual-excess medical deduction. This point estimate is a deterministic parametric imputation, not recovery of the censored actuals.",
+      "cases_jsonl_sha256": "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1",
+      "manifest_sha256": "fb489193fd411d4718a31c5d26ede1023ac21234f9b1f832608a76bbc7ebd0a5",
+      "weighted_mean_benefit_change": -1.013051
+    }
+  },
+  "scenario": "smd-off-bounded-interval-index",
+  "schema": "axiom.snap_qc_simulation_manifest.v1",
+  "status": "complete"
+}

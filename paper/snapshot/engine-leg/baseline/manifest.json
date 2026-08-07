@@ -1,0 +1,404 @@
+{
+  "artifact_class": "counterfactual simulation artifact — not an oracle report; produced on a certified pinned toolchain with a locally modified input bridge (raw-facts mode)",
+  "case_count": 856,
+  "certified_original_bridge_regression_guard": {
+    "comparison_cell_count": 5136,
+    "error_count": 0,
+    "match_count": 856,
+    "mismatch_cell_count": 0,
+    "mismatch_count": 0,
+    "original_bridge_sha256": "8e8eee114e6fce507effae7f08e55202fd4b5c17c7337f84e90e327b464abee1",
+    "status": "passed"
+  },
+  "compiled_artifact_sha256": "06feea26d33a344b78be025613fd142a175b69ceb6d795e0b1d3000950e91f95",
+  "determinism": {
+    "byte_identical": true,
+    "engine_execution_count": 2,
+    "fixed_order": "YRMONTH ascending, then case_id ascending",
+    "jsonl_sha256_both_runs": [
+      "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5",
+      "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5"
+    ],
+    "manifest_serialization_count": 2,
+    "serialization": "UTF-8; LF; terminal newline; sorted keys; compact JSONL"
+  },
+  "diagnostics": {
+    "benefit_delta_distribution_engine_minus_qc": [
+      {
+        "case_count": 10,
+        "delta": -23
+      },
+      {
+        "case_count": 845,
+        "delta": 0
+      },
+      {
+        "case_count": 1,
+        "delta": 22
+      }
+    ],
+    "by_driver_and_stage": [
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "gross_income",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "standard_deduction",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "shelter_deduction",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "net_income",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "maximum_allotment",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 10,
+        "driver": "categorical_200pct_path",
+        "stage": "benefit",
+        "stage_divergence_count": 10,
+        "stage_divergence_weight": 37989.456321
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "gross_income",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "standard_deduction",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "shelter_deduction",
+        "stage_divergence_count": 1,
+        "stage_divergence_weight": 3716.938344
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "net_income",
+        "stage_divergence_count": 1,
+        "stage_divergence_weight": 3716.938344
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "maximum_allotment",
+        "stage_divergence_count": 0,
+        "stage_divergence_weight": 0
+      },
+      {
+        "affected_case_count": 1,
+        "driver": "utility_tier_amount_gap",
+        "stage": "benefit",
+        "stage_divergence_count": 1,
+        "stage_divergence_weight": 3716.938344
+      }
+    ],
+    "by_stage": [
+      {
+        "agreement_count": 856,
+        "divergence_count": 0,
+        "divergence_weight": 0,
+        "label": "snap_gross_monthly_income",
+        "stage": "gross_income"
+      },
+      {
+        "agreement_count": 856,
+        "divergence_count": 0,
+        "divergence_weight": 0,
+        "label": "snap_standard_deduction",
+        "stage": "standard_deduction"
+      },
+      {
+        "agreement_count": 855,
+        "divergence_count": 1,
+        "divergence_weight": 3716.938344,
+        "label": "snap_excess_shelter_deduction",
+        "stage": "shelter_deduction"
+      },
+      {
+        "agreement_count": 855,
+        "divergence_count": 1,
+        "divergence_weight": 3716.938344,
+        "label": "snap_net_income",
+        "stage": "net_income"
+      },
+      {
+        "agreement_count": 856,
+        "divergence_count": 0,
+        "divergence_weight": 0,
+        "label": "snap_maximum_allotment",
+        "stage": "maximum_allotment"
+      },
+      {
+        "agreement_count": 845,
+        "divergence_count": 11,
+        "divergence_weight": 41706.394665,
+        "label": "snap_regular_month_allotment",
+        "stage": "benefit"
+      }
+    ],
+    "driver_case_counts": {
+      "categorical_200pct_path": 10,
+      "utility_tier_amount_gap": 1
+    },
+    "smd_actual_expense_censored_case_count": 46,
+    "smd_actual_expense_censored_weight": 187630.897622
+  },
+  "driver_file_sha256": {
+    "axiom_oracles/bridges/simulation_driver.py": "a40ceba7c517ea66480dbb85f6a4e110762b6545fac027560b38c32f83ca0734"
+  },
+  "exclusions": {
+    "by_reason": {},
+    "total_excluded": 0,
+    "total_loaded": 856
+  },
+  "fiscal_year": 2024,
+  "jurisdiction": "us-co",
+  "limitations": {
+    "categorical": "CAT_ELIG remains the QC-derived categorical-type entitlement fact. Code 2 selects the encoded expanded path and its 200% gross-income test; full 4.206 categorical eligibility is not in the composition and its TANF/MOE/form/disqualification facts are absent from the public file.",
+    "child_support": "FSCSEXP supplies the amount, but payment verification, legal obligation, and history are unavailable; positive expense is projected as a verified three-month average.",
+    "medical": "FSMEDEXP is documented as excess above $35, so the bridge adds $35 solely to meet the encoding's total-expense input schema. The QC minimodel has already replaced 46 sub-threshold Colorado actuals with $165; their actual expenses cannot be recovered.",
+    "resources": "LIQRESOR is a QC-constructed countable-liquid-resource amount, not elemental raw assets (RAWLQRES is the reported field). All retained Colorado resource amounts are zero.",
+    "utility": "SUA1 remains the QC-edited entitlement tier. Itemized bills and the precise LEAP/E-EBT route are unavailable; limited and one-utility tiers use synthetic witness flags. Numeric UTIL is diagnostic only and never enters the engine input. HOMEDED=3 suppresses utility flags because the flat homeless deduction replaces the ordinary shelter path."
+  },
+  "nominal_engine_period": "2026-01",
+  "output_file": {
+    "name": "cases.jsonl",
+    "row_count": 856,
+    "sha256": "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5"
+  },
+  "overlay": {
+    "materialization": {
+      "file_sha256": {
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml": "1aeb049a959ce990408ff793927162417b1677dbaa699156da6460c1ba9cea96",
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml": "34485b43cd50936ffe4fbeb09bd8f90ffac106694b91fb394aea2458161fa6e8",
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml": "48a5c480c9b1e12dbf4ddf5ed23f45fcafd66070a49f857ac74cd00777919151",
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml": "2a9ded5c9c76845879f3076f6958eff585577244fdbdfcb01d8409115c37dc17",
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml": "eb9a0afe85c76bf6f38603e96003fb7c5fc9c019524200740c5eb1fec9d296ae",
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml": "d8c502cbdc420acaf4d8cb4dc5540e77243259e2827e582bd05ba1e1e5517394",
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml": "e078346cb009c129ed00c730d51cc9da6df920b89308c855589bc5fa2bd0025f",
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml": "305d3af1498ec8248d49d11828723a6c76742d0c9832f8d9152770f4aede2ca0",
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml": "908bcc422eb419b8c79e590579dacb5d36c1349fd917478d8e63d8f74fce7e46",
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml": "58dd5c645252c39eeaaa2075384479af6f9dab941e44ecc2759eff8bc7b68a67",
+        "us-co/regulations/10-ccr-2506-1/4.407.31.yaml": "d373620707c58558261814f99709c40b1d9c423c0df2b1202e96e1702ff92131",
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml": "4117a54e621d393bdfd98d7919d47ae896551397a0a188703356e832077cc04e",
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml": "2da03ac3e36421501f90d938f62f56bdd39e871891f35eec192866971dc33b68",
+        "us/regulations/7-cfr/273/10.yaml": "b30b75666b34a4c625c480b6a243340c40994e37d5cc9334142c9fd3723ddf78",
+        "us/regulations/7-cfr/273/8.yaml": "2eb57902785375c837abb8d7a1b7326c20926b1cedd93463c64bbc0ca8981aee",
+        "us/regulations/7-cfr/273/9.yaml": "9ce1454e8d41621559d88ac8bff912e7fcf6618a54c9c48feb9de621de2baf36",
+        "us/statutes/7/2017/a.yaml": "772f90b2817a0c5f421d90288cf2e76b490fccf06b4c4ce7731350eb9de61da9"
+      },
+      "module_id_rewrites": {
+        "us:policies/usda/snap/fy-2026-cola/deductions": "us:policies/usda/snap/fy-2024-cola/deductions",
+        "us:policies/usda/snap/fy-2026-cola/income-eligibility-standards": "us:policies/usda/snap/fy-2024-cola/income-eligibility-standards",
+        "us:policies/usda/snap/fy-2026-cola/maximum-allotments": "us:policies/usda/snap/fy-2024-cola/maximum-allotments"
+      },
+      "overlay": "us-co-snap-fy2024",
+      "patches": [
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "594",
+          "rule": "colorado_snap_heating_cooling_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "560"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "377",
+          "rule": "colorado_snap_basic_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "356"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "71",
+          "rule": "colorado_snap_one_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "67"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from": "97",
+          "rule": "colorado_snap_telephone_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to": "91"
+        }
+      ],
+      "program": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+      "rewrite_counts": {
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml": 4,
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml": 2,
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml": 3,
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml": 1,
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml": 2,
+        "us/regulations/7-cfr/273/10.yaml": 5,
+        "us/regulations/7-cfr/273/8.yaml": 1,
+        "us/regulations/7-cfr/273/9.yaml": 1,
+        "us/statutes/7/2017/a.yaml": 3
+      },
+      "rulespec_root": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/rulespec-us",
+      "schema": "axiom_oracles.rulespec_overlay.v1"
+    },
+    "spec": {
+      "module_id_rewrites": {
+        "us:policies/usda/snap/fy-2026-cola/deductions": "us:policies/usda/snap/fy-2024-cola/deductions",
+        "us:policies/usda/snap/fy-2026-cola/income-eligibility-standards": "us:policies/usda/snap/fy-2024-cola/income-eligibility-standards",
+        "us:policies/usda/snap/fy-2026-cola/maximum-allotments": "us:policies/usda/snap/fy-2024-cola/maximum-allotments"
+      },
+      "name": "us-co-snap-fy2024",
+      "notes": "Compile-time overlay that replays the Colorado SNAP benefit composition against fiscal year 2024 federal parameters. The rulespec-us monorepo ships the composition wired to the FY 2026 cost-of-living (COLA) parameter set, so this overlay rewrites the three USDA cola module ids (fy-2026-cola -> fy-2024-cola) across the composition and every module that imports them, then patches the four Colorado standard-utility-allowance amounts down to their FY 2024 values. The overlay is materialized as a single self-contained rulespec root (a real copy of the us and us-co prefix trees with the rewrites and patches applied) and compiled with that root alone: the engine unions module ids across repo roots rather than shadowing, so a sparse overlay fronting the monorepo would compile both cola vintages and abort with a duplicate-rule error. This is a stopgap: once TheAxiomFoundation/rulespec-us#759 lands the parameter-set inversion (a program selects its cola set by period rather than by hardcoded module id), the fiscal year becomes a run-time choice and this overlay retires. The copy-then-patch discipline follows the EUROMOD platform patcher precedent in axiom_oracles/adapters/euromod/_runner.py, which patches policy switches and DefConst values into a copy of the model tree because the source model must never be mutated in place.",
+      "parameter_patches": [
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "594",
+          "rule": "colorado_snap_heating_cooling_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "560"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "377",
+          "rule": "colorado_snap_basic_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "356"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "71",
+          "rule": "colorado_snap_one_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "67"
+        },
+        {
+          "file": "us-co/regulations/10-ccr-2506-1/4.407.31.yaml",
+          "from_value": "97",
+          "rule": "colorado_snap_telephone_utility_allowance_amount",
+          "source": "us/guidance/usda/fns/snap-qc-fy2024-technical-documentation/page-183",
+          "to_value": "91"
+        }
+      ],
+      "program": "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml",
+      "rewrite_files": [
+        "us/statutes/7/2017/a.yaml",
+        "us/regulations/7-cfr/273/8.yaml",
+        "us/regulations/7-cfr/273/9.yaml",
+        "us/regulations/7-cfr/273/10.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.206.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.207.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.207.3.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.305.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.1.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.401.2.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.407.1.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.407.3.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.408.yaml",
+        "us-co/regulations/10-ccr-2506-1/4.408.2.yaml",
+        "us-co/policies/cdhs/snap/fy-2026-benefit-calculation.yaml"
+      ]
+    },
+    "spec_file": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/axiom-oracles/axiom_oracles/bridges/overlays/us-co-snap-fy2024.yaml",
+    "spec_file_sha256": "0590adf05d940dacf36120db178333dd2275b15fc0d86a7a778ce92f515cb617"
+  },
+  "pins": {
+    "engine": {
+      "binary": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/cargo-target/release/axiom-rules-engine",
+      "binary_sha256": "bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee",
+      "commit": "de0efdc73b469132ee268e1c832e8f7148b91431"
+    },
+    "harness": {
+      "commit": "d30566266932dbd0b6f62e69dcea8ca3c8801690",
+      "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/axiom-oracles"
+    },
+    "qc_csv": {
+      "path": "/Users/maxghenis/.cache/axiom-oracles/snap-qc/qc_pub_fy2024.csv",
+      "sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9"
+    },
+    "rulespec": {
+      "commit": "b53ce208771085030939db4b9691762506b6bca2",
+      "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/rulespec-us"
+    }
+  },
+  "queried_outputs": {
+    "categorical_resource_exemption": "us-co:regulations/10-ccr-2506-1/4.408#snap_categorically_eligible_for_resource_exemption",
+    "child_support_deduction": "us-co:regulations/10-ccr-2506-1/4.407.5#child_support_deduction",
+    "co_expanded_categorical_gross_income_limit": "us-co:regulations/10-ccr-2506-1/4.401.1#co_snap_expanded_categorical_gross_income_limit",
+    "dependent_care_deduction": "us-co:regulations/10-ccr-2506-1/4.407.4#dependent_care_deduction",
+    "federal_medical_deduction": "us:regulations/7-cfr/273/10#snap_excess_medical_deduction_for_net_income",
+    "medical_deduction": "us-co:regulations/10-ccr-2506-1/4.407.61#medical_deduction",
+    "medical_excess": "us-co:regulations/10-ccr-2506-1/4.407.6#medical_excess",
+    "passes_gross_income_test": "us-co:regulations/10-ccr-2506-1/4.401#passes_gross_income_test",
+    "snap_basic_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_basic_utility_allowance_eligible",
+    "snap_countable_financial_resources": "us-co:regulations/10-ccr-2506-1/4.408#snap_countable_financial_resources",
+    "snap_eligible": "us-co:policies/cdhs/snap/fy-2026-benefit-calculation#snap_eligible",
+    "snap_excess_shelter_deduction": "us:regulations/7-cfr/273/10#snap_excess_shelter_deduction_for_net_income",
+    "snap_financial_resources_within_limit": "us:regulations/7-cfr/273/8#snap_financial_resources_within_limit",
+    "snap_gross_monthly_income": "us:regulations/7-cfr/273/10#snap_total_gross_income",
+    "snap_heating_cooling_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_heating_cooling_utility_allowance_eligible",
+    "snap_income_eligible": "us-co:regulations/10-ccr-2506-1/4.401#snap_income_eligible",
+    "snap_individual_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_individual_utility_allowance",
+    "snap_limited_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_limited_utility_allowance",
+    "snap_maximum_allotment": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+    "snap_net_income": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+    "snap_one_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_one_utility_allowance",
+    "snap_one_utility_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_one_utility_allowance_eligible",
+    "snap_regular_month_allotment": "us-co:regulations/10-ccr-2506-1/4.207.2#snap_allotment",
+    "snap_resource_eligible": "us:regulations/7-cfr/273/8#snap_resource_eligible",
+    "snap_resource_limit_categorical_exemption_applies": "us:regulations/7-cfr/273/8#snap_resource_limit_categorical_exemption_applies",
+    "snap_standard_deduction": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+    "snap_standard_utility_allowance": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_standard_utility_allowance",
+    "snap_telephone_allowance_eligible": "us-co:regulations/10-ccr-2506-1/4.407.31#snap_telephone_allowance_eligible"
+  },
+  "scenario": "baseline",
+  "scenario_definition": "Colorado FY2024 baseline on the certified pinned toolchain. The local bridge sources medical from FSMEDEXP, child support from FSCSEXP, utility entitlement from SUA1 with engine-selected allowance amounts, LIQRESOR for liquid resources, and preserves CAT_ELIG type so the encoding applies the expanded 200%-FPL path.",
+  "schema": "axiom.snap_qc_simulation_manifest.v1",
+  "status": "complete_with_documented_public_data_limitations",
+  "wall_times_note": "Measured on the first complete generation for this exact driver version and retained on later full regenerations so the artifact remains byte-identical.",
+  "wall_times_seconds": {
+    "certified_regression_guard": 4.645956,
+    "engine_executions": [
+      4.365976,
+      13.954831
+    ],
+    "overlay_materialization": 0.539698,
+    "program_compile": 2.488735,
+    "qc_load": 1.760549
+  }
+}
