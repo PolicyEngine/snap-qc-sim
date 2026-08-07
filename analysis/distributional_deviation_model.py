@@ -343,6 +343,31 @@ def fit_process(train: pd.DataFrame, features: list[str]) -> ProcessBundle:
     return ProcessBundle(distributional, direct)
 
 
+def predict_export_parameters(
+    bundle: DistributionalBundle,
+    data: pd.DataFrame,
+    features: list[str],
+) -> pd.DataFrame:
+    """Predict the calibrated deviation probability and exported quantiles.
+
+    This is the shared model-primary surface for baseline and policy-scenario
+    exports. It deliberately returns only the parameters consumed by the
+    browser's absolute-deviation process.
+    """
+    result = pd.DataFrame(index=data.index)
+    result["p_dev"] = bundle.deviation_stage.predict(data[features])
+    raw_quantiles = np.column_stack(
+        [model.predict(data[features]) for model in bundle.quantile_models]
+    )
+    quantiles = enforce_monotone_quantiles(
+        raw_quantiles,
+        minimum_magnitude=DEVIATION_TOLERANCE,
+    )
+    for index, column in enumerate(QUANTILE_COLUMNS):
+        result[column] = quantiles[:, index]
+    return result
+
+
 def predict_process(
     bundle: ProcessBundle,
     data: pd.DataFrame,
@@ -355,18 +380,17 @@ def predict_process(
     result = data.copy()
     distributional = bundle.distributional
     result["p_dev_raw"] = distributional.deviation_stage.predict_raw(result[features])
-    result["p_dev"] = distributional.deviation_stage.predict(result[features])
+    export_parameters = predict_export_parameters(
+        distributional,
+        result,
+        features,
+    )
+    result["p_dev"] = export_parameters["p_dev"]
     result["p_pos_raw"] = distributional.sign_stage.predict_raw(result[features])
     result["p_pos"] = distributional.sign_stage.predict(result[features])
-    raw_quantiles = np.column_stack(
-        [model.predict(result[features]) for model in distributional.quantile_models]
-    )
-    quantiles = enforce_monotone_quantiles(
-        raw_quantiles,
-        minimum_magnitude=DEVIATION_TOLERANCE,
-    )
-    for index, column in enumerate(QUANTILE_COLUMNS):
-        result[column] = quantiles[:, index]
+    for column in QUANTILE_COLUMNS:
+        result[column] = export_parameters[column]
+    quantiles = export_parameters.loc[:, QUANTILE_COLUMNS].to_numpy(dtype=float)
     survival = conditional_survival(
         result["thr"].to_numpy(dtype=float),
         quantiles,
@@ -1545,7 +1569,8 @@ def analyze() -> DistributionalArtifacts:
             "q_decimal_quantization": export_report["q_decimal_quantization"],
             "browser_consumer_status": (
                 "model mode remains disabled; model_data contains factor/cap/gate "
-                "metadata for the future browser consumer, but app.js is unchanged"
+                "metadata and run_all pairs it with the SMD-only model_scenarios "
+                "export, but app.js is unchanged"
             ),
         },
     }
