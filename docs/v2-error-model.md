@@ -9,11 +9,12 @@ recompute.
 
 This repository contains the corrected diagnostic v2a pipeline and a v2b
 signed per-case deviation distribution. It exports FY2024 model parameters for
-a browser. A model-based simulator mode consuming that export was implemented
-(PR #9) and is currently disabled in production pending fixes from the
-2026-08-06 adversarial statistical review (tail refit at the attachment depth,
-per-state level factors, 53-state dollar-rate validation; see
-paper/reviews/round-1/code-stats-redteam.md).
+a browser. The export now includes the attachment-depth tail refit, per-case
+physical caps, frozen state dollar factors, and level-gap flags required by the
+2026-08-06 adversarial statistical review. The analysis validates the intended
+browser process for all 53 jurisdictions with eight seeds and 4,000 draws per
+seed. The hidden browser consumer remains disabled and does not yet read the
+new cap and factor fields because this model round leaves `app.js` unchanged.
 
 ## Implementation status
 
@@ -26,14 +27,14 @@ the external engine or `amterr-lab` work.
 | QC-derived household and burden features | Partially implemented | Includes the available medical, self-employment, utility, deduction-count, and benefit-position proxies. Asset verification, child-support verification, pay-frequency conversion, and distances to eligibility discontinuities remain absent. |
 | Diagnostic official-error classifiers | Implemented | Compares a common covariate-plus-formula-anchor baseline with the nested baseline-plus-burden-intermediates specification in the FY2024 evaluation sample. FY2024 has informed pipeline development and is not described as a pristine holdout. |
 | v2a hurdle probabilities and conditional magnitude mean | Implemented | Estimates cross-fitted isotonic stage probabilities and an expected absolute magnitude with out-of-fold Duan smearing. It does not estimate a signed conditional distribution. |
-| State calibration validation | Implemented | Fits through FY2022, estimates shrunken state factors from FY2023, freezes them, and evaluates factor-adjusted results on FY2024. FY2024-derived factors are descriptive anchors only. |
+| State calibration validation | Implemented | Fits the distributional model through FY2022, estimates EB-shrunken dollar-rate factors from out-of-sample FY2023 state ratios, freezes them, and reports matched raw and factor-adjusted FY2024 dollar rates for all 53 jurisdictions. The EB prior mean is fixed at 1, and the analysis does not propagate factor uncertainty. |
 | Medical-error and SMD contrasts | Implemented | Weighted descriptive contrasts use the state-year SMD registry, aligned calendar cells, event counts, and both a post-treatment-conditioned claimant denominator and a stable all-elderly/disabled denominator. They are not causal estimates. |
 | Engine recomputation under alternative policies | Not implemented | Current intermediates are extracted from QC fields; the rules engine does not yet regenerate them under a counterfactual policy. |
-| Signed conditional deviation distribution and assigned-benefit draws | Implemented | Estimates calibrated sign probabilities and nine conditional `log(|D|)` quantiles among deviators, sorts each predicted vector, extends q99 with a training-only OOF-residual log-exponential tail, and exports parameters for signed draws. Native HistGB quantile loss preserves the hurdle's feature, missing-value, and HWGT behavior without adding a dependency. Sign and magnitude are conditionally independent given features. |
+| Signed conditional deviation distribution and assigned-benefit draws | Implemented | Estimates calibrated sign probabilities and nine conditional `log(|D|)` quantiles among deviators, sorts each predicted vector, and extends q99 with the weighted mean excess beyond q99 of OOF median residuals. Draws cap `|D|` at `max(BENMAX, observed |D|)` per case-year: `BENMAX`, the case's maximum monthly allotment, supplies the default maximum-allotment-scale ceiling, while the observed-deviation override preserves the 27 realized exceptions. The export omits `p_pos` because measured-rate outputs use only `|D|`. |
 | Computation-failure mixture probability π | Not implemented | No separate computation-failure channel or policy lever is estimated or simulated. |
 | Input-noise tier | Not implemented | Corrected-versus-original input pairs are not training data for this repository's pipeline. |
 | Event-study or causal DiD validation | Not implemented | The SMD results are descriptive weighted pre/post contrasts only. |
-| Simulator integration and counterfactual aggregation | Implemented, disabled | A model-based mode (bootstrap + per-case redraw, official-anchored) ships in the app but is hidden in production pending adversarial-review fixes; counterfactual aggregation remains not implemented; the observed mode keeps the accounting-bound levers. |
+| Simulator integration and counterfactual aggregation | Export and Python validation implemented; browser disabled | The analysis mirrors case bootstrap, per-occurrence redraw, cap, strict threshold, state factor, model-mean anchor, and zero rate floor for all 53 jurisdictions. The disabled browser code does not yet consume the new cap and factor metadata. Counterfactual aggregation remains unimplemented; observed mode retains the accounting-bound levers. |
 | Forward caseload projection | Not implemented | No calibrated FY2026–28 survey-microdata projection is part of this pipeline. |
 
 ## The core idea
@@ -83,9 +84,11 @@ for all cases and stages, so it makes no such claim.
 
 ## Training and validation protocol
 
-- Training years are FY2017–19 and FY2022–23. FY2020–21 remain excluded, and
-  FY2024 is the evaluation year. Because FY2024 results informed development,
-  they are not a pristine final holdout.
+- Primary diagnostic models use FY2017–19 and FY2022–23. The shipped
+  distributional configuration freezes its model after FY2022, fits state
+  factors on FY2023 out-of-sample dollar ratios, and evaluates on FY2024.
+  FY2020–21 remain excluded. Because FY2024 results informed development, the
+  analysis does not treat FY2024 as a pristine final holdout.
 - A stage-1 adjudicated-benefit deviation is defined using a currency tolerance
   of `|D| > 0.5`, rather than exact floating-point inequality. Stage 2 is fit
   only within those stage-1 positives. The handful of official errors with a
@@ -98,20 +101,22 @@ for all cases and stages, so it makes no such claim.
   `E_FINDGi ∈ {2, 3, 4}`, and `AMOUNTi > 0`, scanning all nine public slots.
 - Stage probabilities are calibrated out of fold within the training data;
   Duan's smearing factor is also estimated from out-of-fold residuals.
-- Headline FY2024 calibration is unfactored and reported both with equal
-  jurisdiction weight and with issuance weight.
 - State factors are learned without FY2024: fit the model through FY2022,
   predict FY2023, shrink FY2023 observed-to-predicted ratios toward one using
   effective-sample-size precision, and apply the frozen factors in FY2024.
+  The analysis reports matched frozen raw and factor-adjusted dollar-rate
+  slope, MAE, and correlation with equal-jurisdiction and issuance weighting.
 - SMD adoption timing comes from the state-year registry. Medical contrasts
   align treated states and controls to the same pre- and post-adoption
   calendar cells. They are descriptive weighted contrasts, not a natural
   experiment or causal validation.
-- Distributional validation aggregates signed case draws using the official
-  centering convention and compares them with corrected observed bootstraps.
-  The app's (currently disabled) model-based mode instead bootstraps cases
-  and redraws deviations, anchored at the model's own baseline mean — a
-  configuration not yet validated; see the review findings.
+- Distributional validation reads the same serialized, quantized model-data
+  payload exported for the intended disabled model mode. It bootstraps cases
+  uniformly, retains HWGT in the ratio, redraws a magnitude for every sampled
+  occurrence, caps `|D|`, applies the state factor after the strict threshold,
+  anchors each seed at the model's own baseline mean, and clips anchored rates
+  at zero downstream. It compares this process with corrected observed
+  bootstraps for all 53 jurisdictions.
 
 ### Reproducing the analysis
 
@@ -165,14 +170,16 @@ The v2b extension learns the signed conditional distribution of deviation:
 1. `P(|D| > 0.5 | features)` from the existing calibrated stage 1.
 2. `P(D > 0 | |D| > 0.5, features)` with a separately calibrated classifier.
 3. Nine conditional quantiles of `log(|D|)` among deviators, with log-linear
-   interpolation and a fitted exponential excess above q99.
+   interpolation and an exponential excess above q99 fit at the same q99
+   attachment depth.
 
 The resulting draw sets `D = 0` for nondeviators and samples sign and magnitude
-independently conditional on features. A future counterfactual rules engine
+independently conditional on features, then applies the per-case physical cap.
+A future counterfactual rules engine
 could compute policy-specific benefits and intermediates before applying these
 draws. This repository does not yet perform that engine recomputation; the
-exported process is wired into the app's model-based mode, which is disabled
-in production pending validation fixes.
+exported process includes the metadata needed by the model-based mode, but the
+disabled browser consumer does not yet enforce the new fields.
 
 ## Proposed counterfactual tiers
 
@@ -180,9 +187,10 @@ in production pending validation fixes.
   the sign and conditional distribution of `D`, including a q99 tail, rather
   than only two probabilities and a conditional mean. The formula benefit
   remains both an anchor and a covariate. The implementation predicts the
-  FY2024 error process from FY2017–19 and FY2022–23 data; it does not establish
-  causal policy effects or transport to thresholds outside the observed
-  setting without additional validation.
+  FY2024 error process with a distributional model frozen after FY2022 and
+  state factors fit on FY2023; it does not establish causal policy effects or
+  transport to thresholds outside the observed setting without additional
+  validation.
 - **Computation-failure mixture.** Separate cases whose issuance can be
   reproduced by correct arithmetic on incorrect inputs from cases requiring
   another computation-error channel. The external `amterr-lab` analysis

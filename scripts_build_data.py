@@ -1,4 +1,5 @@
 """Build app/public/data.json: per-state case arrays for in-browser Monte Carlo."""
+
 import json
 from pathlib import Path
 
@@ -30,9 +31,13 @@ for state, cases in sorted(cases_by_state.items()):
         "issuance": round(sum(c.weight * c.issuance for c in cases)),
         "n": len(cases),
         "verified": VERIFIED.get(state),
-        "w": w, "iss": iss, "err": err, "hits": hits,
+        "w": w,
+        "iss": iss,
+        "err": err,
+        "hits": hits,
     }
 path = Path("app/public/data.json")
 path.parent.mkdir(parents=True, exist_ok=True)
-json.dump({"levers": LEVER_KEYS, "states": out}, open(path, "w"), separators=(",", ":"))
-print(f"{path}: {path.stat().st_size/1e6:.1f}MB, {len(out)} states")
+with path.open("w", encoding="utf-8") as output:
+    json.dump({"levers": LEVER_KEYS, "states": out}, output, separators=(",", ":"))
+print(f"{path}: {path.stat().st_size / 1e6:.1f}MB, {len(out)} states")

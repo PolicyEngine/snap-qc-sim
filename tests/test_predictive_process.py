@@ -65,6 +65,7 @@ def test_draw_deviations_respects_deviation_and_sign_probabilities():
         log_quantiles=log_quantiles,
         tail_scale=0.2,
         rng=np.random.default_rng(42),
+        magnitude_cap=100.0,
     )
 
     assert draws[0] == 0.0
@@ -93,6 +94,7 @@ def test_monte_carlo_mean_matches_closed_form_expectation():
         log_quantiles=log_quantiles,
         tail_scale=scale,
         rng=np.random.default_rng(20240806),
+        magnitude_cap=1e12,
         minimum_magnitude=magnitude,
     )
     simulated = error_dollars(draws, threshold).mean()
@@ -116,15 +118,17 @@ def test_draw_deviations_rejects_invalid_probabilities(probability):
             log_quantiles=np.zeros(QUANTILE_LEVELS.size),
             tail_scale=0.2,
             rng=np.random.default_rng(1),
+            magnitude_cap=100.0,
         )
 
 
-def test_expected_error_requires_a_finite_mean_tail():
-    with pytest.raises(ValueError, match="less than one"):
+@pytest.mark.parametrize("scale", [0.45, 0.5, 1.0])
+def test_predictive_process_requires_finite_variance_margin(scale):
+    with pytest.raises(ValueError, match="below 0.45"):
         expected_error_dollars(
             0.5,
             np.zeros(QUANTILE_LEVELS.size),
-            1.0,
+            scale,
             56.0,
         )
 
@@ -152,3 +156,86 @@ def test_expected_error_matches_closed_form_for_a_truncated_tail():
     )
 
     assert actual.item() == pytest.approx(expected_tail)
+
+
+def test_draw_deviations_enforces_per_case_caps_on_body_and_tail():
+    log_quantiles = np.full((2, QUANTILE_LEVELS.size), np.log(1_000.0))
+
+    draws = draw_deviations(
+        p_dev=np.ones(2),
+        p_pos=np.ones(2),
+        log_quantiles=log_quantiles,
+        tail_scale=0.25,
+        rng=np.random.default_rng(9),
+        magnitude_cap=np.array([20.0, 30.0]),
+    )
+
+    assert draws.tolist() == pytest.approx([20.0, 30.0])
+
+
+@pytest.mark.parametrize("cap", [0.49, 0.0, np.nan, np.inf])
+def test_draw_deviations_rejects_invalid_caps(cap):
+    with pytest.raises(ValueError, match="magnitude_cap"):
+        draw_deviations(
+            p_dev=1.0,
+            p_pos=1.0,
+            log_quantiles=np.zeros(QUANTILE_LEVELS.size),
+            tail_scale=0.25,
+            rng=np.random.default_rng(1),
+            magnitude_cap=cap,
+        )
+
+
+def test_capped_expected_error_matches_tail_identity_and_strict_threshold():
+    probability = 0.4
+    magnitude = 10.0
+    scale = 0.25
+    cap = 20.0
+    threshold = 5.0
+    log_quantiles = np.full(QUANTILE_LEVELS.size, np.log(magnitude))
+
+    above_threshold = expected_error_dollars(
+        probability,
+        log_quantiles,
+        scale,
+        threshold,
+        minimum_magnitude=magnitude,
+    )
+    above_cap = expected_error_dollars(
+        probability,
+        log_quantiles,
+        scale,
+        cap,
+        minimum_magnitude=magnitude,
+    )
+    survival_at_cap = conditional_survival(
+        cap,
+        log_quantiles,
+        scale,
+        minimum_magnitude=magnitude,
+    )
+    capped = expected_error_dollars(
+        probability,
+        log_quantiles,
+        scale,
+        threshold,
+        minimum_magnitude=magnitude,
+        magnitude_cap=cap,
+    )
+
+    assert capped.item() == pytest.approx(
+        above_threshold.item()
+        - above_cap.item()
+        + probability * cap * survival_at_cap.item()
+    )
+    assert (
+        expected_error_dollars(
+            probability,
+            log_quantiles,
+            scale,
+            cap,
+            minimum_magnitude=magnitude,
+            magnitude_cap=cap,
+        ).item()
+        == 0.0
+    )

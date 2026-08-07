@@ -224,6 +224,61 @@ def test_state_calibration_helper_supports_equal_and_issuance_weights():
     )
 
 
+def test_state_rates_raise_on_nonpositive_predicted_total():
+    frame = pd.DataFrame(
+        {
+            "state": ["AA", "AA"],
+            "w": [1.0, 2.0],
+            "issuance": [100.0, 200.0],
+            "obs_error_dollars": [10.0, 20.0],
+            "pred_err_dollars": [0.0, 0.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match="AA.*predicted error-dollar total"):
+        hurdle_model._state_rates(frame)
+
+
+def test_tail_fit_selects_q99_mean_excess_and_reports_all_cutoffs(monkeypatch):
+    distributional = run_all.distributional_deviation_model
+    n = 1_000
+    target = np.linspace(3.0, 4.0, n)
+    residual = np.linspace(0.0, 1.0, n)
+    frame = pd.DataFrame(
+        {
+            "x": np.linspace(-1.0, 1.0, n),
+            "D": np.exp(target),
+            "w": np.ones(n),
+        }
+    )
+    monkeypatch.setattr(
+        distributional,
+        "_weighted_cross_val_predict",
+        lambda *args, **kwargs: target - residual,
+    )
+
+    tail = distributional._fit_tail(frame, ["x"])
+
+    assert [row["cutoff_quantile"] for row in tail.mean_excess_by_cutoff] == [
+        0.85,
+        0.9,
+        0.95,
+        0.975,
+        0.99,
+        0.995,
+    ]
+    q90 = next(
+        row for row in tail.mean_excess_by_cutoff if row["cutoff_quantile"] == 0.9
+    )
+    q99 = next(
+        row for row in tail.mean_excess_by_cutoff if row["cutoff_quantile"] == 0.99
+    )
+    assert tail.cutoff_quantile == 0.99
+    assert tail.scale == pytest.approx(q99["mean_excess_log"])
+    assert tail.scale != pytest.approx(q90["mean_excess_log"])
+    assert tail.scale_se > 0
+
+
 @pytest.fixture
 def official_label_cases():
     cases = pd.DataFrame(
@@ -403,6 +458,72 @@ def test_weighted_quantile_coverage_has_one_row_per_configured_quantile():
     )
 
 
+def test_seed_aggregation_reports_between_seed_mc_error():
+    distributional = run_all.distributional_deviation_model
+    rows = [
+        {
+            "mean_pct": 9.0 + index,
+            "sd_pp": 1.0 + index / 10,
+            "tier_probabilities": {
+                "0": 0.1,
+                "5": 0.2,
+                "10": 0.3,
+                "15": 0.4,
+            },
+        }
+        for index in range(8)
+    ]
+
+    result = distributional._aggregate_seed_statistics(rows)
+
+    assert result["mean_pct"] == pytest.approx(12.5)
+    assert result["mean_mc_se_pp"] > 0
+    assert result["sd_mc_se_pp"] > 0
+    assert sum(
+        cell["probability"] for cell in result["tier_probabilities"].values()
+    ) == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize(("cap", "expected_rate"), [(100.0, 200.0), (40.0, 0.0)])
+def test_published_model_bootstrap_caps_before_threshold_then_applies_factor(
+    monkeypatch, cap, expected_rate
+):
+    distributional = run_all.distributional_deviation_model
+    monkeypatch.setattr(distributional, "SIMULATION_DRAWS", 16)
+    monkeypatch.setattr(distributional, "SIMULATION_BATCH_SIZE", 8)
+
+    class FixedRng:
+        @staticmethod
+        def integers(_low, _high, *, size):
+            return np.zeros(size, dtype=int)
+
+        @staticmethod
+        def random(*, size):
+            return np.full(size, 0.5)
+
+    monkeypatch.setattr(
+        distributional.np.random, "default_rng", lambda _seed: FixedRng()
+    )
+    group = pd.DataFrame(
+        {
+            "w": [1.0],
+            "issuance": [100.0],
+            "p_dev": [1.0],
+            "deviation_cap": [cap],
+            **{column: [np.log(1_000.0)] for column in distributional.QUANTILE_COLUMNS},
+        }
+    )
+
+    rates = distributional._model_bootstrap_draws(
+        group,
+        tail_scale=0.25,
+        state_factor=2.0,
+        seed=123,
+    )
+
+    assert rates.tolist() == pytest.approx([expected_rate] * 16)
+
+
 def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     monkeypatch, tmp_path
 ):
@@ -444,13 +565,19 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
         return SimpleNamespace(
             result=result,
             predictions=pd.DataFrame(),
-            bundle=SimpleNamespace(tail=SimpleNamespace(scale=0.25)),
+            bundle=SimpleNamespace(tail=SimpleNamespace(scale=0.25, scale_se=0.01)),
+            state_factors=pd.DataFrame(),
+            state_diagnostics=pd.DataFrame(),
+            model_data_payload={"model_data": "new"},
         )
 
     def fake_build_model_data(
         predictions,
         *,
         tail_scale,
+        tail_scale_se,
+        state_factors,
+        state_diagnostics,
         output_path,
         metadata_path,
         threshold,
@@ -460,12 +587,16 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     ):
         assert predictions.empty
         assert tail_scale == 0.25
+        assert tail_scale_se == 0.01
+        assert state_factors.empty
+        assert state_diagnostics.empty
         assert metadata_path == model_data_destination.with_name("data.json")
         assert threshold == 56
         assert deviation_tolerance == 0.5
         assert len(quantile_levels) == len(quantile_columns) == 9
         Path(output_path).write_text(json.dumps({"model_data": "new"}))
         return {
+            "data": {"model_data": "new"},
             "raw_bytes": 21,
             "gzip_bytes": 37,
             "q_decimal_quantization": None,
@@ -503,3 +634,48 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     }
     assert findings_destination.read_text() == "new\n"
     assert json.loads(model_data_destination.read_text()) == {"model_data": "new"}
+
+
+def test_committed_distributional_artifact_contains_review_gates():
+    path = Path(__file__).resolve().parents[1] / "analysis/distributional_results.json"
+    payload = json.loads(path.read_text())
+    magnitude = payload["magnitude_distribution"]
+    tail = magnitude["tail_fit"]
+    dollar_validation = payload["dollar_rate_validation"]
+    simulation = payload["measured_rate_simulation"]
+
+    assert [row["cutoff_quantile"] for row in tail["mean_excess_by_cutoff"]] == [
+        0.85,
+        0.9,
+        0.95,
+        0.975,
+        0.99,
+        0.995,
+    ]
+    assert tail["fit_residual_cutoff_quantile"] == 0.99
+    assert tail["scale_se_log"] > 0
+    assert tail["implied_pareto_tail_index"] > 2
+    assert tail["finite_variance_gate"]["passed"] is True
+    assert (
+        magnitude["physical_cap"]["unfactored_frozen_model"][
+            "expected_error_dollars_removed_fraction"
+        ]
+        > 0
+    )
+    assert (
+        magnitude["physical_cap"]["factor_adjusted_frozen_model"][
+            "expected_error_dollars_removed_fraction"
+        ]
+        > 0
+    )
+    assert magnitude["coverage_signed_gap_pattern"]["all_nine_negative"] is True
+    assert "effective_n_scaled_cvm" in magnitude["fy2024_weighted_pit"]
+    assert len(dollar_validation["states"]) == 53
+    assert dollar_validation["matched_model_pair"] is True
+    assert simulation["state_count"] == 53
+    assert simulation["seed_count"] >= 8
+    assert simulation["draws_per_seed"] >= 4_000
+    assert simulation["model_input"]["uses_encoded_arrays_and_state_factors"] is True
+    cutoff_rows = {row["cutoff_quantile"]: row for row in tail["mean_excess_by_cutoff"]}
+    assert cutoff_rows[0.85]["fy2024_prediction_source"].endswith("q75_q90")
+    assert cutoff_rows[0.995]["fy2024_prediction_source"].endswith("above_q99")
