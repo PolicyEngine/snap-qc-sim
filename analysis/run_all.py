@@ -395,55 +395,129 @@ def _render_distributional_findings(
     magnitude = distributional["magnitude_distribution"]
     coverage = magnitude["fy2024_weighted_coverage"]
     crossing = distributional["crossing_validation"]
+    dollars = distributional["dollar_rate_validation"]
     simulation = distributional["measured_rate_simulation"]
     export = distributional["export"]
     tail = magnitude["tail_fit"]
+    cap = magnitude["physical_cap"]
+    unfactored_cap = cap["unfactored_frozen_model"]
+    factored_cap = cap["factor_adjusted_frozen_model"]
+    pit = magnitude["fy2024_weighted_pit"]
+    pattern = magnitude["coverage_signed_gap_pattern"]
+
+    def tier_cell(metrics: Mapping[str, Any]) -> str:
+        return "; ".join(
+            f"{tier}: {_pct(metrics['tier_probabilities'][tier]['probability'], 1)}"
+            for tier in ("0", "5", "10", "15")
+        )
+
     lines = [
         "## Distributional deviation process",
         "",
         (
-            "The distributional model predicts the FY2024 SNAP QC error process "
-            "from FY2017–19 and FY2022–23 records. It does not identify causal "
-            "effects. Among cases with `|D| > $0.50`, it estimates `P(D > 0)`, "
-            "nine conditional quantiles of `log(|D|)`, and a log-scale "
-            "exponential tail beyond q99. Sign and magnitude are conditionally "
-            "independent given the model features."
+            "The shipped distributional model is fit through FY2022, estimates "
+            "state dollar factors out of sample in FY2023, and validates the "
+            "frozen configuration in FY2024. It does not identify causal effects. "
+            "Among cases with `|D| > $0.50`, it estimates nine conditional "
+            "quantiles of `log(|D|)` and a log-scale exponential tail beyond q99."
         ),
         "",
         (
-            f"The tail scale is {_metric(tail['scale_log'], 4)} log dollars. "
-            f"The fit uses {_integer(tail['n'])} top-decile OOF residual "
-            f"exceedances (effective n {_metric(tail['effective_n'], 1)})."
+            "The tail uses option (a), the weighted mean excess beyond q99 of "
+            "OOF median residuals. This preserves the existing exponential-log "
+            "draw, survival, and moment equations while fitting at the actual "
+            "attachment depth. The chosen scale is "
+            f"{_metric(tail['scale_log'], 4)} (SE "
+            f"{_metric(tail['scale_se_log'], 4)}), implying a pre-cap Pareto "
+            f"tail index of {_metric(tail['implied_pareto_tail_index'], 3)}. "
+            f"The q99 fit contains {_integer(tail['n'])} strict exceedances "
+            f"(effective n {_metric(tail['effective_n'], 1)})."
         ),
         "",
         (
-            "Native HistGB quantile loss retains the hurdle's feature set, NaN "
-            "routing, and HWGT support without adding another dependency."
+            "The finite-variance gate requires a point scale below "
+            f"{_metric(tail['finite_variance_gate']['point_scale_upper_bound_exclusive'], 2)} "
+            "and a 95% upper scale below 0.5. The fitted upper value is "
+            f"{_metric(tail['finite_variance_gate']['upper_95_log_scale'], 4)}, "
+            "leaving a margin of "
+            f"{_metric(tail['finite_variance_gate']['uncertainty_margin_to_limit'], 4)}."
         ),
         "",
-        "Sign probabilities use HWGT and the same nested outer/inner OOF isotonic calibration as the hurdle stages.",
+        "### Tail threshold stability",
         "",
-        "| sign model/sample | raw AUC | calibrated AUC | raw PR-AUC | calibrated PR-AUC | raw Brier | calibrated Brier | raw calibration-in-the-large | calibrated calibration-in-the-large |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
-        _probability_row(
-            "Training deviators, nested OOF",
-            sign["training_oof_cross_fitted"],
-        ),
-        _probability_row(
-            "FY2024 deviators",
-            sign["fy2024_among_deviators"],
-        ),
-        "",
-        "### Weighted FY2024 quantile coverage",
-        "",
-        (
-            "Coverage uses FY2024 deviators and HWGT. A flag marks an absolute "
-            "difference from nominal coverage greater than 3 percentage points."
-        ),
-        "",
-        "| quantile | weighted coverage | difference | >3pp flag |",
-        "|---:|---:|---:|:---:|",
+        "| cutoff | train OOF residual mean excess (SE) | train effective n | FY2024 conditional mean excess (SE) | FY2024 effective n |",
+        "|---:|---:|---:|---:|---:|",
     ]
+    for row in tail["mean_excess_by_cutoff"]:
+        lines.append(
+            f"| q{100 * _number(row['cutoff_quantile'], context='cutoff'):.1f} | "
+            f"{_metric(row['train_oof_mean_excess_log'], 4)} "
+            f"({_metric(row['train_oof_mean_excess_se_log'], 4)}) | "
+            f"{_metric(row['train_oof_effective_n'], 1)} | "
+            f"{_metric(row['fy2024_conditional_mean_excess_log'], 4)} "
+            f"({_metric(row['fy2024_conditional_mean_excess_se_log'], 4)}) | "
+            f"{_metric(row['fy2024_exceedance_effective_n'], 1)} |"
+        )
+    lines.extend(
+        [
+            "",
+            str(tail["threshold_stability_note"]),
+            "",
+            "### Physical support cap",
+            "",
+            (
+                "Each case-year caps `|D|` at `max(BENMAX, observed |D|)` before "
+                "the strict threshold. `BENMAX` is the case's maximum monthly "
+                "allotment and supplies the default maximum-allotment-scale "
+                "ceiling; the observed-`|D|` override preserves realized support "
+                "for the exceptions. FY2024 caps range from $"
+                f"{_integer(cap['fy2024_cap_min'])} to $"
+                f"{_integer(cap['fy2024_cap_max'])}; "
+                f"{_integer(cap['cases_with_observed_abs_D_above_BENMAX'])} "
+                "observations require the observed-support term. The cap "
+                f"winsorizes {_pct(cap['weighted_unconditional_draw_probability_clipped'], 3)} "
+                "of weighted all-case draws. It removes "
+                f"{_pct(unfactored_cap['expected_error_dollars_removed_fraction'], 3)} "
+                "of unfactored analytic expected dollars and "
+                f"{_pct(factored_cap['expected_error_dollars_removed_fraction'], 3)} "
+                "after state factors, reducing the corresponding national modeled "
+                "rates by "
+                f"{_metric(unfactored_cap['expected_dollar_rate_reduction_pp'], 4, 'pp')} "
+                "and "
+                f"{_metric(factored_cap['expected_dollar_rate_reduction_pp'], 4, 'pp')}, "
+                "respectively."
+            ),
+            "",
+            (
+                "Native HistGB quantile loss retains the hurdle's feature set, "
+                "NaN routing, and HWGT support without adding another dependency."
+            ),
+            "",
+            "Sign probabilities use HWGT and the same nested outer/inner OOF isotonic calibration as the hurdle stages. They remain in analysis but `p_pos` is omitted from the export because rate outputs use only `|D|`.",
+            "",
+            "| sign model/sample | raw AUC | calibrated AUC | raw PR-AUC | calibrated PR-AUC | raw Brier | calibrated Brier | raw calibration-in-the-large | calibrated calibration-in-the-large |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+            _probability_row(
+                "Frozen training deviators, nested OOF",
+                sign["training_oof_cross_fitted"],
+            ),
+            _probability_row(
+                "FY2024 deviators",
+                sign["fy2024_among_deviators"],
+            ),
+            "",
+            "### Weighted FY2024 quantile coverage",
+            "",
+            (
+                "Coverage uses FY2024 deviators and HWGT. Signed gaps are shown; "
+                "negative means undercoverage and a fitted quantile below its "
+                "nominal target."
+            ),
+            "",
+            "| quantile | weighted coverage | signed gap | >3pp flag |",
+            "|---:|---:|---:|:---:|",
+        ]
+    )
     for row in coverage:
         lines.append(
             f"| {_number(row['quantile'], context='quantile'):.3f} | "
@@ -455,15 +529,28 @@ def _render_distributional_findings(
     lines.extend(
         [
             "",
+            (
+                f"All {_integer(pattern['negative_gap_count'])} signed gaps are "
+                "negative. The weighted PIT mean is "
+                f"{_metric(pit['weighted_mean'], 4)} versus 0.5 "
+                f"({_signed(pit['mean_gap'], 4)}; Kish-effective-n iid-Uniform "
+                "reference z="
+                f"{_signed(pit['kish_iid_uniform_reference_z'], 2)}). The "
+                "descriptive joint effective-n-scaled weighted Cramér–von Mises "
+                f"statistic is {_metric(pit['effective_n_scaled_cvm'], 3)}."
+            ),
+            (
+                "These reference statistics are not design-based tests and omit "
+                "QC survey dependence and fitted-CDF uncertainty."
+            ),
+            "",
             "### Threshold-crossing validation",
             "",
             (
                 "The observed FY2024 official-error prevalence is "
                 f"{_metric(crossing['observed_official_national_prevalence_pct'], 4, '%')}. "
                 "Literal `|D| > $56` prevalence is "
-                f"{_metric(crossing['observed_literal_D_crossing_national_prevalence_pct'], 4, '%')}. "
-                f"{_integer(crossing['official_vs_literal_discordant_n'])} "
-                "reconciliation-anomaly case separates the two definitions."
+                f"{_metric(crossing['observed_literal_D_crossing_national_prevalence_pct'], 4, '%')}."
             ),
             "",
             "| route | specification | national predicted prevalence | equal-state MAE | issuance-weighted MAE |",
@@ -477,81 +564,111 @@ def _render_distributional_findings(
             f"{_metric(row['equal_state_mae_pp'], 3, 'pp')} | "
             f"{_metric(row['issuance_weighted_mae_pp'], 3, 'pp')} |"
         )
-    differences = crossing["primary_distributional_minus_direct_mae_pp"]
-    equal_difference = _number(
-        differences["equal_state"], context="equal-state MAE difference"
+
+    raw_metrics = dollars["metrics"]["raw_frozen_model"]
+    adjusted_metrics = dollars["metrics"]["factor_adjusted_frozen_model"]
+    lines.extend(
+        [
+            "",
+            "### FY2024 state dollar-rate validation",
+            "",
+            (
+                "These are matched frozen-model comparisons: both raw and "
+                "factor-adjusted rows use the distributional model fit through "
+                "FY2022. Factors are estimated from FY2023 out-of-sample dollar "
+                "ratios, EB-shrunk toward the fixed prior mean 1, frozen, and "
+                "applied to FY2024. Factor uncertainty is not propagated."
+            ),
+            "",
+            "| FY2024 configuration | slope | intercept | MAE | RMSE | correlation | correlation squared |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+            _calibration_row(
+                "Frozen raw, equal jurisdiction",
+                raw_metrics["equal_jurisdiction"],
+            ),
+            _calibration_row(
+                "Frozen factor-adjusted, equal jurisdiction",
+                adjusted_metrics["equal_jurisdiction"],
+            ),
+            _calibration_row(
+                "Frozen raw, issuance weighted",
+                raw_metrics["issuance_weighted"],
+            ),
+            _calibration_row(
+                "Frozen factor-adjusted, issuance weighted",
+                adjusted_metrics["issuance_weighted"],
+            ),
+            "",
+            (
+                "National issuance-weighted observed/raw/factor-adjusted dollar "
+                "rates are "
+                f"{_metric(dollars['national_dollar_rates_pct']['observed'], 3, '%')}/"
+                f"{_metric(dollars['national_dollar_rates_pct']['analytic_raw'], 3, '%')}/"
+                f"{_metric(dollars['national_dollar_rates_pct']['analytic_factor_adjusted'], 3, '%')}."
+            ),
+            "",
+            "The full state table is also the raw model/observed level-gap disclosure required by the app:",
+            "",
+            "| state | observed dollar rate | raw analytic | factor | factor-adjusted analytic | raw model/observed | adjusted model/observed | outside [0.7, 1.4] |",
+            "|---|---:|---:|---:|---:|---:|---:|:---:|",
+        ]
     )
-    issuance_difference = _number(
-        differences["issuance_weighted"],
-        context="issuance-weighted MAE difference",
-    )
-    equal_direction = "higher (worse)" if equal_difference > 0 else "lower (better)"
-    issuance_direction = (
-        "higher (worse)" if issuance_difference > 0 else "lower (better)"
-    )
-    rows_by_key = {
-        (row["route"], row["specification"]): row for row in crossing["comparison_rows"]
-    }
-    frozen_specification = "frozen model through FY2022, unfactored"
-    factored_specification = "frozen model through FY2022, FY2023-fit factor adjusted"
-    frozen_direct = rows_by_key[("direct stage-2", frozen_specification)]
-    frozen_distributional = rows_by_key[
-        ("distributional implied crossing", frozen_specification)
-    ]
-    differences_by_specification = crossing[
-        "distributional_minus_direct_mae_pp_by_specification"
-    ]
-    frozen_difference = differences_by_specification[frozen_specification]
-    factored_difference = differences_by_specification[factored_specification]
+    for row in dollars["states"]:
+        lines.append(
+            f"| {row['state']} | "
+            f"{_metric(row['observed_dollar_rate_pct'], 3, '%')} | "
+            f"{_metric(row['analytic_raw_dollar_rate_pct'], 3, '%')} | "
+            f"{_metric(row['state_factor'], 3)} | "
+            f"{_metric(row['analytic_factor_adjusted_dollar_rate_pct'], 3, '%')} | "
+            f"{_metric(row['raw_model_to_observed_ratio'], 3)} | "
+            f"{_metric(row['adjusted_model_to_observed_ratio'], 3)} | "
+            f"{'Yes' if row['adjusted_ratio_outside_0_7_to_1_4'] else 'No'} |"
+        )
+
+    flagged_states = dollars["level_ratio_gate"]["flagged_states"]
+    flagged_text = ", ".join(str(state) for state in flagged_states) or "none"
     lines.extend(
         [
             "",
             (
-                "For the primary unfactored FY2024 comparison, the distributional "
-                f"route's equal-state MAE is {abs(equal_difference):.3f}pp "
-                f"{equal_direction} than the direct model, and its "
-                f"issuance-weighted MAE is {abs(issuance_difference):.3f}pp "
-                f"{issuance_direction}."
+                f"{_integer(dollars['level_ratio_gate']['flagged_state_count'])} "
+                "states remain outside the inclusive [0.7, 1.4] adjusted level "
+                f"gate: {flagged_text}."
             ),
+            "",
+            "### Validated exported configuration versus observed bootstrap",
             "",
             (
-                "The frozen, unfactored distributional route is materially worse "
-                "on issuance-weighted state MAE: "
-                f"{_metric(frozen_distributional['issuance_weighted_mae_pp'], 3, 'pp')} "
-                "versus "
-                f"{_metric(frozen_direct['issuance_weighted_mae_pp'], 3, 'pp')} "
-                f"for the direct route ({_signed(frozen_difference['issuance_weighted'], 3, 'pp')}). "
-                "Its equal-state difference is "
-                f"{_signed(frozen_difference['equal_state'], 3, 'pp')}. After "
-                "FY2023-fit factors, the distributional route remains higher by "
-                f"{_metric(factored_difference['equal_state'], 3, 'pp')} "
-                "equal-state and "
-                f"{_metric(factored_difference['issuance_weighted'], 3, 'pp')} "
-                "issuance-weighted."
+                f"All {_integer(simulation['state_count'])} jurisdictions use "
+                f"{_integer(simulation['seed_count'])} seeds × "
+                f"{_integer(simulation['draws_per_seed'])} draws. The model "
+                "reads the serialized export arrays and state factors, uniformly "
+                "bootstraps cases, redraws each sampled occurrence, "
+                "caps `|D|`, applies the state factor after thresholding, anchors "
+                "each seed at its own model baseline mean, and clips anchored "
+                "rates at zero. The model SD includes case-composition and "
+                "conditional-process variation; the observed-bootstrap SD "
+                "contains case-composition variation in realized errors."
             ),
             "",
-            "### Model process versus observed bootstrap",
-            "",
-            (
-                f"Each row uses {int(simulation['draws']):,} draws. The model "
-                "draws one signed deviation for every fixed FY2024 CASE == 1 "
-                "record. The observed comparator uniformly bootstraps corrected "
-                "case errors. Both retain HWGT inside the measured-rate ratio and "
-                "apply the official-rate level adjustment from `simulate.py`."
-            ),
-            "",
-            "| state | official | model mean | model SD | observed-bootstrap mean | observed-bootstrap SD |",
-            "|---|---:|---:|---:|---:|---:|",
+            "| state | official | model mean | model SD (MC SE) | observed mean | observed SD (MC SE) | model tiers 0/5/10/15 | observed tiers 0/5/10/15 |",
+            "|---|---:|---:|---:|---:|---:|---|---|",
         ]
     )
     for row in simulation["rows"]:
+        model = row["model"]
+        observed = row["observed_bootstrap"]
         lines.append(
             f"| {row['state']} | {_metric(row['official_rate_pct'], 3, '%')} | "
-            f"{_metric(row['model']['mean_pct'], 3, '%')} | "
-            f"{_metric(row['model']['sd_pp'], 3, 'pp')} | "
-            f"{_metric(row['observed_bootstrap']['mean_pct'], 3, '%')} | "
-            f"{_metric(row['observed_bootstrap']['sd_pp'], 3, 'pp')} |"
+            f"{_metric(model['mean_pct'], 3, '%')} | "
+            f"{_metric(model['sd_pp'], 3, 'pp')} "
+            f"({_metric(model['sd_mc_se_pp'], 3, 'pp')}) | "
+            f"{_metric(observed['mean_pct'], 3, '%')} | "
+            f"{_metric(observed['sd_pp'], 3, 'pp')} "
+            f"({_metric(observed['sd_mc_se_pp'], 3, 'pp')}) | "
+            f"{tier_cell(model)} | {tier_cell(observed)} |"
         )
+
     quantization = export.get("q_decimal_quantization")
     quantization_text = (
         f" Quantile logs use {int(quantization)} decimal places because the "
@@ -563,12 +680,14 @@ def _render_distributional_findings(
         [
             "",
             (
-                "The self-contained FY2024 browser export contains "
+                "The self-contained frozen FY2024 export contains "
                 f"{_integer(export['fy2024_cases'])} CASE == 1 records across "
-                f"{_integer(export['state_count'])} jurisdictions. Its final size "
-                f"is {_metric(export['model_data_raw_bytes'] / 1_000_000, 2)} MB "
-                "raw and "
-                f"{_metric(export['model_data_gzip_bytes'] / 1_000_000, 2)} MB "
+                f"{_integer(export['state_count'])} jurisdictions, including "
+                "per-case caps and per-state factors/level flags but excluding "
+                "unused `p_pos`. Its final size is "
+                f"{_metric(export['model_data_raw_bytes'] / 1_000_000, 3)} MB raw "
+                "and "
+                f"{_metric(export['model_data_gzip_bytes'] / 1_000_000, 3)} MB "
                 f"under deterministic gzip.{quantization_text}"
             ),
             "",
@@ -611,14 +730,14 @@ def render_findings(
             (
                 "These are diagnostic and descriptive results. FY2024 informed "
                 "pipeline development across the audit-and-correct rounds and is "
-                "not a pristine holdout. This repository implements and exports a "
-                "signed conditional deviation process; the live simulator's "
-                "model-based mode consumes that export but is disabled in "
-                "production pending adversarial-review fixes (tail refit, state "
-                "factors, dollar-rate validation). The headline factor-validation "
-                "row (0.885pp equal-state MAE) belongs to the frozen expected-"
-                "dollar hurdle route, not the unfactored distributional export "
-                "the app consumes. Not yet implemented: a computation-failure "
+                "not a pristine holdout. This repository implements a signed "
+                "conditional deviation process and exports its magnitude/rate "
+                "configuration with a q99 tail refit, physical caps, frozen state "
+                "dollar factors, and matched dollar-rate validation. The hidden "
+                "browser model consumer remains "
+                "disabled and does not yet read the new cap/factor metadata; "
+                "`app.js` was intentionally left unchanged in this model-only "
+                "round. Not yet implemented: a computation-failure "
                 "mixture, an input-noise tier, an event-study design, and engine "
                 "recomputation under alternative policies. "
                 "See `docs/v2-error-model.md` for the implementation-status table."
@@ -655,6 +774,9 @@ def main() -> None:
         export_report = scripts_build_model_data.build_model_data(
             distributional_artifacts.predictions,
             tail_scale=distributional_artifacts.bundle.tail.scale,
+            tail_scale_se=distributional_artifacts.bundle.tail.scale_se,
+            state_factors=distributional_artifacts.state_factors,
+            state_diagnostics=distributional_artifacts.state_diagnostics,
             output_path=staged_model_data,
             metadata_path=MODEL_DATA.with_name("data.json"),
             threshold=distributional_deviation_model.THRESHOLD[
@@ -664,6 +786,11 @@ def main() -> None:
             quantile_levels=distributional_deviation_model.QUANTILE_LEVELS,
             quantile_columns=distributional_deviation_model.QUANTILE_COLUMNS,
         )
+        if export_report["data"] != distributional_artifacts.model_data_payload:
+            raise AssertionError(
+                "written model-data payload differs from the payload used for "
+                "shipped-configuration simulation validation"
+            )
         distributional_artifacts.result["export"].update(
             {
                 "model_data_raw_bytes": export_report["raw_bytes"],

@@ -160,6 +160,7 @@ def assemble() -> pd.DataFrame:
         "RAWBEN",
         "BENFIX",
         "FSBEN",
+        "BENMAX",
         "HWGT",
     ]
 
@@ -177,7 +178,10 @@ def assemble() -> pd.DataFrame:
         assigned = pd.to_numeric(df["RAWBEN"], errors="coerce")
         corrected = pd.to_numeric(df["BENFIX"], errors="coerce")
         formula = pd.to_numeric(df["FSBEN"], errors="coerce")
+        benmax = pd.to_numeric(df["BENMAX"], errors="coerce")
         weight = pd.to_numeric(df["HWGT"], errors="coerce")
+        if benmax.isna().any() or (benmax <= 0).any():
+            raise ValueError(f"FY{year}: BENMAX must be finite and positive")
 
         # Missing target/weight values cannot be assigned a label or loss and
         # are excluded explicitly.  Formula-benefit NaNs remain modelable and
@@ -201,13 +205,13 @@ def assemble() -> pd.DataFrame:
             raise ValueError(f"FY{year}: build_features changed row alignment")
 
         features["D"] = assigned.loc[valid] - corrected.loc[valid]
+        features["benmax"] = benmax.loc[valid]
+        features["deviation_cap"] = np.maximum(features["benmax"], features["D"].abs())
         features["official_error"] = (
             status.loc[valid].isin([2, 3]) & (amterr.loc[valid] > threshold)
         ).astype(np.int8)
         features["formula_benefit"] = formula.loc[valid]
-        features["formula_benefit_missing"] = (
-            formula.loc[valid].isna().astype(np.int8)
-        )
+        features["formula_benefit_missing"] = formula.loc[valid].isna().astype(np.int8)
         features["formula_deviation_abs"] = (
             assigned.loc[valid] - formula.loc[valid]
         ).abs()
@@ -485,9 +489,10 @@ def _nested_magnitude_oof_predictions(
         oof_log_prediction[score_idx] = fold_log_prediction
         oof_magnitude[score_idx] = np.exp(fold_log_prediction) * fold_smear
 
-    if not np.isfinite(oof_log_prediction).all() or not np.isfinite(
-        oof_magnitude
-    ).all():
+    if (
+        not np.isfinite(oof_log_prediction).all()
+        or not np.isfinite(oof_magnitude).all()
+    ):
         raise ValueError("nested magnitude cross-fitting produced invalid scores")
     return oof_log_prediction, oof_magnitude, fold_smears, inner_folds
 
@@ -664,11 +669,13 @@ def _state_rates(data: pd.DataFrame) -> pd.DataFrame:
         predicted = group["pred_err_dollars"].to_numpy(dtype=float)
         issuance_total = float(np.sum(w * issuance))
         if not np.isfinite(issuance_total) or issuance_total <= 0:
-            continue
+            raise ValueError(f"{state}: issuance total must be finite and positive")
         observed_total = float(np.sum(w * observed))
         predicted_total = float(np.sum(w * predicted))
         if not np.isfinite(predicted_total) or predicted_total <= 0:
-            continue
+            raise ValueError(
+                f"{state}: predicted error-dollar total must be finite and positive"
+            )
 
         observed_mean = _weighted_mean(observed, w)
         predicted_mean = _weighted_mean(predicted, w)
@@ -809,7 +816,9 @@ def _apply_state_factors(data: pd.DataFrame, factors: pd.DataFrame) -> pd.DataFr
     _require_columns(data, ["state", "pred_err_dollars"], "factor application data")
     _require_columns(factors, ["state", "state_factor"], "state factors")
     if factors["state"].duplicated().any():
-        duplicates = sorted(factors.loc[factors["state"].duplicated(), "state"].unique())
+        duplicates = sorted(
+            factors.loc[factors["state"].duplicated(), "state"].unique()
+        )
         raise ValueError(f"state factors contain duplicate jurisdictions: {duplicates}")
     factor_values = pd.to_numeric(factors["state_factor"], errors="coerce")
     if factor_values.isna().any() or not np.isfinite(factor_values).all():
@@ -1070,8 +1079,7 @@ def main(output_path: str | Path = OUT) -> dict[str, Any]:
                 "stage1-positive population"
             ),
             "smear_method": (
-                "deployable weighted mean exp(full-training OOF "
-                "log-magnitude residual)"
+                "deployable weighted mean exp(full-training OOF log-magnitude residual)"
             ),
             "smear": primary.smear,
             "oof_n": primary.stage3_oof_n,
@@ -1085,9 +1093,7 @@ def main(output_path: str | Path = OUT) -> dict[str, Any]:
                     "from that outer training set"
                 ),
                 "outer_folds": N_FOLDS,
-                "inner_folds_by_outer_fold": (
-                    primary.stage3_nested_oof_inner_folds
-                ),
+                "inner_folds_by_outer_fold": (primary.stage3_nested_oof_inner_folds),
                 "fold_smears": primary.stage3_nested_oof_fold_smears,
                 "observed_abs_D_mean_weighted": (
                     primary.stage3_oof_observed_mean_weighted
@@ -1136,9 +1142,7 @@ def main(output_path: str | Path = OUT) -> dict[str, Any]:
                 "dropped_missing_target_or_weight_by_year", {}
             ),
             "hurdle_population_nesting": {
-                "training_through_fy2023": _hurdle_population_summary(
-                    primary_train
-                ),
+                "training_through_fy2023": _hurdle_population_summary(primary_train),
                 "fy2024": _hurdle_population_summary(fy2024),
             },
         },

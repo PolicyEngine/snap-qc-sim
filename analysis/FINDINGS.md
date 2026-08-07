@@ -107,65 +107,203 @@ Any factor computed from FY2024 in the state records is a descriptive anchor onl
 
 ## Distributional deviation process
 
-The distributional model predicts the FY2024 SNAP QC error process from FY2017–19 and FY2022–23 records. It does not identify causal effects. Among cases with `|D| > $0.50`, it estimates `P(D > 0)`, nine conditional quantiles of `log(|D|)`, and a log-scale exponential tail beyond q99. Sign and magnitude are conditionally independent given the model features.
+The shipped distributional model is fit through FY2022, estimates state dollar factors out of sample in FY2023, and validates the frozen configuration in FY2024. It does not identify causal effects. Among cases with `|D| > $0.50`, it estimates nine conditional quantiles of `log(|D|)` and a log-scale exponential tail beyond q99.
 
-The tail scale is 0.4674 log dollars. The fit uses 7,907 top-decile OOF residual exceedances (effective n 3188.1).
+The tail uses option (a), the weighted mean excess beyond q99 of OOF median residuals. This preserves the existing exponential-log draw, survival, and moment equations while fitting at the actual attachment depth. The chosen scale is 0.2713 (SE 0.0198), implying a pre-cap Pareto tail index of 3.686. The q99 fit contains 622 strict exceedances (effective n 201.6).
+
+The finite-variance gate requires a point scale below 0.45 and a 95% upper scale below 0.5. The fitted upper value is 0.3101, leaving a margin of 0.1899.
+
+### Tail threshold stability
+
+| cutoff | train OOF residual mean excess (SE) | train effective n | FY2024 conditional mean excess (SE) | FY2024 effective n |
+|---:|---:|---:|---:|---:|
+| q85.0 | 0.5939 (0.0069) | 3916.1 | 0.4812 (0.0107) | 1463.3 |
+| q90.0 | 0.4802 (0.0074) | 2566.1 | 0.3771 (0.0108) | 1082.1 |
+| q95.0 | 0.3718 (0.0088) | 1227.4 | 0.2781 (0.0105) | 649.7 |
+| q97.5 | 0.3030 (0.0118) | 563.2 | 0.2292 (0.0104) | 435.9 |
+| q99.0 | 0.2713 (0.0198) | 201.6 | 0.1686 (0.0099) | 271.0 |
+| q99.5 | 0.2486 (0.0339) | 79.0 | 0.1535 (0.0111) | 201.1 |
+
+Training OOF mean excess declines through q97.5 and stabilizes at q99-q99.5. q99 matches the attachment depth while retaining more effective sample than q99.5. The FY2024 diagnostic q85 is bounded between the adjacent shipped q75 and q90 cutoffs, and q99.5 is bounded above q99, so the diagnostic thresholds remain ordered with the shipped grid; conditional excess is lower at both deepest cutoffs.
+
+### Physical support cap
+
+Each case-year caps `|D|` at `max(BENMAX, observed |D|)` before the strict threshold. `BENMAX` is the case's maximum monthly allotment and supplies the default maximum-allotment-scale ceiling; the observed-`|D|` override preserves realized support for the exceptions. FY2024 caps range from $291 to $3,958; 27 observations require the observed-support term. The cap winsorizes 0.110% of weighted all-case draws. It removes 0.733% of unfactored analytic expected dollars and 0.744% after state factors, reducing the corresponding national modeled rates by 0.0385pp and 0.0503pp, respectively.
 
 Native HistGB quantile loss retains the hurdle's feature set, NaN routing, and HWGT support without adding another dependency.
 
-Sign probabilities use HWGT and the same nested outer/inner OOF isotonic calibration as the hurdle stages.
+Sign probabilities use HWGT and the same nested outer/inner OOF isotonic calibration as the hurdle stages. They remain in analysis but `p_pos` is omitted from the export because rate outputs use only `|D|`.
 
 | sign model/sample | raw AUC | calibrated AUC | raw PR-AUC | calibrated PR-AUC | raw Brier | calibrated Brier | raw calibration-in-the-large | calibrated calibration-in-the-large |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Training deviators, nested OOF | 0.6775 | 0.6763 | 0.7794 | 0.7770 | 0.2062 | 0.2063 | +0.0044 | +0.0066 |
-| FY2024 deviators | 0.6997 | 0.6996 | 0.8008 | 0.7934 | 0.2014 | 0.2009 | +0.0347 | +0.0175 |
+| Frozen training deviators, nested OOF | 0.6673 | 0.6659 | 0.7736 | 0.7703 | 0.2075 | 0.2075 | -0.0001 | +0.0025 |
+| FY2024 deviators | 0.6862 | 0.6861 | 0.7894 | 0.7801 | 0.2031 | 0.2031 | +0.0260 | +0.0114 |
 
 ### Weighted FY2024 quantile coverage
 
-Coverage uses FY2024 deviators and HWGT. A flag marks an absolute difference from nominal coverage greater than 3 percentage points.
+Coverage uses FY2024 deviators and HWGT. Signed gaps are shown; negative means undercoverage and a fitted quantile below its nominal target.
 
-| quantile | weighted coverage | difference | >3pp flag |
+| quantile | weighted coverage | signed gap | >3pp flag |
 |---:|---:|---:|:---:|
-| 0.050 | 4.70% | -0.30pp | No |
-| 0.100 | 8.34% | -1.66pp | No |
-| 0.250 | 23.18% | -1.82pp | No |
-| 0.500 | 48.18% | -1.82pp | No |
-| 0.750 | 71.53% | -3.47pp | Yes |
-| 0.900 | 86.75% | -3.25pp | Yes |
-| 0.950 | 92.21% | -2.79pp | No |
-| 0.975 | 94.75% | -2.75pp | No |
-| 0.990 | 96.87% | -2.13pp | No |
+| 0.050 | 4.75% | -0.25pp | No |
+| 0.100 | 8.29% | -1.71pp | No |
+| 0.250 | 21.15% | -3.85pp | Yes |
+| 0.500 | 43.90% | -6.10pp | Yes |
+| 0.750 | 68.11% | -6.89pp | Yes |
+| 0.900 | 82.56% | -7.44pp | Yes |
+| 0.950 | 89.73% | -5.27pp | Yes |
+| 0.975 | 93.03% | -4.47pp | Yes |
+| 0.990 | 95.59% | -3.41pp | Yes |
+
+All 9 signed gaps are negative. The weighted PIT mean is 0.5544 versus 0.5 (+0.0544; Kish-effective-n iid-Uniform reference z=+15.40). The descriptive joint effective-n-scaled weighted Cramér–von Mises statistic is 21.630.
+These reference statistics are not design-based tests and omit QC survey dependence and fitted-CDF uncertainty.
 
 ### Threshold-crossing validation
 
-The observed FY2024 official-error prevalence is 13.3939%. Literal `|D| > $56` prevalence is 13.3932%. 1 reconciliation-anomaly case separates the two definitions.
+The observed FY2024 official-error prevalence is 13.3939%. Literal `|D| > $56` prevalence is 13.3932%.
 
 | route | specification | national predicted prevalence | equal-state MAE | issuance-weighted MAE |
 |---|---|---:|---:|---:|
 | direct stage-2 | primary model through FY2023, unfactored | 12.919% | 3.021pp | 2.102pp |
 | distributional implied crossing | primary model through FY2023, unfactored | 13.224% | 3.080pp | 2.019pp |
 | direct stage-2 | frozen model through FY2022, unfactored | 12.714% | 3.017pp | 2.188pp |
-| direct stage-2 | frozen model through FY2022, FY2023-fit factor adjusted | 13.083% | 1.559pp | 1.202pp |
 | distributional implied crossing | frozen model through FY2022, unfactored | 11.992% | 3.022pp | 2.578pp |
-| distributional implied crossing | frozen model through FY2022, FY2023-fit factor adjusted | 12.800% | 1.591pp | 1.207pp |
 
-For the primary unfactored FY2024 comparison, the distributional route's equal-state MAE is 0.060pp higher (worse) than the direct model, and its issuance-weighted MAE is 0.084pp lower (better).
+### FY2024 state dollar-rate validation
 
-The frozen, unfactored distributional route is materially worse on issuance-weighted state MAE: 2.578pp versus 2.188pp for the direct route (+0.390pp). Its equal-state difference is +0.004pp. After FY2023-fit factors, the distributional route remains higher by 0.032pp equal-state and 0.005pp issuance-weighted.
+These are matched frozen-model comparisons: both raw and factor-adjusted rows use the distributional model fit through FY2022. Factors are estimated from FY2023 out-of-sample dollar ratios, EB-shrunk toward the fixed prior mean 1, frozen, and applied to FY2024. Factor uncertainty is not propagated.
 
-### Model process versus observed bootstrap
+| FY2024 configuration | slope | intercept | MAE | RMSE | correlation | correlation squared |
+|---|---:|---:|---:|---:|---:|---:|
+| Frozen raw, equal jurisdiction | 1.188 | +0.181pp | 2.020pp | 2.580pp | 0.463 | 0.215 |
+| Frozen factor-adjusted, equal jurisdiction | 0.907 | +0.899pp | 0.928pp | 1.204pp | 0.901 | 0.812 |
+| Frozen raw, issuance weighted | 0.924 | +2.413pp | 2.282pp | 2.673pp | 0.410 | 0.168 |
+| Frozen factor-adjusted, issuance weighted | 0.852 | +1.500pp | 0.834pp | 1.099pp | 0.875 | 0.765 |
 
-Each row uses 4,000 draws. The model draws one signed deviation for every fixed FY2024 CASE == 1 record. The observed comparator uniformly bootstraps corrected case errors. Both retain HWGT inside the measured-rate ratio and apply the official-rate level adjustment from `simulate.py`.
+National issuance-weighted observed/raw/factor-adjusted dollar rates are 7.223%/5.207%/6.717%.
 
-| state | official | model mean | model SD | observed-bootstrap mean | observed-bootstrap SD |
-|---|---:|---:|---:|---:|---:|
-| CO | 9.970% | 8.620% | 1.091pp | 9.976% | 0.923pp |
-| CA | 10.980% | 9.837% | 0.793pp | 10.992% | 0.808pp |
-| NY | 14.090% | 11.022% | 0.616pp | 14.099% | 0.946pp |
-| TX | 8.320% | 7.494% | 0.647pp | 8.320% | 0.651pp |
+The full state table is also the raw model/observed level-gap disclosure required by the app:
 
-The self-contained FY2024 browser export contains 44,800 CASE == 1 records across 53 jurisdictions. Its final size is 3.25 MB raw and 0.78 MB under deterministic gzip. Quantile logs use 2 decimal places because the four-significant-figure draft exceeded 2.5 MB.
+| state | observed dollar rate | raw analytic | factor | factor-adjusted analytic | raw model/observed | adjusted model/observed | outside [0.7, 1.4] |
+|---|---:|---:|---:|---:|---:|---:|:---:|
+| AK | 4.793% | 2.997% | 1.053 | 3.157% | 0.625 | 0.659 | Yes |
+| AL | 6.154% | 4.266% | 1.246 | 5.314% | 0.693 | 0.863 | No |
+| AR | 3.691% | 4.640% | 0.594 | 2.757% | 1.257 | 0.747 | No |
+| AZ | 6.545% | 5.038% | 1.514 | 7.629% | 0.770 | 1.166 | No |
+| CA | 7.953% | 5.657% | 1.385 | 7.834% | 0.711 | 0.985 | No |
+| CO | 7.421% | 5.132% | 1.203 | 6.175% | 0.692 | 0.832 | No |
+| CT | 8.846% | 5.642% | 1.345 | 7.589% | 0.638 | 0.858 | No |
+| DC | 14.034% | 6.005% | 2.396 | 14.390% | 0.428 | 1.025 | No |
+| DE | 6.306% | 5.506% | 1.221 | 6.723% | 0.873 | 1.066 | No |
+| FL | 7.877% | 4.939% | 1.589 | 7.850% | 0.627 | 0.997 | No |
+| GA | 10.406% | 5.340% | 2.156 | 11.515% | 0.513 | 1.106 | No |
+| GU | 5.404% | 2.781% | 1.643 | 4.568% | 0.515 | 0.845 | No |
+| HI | 2.534% | 2.956% | 1.203 | 3.557% | 1.167 | 1.404 | Yes |
+| IA | 4.098% | 5.748% | 0.710 | 4.081% | 1.403 | 0.996 | No |
+| ID | 2.129% | 4.831% | 0.304 | 1.471% | 2.269 | 0.691 | Yes |
+| IL | 9.242% | 5.557% | 1.573 | 8.743% | 0.601 | 0.946 | No |
+| IN | 5.969% | 3.969% | 1.525 | 6.054% | 0.665 | 1.014 | No |
+| KS | 3.841% | 4.685% | 0.974 | 4.561% | 1.219 | 1.187 | No |
+| KY | 4.374% | 5.120% | 0.680 | 3.482% | 1.170 | 0.796 | No |
+| LA | 5.734% | 4.935% | 1.053 | 5.196% | 0.861 | 0.906 | No |
+| MA | 10.646% | 6.069% | 1.253 | 7.606% | 0.570 | 0.714 | No |
+| MD | 8.909% | 5.284% | 1.733 | 9.157% | 0.593 | 1.028 | No |
+| ME | 7.185% | 6.536% | 1.446 | 9.449% | 0.910 | 1.315 | No |
+| MI | 8.159% | 6.620% | 1.365 | 9.036% | 0.811 | 1.108 | No |
+| MN | 9.127% | 7.516% | 0.817 | 6.140% | 0.823 | 0.673 | Yes |
+| MO | 4.192% | 4.049% | 0.935 | 3.786% | 0.966 | 0.903 | No |
+| MS | 6.140% | 4.326% | 1.181 | 5.110% | 0.704 | 0.832 | No |
+| MT | 4.971% | 5.744% | 0.780 | 4.481% | 1.155 | 0.901 | No |
+| NC | 7.169% | 6.427% | 1.011 | 6.499% | 0.896 | 0.906 | No |
+| ND | 6.275% | 4.791% | 1.106 | 5.299% | 0.764 | 0.844 | No |
+| NE | 3.318% | 4.593% | 0.750 | 3.443% | 1.384 | 1.037 | No |
+| NH | 5.783% | 6.220% | 0.864 | 5.376% | 1.076 | 0.930 | No |
+| NJ | 4.467% | 4.633% | 1.011 | 4.684% | 1.037 | 1.049 | No |
+| NM | 9.384% | 5.739% | 1.475 | 8.467% | 0.612 | 0.902 | No |
+| NV | 6.143% | 6.565% | 0.681 | 4.472% | 1.069 | 0.728 | No |
+| NY | 7.837% | 3.985% | 1.532 | 6.103% | 0.508 | 0.779 | No |
+| OH | 4.706% | 4.534% | 1.000 | 4.535% | 0.964 | 0.964 | No |
+| OK | 8.376% | 4.691% | 1.461 | 6.853% | 0.560 | 0.818 | No |
+| OR | 10.838% | 6.594% | 1.574 | 10.378% | 0.608 | 0.958 | No |
+| PA | 7.822% | 5.970% | 1.109 | 6.623% | 0.763 | 0.847 | No |
+| RI | 11.474% | 5.279% | 1.984 | 10.471% | 0.460 | 0.913 | No |
+| SC | 5.785% | 4.422% | 1.428 | 6.314% | 0.764 | 1.091 | No |
+| SD | 2.274% | 3.869% | 0.337 | 1.305% | 1.702 | 0.574 | Yes |
+| TN | 4.208% | 4.188% | 1.037 | 4.343% | 0.995 | 1.032 | No |
+| TX | 6.301% | 4.614% | 1.024 | 4.726% | 0.732 | 0.750 | No |
+| UT | 1.907% | 4.065% | 0.525 | 2.134% | 2.132 | 1.119 | No |
+| VA | 7.598% | 5.731% | 1.194 | 6.843% | 0.754 | 0.901 | No |
+| VI | 3.052% | 4.387% | 1.522 | 6.674% | 1.437 | 2.187 | Yes |
+| VT | 4.239% | 5.296% | 0.755 | 3.996% | 1.249 | 0.943 | No |
+| WA | 5.294% | 5.089% | 1.126 | 5.728% | 0.961 | 1.082 | No |
+| WI | 3.727% | 7.282% | 0.652 | 4.748% | 1.954 | 1.274 | No |
+| WV | 4.006% | 6.053% | 0.805 | 4.873% | 1.511 | 1.217 | No |
+| WY | 3.522% | 4.553% | 0.314 | 1.428% | 1.293 | 0.405 | Yes |
+
+7 states remain outside the inclusive [0.7, 1.4] adjusted level gate: AK, HI, ID, MN, SD, VI, WY.
+
+### Validated exported configuration versus observed bootstrap
+
+All 53 jurisdictions use 8 seeds × 4,000 draws. The model reads the serialized export arrays and state factors, uniformly bootstraps cases, redraws each sampled occurrence, caps `|D|`, applies the state factor after thresholding, anchors each seed at its own model baseline mean, and clips anchored rates at zero. The model SD includes case-composition and conditional-process variation; the observed-bootstrap SD contains case-composition variation in realized errors.
+
+| state | official | model mean | model SD (MC SE) | observed mean | observed SD (MC SE) | model tiers 0/5/10/15 | observed tiers 0/5/10/15 |
+|---|---:|---:|---:|---:|---:|---|---|
+| AK | 24.660% | 24.660% | 0.572pp (0.004pp) | 24.671% | 0.823pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| AL | 8.320% | 8.320% | 0.556pp (0.001pp) | 8.323% | 0.574pp (0.001pp) | 0: 0.0%; 5: 28.7%; 10: 71.1%; 15: 0.2% | 0: 0.0%; 5: 29.1%; 10: 70.6%; 15: 0.3% |
+| AR | 9.560% | 9.560% | 0.329pp (0.001pp) | 9.563% | 0.530pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 90.7%; 15: 9.3% | 0: 0.0%; 5: 0.0%; 10: 80.0%; 15: 20.0% |
+| AZ | 8.840% | 8.840% | 0.961pp (0.003pp) | 8.836% | 0.791pp (0.003pp) | 0: 0.0%; 5: 19.2%; 10: 69.1%; 15: 11.6% | 0: 0.0%; 5: 14.5%; 10: 78.1%; 15: 7.4% |
+| CA | 10.980% | 10.980% | 0.889pp (0.003pp) | 10.975% | 0.827pp (0.003pp) | 0: 0.0%; 5: 0.0%; 10: 13.2%; 15: 86.8% | 0: 0.0%; 5: 0.0%; 10: 11.7%; 15: 88.3% |
+| CO | 9.970% | 9.970% | 0.754pp (0.002pp) | 9.963% | 0.905pp (0.004pp) | 0: 0.0%; 5: 0.2%; 10: 53.2%; 15: 46.6% | 0: 0.0%; 5: 1.0%; 10: 51.7%; 15: 47.3% |
+| CT | 10.250% | 10.250% | 0.859pp (0.004pp) | 10.244% | 0.858pp (0.003pp) | 0: 0.0%; 5: 0.2%; 10: 39.5%; 15: 60.3% | 0: 0.0%; 5: 0.3%; 10: 39.2%; 15: 60.4% |
+| DC | 17.380% | 17.380% | 1.465pp (0.006pp) | 17.378% | 1.053pp (0.005pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| DE | 12.370% | 12.370% | 0.785pp (0.002pp) | 12.377% | 0.698pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| FL | 15.130% | 15.130% | 0.878pp (0.003pp) | 15.130% | 0.717pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| GA | 15.650% | 15.650% | 1.250pp (0.004pp) | 15.650% | 0.920pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| GU | 9.720% | 9.720% | 1.167pp (0.003pp) | 9.728% | 1.281pp (0.006pp) | 0: 0.0%; 5: 5.3%; 10: 57.4%; 15: 37.3% | 0: 0.0%; 5: 7.4%; 10: 54.0%; 15: 38.6% |
+| HI | 6.680% | 6.680% | 0.505pp (0.003pp) | 6.681% | 0.373pp (0.001pp) | 0: 8.1%; 5: 91.0%; 10: 0.9%; 15: 0.0% | 0: 2.7%; 5: 97.3%; 10: 0.1%; 15: 0.0% |
+| IA | 6.140% | 6.140% | 0.427pp (0.002pp) | 6.136% | 0.573pp (0.003pp) | 0: 38.4%; 5: 61.6%; 10: 0.0%; 15: 0.0% | 0: 41.9%; 5: 57.9%; 10: 0.2%; 15: 0.0% |
+| ID | 3.590% | 3.590% | 0.149pp (0.000pp) | 3.594% | 0.358pp (0.001pp) | 0: 100.0%; 5: 0.0%; 10: 0.0%; 15: 0.0% | 0: 100.0%; 5: 0.0%; 10: 0.0%; 15: 0.0% |
+| IL | 11.560% | 11.560% | 0.988pp (0.004pp) | 11.566% | 0.930pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 5.2%; 15: 94.8% | 0: 0.0%; 5: 0.0%; 10: 4.0%; 15: 96.0% |
+| IN | 9.520% | 9.520% | 0.676pp (0.003pp) | 9.524% | 0.587pp (0.002pp) | 0: 0.0%; 5: 0.8%; 10: 75.8%; 15: 23.3% | 0: 0.0%; 5: 0.3%; 10: 78.9%; 15: 20.8% |
+| KS | 9.980% | 9.980% | 0.535pp (0.002pp) | 9.981% | 0.468pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 53.0%; 15: 47.0% | 0: 0.0%; 5: 0.0%; 10: 52.9%; 15: 47.1% |
+| KY | 9.110% | 9.110% | 0.401pp (0.001pp) | 9.108% | 0.608pp (0.002pp) | 0: 0.0%; 5: 0.1%; 10: 98.1%; 15: 1.8% | 0: 0.0%; 5: 2.7%; 10: 89.5%; 15: 7.8% |
+| LA | 6.620% | 6.620% | 0.573pp (0.002pp) | 6.628% | 0.696pp (0.004pp) | 0: 13.8%; 5: 85.1%; 10: 1.1%; 15: 0.0% | 0: 18.4%; 5: 78.7%; 10: 3.0%; 15: 0.0% |
+| MA | 14.100% | 14.100% | 0.882pp (0.004pp) | 14.096% | 1.097pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| MD | 13.640% | 13.640% | 1.107pp (0.002pp) | 13.633% | 1.026pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| ME | 10.260% | 10.260% | 1.043pp (0.008pp) | 10.260% | 0.811pp (0.002pp) | 0: 0.0%; 5: 1.0%; 10: 40.5%; 15: 58.5% | 0: 0.0%; 5: 0.1%; 10: 38.6%; 15: 61.3% |
+| MI | 9.530% | 9.530% | 1.106pp (0.006pp) | 9.526% | 0.936pp (0.006pp) | 0: 0.0%; 5: 7.8%; 10: 59.9%; 15: 32.2% | 0: 0.0%; 5: 4.6%; 10: 65.3%; 15: 30.1% |
+| MN | 8.980% | 8.980% | 0.768pp (0.002pp) | 8.964% | 1.184pp (0.006pp) | 0: 0.0%; 5: 9.5%; 10: 80.8%; 15: 9.7% | 0: 0.2%; 5: 20.9%; 10: 60.0%; 15: 18.9% |
+| MO | 9.420% | 9.420% | 0.495pp (0.002pp) | 9.424% | 0.580pp (0.002pp) | 0: 0.0%; 5: 0.1%; 10: 87.7%; 15: 12.3% | 0: 0.0%; 5: 0.4%; 10: 83.6%; 15: 16.0% |
+| MS | 10.690% | 10.690% | 0.554pp (0.003pp) | 10.693% | 0.580pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 10.2%; 15: 89.8% | 0: 0.0%; 5: 0.0%; 10: 11.5%; 15: 88.5% |
+| MT | 8.890% | 8.890% | 0.643pp (0.001pp) | 8.895% | 0.760pp (0.004pp) | 0: 0.0%; 5: 7.5%; 10: 87.5%; 15: 5.0% | 0: 0.0%; 5: 11.5%; 10: 80.6%; 15: 7.8% |
+| NC | 10.210% | 10.210% | 0.687pp (0.003pp) | 10.221% | 0.734pp (0.003pp) | 0: 0.0%; 5: 0.0%; 10: 39.0%; 15: 61.0% | 0: 0.0%; 5: 0.0%; 10: 39.0%; 15: 61.0% |
+| ND | 7.910% | 7.910% | 0.945pp (0.005pp) | 7.925% | 1.182pp (0.005pp) | 0: 1.2%; 5: 55.0%; 10: 41.7%; 15: 2.1% | 0: 4.3%; 5: 50.4%; 10: 40.6%; 15: 4.8% |
+| NE | 5.500% | 5.500% | 0.388pp (0.002pp) | 5.498% | 0.676pp (0.003pp) | 0: 89.9%; 5: 10.2%; 10: 0.0%; 15: 0.0% | 0: 78.1%; 5: 21.8%; 10: 0.1%; 15: 0.0% |
+| NH | 7.570% | 7.570% | 0.738pp (0.004pp) | 7.574% | 0.772pp (0.004pp) | 0: 1.1%; 5: 71.9%; 10: 26.8%; 15: 0.1% | 0: 1.4%; 5: 70.2%; 10: 28.2%; 15: 0.2% |
+| NJ | 14.330% | 14.330% | 0.650pp (0.004pp) | 14.334% | 0.671pp (0.002pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| NM | 14.610% | 14.610% | 0.868pp (0.001pp) | 14.611% | 0.879pp (0.003pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| NV | 5.940% | 5.940% | 0.525pp (0.001pp) | 5.936% | 0.770pp (0.003pp) | 0: 56.4%; 5: 43.6%; 10: 0.0%; 15: 0.0% | 0: 54.5%; 5: 45.0%; 10: 0.5%; 15: 0.0% |
+| NY | 14.090% | 14.090% | 0.744pp (0.003pp) | 14.090% | 0.935pp (0.003pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| OH | 9.010% | 9.010% | 0.502pp (0.001pp) | 9.015% | 0.614pp (0.002pp) | 0: 0.0%; 5: 1.7%; 10: 95.4%; 15: 3.0% | 0: 0.0%; 5: 4.3%; 10: 89.9%; 15: 5.9% |
+| OK | 10.870% | 10.870% | 0.781pp (0.003pp) | 10.872% | 0.829pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 12.9%; 15: 87.1% | 0: 0.0%; 5: 0.0%; 10: 14.5%; 15: 85.5% |
+| OR | 14.060% | 14.060% | 1.229pp (0.005pp) | 14.064% | 1.166pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% | 0: 0.0%; 5: 0.0%; 10: 0.0%; 15: 100.0% |
+| PA | 10.760% | 10.760% | 0.793pp (0.004pp) | 10.755% | 0.912pp (0.005pp) | 0: 0.0%; 5: 0.0%; 10: 16.7%; 15: 83.3% | 0: 0.0%; 5: 0.0%; 10: 20.6%; 15: 79.4% |
+| RI | 12.290% | 12.290% | 1.167pp (0.004pp) | 12.289% | 0.939pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 2.0%; 15: 98.0% | 0: 0.0%; 5: 0.0%; 10: 0.6%; 15: 99.4% |
+| SC | 9.250% | 9.250% | 0.710pp (0.004pp) | 9.250% | 0.629pp (0.003pp) | 0: 0.0%; 5: 3.4%; 10: 82.2%; 15: 14.4% | 0: 0.0%; 5: 2.0%; 10: 86.0%; 15: 12.0% |
+| SD | 3.280% | 3.280% | 0.198pp (0.001pp) | 3.280% | 0.443pp (0.001pp) | 0: 100.0%; 5: 0.0%; 10: 0.0%; 15: 0.0% | 0: 100.0%; 5: 0.0%; 10: 0.0%; 15: 0.0% |
+| TN | 9.470% | 9.470% | 0.525pp (0.003pp) | 9.469% | 0.516pp (0.002pp) | 0: 0.0%; 5: 0.1%; 10: 84.4%; 15: 15.5% | 0: 0.0%; 5: 0.1%; 10: 84.9%; 15: 15.0% |
+| TX | 8.320% | 8.320% | 0.511pp (0.002pp) | 8.321% | 0.648pp (0.003pp) | 0: 0.0%; 5: 26.9%; 10: 73.0%; 15: 0.2% | 0: 0.0%; 5: 31.7%; 10: 67.5%; 15: 0.7% |
+| UT | 5.740% | 5.740% | 0.239pp (0.001pp) | 5.736% | 0.334pp (0.001pp) | 0: 86.0%; 5: 14.0%; 10: 0.0%; 15: 0.0% | 0: 79.3%; 5: 20.7%; 10: 0.0%; 15: 0.0% |
+| VA | 11.500% | 11.500% | 0.793pp (0.004pp) | 11.501% | 0.844pp (0.004pp) | 0: 0.0%; 5: 0.0%; 10: 2.3%; 15: 97.7% | 0: 0.0%; 5: 0.0%; 10: 3.1%; 15: 96.9% |
+| VI | 3.540% | 3.540% | 1.421pp (0.006pp) | 3.548% | 0.766pp (0.004pp) | 0: 94.8%; 5: 4.8%; 10: 0.3%; 15: 0.0% | 0: 99.7%; 5: 0.3%; 10: 0.0%; 15: 0.0% |
+| VT | 5.130% | 5.130% | 0.637pp (0.003pp) | 5.125% | 0.800pp (0.002pp) | 0: 90.6%; 5: 9.3%; 10: 0.0%; 15: 0.0% | 0: 86.1%; 5: 13.8%; 10: 0.1%; 15: 0.0% |
+| WA | 6.060% | 6.060% | 0.801pp (0.004pp) | 6.055% | 0.724pp (0.003pp) | 0: 48.4%; 5: 50.4%; 10: 1.2%; 15: 0.0% | 0: 48.1%; 5: 51.4%; 10: 0.5%; 15: 0.0% |
+| WI | 4.470% | 4.470% | 0.510pp (0.002pp) | 4.471% | 0.554pp (0.003pp) | 0: 99.7%; 5: 0.3%; 10: 0.0%; 15: 0.0% | 0: 99.5%; 5: 0.5%; 10: 0.0%; 15: 0.0% |
+| WV | 9.430% | 9.430% | 0.597pp (0.002pp) | 9.433% | 0.602pp (0.002pp) | 0: 0.0%; 5: 0.5%; 10: 82.5%; 15: 17.0% | 0: 0.0%; 5: 0.5%; 10: 82.6%; 15: 16.9% |
+| WY | 5.120% | 5.120% | 0.299pp (0.001pp) | 5.112% | 1.068pp (0.006pp) | 0: 99.5%; 5: 0.5%; 10: 0.0%; 15: 0.0% | 0: 80.5%; 5: 18.5%; 10: 1.0%; 15: 0.0% |
+
+The self-contained frozen FY2024 export contains 44,800 CASE == 1 records across 53 jurisdictions, including per-case caps and per-state factors/level flags but excluding unused `p_pos`. Its final size is 3.124 MB raw and 0.741 MB under deterministic gzip. Quantile logs use 2 decimal places because the four-significant-figure draft exceeded 2.5 MB.
 
 ## Interpretation boundary
 
-These are diagnostic and descriptive results. FY2024 informed pipeline development across the audit-and-correct rounds and is not a pristine holdout. This repository implements and exports a signed conditional deviation process; the live simulator's model-based mode consumes that export but is disabled in production pending adversarial-review fixes (tail refit, state factors, dollar-rate validation). The headline factor-validation row (0.885pp equal-state MAE) belongs to the frozen expected-dollar hurdle route, not the unfactored distributional export the app consumes. Not yet implemented: a computation-failure mixture, an input-noise tier, an event-study design, and engine recomputation under alternative policies. See `docs/v2-error-model.md` for the implementation-status table.
+These are diagnostic and descriptive results. FY2024 informed pipeline development across the audit-and-correct rounds and is not a pristine holdout. This repository implements a signed conditional deviation process and exports its magnitude/rate configuration with a q99 tail refit, physical caps, frozen state dollar factors, and matched dollar-rate validation. The hidden browser model consumer remains disabled and does not yet read the new cap/factor metadata; `app.js` was intentionally left unchanged in this model-only round. Not yet implemented: a computation-failure mixture, an input-noise tier, an event-study design, and engine recomputation under alternative policies. See `docs/v2-error-model.md` for the implementation-status table.

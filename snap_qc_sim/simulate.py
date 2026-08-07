@@ -43,8 +43,12 @@ def tier_of(rate: float) -> int:
     return 15
 
 
-def lever_error(error: float, elements: frozenset[int], suppressed: frozenset[int],
-                effectiveness: float) -> float:
+def lever_error(
+    error: float,
+    elements: frozenset[int],
+    suppressed: frozenset[int],
+    effectiveness: float,
+) -> float:
     """Counted error dollars for a case after suppressing lever categories.
 
     Single-attribution approximation: the case's error is scaled by the share
@@ -72,6 +76,8 @@ def simulate(
     Resampling at the scenario's sample size carries the audit-volume
     variance effect (SD ~ 1/sqrt(n)); the distribution is centered at the
     official rate shifted by the lever's effect on the sample's own rate.
+    This low-level function returns the centered draws without constraining
+    support. Presentation and validation consumers clip anchored rates at zero.
     """
     rng = rng or np.random.default_rng()
     w = np.array([c.weight for c in cases])

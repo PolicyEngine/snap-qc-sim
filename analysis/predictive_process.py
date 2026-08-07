@@ -8,8 +8,9 @@ excess with scale ``tail_scale``::
 
     log(|D|) = log_q99 - tail_scale * log((1 - u) / (1 - q99)).
 
-This continuation is a Pareto tail in dollars.  Its first moment is finite
-exactly when ``0 < tail_scale < 1``.
+This continuation is a Pareto tail in dollars.  Reported uncertainty requires
+finite variance, so every public calculation enforces ``tail_scale < 0.45``:
+the mathematical 0.5 boundary minus a 0.05 regression margin.
 """
 
 from __future__ import annotations
@@ -22,6 +23,9 @@ QUANTILE_LEVELS = np.array(
     [0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.975, 0.99],
     dtype=float,
 )
+FINITE_VARIANCE_TAIL_SCALE = 0.5
+TAIL_SCALE_MARGIN = 0.05
+MAX_TAIL_SCALE = FINITE_VARIANCE_TAIL_SCALE - TAIL_SCALE_MARGIN
 
 
 def _minimum_log(minimum_magnitude: float) -> float:
@@ -63,11 +67,25 @@ def _probability(value: Any, name: str) -> np.ndarray:
 
 
 def _positive_tail_scale(value: Any) -> np.ndarray:
-    """Return a finite, strictly positive exponential-tail scale."""
+    """Return a positive scale safely inside the finite-variance region."""
     scale = _finite_array(value, "tail_scale")
     if np.any(scale <= 0):
         raise ValueError("tail_scale must be strictly positive")
+    if np.any(scale >= MAX_TAIL_SCALE):
+        raise ValueError(
+            f"tail_scale must be below {MAX_TAIL_SCALE:.2f}: the dollar-tail "
+            "variance requires a scale below 0.5 and the model reserves a "
+            f"{TAIL_SCALE_MARGIN:.2f} regression margin"
+        )
     return scale
+
+
+def _magnitude_cap(value: Any, minimum_magnitude: float) -> np.ndarray:
+    """Return a finite per-case cap no lower than the modeled support floor."""
+    cap = _finite_array(value, "magnitude_cap")
+    if np.any(cap < minimum_magnitude):
+        raise ValueError("magnitude_cap must be at least the modeled minimum magnitude")
+    return cap
 
 
 def _threshold(value: Any) -> np.ndarray:
@@ -249,22 +267,25 @@ def draw_deviations(
     log_quantiles: Any,
     tail_scale: Any,
     rng: Any,
+    *,
+    magnitude_cap: Any,
     quantile_levels: Any = QUANTILE_LEVELS,
     minimum_magnitude: float = 0.5,
 ) -> np.ndarray:
-    """Draw one signed deviation for every broadcast per-case parameter cell."""
+    """Draw one signed, physically capped deviation per parameter cell."""
     quantiles, levels, minimum_log = _prepare_quantiles(
         log_quantiles, quantile_levels, minimum_magnitude
     )
     deviation_probability = _probability(p_dev, "p_dev")
     positive_probability = _probability(p_pos, "p_pos")
     scale = _positive_tail_scale(tail_scale)
-    shape, quantiles, values = _broadcast_inputs(
-        quantiles,
-        p_dev=deviation_probability,
-        p_pos=positive_probability,
-        tail_scale=scale,
-    )
+    inputs = {
+        "p_dev": deviation_probability,
+        "p_pos": positive_probability,
+        "tail_scale": scale,
+        "magnitude_cap": _magnitude_cap(magnitude_cap, minimum_magnitude),
+    }
+    shape, quantiles, values = _broadcast_inputs(quantiles, **inputs)
 
     deviates = _uniform(rng, shape, "deviation draw") < values["p_dev"]
     positive = _uniform(rng, shape, "sign draw") < values["p_pos"]
@@ -276,6 +297,7 @@ def draw_deviations(
         levels,
         minimum_log,
     )
+    log_magnitude = np.minimum(log_magnitude, np.log(values["magnitude_cap"]))
     with np.errstate(over="ignore"):
         magnitude = np.exp(log_magnitude)
     if not np.isfinite(magnitude).all():
@@ -333,30 +355,15 @@ def _linear_segment_integral(
     return result
 
 
-def expected_error_dollars(
-    p_dev: Any,
-    log_quantiles: Any,
-    tail_scale: Any,
-    threshold: Any,
-    quantile_levels: Any = QUANTILE_LEVELS,
-    minimum_magnitude: float = 0.5,
+def _expected_error_dollars_uncapped(
+    quantiles: np.ndarray,
+    levels: np.ndarray,
+    minimum_log: float,
+    deviation_probability: np.ndarray,
+    scale: np.ndarray,
+    threshold_array: np.ndarray,
 ) -> np.ndarray:
-    """Return exact ``E[|D| 1{|D| > threshold}]`` for each case.
-
-    The expectation integrates the log-linear quantile segments analytically.
-    The exponential excess in log dollars induces a Pareto tail, so this
-    first moment requires ``0 < tail_scale < 1``.
-    """
-    quantiles, levels, minimum_log = _prepare_quantiles(
-        log_quantiles, quantile_levels, minimum_magnitude
-    )
-    deviation_probability = _probability(p_dev, "p_dev")
-    scale = _positive_tail_scale(tail_scale)
-    if np.any(scale >= 1):
-        raise ValueError(
-            "tail_scale must be less than one for a finite expected magnitude"
-        )
-    threshold_array = _threshold(threshold)
+    """Integrate the unbounded piecewise quantile function above a threshold."""
     shape, quantiles, values = _broadcast_inputs(
         quantiles,
         p_dev=deviation_probability,
@@ -403,3 +410,80 @@ def expected_error_dollars(
     if not np.isfinite(result).all():
         raise FloatingPointError("expected error dollars are not finite")
     return result.reshape(shape)
+
+
+def expected_error_dollars(
+    p_dev: Any,
+    log_quantiles: Any,
+    tail_scale: Any,
+    threshold: Any,
+    quantile_levels: Any = QUANTILE_LEVELS,
+    minimum_magnitude: float = 0.5,
+    magnitude_cap: Any | None = None,
+) -> np.ndarray:
+    """Return exact expected thresholded error dollars for each case.
+
+    Without ``magnitude_cap`` this is
+    ``E[|D| 1{|D| > threshold}]``. With a cap it is
+    ``E[min(|D|, cap) 1{min(|D|, cap) > threshold}]``. The capped expression
+    uses the identity ``E[M 1(T<M)] - E[M 1(C<M)] + C P(C<M)`` for ``C>T``.
+    """
+    quantiles, levels, minimum_log = _prepare_quantiles(
+        log_quantiles, quantile_levels, minimum_magnitude
+    )
+    deviation_probability = _probability(p_dev, "p_dev")
+    scale = _positive_tail_scale(tail_scale)
+    threshold_array = _threshold(threshold)
+    unbounded = _expected_error_dollars_uncapped(
+        quantiles,
+        levels,
+        minimum_log,
+        deviation_probability,
+        scale,
+        threshold_array,
+    )
+    if magnitude_cap is None:
+        return unbounded
+
+    cap = _magnitude_cap(magnitude_cap, minimum_magnitude)
+    above_cap = _expected_error_dollars_uncapped(
+        quantiles,
+        levels,
+        minimum_log,
+        deviation_probability,
+        scale,
+        cap,
+    )
+    survival_at_cap = conditional_survival(
+        cap,
+        quantiles,
+        scale,
+        levels,
+        minimum_magnitude,
+    )
+    try:
+        (
+            unbounded,
+            above_cap,
+            survival_at_cap,
+            deviation_probability,
+            cap,
+            threshold_array,
+        ) = np.broadcast_arrays(
+            unbounded,
+            above_cap,
+            survival_at_cap,
+            deviation_probability,
+            cap,
+            threshold_array,
+        )
+    except ValueError as exc:
+        raise ValueError(
+            "magnitude_cap must broadcast with the predictive-process inputs"
+        ) from exc
+    capped = unbounded - above_cap + deviation_probability * cap * survival_at_cap
+    capped = np.where(cap > threshold_array, capped, 0.0)
+    capped = np.maximum(capped, 0.0)
+    if not np.isfinite(capped).all():
+        raise FloatingPointError("capped expected error dollars are not finite")
+    return capped
