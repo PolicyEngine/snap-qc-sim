@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SNAP payment error simulator | PolicyEngine</title>
-<meta name="description" content="Simulate a state's SNAP payment error rate distribution, cost-share tier probabilities, and expected dollars under audit-volume and policy simplification choices.">
+<meta name="description" content="Simulate a state's SNAP payment error rate distribution, cost-share tier probabilities, and expected dollars — with a case-level model scenario for the standard medical deduction.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="SNAP payment error simulator | PolicyEngine">
-<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show the distribution of its measured payment error rate — and what audit volume and simplification options do to its FY 2028 cost-share bill.">
+<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show the distribution of its measured payment error rate — and what audit volume and a model-based standard medical deduction scenario do to its FY 2028 cost-share bill.">
 <meta property="og:url" content="https://snap-qc-sim.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SNAP payment error simulator | PolicyEngine">
@@ -30,7 +30,8 @@
       8–10, 15% at or above 10 — keyed to the FY 2025–26 rates being measured
       now. This simulator draws from the state's own USDA Quality Control
       sample to show the <em>distribution</em> of its measured rate, and what
-      audit volume and policy simplification choices do to the bill.
+      audit volume and a model-based standard medical deduction scenario do
+      to the bill.
     </p>
   </div>
 </header>
@@ -42,36 +43,18 @@
       <select id="state"></select>
       <div id="verified-badge" class="badge" hidden></div>
     </div>
-    <!-- Model-based mode is implemented but disabled pending fixes from the
-         2026-08-06 adversarial statistical review (tail refit at attachment
-         depth, per-state level-gap factors, 53-state dollar-rate validation).
-         See paper/reviews/round-1/code-stats-redteam.md. -->
-    <div class="control" hidden>
-      <span class="label">Simulation mode</span>
-      <div class="mode-toggle" role="radiogroup" aria-label="Simulation mode">
-        <label><input type="radio" name="mode" value="observed" checked> Observed resample</label>
-        <label><input type="radio" name="mode" value="model"> Model-based</label>
-      </div>
-      <div class="hint" id="mode-hint">Resamples the state's observed FY 2024 QC error dollars.</div>
-    </div>
     <div class="control">
       <label for="audits">Additional QC reviews <span class="val" id="audits-val">+0</span></label>
       <input type="range" id="audits" min="0" max="1000" step="50" value="0">
       <div class="hint">Beyond the state's FY 2024 sample size</div>
     </div>
     <div class="control levers">
-      <span class="label">Simplification options</span>
-      <label><input type="checkbox" id="lever-smd"> Standard medical deduction</label>
-      <label><input type="checkbox" id="lever-ssed"> Standard self-employment deduction</label>
-      <label><input type="checkbox" id="lever-heat_and_eat"> Heat-and-eat</label>
-      <label><input type="checkbox" id="lever-bbce_resources"> BBCE resource exemption</label>
-    </div>
-    <div class="control">
-      <label for="eff">Suppression effectiveness <span class="val" id="eff-val">50%</span></label>
-      <input type="range" id="eff" min="25" max="100" step="25" value="50">
-      <div class="hint">Share of the selected categories' observed FY 2024 error dollars removed — an accounting bound, not a case-level prediction</div>
+      <span class="label">Policy scenario — case-level model</span>
+      <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
+      <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
     </div>
   </section>
+  <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
 
   <section class="tiles" aria-label="Headline results">
     <div class="tile"><div class="k" id="t-official">–</div><div class="l">Official FY 2024 payment error rate</div></div>
@@ -115,11 +98,11 @@
       <summary>Method and caveats</summary>
       <ul>
         <li>Error process from the FY 2024 SNAP QC public-use file, official error-rate universe: adjudicated errors with recorded amounts above the official $56 threshold. Scenarios re-draw QC-style samples and recompute the weighted rate, centered on the state's official published rate.</li>
-        <li>Simplification options suppress the error contribution of the finding-element categories they standardize (medical 365, self-employment 312, utilities 364, resources 211–225 except substantial winnings 214) at the chosen effectiveness — a scenario dial, not a causal estimate; states adopt options endogenously.</li>
+        <li>The policy scenario re-predicts every case from the fitted error model with the state's standard-medical-deduction documentation feature reversed — per-case deviation probabilities and all nine deviation quantiles, exported with 10,000-draw paired case-bootstrap 95% intervals (model frozen through FY 2022, evaluated on FY 2024). It is a model-implied association from burden features that add +0.006 ROC AUC, not a causal policy effect; states adopt options endogenously. Self-employment, heat-and-eat, and BBCE scenarios are deliberately absent: the fitted features cannot express a defensible policy flip for them (machine-readable reasons ship in <a href="model_scenarios.json">the export</a>).</li>
         <li>The underlying error process is held fixed: no behavioral response, and no corrective-feedback channel from auditing more cases.</li>
         <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
         <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
-        <li>A model-based mode — drawing each case's payment deviation from a distribution fitted on FY 2017–19 and 2022–23 QC data (pandemic years excluded) and evaluated on FY 2024 — is implemented but currently disabled pending fixes from an adversarial statistical review (tail refit, per-state level factors, full dollar-rate validation; findings in the <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/reviews/round-1">repository</a>).</li>
+        <li>When the scenario is on, both baseline and scenario draw each case's payment deviation from distributions fitted on FY 2017–19 and 2022 QC data (pandemic years excluded), with levels anchored to the official rate; with it off, the simulator resamples observed QC error dollars. Model output is disabled for seven jurisdictions (AK, HI, ID, MN, SD, VI, WY) whose factor-adjusted FY 2024 model-to-observed dollar-rate ratio falls outside [0.7, 1.4]. Validation results — including quantile under-coverage at most levels and under-dispersion of simulated rates — and the adversarial review history are in the <a href="https://github.com/PolicyEngine/snap-qc-sim">repository</a>.</li>
         <li>Statute delays cost-share implementation for the highest-error states: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(iii). The simulator shows the standard FY 2028 schedule.</li>
         <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
       </ul>
