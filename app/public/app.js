@@ -1,16 +1,19 @@
 // SNAP payment error simulator — in-browser Monte Carlo over the state's
-// QC sample. Method mirrors snap_qc_sim.simulate (Python) exactly.
+// QC sample. The no-scenario engine mirrors snap_qc_sim.simulate (Python)
+// exactly; the policy scenario draws every case from the fitted error model
+// (model_data.json) and its SMD-flipped counterpart (model_scenarios.json).
 
 const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
-const LEVER_IDS = ["smd", "ssed", "heat_and_eat", "bbce_resources"];
 const DRAWS = 4000;
+const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 
 const fmtM = (v) => {
   const m = v / 1e6;
   return m >= 1000 ? `$${(m / 1000).toFixed(2)}B` : `$${m.toFixed(0)}M`;
 };
+const fmtPP = (v, digits = 3) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(digits)}`;
 const tierOf = (r) => { for (const [cut, s] of TIERS) if (r < cut) return s; return 15; };
 
 function mulberry32(seed) {
@@ -30,37 +33,21 @@ tooltip.className = "tooltip";
 tooltip.hidden = true;
 document.body.appendChild(tooltip);
 
-function scenarioErrors(st, levers, eff) {
-  const n = st.w.length;
-  const err = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    let e = st.err[i];
-    if (e > 0 && st.hits[i] !== 0) {
-      const h = st.hits[i]; // [total, smd, ssed, hne, bbce]
-      let hit = 0;
-      for (let k = 0; k < 4; k++) if (levers[k]) hit += h[k + 1];
-      e *= 1 - (eff * hit) / h[0];
-    }
-    err[i] = e;
-  }
-  return err;
-}
+// ---- Observed-resample engine (no scenario) ------------------------------
 
-function simulate(st, { extra = 0, levers = [0, 0, 0, 0], eff = 0.5, seed = 11 } = {}) {
+function simulate(st, { extra = 0, seed = 11 } = {}) {
   const n = st.w.length;
-  const err = scenarioErrors(st, levers, eff);
   const we = new Float64Array(n), wi = new Float64Array(n);
-  let sumWE0 = 0, sumWE = 0, sumWI = 0;
+  let sumWE = 0, sumWI = 0;
   for (let i = 0; i < n; i++) {
-    we[i] = st.w[i] * err[i];
+    we[i] = st.w[i] * st.err[i];
     wi[i] = st.w[i] * st.iss[i];
-    sumWE0 += st.w[i] * st.err[i];
     sumWE += we[i];
     sumWI += wi[i];
   }
-  const point0 = (100 * sumWE0) / sumWI;
-  const point1 = (100 * sumWE) / sumWI;
-  const level = st.official + (point1 - point0);
+  // Center on the official published rate: the file-derived point drops
+  // out, leaving the official level plus this draw's sampling deviation.
+  const point = (100 * sumWE) / sumWI;
   const m = n + extra;
   const rng = mulberry32(seed);
   const rates = new Float64Array(DRAWS);
@@ -70,7 +57,7 @@ function simulate(st, { extra = 0, levers = [0, 0, 0, 0], eff = 0.5, seed = 11 }
       const i = (rng() * n) | 0;
       e += we[i]; s += wi[i];
     }
-    rates[d] = level + (100 * e) / s - point1;
+    rates[d] = st.official + (100 * e) / s - point;
   }
   return rates;
 }
@@ -276,38 +263,71 @@ function readUrl() {
   const st = p.get("state");
   if (st && DATA.states[st]) $("state").value = st;
   if (p.get("audits")) $("audits").value = Math.min(1000, Math.max(0, +p.get("audits") || 0));
-  if (p.get("eff")) $("eff").value = Math.min(100, Math.max(25, +p.get("eff") || 50));
-  const levers = (p.get("levers") || "").split(",");
-  for (const id of LEVER_IDS) $("lever-" + id).checked = levers.includes(id);
-  // Model mode is disabled pending the 2026-08-06 adversarial-review fixes
-  // (tail refit, state-level factors, dollar-rate validation); the URL param
-  // is ignored so shared links cannot reach the unvalidated mode.
+  // Legacy accounting-lever params (levers, eff, mode) are ignored: those
+  // scenarios suppressed observed error dollars by finding category, which
+  // is an accounting bound, not a prediction, and were removed 2026-08-07.
+  return p.get("smd") === "1";
 }
 
 function writeUrl() {
   const p = new URLSearchParams();
   p.set("state", $("state").value);
-  if (MODE === "model") p.set("mode", "model");
   if (+$("audits").value) p.set("audits", $("audits").value);
-  const on = LEVER_IDS.filter((id) => $("lever-" + id).checked);
-  if (on.length && MODE !== "model") {
-    p.set("levers", on.join(","));
-    p.set("eff", $("eff").value);
-  }
+  if ($("lever-smd").checked) p.set("smd", "1");
   history.replaceState(null, "", "?" + p.toString());
 }
 
-// ---- Model-based mode ----------------------------------------------------
-// Draws each case's deviation from the fitted distribution in model_data.json
-// (PR #8), mirroring analysis/predictive_process.py: piecewise-linear inverse
-// CDF over [log(tolerance), q05..q99] in log-dollar space, exponential tail in
-// logs beyond q99, error dollars = |D| strictly above the year threshold.
-// Levels are anchored so the model's own baseline mean sits at the official
-// rate; the model's raw-level gap by state is documented in analysis/FINDINGS.
+// ---- Model-based scenario engine -----------------------------------------
+// The scenario draws each case's deviation from the fitted distribution in
+// model_data.json, mirroring analysis/predictive_process.py: piecewise-linear
+// inverse CDF over [log(tolerance), q05..q99] in log-dollar space, exponential
+// tail in logs beyond q99, error dollars = |D| strictly above the threshold.
+// model_scenarios.json supplies each state's SMD-flipped per-case parameters
+// as a sparse patch, valid only against the exact model_data.json it pins by
+// SHA-256 (verified at load). Both endpoints are anchored so the model's own
+// baseline mean sits at the official rate; the per-state raw-level gap is
+// documented in analysis/FINDINGS.md and gates seven states out entirely.
 
-let MODEL = null;
-let MODEL_PREP = {};
-let MODE = "observed";
+let MODEL = null;        // model_data.json payload
+let SCEN = null;         // model_scenarios.json payload
+let ARTIFACTS = null;    // load promise
+let ARTIFACT_ERROR = null;
+let MODEL_PREP = {};     // per-state baseline arrays
+let PATCH_PREP = {};     // per-state SMD-flipped arrays
+
+async function loadModelArtifacts() {
+  if (!ARTIFACTS) {
+    ARTIFACTS = (async () => {
+      const [mdRes, scRes] = await Promise.all([
+        fetch("model_data.json"),
+        fetch("model_scenarios.json"),
+      ]);
+      if (!mdRes.ok || !scRes.ok) throw new Error("model artifact fetch failed");
+      const mdBytes = await mdRes.arrayBuffer();
+      const scen = await scRes.json();
+      if (scen.schema !== SCEN_SCHEMA)
+        throw new Error(`unexpected scenario schema ${scen.schema}`);
+      if (scen.delta_direction !== "adopted_minus_not_adopted")
+        throw new Error("unexpected scenario delta direction");
+      if (!scen.included_levers.includes("smd"))
+        throw new Error("scenario export does not include the SMD lever");
+      const digest = await crypto.subtle.digest("SHA-256", mdBytes);
+      const hex = [...new Uint8Array(digest)]
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      if (hex !== scen.base_model.sha256)
+        throw new Error(
+          `model_data.json sha256 ${hex.slice(0, 12)}… does not match the scenario export's pin ${scen.base_model.sha256.slice(0, 12)}…`
+        );
+      MODEL = JSON.parse(new TextDecoder().decode(mdBytes));
+      SCEN = scen;
+    })().catch((err) => {
+      ARTIFACT_ERROR = err;
+      throw err;
+    });
+  }
+  return ARTIFACTS;
+}
 
 function prepModelState(code) {
   if (MODEL_PREP[code]) return MODEL_PREP[code];
@@ -334,13 +354,45 @@ function prepModelState(code) {
     pDev: Float64Array.from(st.p_dev),
     q,
     minLog,
+    baseRates: null,
     baseMean: null,
   };
   return MODEL_PREP[code];
 }
 
-function simulateModel(code, { extra = 0, seed = 11 } = {}) {
-  const ms = prepModelState(code);
+function prepPatchedState(code) {
+  if (PATCH_PREP[code]) return PATCH_PREP[code];
+  const base = prepModelState(code);
+  const patch = SCEN.states[code].levers.smd.per_case;
+  const idx = patch.i;
+  if (idx.length !== patch.p_dev.length || idx.length !== patch.q.length)
+    throw new Error(`scenario patch ${code}: ragged patch arrays`);
+  const pDev = Float64Array.from(base.pDev);
+  const q = Float64Array.from(base.q);
+  let prev = -1;
+  for (let r = 0; r < idx.length; r++) {
+    const i = idx[r];
+    if (!Number.isInteger(i) || i <= prev || i >= base.n)
+      throw new Error(`scenario patch ${code}: bad index ${i}`);
+    prev = i;
+    const p = patch.p_dev[r];
+    if (!(p >= 0 && p <= 1)) throw new Error(`scenario patch ${code}[${i}]: p_dev ${p}`);
+    pDev[i] = p;
+    const row = patch.q[r];
+    if (row.length !== 9) throw new Error(`scenario patch ${code}[${i}]: quantile row length`);
+    for (let k = 0; k < 9; k++) {
+      const v = row[k];
+      if (v < base.minLog) throw new Error(`scenario patch ${code}[${i}][${k}] below floor`);
+      if (k > 0 && v < row[k - 1])
+        throw new Error(`scenario patch ${code}[${i}] not monotone at ${k}`);
+      q[i * 9 + k] = v;
+    }
+  }
+  PATCH_PREP[code] = { n: base.n, w: base.w, wiss: base.wiss, pDev, q, minLog: base.minLog };
+  return PATCH_PREP[code];
+}
+
+function simulateModel(ms, { extra = 0, seed = 11 } = {}) {
   const levels = MODEL.quantile_levels;
   const nodeLevels = [0].concat(levels);
   const q99 = levels[8];
@@ -376,55 +428,116 @@ function simulateModel(code, { extra = 0, seed = 11 } = {}) {
   return rates;
 }
 
-function modelBase(code, official) {
+function modelAnchor(code, official) {
   const ms = prepModelState(code);
   if (ms.baseMean === null) {
-    ms.baseRates = simulateModel(code, {});
+    ms.baseRates = simulateModel(ms, {});
     let sum = 0;
     for (const r of ms.baseRates) sum += r;
     ms.baseMean = sum / ms.baseRates.length;
   }
-  return { raw: ms.baseRates, shift: official - ms.baseMean };
+  return { rates: ms.baseRates, shift: official - ms.baseMean };
 }
 
-function setModeUi() {
-  const model = MODE === "model";
-  for (const id of LEVER_IDS) $("lever-" + id).disabled = model;
-  $("eff").disabled = model;
-  document.querySelector(".levers").classList.toggle("off", model);
-  $("eff").closest(".control").classList.toggle("off", model);
-  $("mode-hint").textContent = model
-    ? "Each draw samples cases and draws each case's error from its fitted distribution; level anchored to the official rate. Simplification options need engine-computed counterfactuals (future work) and stay in observed mode."
-    : "Resamples the state's observed FY 2024 QC error dollars.";
+const shiftRates = (r, shift) => {
+  const out = new Float64Array(r.length);
+  for (let i = 0; i < r.length; i++) out[i] = r[i] + shift;
+  return out;
+};
+
+// ---- Scenario control state ----------------------------------------------
+
+function scenarioInfo(code) {
+  if (!SCEN) return null;
+  const state = SCEN.states[code];
+  const lever = state?.levers?.smd;
+  if (!lever) return null;
+  // ci_lo/ci_hi bracket delta_pp (adopted − not adopted); the flip-from-
+  // current-policy delta negates all three when the state already adopts.
+  const sign = lever.baseline_adopted ? -1 : 1;
+  return {
+    gated: !!state.level_flag,
+    ratio: state.level_ratio,
+    adopted: lever.baseline_adopted,
+    flipDelta: lever.baseline_to_patch_delta_pp,
+    flipLo: sign > 0 ? lever.ci_lo : -lever.ci_hi,
+    flipHi: sign > 0 ? lever.ci_hi : -lever.ci_lo,
+    flips: lever.feature_flip_n,
+  };
 }
+
+function syncScenarioControl() {
+  const code = $("state").value;
+  const box = $("lever-smd");
+  const label = $("smd-label");
+  const hint = $("smd-hint");
+  if (ARTIFACT_ERROR) {
+    box.checked = false;
+    box.disabled = true;
+    hint.textContent = `Model artifacts failed integrity checks and the scenario is unavailable: ${ARTIFACT_ERROR.message}`;
+    return;
+  }
+  if (!SCEN) {
+    box.disabled = false;
+    label.textContent = "Flip the standard medical deduction";
+    hint.textContent =
+      "Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.";
+    return;
+  }
+  const info = scenarioInfo(code);
+  if (!info) {
+    box.checked = false;
+    box.disabled = true;
+    hint.textContent = "No model scenario is exported for this jurisdiction.";
+    return;
+  }
+  label.textContent = info.adopted
+    ? "Drop the standard medical deduction"
+    : "Adopt the standard medical deduction";
+  if (info.gated) {
+    box.checked = false;
+    box.disabled = true;
+    hint.textContent =
+      `Model output is disabled for this state: its factor-adjusted FY 2024 model-to-observed ` +
+      `dollar-rate ratio (${info.ratio.toFixed(2)}) is outside the inclusive [0.7, 1.4] validation range.`;
+    return;
+  }
+  box.disabled = false;
+  hint.textContent =
+    `Model association from re-predicting ${info.flips} flipped cases: ` +
+    `${fmtPP(info.flipDelta)}pp expected threshold-crossing rate ` +
+    `(95% CI ${fmtPP(info.flipLo)} to ${fmtPP(info.flipHi)}pp, ` +
+    `${SCEN.uncertainty.draws.toLocaleString()} paired bootstrap draws). ` +
+    `An association from burden features adding +0.006 ROC AUC — not a causal estimate.`;
+}
+
+function mechanismLine(scenarioOn) {
+  return scenarioOn
+    ? "Sampling engine: model-based — each draw samples cases and draws each case's deviation from its fitted distribution (baseline) or its SMD-flipped distribution (scenario); levels anchored to the official rate."
+    : "Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.";
+}
+
+// ---- Render --------------------------------------------------------------
 
 function render() {
   const code = $("state").value;
   const st = DATA.states[code];
-  const levers = LEVER_IDS.map((id) => ($("lever-" + id).checked ? 1 : 0));
-  const eff = +$("eff").value / 100;
   const extra = +$("audits").value;
   $("audits-val").textContent = "+" + extra;
-  $("eff-val").textContent = Math.round(eff * 100) + "%";
+  syncScenarioControl();
+  const scenarioOn = $("lever-smd").checked && SCEN && !scenarioInfo(code)?.gated;
 
-  let base, scen, issuance;
-  if (MODE === "model" && MODEL) {
-    const { raw, shift } = modelBase(code, st.official);
-    const lift = (r) => {
-      const out = new Float64Array(r.length);
-      for (let i = 0; i < r.length; i++) out[i] = r[i] + shift;
-      return out;
-    };
-    base = lift(raw);
-    scen = extra ? lift(simulateModel(code, { extra })) : base;
-    // data.json's full-sample total is the design-consistent issuance
-    // estimate; the model roster drops rows with missing fields (MN −89).
-    issuance = st.issuance;
+  let base, scen;
+  const issuance = st.issuance;
+  if (scenarioOn) {
+    const anchor = modelAnchor(code, st.official);
+    base = shiftRates(anchor.rates, anchor.shift);
+    scen = shiftRates(simulateModel(prepPatchedState(code), { extra }), anchor.shift);
   } else {
     base = simulate(st, {});
-    scen = simulate(st, { extra, levers, eff });
-    issuance = st.issuance;
+    scen = extra ? simulate(st, { extra }) : base;
   }
+  $("mechanism").textContent = mechanismLine(scenarioOn);
   const sb = summarize(base, issuance);
   const ss = summarize(scen, issuance);
 
@@ -468,23 +581,7 @@ async function main() {
     sel.appendChild(o);
   }
   sel.value = "CO";
-  readUrl();
-  setModeUi();
-  document.querySelectorAll('input[name="mode"]').forEach((r) => {
-    r.addEventListener("change", async () => {
-      MODE = r.value;
-      if (MODE === "model" && !MODEL) {
-        $("mode-hint").textContent = "Loading model distributions…";
-        MODEL = await (await fetch("model_data.json")).json();
-      }
-      setModeUi();
-      render();
-    });
-  });
-  if (MODE === "model" && !MODEL) {
-    MODEL = await (await fetch("model_data.json")).json();
-    setModeUi();
-  }
+  const wantScenario = readUrl();
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
@@ -493,8 +590,18 @@ async function main() {
   const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
   sel.addEventListener("change", queue);
   $("audits").addEventListener("input", queue);
-  $("eff").addEventListener("input", queue);
-  for (const id of LEVER_IDS) $("lever-" + id).addEventListener("change", queue);
+  $("lever-smd").addEventListener("change", async () => {
+    if ($("lever-smd").checked && !SCEN) {
+      $("smd-hint").textContent = "Loading model distributions…";
+      try {
+        await loadModelArtifacts();
+      } catch {
+        // syncScenarioControl surfaces ARTIFACT_ERROR; never fall back silently.
+      }
+      if (scenarioInfo($("state").value)?.gated || ARTIFACT_ERROR) $("lever-smd").checked = false;
+    }
+    queue();
+  });
   document.querySelectorAll("#nat-table th button").forEach((b) => {
     b.addEventListener("click", () => {
       const k = b.dataset.k;
@@ -502,6 +609,14 @@ async function main() {
       renderNatTable();
     });
   });
+  if (wantScenario) {
+    try {
+      await loadModelArtifacts();
+      if (!scenarioInfo(sel.value)?.gated) $("lever-smd").checked = true;
+    } catch {
+      // Shared links to gated or broken scenarios load the observed view.
+    }
+  }
   render();
   setTimeout(computeNational, 60);
 }

@@ -104,13 +104,6 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
 .hint { font-size: 0.75rem; color: var(--muted-foreground); }
 #nat-takeaway { margin: 10px 0 0; }
 
-.mode-toggle { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 8px; padding: 2px; width: fit-content; }
-.mode-toggle label {
-  display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 6px;
-  font-size: 0.83rem; cursor: pointer; color: var(--muted-foreground);
-}
-.mode-toggle label:has(input:checked) { background: var(--secondary); color: var(--foreground); font-weight: 600; }
-.mode-toggle input { accent-color: var(--primary); margin: 0; }
 .control.off, .levers.off { opacity: 0.45; }
 .control.off input, .levers.off input { cursor: not-allowed; }
 
@@ -119,3 +112,4 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
   .chart-card, .tiles, .verify-cta { break-inside: avoid; }
   body { color: #000; }
 }
+.mechanism { margin: -12px 0 18px 2px; }
