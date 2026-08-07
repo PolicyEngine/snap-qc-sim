@@ -1,0 +1,479 @@
+{
+  "schema": "snap_qc_sim.counterfactual_co_smd.v1",
+  "schema_version": 1,
+  "generated_by": "analysis/counterfactual_join.py",
+  "jurisdiction": "CO",
+  "fiscal_year": 2024,
+  "counterfactual": "Colorado standard medical deduction off",
+  "delta_direction": "SMD-off minus SMD-on",
+  "case_universe": {
+    "filter": "CASE == 1",
+    "cases": 856,
+    "weighted_population": 3663355.0092203855,
+    "issuance": 1267963387.746441
+  },
+  "feature_construction": {
+    "documentation_definition": "FSMEDEXP > 35 and elderly_or_disabled and SMD does not apply",
+    "documentation_flip_cases": 53,
+    "documentation_flip_weight": 214631.5320217906,
+    "documentation_flip_weight_share": 0.05858878855081732,
+    "engine_delta_mapping": {
+      "benefit": "FSBEN + engine benefit delta -> formula_benefit and benefit-position features",
+      "medical_and_shelter_deductions": "FSMEDDED/FSSLTDED + engine deltas -> deduction_count and deductions_per_member",
+      "net_income": "FSNETINC + engine net-income delta -> net_share_of_gross"
+    },
+    "baseline_anchor_reason": "Use QC baselines plus engine deltas to avoid importing 11 unrelated absolute benefit divergences and one unrelated net-income divergence"
+  },
+  "model_diagnostics": {
+    "direct_classifier_covariates_roc_auc": 0.7608905023931776,
+    "direct_classifier_with_intermediates_roc_auc": 0.7666262908275983,
+    "burden_intermediate_roc_auc_lift": 0.0057357884344206855,
+    "burden_intermediate_roc_auc_lift_rounded_3": 0.006,
+    "descriptive_smd_adoption_contrasts_pp": {
+      "AZ": {
+        "claimant_conditioned_pp": 2.068361360115635,
+        "stable_all_elderly_disabled_pp": 0.6397922855539282
+      },
+      "KY": {
+        "claimant_conditioned_pp": -0.4247133459013426,
+        "stable_all_elderly_disabled_pp": -0.006866530559406996
+      },
+      "CA": {
+        "claimant_conditioned_pp": 0.11005887514549673,
+        "stable_all_elderly_disabled_pp": -1.4029525824115914
+      }
+    }
+  },
+  "uncertainty": {
+    "method": "paired nonparametric i.i.d. bootstrap of Colorado FY2024 QC cases; sample rows with replacement, retain HWGT inside each weighted mean, and use percentile intervals",
+    "draws": 10000,
+    "seed": 202408,
+    "confidence_level": 0.95,
+    "conditional_on_fitted_models": true,
+    "omitted_uncertainty": "training-fit, model-specification, causal-identification, censored-expense imputation, official re-review, and actual stratified/monthly QC sampling-design uncertainty"
+  },
+  "fy2028_cost_share": {
+    "official_fy2024_rate_pct": 9.97,
+    "fy2024_issuance": 1267963387.746441,
+    "interpretation": "FY2028 statutory tiers applied to FY2024 issuance; illustration, not a FY2028 forecast",
+    "observed_mode_bootstrap": {
+      "method": "snap_qc_sim.simulate observed mode, official-rate centered; model scenarios add the direct crossing-rate delta as a level shift",
+      "seed": 11,
+      "draws": 100000,
+      "baseline": {
+        "mean_rate": 9.975618134814205,
+        "sd_rate": 0.9040791583307319,
+        "p_tier": {
+          "0": 0.0,
+          "5": 0.00946,
+          "10": 0.51405,
+          "15": 0.47649
+        },
+        "expected_cost_share": 156405185.8236051,
+        "sd_cost_share": 32810189.888594784,
+        "p95_cost_share": 190194508.16196612
+      }
+    },
+    "accounting_bound_smd": {
+      "method": "v1 equal attribution across each case's unique finding elements; 100% suppression of element 365",
+      "medical_element": 365,
+      "official_error_cases_with_medical_element": 6,
+      "weighted_attributed_error_dollars": 3117722.7705679256,
+      "smd_adoption": {
+        "sample_payment_error_rate_delta_pp": -0.2458842897750424,
+        "expected_cost_share": {
+          "mean_rate": 9.729453030988523,
+          "sd_rate": 0.896118563386932,
+          "p_tier": {
+            "0": 1e-05,
+            "5": 0.02073,
+            "10": 0.60792,
+            "15": 0.37134
+          },
+          "expected_cost_share": 149023102.98014534,
+          "sd_cost_share": 32893610.45297634,
+          "p95_cost_share": 190194508.16196612
+        },
+        "expected_cost_share_delta": -7382082.843459755
+      },
+      "direction_reversed_smd_off_level_reference": {
+        "explanation": "Mechanical sign reversal of the accounting sample-rate shift applied to the unchanged observed bootstrap; not an existing one-sided simulator lever output",
+        "level_shift_pp": 0.2458842897750424,
+        "expected_cost_share": {
+          "mean_rate": 10.221502424589247,
+          "sd_rate": 0.904079158330732,
+          "p_tier": {
+            "0": 0.0,
+            "5": 0.00382,
+            "10": 0.41301,
+            "15": 0.58317
+          },
+          "expected_cost_share": 163526068.2091891,
+          "sd_cost_share": 31784150.907690138,
+          "p95_cost_share": 190194508.16196612
+        },
+        "expected_cost_share_delta": 7120882.385583997
+      }
+    }
+  },
+  "scenarios": {
+    "floor": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $1, the minimum positive whole-dollar amount consistent with the QC minimodel condition 0 < excess <= $165. The engine therefore receives $36 in total medical expenses and, with Colorado's SMD set to $0, computes a $1 actual-excess medical deduction.",
+      "engine_accounting": {
+        "benefit_changed_cases": 22,
+        "weighted_mean_benefit_delta_per_case_month": -1.461777075886898,
+        "weighted_benefit_delta_total": -5355008.373313795,
+        "medical_deduction_changed_cases": 46,
+        "shelter_deduction_changed_cases": 38,
+        "net_income_changed_cases": 44
+      },
+      "feature_changes": {
+        "med_doc_required_0_to_1_cases": 53,
+        "med_doc_required_other_change_cases": 0,
+        "formula_benefit_changed_cases": 22,
+        "medical_deduction_changed_cases": 46,
+        "shelter_deduction_changed_cases": 38,
+        "net_income_changed_cases": 44
+      },
+      "direct_official_error_classifier": {
+        "probability_kind": "raw HistGradientBoostingClassifier class probability; the committed direct classifier has no calibrator",
+        "baseline_weighted_expected_crossing_rate": 0.12275176461486587,
+        "counterfactual_weighted_expected_crossing_rate": 0.12223520934653682,
+        "weighted_delta_pp": -0.05165552683290309,
+        "uncertainty": {
+          "estimate": -0.05165552683290309,
+          "bootstrap_mean": -0.05190450508120307,
+          "standard_error": 0.0377592078128087,
+          "confidence_interval": [
+            -0.12602618868160462,
+            0.022128274427329446
+          ]
+        }
+      },
+      "hurdle_expected_error_dollars": {
+        "estimator": "separate committed calibrated p1 * p2 * predicted magnitude; primary through-FY2023 unfactored model",
+        "baseline_weighted_mean_per_case_month": 22.473777044462448,
+        "counterfactual_weighted_mean_per_case_month": 22.299404616064027,
+        "weighted_mean_delta_per_case_month": -0.17437242839842204,
+        "weighted_total_delta": -638788.1090432823,
+        "payment_error_dollar_rate_delta_pp": -0.05037906576928884,
+        "hurdle_crossing_probability_delta_pp": -0.09763819409583806,
+        "uncertainty": {
+          "estimate": -0.17437242839842204,
+          "bootstrap_mean": -0.17542461311372018,
+          "standard_error": 0.08513338306681413,
+          "confidence_interval": [
+            -0.34948958878244296,
+            -0.01812174891111792
+          ],
+          "weighted_total_confidence_interval": [
+            -1280304.4357365351,
+            -66386.3996493779
+          ],
+          "payment_error_dollar_rate_delta_pp_confidence_interval": [
+            -0.10097329687192531,
+            -0.005235671651952574
+          ]
+        }
+      },
+      "fy2028_cost_share_translation": {
+        "shifted_official_level_pct": 9.918344473167098,
+        "observed_bootstrap_summary": {
+          "mean_rate": 9.923962607981302,
+          "sd_rate": 0.9040791583307319,
+          "p_tier": {
+            "0": 0.0,
+            "5": 0.01144,
+            "10": 0.53461,
+            "15": 0.45395
+          },
+          "expected_cost_share": 154850662.71022797,
+          "sd_cost_share": 32916711.733779505,
+          "p95_cost_share": 190194508.16196612
+        },
+        "expected_cost_share_delta": -1554523.113377124,
+        "conditional_expected_cost_share_delta_bootstrap_mean": -1568301.8813172563,
+        "conditional_expected_cost_share_delta_confidence_interval": [
+          -3785520.543659327,
+          641003.0411328585
+        ]
+      }
+    },
+    "point": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $57. This is the nearest whole dollar to the $57.4207276 conditional mean E[X | 0 < X <= $165] from an HWGT-weighted left-censored lognormal maximum-likelihood fit to the 46 censored Colorado records and the seven exact non-recoded Colorado excesses above $165 ($175, $200, $227, $314, $314, $360, $470; ln-dollar mu = 4.014722652 and sigma = 0.959967962). The engine therefore receives $92 in total medical expenses and, with Colorado's SMD set to $0, computes a $57 actual-excess medical deduction. This point estimate is a deterministic parametric imputation, not recovery of the censored actuals.",
+      "engine_accounting": {
+        "benefit_changed_cases": 21,
+        "weighted_mean_benefit_delta_per_case_month": -1.0130506577281553,
+        "weighted_benefit_delta_total": -3711164.201582444,
+        "medical_deduction_changed_cases": 46,
+        "shelter_deduction_changed_cases": 38,
+        "net_income_changed_cases": 43
+      },
+      "feature_changes": {
+        "med_doc_required_0_to_1_cases": 53,
+        "med_doc_required_other_change_cases": 0,
+        "formula_benefit_changed_cases": 21,
+        "medical_deduction_changed_cases": 46,
+        "shelter_deduction_changed_cases": 38,
+        "net_income_changed_cases": 43
+      },
+      "direct_official_error_classifier": {
+        "probability_kind": "raw HistGradientBoostingClassifier class probability; the committed direct classifier has no calibrator",
+        "baseline_weighted_expected_crossing_rate": 0.12275176461486587,
+        "counterfactual_weighted_expected_crossing_rate": 0.12214166091682101,
+        "weighted_delta_pp": -0.06101036980448526,
+        "uncertainty": {
+          "estimate": -0.06101036980448526,
+          "bootstrap_mean": -0.061694306056137814,
+          "standard_error": 0.03748150330722015,
+          "confidence_interval": [
+            -0.13516047425757993,
+            0.011539572200842467
+          ]
+        }
+      },
+      "hurdle_expected_error_dollars": {
+        "estimator": "separate committed calibrated p1 * p2 * predicted magnitude; primary through-FY2023 unfactored model",
+        "baseline_weighted_mean_per_case_month": 22.473777044462448,
+        "counterfactual_weighted_mean_per_case_month": 22.273995391644487,
+        "weighted_mean_delta_per_case_month": -0.19978165281795685,
+        "weighted_total_delta": -731871.1186009902,
+        "payment_error_dollar_rate_delta_pp": -0.057720209090717456,
+        "hurdle_crossing_probability_delta_pp": -0.11346978566286169,
+        "uncertainty": {
+          "estimate": -0.19978165281795685,
+          "bootstrap_mean": -0.20166264489484165,
+          "standard_error": 0.08415779942294956,
+          "confidence_interval": [
+            -0.3782656420776802,
+            -0.049745539238453464
+          ],
+          "weighted_total_confidence_interval": [
+            -1385721.334721235,
+            -182235.57035555775
+          ],
+          "payment_error_dollar_rate_delta_pp_confidence_interval": [
+            -0.1092871724935281,
+            -0.014372305392780001
+          ]
+        }
+      },
+      "fy2028_cost_share_translation": {
+        "shifted_official_level_pct": 9.908989630195515,
+        "observed_bootstrap_summary": {
+          "mean_rate": 9.91460776500972,
+          "sd_rate": 0.9040791583307319,
+          "p_tier": {
+            "0": 0.0,
+            "5": 0.01183,
+            "10": 0.53848,
+            "15": 0.44969
+          },
+          "expected_cost_share": 154555861.22257692,
+          "sd_cost_share": 32930367.70836437,
+          "p95_cost_share": 190194508.16196612
+        },
+        "expected_cost_share_delta": -1849324.6010281742,
+        "conditional_expected_cost_share_delta_bootstrap_mean": -1863787.6888086707,
+        "conditional_expected_cost_share_delta_confidence_interval": [
+          -4056975.6554335123,
+          328434.2165110352
+        ]
+      }
+    },
+    "ceiling": {
+      "assumption_statement": "For each of the 46 cases identified by MED_DED_DEMO = 1 and public FSMEDEXP = $165, assume the unrecoverable pre-recode allowable medical-expense excess above $35 was $165, the maximum amount consistent with the QC minimodel condition 0 < excess <= $165. The engine therefore receives $200 in total medical expenses and, with Colorado's SMD set to $0, computes a $165 actual-excess medical deduction.",
+      "engine_accounting": {
+        "benefit_changed_cases": 0,
+        "weighted_mean_benefit_delta_per_case_month": 0.0,
+        "weighted_benefit_delta_total": 0.0,
+        "medical_deduction_changed_cases": 0,
+        "shelter_deduction_changed_cases": 0,
+        "net_income_changed_cases": 0
+      },
+      "feature_changes": {
+        "med_doc_required_0_to_1_cases": 53,
+        "med_doc_required_other_change_cases": 0,
+        "formula_benefit_changed_cases": 0,
+        "medical_deduction_changed_cases": 0,
+        "shelter_deduction_changed_cases": 0,
+        "net_income_changed_cases": 0
+      },
+      "direct_official_error_classifier": {
+        "probability_kind": "raw HistGradientBoostingClassifier class probability; the committed direct classifier has no calibrator",
+        "baseline_weighted_expected_crossing_rate": 0.12275176461486587,
+        "counterfactual_weighted_expected_crossing_rate": 0.12202497894376052,
+        "weighted_delta_pp": -0.07267856711053357,
+        "uncertainty": {
+          "estimate": -0.07267856711053355,
+          "bootstrap_mean": -0.07280315857767755,
+          "standard_error": 0.016282001046246764,
+          "confidence_interval": [
+            -0.10653544398020723,
+            -0.04290994008911152
+          ]
+        }
+      },
+      "hurdle_expected_error_dollars": {
+        "estimator": "separate committed calibrated p1 * p2 * predicted magnitude; primary through-FY2023 unfactored model",
+        "baseline_weighted_mean_per_case_month": 22.473777044462448,
+        "counterfactual_weighted_mean_per_case_month": 22.352356662091903,
+        "weighted_mean_delta_per_case_month": -0.12142038237054276,
+        "weighted_total_delta": -444805.9659785824,
+        "payment_error_dollar_rate_delta_pp": -0.03508034776691295,
+        "hurdle_crossing_probability_delta_pp": -0.043266195133423876,
+        "uncertainty": {
+          "estimate": -0.12142038237054276,
+          "bootstrap_mean": -0.12172152831213816,
+          "standard_error": 0.03706327699665683,
+          "confidence_interval": [
+            -0.19830434518155113,
+            -0.05388650439016839
+          ],
+          "weighted_total_confidence_interval": [
+            -726459.2162710037,
+            -197405.39578709967
+          ],
+          "payment_error_dollar_rate_delta_pp_confidence_interval": [
+            -0.05729339058930905,
+            -0.015568698409971403
+          ]
+        }
+      },
+      "fy2028_cost_share_translation": {
+        "shifted_official_level_pct": 9.897321432889466,
+        "observed_bootstrap_summary": {
+          "mean_rate": 9.90293956770367,
+          "sd_rate": 0.9040791583307318,
+          "p_tier": {
+            "0": 0.0,
+            "5": 0.01239,
+            "10": 0.54293,
+            "15": 0.44468
+          },
+          "expected_cost_share": 154202733.41908953,
+          "sd_cost_share": 32954570.661213037,
+          "p95_cost_share": 190194508.16196612
+        },
+        "expected_cost_share_delta": -2202452.4045155644,
+        "conditional_expected_cost_share_delta_bootstrap_mean": -2206146.1086603994,
+        "conditional_expected_cost_share_delta_confidence_interval": [
+          -3220627.004875958,
+          -1288884.783644259
+        ]
+      }
+    }
+  },
+  "interpretation": {
+    "causal": false,
+    "headline": "The SMD-off deltas are small, uncertainty-dominated model-implied associations, not causal effects. Near-zero results and the gap from the accounting bound are findings.",
+    "counterintuitive_sign": "The fitted models imply lower error under SMD-off even though the documentation proxy rises. Gradient-boosted trees impose neither causal nor monotonic structure, so this sign is not evidence that documentation requirements reduce errors.",
+    "cost_share_bridge": "The direct crossing rate is a weighted share of cases, whereas the official payment error rate is error dollars divided by issuance. Adding one to the other is the requested mechanical level-shift translation, not an identity between like-denominator rates."
+  },
+  "provenance": {
+    "round_1b_root": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/simulations/fy2024/us-co",
+    "round_1b_input_sha256": {
+      "baseline/manifest.json": "72e1f7cd0afe607aa4db1acf28743c12ca17da868ab230a13ccc119e4dac7857",
+      "smd-off/manifest.json": "8094a47e1f7a749522e2dda775388d6d066823af9d910498534c3be315246381",
+      "smd-off/floor/manifest.json": "d23a0a4bc0384e92665dd0c6b055e7c0fc1d7e755a765655fb8989df30d684a0",
+      "smd-off/point/manifest.json": "fb489193fd411d4718a31c5d26ede1023ac21234f9b1f832608a76bbc7ebd0a5",
+      "smd-off/ceiling/manifest.json": "06e96f8c00ca77669720ca9e2c261aa1f4c4a3db4cf9ab1b0dd3647159837424",
+      "baseline/cases.jsonl": "a46de9dc09107a69f710580b80ee069a8e3050fd403d1b67d0197d12b06aaaa5",
+      "smd-off/floor/cases.jsonl": "4a626c379a46a20cc0d6da703af19c5b045e4a66a04c5c57bad4133a25ba46a1",
+      "smd-off/point/cases.jsonl": "f0faf1835288186c4dced5c8a43a0dbad82c1b0261cba5924e4cb3bdb774aee1",
+      "smd-off/ceiling/cases.jsonl": "f6a9a56cd18fcae2a2f55d817ff88a745992230629bf9868770fc4a32e3ce014"
+    },
+    "round_1b_scenario_fingerprints": {
+      "floor": "bf29b3eb43fc9ef8b891f3c79097e407e337dbefe3fa40d0e1061094786f456d",
+      "point": "50f70c91749ce2f0e5b971bb910f74e76a112e6214aa3a3964e0507c45e39fcc",
+      "ceiling": "35ecd34c0eea6a7d0d86e42772a220e9cc0ce29ba153cf1fa87214a3b97a70b3"
+    },
+    "engine_pins": {
+      "engine": {
+        "binary": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/cargo-target/release/axiom-rules-engine",
+        "binary_sha256": "bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee",
+        "commit": "de0efdc73b469132ee268e1c832e8f7148b91431"
+      },
+      "harness": {
+        "commit": "d30566266932dbd0b6f62e69dcea8ca3c8801690",
+        "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/axiom-oracles"
+      },
+      "qc_csv": {
+        "path": "/Users/maxghenis/.cache/axiom-oracles/snap-qc/qc_pub_fy2024.csv",
+        "sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9"
+      },
+      "rulespec": {
+        "commit": "b53ce208771085030939db4b9691762506b6bca2",
+        "worktree": "/Users/maxghenis/.cache/axiom-oracles/v2b/cert-probe/rulespec-us"
+      }
+    },
+    "nominal_engine_period": "2026-01",
+    "model_pipeline": {
+      "package_versions": {
+        "python": "3.14.4",
+        "numpy": "2.5.1",
+        "pandas": "2.3.3",
+        "scikit-learn": "1.8.0",
+        "pyreadstat": "1.3.5",
+        "scipy": "1.17.1"
+      },
+      "input_sha256": {
+        "qc_pub_fy2017.sav": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9",
+        "qc_pub_fy2018.sav": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82",
+        "qc_pub_fy2019.sav": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846",
+        "qc_pub_fy2022.sav": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
+        "qc_pub_fy2023.sav": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
+        "qc_pub_fy2024.sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
+        "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca"
+      },
+      "threshold_dollars_by_fiscal_year": {
+        "2017": 38,
+        "2018": 37,
+        "2019": 37,
+        "2022": 48,
+        "2023": 54,
+        "2024": 56
+      },
+      "random_state": 7,
+      "oof_folds": 5,
+      "oof_design": {
+        "probability_training_metrics": "nested outer/inner cross-fitting; each outer calibrator is fit on inner OOF base scores from its outer training set",
+        "deployable_probability_calibrator": "weighted isotonic fit on all full-training OOF base scores",
+        "magnitude_training_metrics": "outer-fold log predictions multiplied by Duan smears fit on inner OOF residuals from the corresponding outer training set",
+        "deployable_duan_smear": "weighted mean exp(residual) over all full-training OOF residuals"
+      },
+      "deviation_tolerance_dollars": 0.5,
+      "model_parameters": {
+        "max_iter": 300,
+        "learning_rate": 0.08,
+        "max_leaf_nodes": 63,
+        "random_state": 7
+      }
+    },
+    "package_versions": {
+      "python": "3.14.4",
+      "numpy": "2.5.1",
+      "pandas": "2.3.3",
+      "pyreadstat": "1.3.5",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1"
+    },
+    "implementation_sha256": {
+      "analysis/counterfactual_join.py": "7f7b85dbd2fa90adf084813dd75033748027ffbd4967955c71381d7a1d729898",
+      "analysis/train_error_model.py": "c83c71a4b362628620e10bcfb8c6cb8f596aba12fa45b7fbf1cffe259cb62a11",
+      "analysis/hurdle_deviation_model.py": "e77525898147f3ca1003ee7e70e01aa3db75ca4e20169e641a634aba8656c279",
+      "snap_qc_sim/simulate.py": "8d1a724c90924ce2ec907148397999e20f083ecdd40e06a9b12801aad6fd780f",
+      "paper/snapshot/labs/results_by_state_corrected.json": "00a930cb2efeb7c2f59102359ad720ad6905367682c2539791bda95df6af8889"
+    },
+    "determinism": {
+      "thread_environment": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1"
+      },
+      "serialization": "UTF-8; LF; terminal newline; stable insertion order; no timestamp"
+    }
+  }
+}

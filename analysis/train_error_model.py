@@ -235,18 +235,28 @@ def _self_employment_columns(
     return found
 
 
-def load_year(year: int) -> pd.DataFrame:
-    """Load and enforce the official ``CASE == 1`` QC universe for one year."""
+def load_year(year: int, *, include_source_row_index: bool = False) -> pd.DataFrame:
+    """Load and enforce the official ``CASE == 1`` QC universe for one year.
+
+    ``include_source_row_index`` preserves the zero-based SAV row number used
+    by the certified engine artifacts' case identifiers. It is metadata only
+    and never enters the predictive feature set.
+    """
     if year not in THRESHOLD:
         raise ValueError(f"No official payment-error threshold configured for FY{year}")
     path = QC_DIR / f"qc_pub_fy{year}.sav"
     df, _ = pyreadstat.read_sav(str(path))
     df.columns = [c.upper() for c in df.columns]
+    if include_source_row_index:
+        df["source_row_index"] = np.arange(len(df), dtype=np.int64)
     assert_required_columns(df, REQUIRED_COLS, context=f"FY{year} SAV")
     se_cols = _self_employment_columns(
         df.columns, expected_count=PERSON_SLOTS_BY_YEAR[year]
     )
-    df = df[REQUIRED_COLS + se_cols].copy()
+    selected = REQUIRED_COLS + se_cols
+    if include_source_row_index:
+        selected = selected + ["source_row_index"]
+    df = df[selected].copy()
     df = filter_case_universe(df)
     df["year"] = year
     df["state"] = df["STATE"].map(FIPS)
@@ -373,6 +383,31 @@ def _medical_payment_impact(df: pd.DataFrame) -> pd.Series:
     return pd.concat(paired, axis=1).any(axis=1)
 
 
+def medical_documentation_required(
+    medical_expense_above_floor: pd.Series,
+    elderly_or_disabled: pd.Series,
+    smd_applies: pd.Series,
+) -> pd.Series:
+    """Return the model's medical-documentation burden proxy.
+
+    The proxy is one only when reported medical expense clears the strict
+    ``$35`` excess gate, the household contains an elderly or disabled member,
+    and a standard medical deduction does not apply. Keeping this predicate in
+    one function prevents counterfactual joins from broadening the flip to all
+    medical claimants or only the censored subset.
+    """
+    if not (
+        medical_expense_above_floor.index.equals(elderly_or_disabled.index)
+        and medical_expense_above_floor.index.equals(smd_applies.index)
+    ):
+        raise ValueError("medical-documentation inputs must share an index")
+    return (
+        medical_expense_above_floor.astype(bool)
+        & elderly_or_disabled.astype(bool)
+        & ~smd_applies.astype(bool)
+    ).astype(int)
+
+
 def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
     """Build outcomes, covariates, and recomputable burden intermediates."""
     assert_required_columns(df, REQUIRED_COLS + ["year", "state"])
@@ -428,9 +463,11 @@ def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
     _missing_indicator(f, "claims_medical", medical_expense)
     f["medical_expense_above_floor"] = above_excess_floor.astype(int)
     smd = df["state"].isin(smd_states)
-    f["med_doc_required"] = (
-        above_excess_floor & f["elderly_or_disabled"].astype(bool) & ~smd
-    ).astype(int)
+    f["med_doc_required"] = medical_documentation_required(
+        f["medical_expense_above_floor"],
+        f["elderly_or_disabled"],
+        smd,
+    )
     # Known limitation: this binary proxy does not incorporate the state's
     # standard amount, whether the standard binds for this household, or whether
     # actual expenses above the standard still require documents.
@@ -805,9 +842,7 @@ def main() -> None:
     )
 
     print("\n== FY2024 evaluation ==")
-    _, _, baseline = fit_score(
-        train, test, COVARIATES, "covariates + formula anchor"
-    )
+    _, _, baseline = fit_score(train, test, COVARIATES, "covariates + formula anchor")
     full_columns = COVARIATES + INTERMEDIATES
     full_model, _, full = fit_score(
         train, test, full_columns, "baseline + burden intermediates"
