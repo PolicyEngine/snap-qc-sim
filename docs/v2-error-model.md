@@ -14,8 +14,9 @@ physical caps, frozen state dollar factors, and level-gap flags required by the
 2026-08-06 adversarial statistical review. A sibling scenario export supplies
 case-level SMD adoption parameters and paired-bootstrap intervals in all 53
 jurisdictions. The analysis validates the intended browser process with eight
-seeds and 4,000 draws per seed. The browser wiring remains unchanged in this
-model/export round.
+seeds and 4,000 draws per seed. As of 2026-08-07 the browser is wired: the
+deployed app's only policy lever is the SMD model scenario, the accounting-bound
+levers are removed, and seven level-gated jurisdictions are disabled in the UI.
 
 ## Implementation status
 
@@ -36,7 +37,7 @@ the external engine or `amterr-lab` work.
 | Computation-failure mixture probability π | Not implemented | No separate computation-failure channel or policy lever is estimated or simulated. |
 | Input-noise tier | Not implemented | Corrected-versus-original input pairs are not training data for this repository's pipeline. |
 | Event-study or causal DiD validation | Not implemented | The SMD results are descriptive weighted pre/post contrasts only. |
-| Simulator integration and counterfactual aggregation | Baseline and SMD scenario exports implemented; browser wiring pending | The analysis mirrors case bootstrap, per-occurrence redraw, cap, strict threshold, state factor, model-mean anchor, and zero rate floor for all 53 jurisdictions. The sibling export supplies sparse full flipped parameters, adoption-direction point deltas and CIs, and the seven level-gate flags. `app.js` remains unchanged; observed mode still uses accounting-bound levers until the browser is wired. |
+| Simulator integration and counterfactual aggregation | Exports implemented and browser wired (2026-08-07) | The analysis mirrors case bootstrap, per-occurrence redraw, cap, strict threshold, state factor, model-mean anchor, and zero rate floor for all 53 jurisdictions. The sibling export supplies sparse full flipped parameters, adoption-direction point deltas and CIs, and the seven level-gate flags. The deployed app applies the SMD patch as its only policy lever, verifies the base-model SHA-256 pin before use, disables the gated jurisdictions with their ratios, and no longer contains the accounting-bound levers; the observed resample remains the no-scenario engine. |
 | Forward caseload projection | Not implemented | No calibrated FY2026–28 survey-microdata projection is part of this pipeline. |
 
 ## Round-2 spine: Microcosm population simulation (approved direction, 2026-08-07)
@@ -134,7 +135,7 @@ for all cases and stages, so it makes no such claim.
   calendar cells. They are descriptive weighted contrasts, not a natural
   experiment or causal validation.
 - Distributional validation reads the same serialized, quantized model-data
-  payload exported for the intended disabled model mode. It bootstraps cases
+  payload the deployed browser scenario consumes. It bootstraps cases
   uniformly, retains HWGT in the ratio, redraws a magnitude for every sampled
   occurrence, caps `|D|`, applies the state factor after the strict threshold,
   anchors each seed at the model's own baseline mean, and clips anchored rates
@@ -205,8 +206,11 @@ The resulting draw sets `D = 0` for nondeviators and samples sign and magnitude
 independently conditional on features, then applies the per-case physical cap.
 A future counterfactual rules engine could compute policy-specific benefits and
 intermediates before applying these draws. This repository now exports the
-defensible SMD proxy flip but does not yet perform broader engine recomputation;
-the browser consumer does not yet enforce the new scenario fields.
+defensible SMD proxy flip, and the browser consumer enforces the scenario
+contract (base-model SHA-256 pin, schema and delta-direction checks, patch
+index/monotonicity/probability assertions) before serving it. Broader engine
+recomputation — repricing benefits under alternative rules beyond the Colorado
+validation leg — remains future work.
 
 ## Proposed counterfactual tiers
 

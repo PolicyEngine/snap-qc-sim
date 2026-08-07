@@ -1568,9 +1568,12 @@ def analyze() -> DistributionalArtifacts:
             "model_data_gzip_bytes": export_report["gzip_bytes"],
             "q_decimal_quantization": export_report["q_decimal_quantization"],
             "browser_consumer_status": (
-                "model mode remains disabled; model_data contains factor/cap/gate "
-                "metadata and run_all pairs it with the SMD-only model_scenarios "
-                "export, but app.js is unchanged"
+                "browser scenario consumer live since 2026-08-07: app.js applies "
+                "the SMD-only model_scenarios patch as its single policy lever, "
+                "verifies the base-model sha256 pin before use, and disables the "
+                "seven level-gated jurisdictions; the observed resample remains "
+                "the no-scenario engine and the accounting-bound levers are "
+                "removed"
             ),
         },
     }

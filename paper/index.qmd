@@ -104,10 +104,12 @@ project's verification discipline applies to itself: the pipeline is
 deterministic (independent clean-room reruns reproduce all five
 analysis-pipeline artifacts byte-for-byte, and the headline simulation
 artifact was independently reproduced from the raw file to four
-decimals), and this revision incorporates eleven adversarial
-reviews — archived in the repository — whose findings included two
-direction-of-effect errors in an earlier draft of this manuscript and a
-data-definition defect in the deployed simulator, all corrected here.
+decimals), and this revision incorporates three rounds of adversarial
+review — archived unedited in the repository — whose findings included
+two direction-of-effect errors in an earlier draft of this manuscript,
+a data-definition defect in the deployed simulator, and a validation
+claim that had gone stale against the corrected model pipeline, all
+corrected here.
 
 ## The QC system and the money attached to it {#sec-qc}
 
@@ -392,17 +394,36 @@ quantiles of $\log|D|$ fitted by quantile-loss gradient boosting
 Duan smear of 1.173 [@duan1983smearing]; predicted mean conditional
 magnitude is $183 against $189 observed.
 
-**Validation, including failures.** @tbl-validate summarizes. Weighted
-quantile coverage on fiscal 2024 deviators is within 3 points of nominal
-at seven of nine levels — but all nine gaps are negative (−0.3 to −3.5
-points): systematic *under*-coverage, meaning predicted quantiles sit
-too low and the model understates mid-upper magnitudes, coherent with
-the $183-versus-$189 comparison. An adversarial statistical review of
-the deployed model additionally found the tail fitted at one depth but
-attached at another (overstating extreme-tail mass) and cross-state
-level gaps propagating into simulated spreads; the simulator's
-model-based mode is disabled pending those fixes, and this paper quotes
-it nowhere.
+**Validation, including failures.** @tbl-validate summarizes. An
+adversarial statistical review of the first deployed model found the
+tail fitted at one depth but attached at another (overstating
+extreme-tail mass) and cross-state level gaps propagating into simulated
+spreads. The fix round — refitting the tail at its attachment depth (log
+scale 0.271), capping each case's magnitude at a physical maximum, and
+freezing fiscal-2023-fit state dollar factors — repaired those defects
+and made the remaining one starker: weighted quantile coverage on fiscal
+2024 deviators is within 3 points of nominal at only two of nine levels,
+all nine gaps negative (−0.2 to −7.4 points, worst at the 75th–90th
+percentiles). This is one-sided *under*-coverage — predicted quantiles
+sit too low, understating mid-to-upper magnitudes, coherent with the
+$183-versus-$189 comparison. An earlier version of this section
+described the pre-correction pipeline's coverage (seven of nine levels
+within 3 points), which the corrected pipeline no longer attains; the
+fact catalog records the change. A benchmark against a quantile
+regression forest on the identical protocol, with the decision rule
+fixed in the protocol code before results existed, indicates the failure
+is structural rather than an estimator artifact: the forest improves
+mean absolute coverage (4.10 against 4.38 points) but shifts
+under-coverage from the tail to the central levels with a worse maximum
+gap, degrades probability-integral-transform calibration, and loses the
+factor-adjusted state-calibration comparison (0.951 against 0.928
+points), so the gradient-boosted stack is retained. The deployed
+simulator serves this model in exactly one place — a
+standard-medical-deduction scenario whose flipped per-case parameters,
+paired-bootstrap intervals, and level gate ship in an export pinned to
+the exact model file by hash, with the seven jurisdictions outside the
+[0.7, 1.4] factor-adjusted level-ratio range disabled — and no
+simulation result in this paper uses model draws.
 
 | Quantity | Unfactored (frozen model) | With frozen FY2023 factors |
 |---|---:|---:|
@@ -534,23 +555,38 @@ marginal error reduction is near zero for states deep within a tier
 
 ## Toward engine-computed counterfactuals {#sec-roadmap}
 
-The gap this paper leaves open is the counterfactual one: replacing
-accounting bounds with case-level simulations in which the rules engine
-recomputes both the correct benefit and the policy-burden intermediates
-under alternative policy, and the error model responds through those
-intermediates. The pieces exist separately — a certified, fast
-toolchain; a parameter-overlay mechanism with recorded provenance; a
-model that consumes burden intermediates — and the work between them is
-bounded: feeding the harness raw facts instead of file-derived
-intermediates (@sec-oracle-scope), encoding the "off" state of options
-whose current encodings are structural, and resolving a data constraint
-for self-employment (the public file records net rather than gross
-self-employment income, so that counterfactual is not identified from
-public data). The cost-sharing formula is itself an encodable target:
-the sampling formulas of 7 C.F.R. § 275.11(b) and the tier schedule of
-7 U.S.C. § 2013(a)(2), with its election and delay clauses, can be
-encoded and tested at their published boundary values, replacing
-hand-transcribed constants in simulators like this one.
+The counterfactual gap has begun to close. For one state and one
+option — Colorado and the standard medical deduction — the pieces now
+run end to end, and the run itself produced findings. The first is
+structural: the certified parity chain never consumes Colorado's
+standard-medical-deduction rule, because QC editing bakes the deduction
+into the stored expense fields and the federal computation path
+reproduces every case exactly without it — a sharper instance of the
+Minimodel-canon scope point of @sec-oracle-scope. A simulation-only
+composition adapter that binds the state rule into the federal path,
+validated by exact baseline invariance on all 856 cases, reprices the
+option's removal only as bounds, because the public file censors 46
+medical-expense records at exactly $165: between −$1.46 and $0 per
+case-month. The second is a sign disagreement: feeding the
+engine-recomputed intermediates through the error model implies a
+cost-share change of roughly −$1.6M to −$2.2M per year for removing
+the deduction (intervals spanning zero in two of three censoring
+variants), where the accounting-reverse bound for the same flip is
++$7.1M. The two mechanisms answer different questions — one scales
+observed error dollars by finding category, the other predicts how
+re-adjudication risk shifts when the documentation feature flips — and
+their disagreement on a real case is the concrete argument for retiring
+accounting levers from the public simulator, which now serves only the
+model scenario. What remains open is breadth: engine legs for the
+remaining options (self-employment is not identified from public data,
+which records net rather than gross income) and the other verified
+states, feeding the harness raw facts instead of file-derived
+intermediates (@sec-oracle-scope), and the cost-sharing formula itself
+as an encodable target: the sampling formulas of 7 C.F.R. § 275.11(b)
+and the tier schedule of 7 U.S.C. § 2013(a)(2), with its election and
+delay clauses, can be encoded and tested at their published boundary
+values, replacing hand-transcribed constants in simulators like this
+one.
 
 ## Limitations {#sec-limitations}
 
@@ -567,9 +603,11 @@ shares, not dollar shares. The error models predict an adjudicated,
 thresholded label — a property of the measurement system, with a
 documented manipulation history (@sec-qc). Cross-state model transport
 is imperfect: the model's raw level underpredicts high-error states,
-all nine coverage gaps are one-sided negative, and the deployed
-model-based simulator mode is disabled pending tail and level-factor
-fixes, so all simulation results here use the observed-resample mode.
+all nine coverage gaps remain one-sided negative after the tail and
+level-factor fixes, and the deployed simulator accordingly serves the
+model only for its level-gated standard-medical-deduction scenario,
+with seven jurisdictions disabled outright; every simulation result in
+this paper uses the observed-resample engine.
 That mode resamples i.i.d. from a probability sample whose actual
 design varies by state, treats the official rate's federal re-review
 adjustment as a fixed level with no variance contribution, and holds
