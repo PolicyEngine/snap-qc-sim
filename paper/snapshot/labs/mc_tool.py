@@ -68,12 +68,19 @@ def load_cases():
             rawben = _num(row.get("RAWBEN"))
             if rawben is None:
                 continue
+            # Official error-rate universe and definition (adjudicated
+            # status with the recorded amount above the year threshold),
+            # matching snap_qc_sim/data.py post-PR #10.
+            case_flag = _num(row.get("CASE"))
+            if case_flag is not None and case_flag != 1:
+                continue
             w = _num(row.get("HWGT")) or 0.0
-            fsben = _num(row.get("FSBEN"))
+            if w <= 0:
+                continue
             amterr = _num(row.get("AMTERR")) or 0.0
             counted = (
                 (row.get("STATUS") or "").strip() in ("2", "3")
-                and fsben is not None and abs(rawben - fsben) > THRESHOLD
+                and amterr > THRESHOLD
             )
             elements = set()
             for i in range(1, 10):

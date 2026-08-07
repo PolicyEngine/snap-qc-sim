@@ -17,19 +17,21 @@ abstract: |
   errors that remain should be measured and simulated. I use the USDA
   Quality Control (QC) public-use files as a verification oracle for
   independently encoded SNAP rules: across seven states, the encodings
-  reproduce the file's benefit-computation chain exactly — 6,081 of 6,194
-  in-scope fiscal 2024 cases (113 documented exclusions), six computation
-  stages per case, zero dollar tolerance — a process that surfaced and
-  fixed two defects in the encodings and errata in the federal technical
+  reproduce the file's benefit-computation chain, from file-recorded
+  intermediates, exactly — all 6,081 in-scope cases of the 6,194-case
+  official universe (113 documented exclusions), six computation stages
+  per case, zero dollar tolerance — a process that surfaced and fixed two
+  defects in the encodings and surfaced errata in the federal technical
   documentation. Replaying reconstructed pre-edit case facts through the
-  verified engine explains 86.9% of filtered Colorado error cases as
-  correct arithmetic on wrong facts. I then fit and validate a
-  distributional model of case-level payment deviations and embed the
-  results in an open Monte Carlo simulator of measured error rates under
-  the cost-sharing formula. The central finding is about measurement:
-  at regulatory sample sizes, several states face nearly even odds —
-  46 to 50 percent — of being assigned a different cost tier than their
-  official point rate implies.
+  verified engine explains 78.4% of Colorado's above-threshold official
+  error cases — and 91.4% of sub-threshold deviations — as correct
+  arithmetic on wrong facts. I also fit and validate a distributional
+  model of case-level payment deviations, and report its validation
+  failures alongside its results. The central finding, from an open Monte
+  Carlo simulator resampling each state's own QC cases, is about
+  measurement: at regulatory sample sizes, several states face nearly
+  even odds — 46 to 50 percent — of being assigned a different cost tier
+  than their official point rate implies.
 ---
 
 ## Introduction
@@ -41,8 +43,9 @@ reaches 6% will pay 5% of benefit costs beginning in fiscal year 2028; at
 FY2028 share is the state's fiscal 2025 or 2026 rate, at its election;
 later years use the third preceding year. Implementation is delayed for
 the highest-error states: a state whose fiscal 2025 rate times 1.5 reaches
-20% — that is, a rate of 13.33% — starts in FY2029 instead, and a state
-whose fiscal 2026 rate crosses the same test starts in FY2030.[^delay]
+20% — that is, a rate above 13.33% (13.34% at the published two-decimal
+precision) — starts in FY2029 instead, and a state whose fiscal 2026
+rate crosses the same test starts in FY2030.[^delay]
 For a mid-sized state, one tier is worth tens of millions of dollars a
 year; for the largest states, more than a hundred million.
 
@@ -63,7 +66,9 @@ files that result record, for roughly 45,000 cases a year, what the
 agency issued and what the review concluded the case should have
 received, with coded findings for every discrepancy.
 
-This paper treats those files as a research instrument with three uses.
+This paper treats those files as a research instrument with three uses,
+the first in the software-testing sense of an *oracle*: an external
+source of ground-truth outputs for given inputs.
 
 First, as a verification target for rules as code. I test independently
 encoded SNAP rules — statute, regulations, and state policy manuals
@@ -96,8 +101,10 @@ The analysis pipeline, simulator, and this manuscript live in one public
 repository; a fact catalog maps every quantitative claim to a committed
 artifact (@sec-availability). Because the claims depend on it, the
 project's verification discipline applies to itself: the pipeline is
-deterministic (independent clean-room reruns reproduce all artifacts
-byte-for-byte), and this revision incorporates eleven adversarial
+deterministic (independent clean-room reruns reproduce all five
+analysis-pipeline artifacts byte-for-byte, and the headline simulation
+artifact was independently reproduced from the raw file to four
+decimals), and this revision incorporates eleven adversarial
 reviews — archived in the repository — whose findings included two
 direction-of-effect errors in an earlier draft of this manuscript and a
 data-definition defect in the deployed simulator, all corrected here.
@@ -108,7 +115,8 @@ QC reviews produce, for each sampled active case, the issued allotment
 (`RAWBEN`), a corrected allotment constructed from the reviewer's
 findings (`BENFIX`), and — when they differ by more than a tolerance
 threshold ($56 in fiscal 2024, indexed from a $37 statutory base under
-7 U.S.C. § 2025(c)) — a payment error with coded findings. The official
+7 U.S.C. § 2025(c)) — a payment error; findings are coded for
+sub-threshold deviations as well. The official
 state rate combines over- and underpayment rates [@fns2024per]: Colorado's
 9.97% is 7.91 over plus 2.06 under, and Maryland's 13.64 includes the
 nation's highest underpayment rate, 4.79 — so cost sharing partly bills
@@ -125,16 +133,21 @@ this removed 1,037 ineligible-finding and 406 full-overissuance cases
 nationally. The file is therefore truncated at the top of the
 error-magnitude distribution. Every file-based estimate in this paper
 inherits that truncation: it is part of why Colorado's file-derived rate
-(8.88%) sits below its official 9.97%, and it biases simulated sampling
-variability downward — meaning the tier-noise results of @sec-simulate
-are, if anything, understated.
+(8.88%) sits below its official 9.97%. Restoring the excluded cases
+would add a large between-component variance term — their per-case error
+contributions are the full issued benefit — so the truncation biases
+simulated sampling variability downward; the i.i.d. approximation to
+states' month-stratified sampling designs plausibly biases it upward, so
+the tier-noise results of @sec-simulate are likely, though not
+certainly, understated.
 
 **The measured rate is a property of the measurement system.** Between
 roughly 2009 and 2016, several states used consultant-driven error-review
 practices that biased QC findings downward; the Department of Justice
-recovered more than $32 million in False Claims Act settlements from six
-states, FNS issued formal anti-bias guidance, and national rates for
-fiscal 2015–16 were not published [@crs2024snap]. This history is why the
+recovered more than $67 million in False Claims Act settlements from
+eight states over 2017–2021 [@doj2021snapqc], FNS issued formal
+anti-bias guidance, and national rates for fiscal 2015–16 were not
+published [@crs2018errors]. This history is why the
 present analysis trains no earlier than fiscal 2017 — and why the fiscal
 2025–27 rates now being measured, which carry orders of magnitude more
 money than the settlements-era rates did, cannot be treated as exogenous
@@ -176,10 +189,10 @@ I tested encodings of federal SNAP law and seven states' policy manuals
 maintained in the public rulespec-us repository and executed by a
 deterministic rules engine, against the fiscal 2024 QC file. The file
 contains 6,194 cases in the official universe for those states; 6,081 are
-in scope for replay — the 113 exclusions (1.8%) are enumerated
-program-structure classes (standardized-benefit units under SSI cash-out
-and MFIP, and records missing required fields), logged per case by the
-harness. @tbl-verify reports the counts. For each in-scope case the
+in scope for replay — all 113 exclusions (1.8%) are SSI-CAP (Combined
+Application Project) standardized-benefit units, whose allotments follow
+a demonstration schedule outside the computed chain, logged per case by
+the harness. @tbl-verify reports the counts. For each in-scope case the
 harness asserts six values — gross income, standard deduction, excess
 shelter deduction, net income, maximum allotment, and benefit — against
 the file's recorded values at zero dollar tolerance.
@@ -198,9 +211,9 @@ cell comparisons, no mismatches.
 | Texas | 906 | 955 | 49 |
 | Total | 6,081 | 6,194 | 113 |
 
-: Fiscal 2024 verification coverage by state. Exclusions are documented
-program-structure classes (standardized-benefit units, missing required
-fields), logged per case. {#tbl-verify}
+: Fiscal 2024 verification coverage by state. All exclusions are SSI-CAP
+standardized-benefit units, logged per case by the harness.
+{#tbl-verify}
 
 ### What the parity target is {#sec-oracle-scope}
 
@@ -267,17 +280,22 @@ report.
 If a verified engine issued every benefit, how much measured error would
 disappear? The QC file supports three nested answers for Colorado fiscal
 2024, summarized in @tbl-decompose: 305 of 856 sampled cases carry
-recorded payment deviations (`RAWBEN` ≠ `BENFIX`; this count includes
-deviations below the official threshold), $112.6M per year in weighted
-error dollars on $1.268B of issuance. All three layers exclude, by
-construction of the file, the ineligible-case error dollars described in
-@sec-qc.
+recorded payment deviations (`RAWBEN` ≠ `BENFIX`) — but only 110 of the
+305 are official errors above the $56 threshold; the other 195 are
+sub-threshold deviations the official rate excludes. Weighted, the 305
+carry $112.6M per year in deviation dollars on $1.268B of issuance, of
+which $18.5M (16%) is sub-threshold: the deviation-based 8.88% file rate
+therefore combines an official-definition file rate of 7.42% with
+sub-threshold dollars, while the official 9.97% additionally
+incorporates the federal re-review adjustment and the excluded
+ineligible-case error of @sec-qc. All three layers exclude, by
+construction of the file, that ineligible-case error.
 
 | Layer | Definition | Computation-side share | Universe and units |
 |---|---|---|---|
 | 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change) | 7.3% strict; 10.5% adding policy-misapplied, budgeted-wrong, computer-user | Colorado error dollars; nationally 3.9% strict ($320M/yr), 18.4% broad ($1.5B of $8.1B) |
 | 2. Finding natures | Nature codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed), cause-disambiguated | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado error dollars |
-| 3. Engine replay | Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts | 13.1% of cases unexplained (upper bound); 86.9% explained as correct arithmetic on wrong facts | 283 filtered Colorado error cases; case shares, not dollar shares |
+| 3. Engine replay | Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts | Above-threshold official errors: 21.6% of cases unexplained (upper bound), 78.4% explained as correct arithmetic on wrong facts. Sub-threshold deviations: 8.6% unexplained, 91.4% explained. Blended: 13.1% / 86.9% | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
 : Three nested decompositions of Colorado fiscal 2024 measured error.
 Layers 1–2 are shares of weighted error dollars; layer 3 is a share of
@@ -290,25 +308,33 @@ The strictest layer reconstructs each error case's pre-edit original
 values using the public reconstruction solver of @giannella_snapqc —
 which exploits the file's disclosure-protection perturbation structure
 to recover original values — adapted to fiscal 2024, then replays those
-originals through the verified engine. Of 283 error cases surviving the
-solver's consistency filters (22 of 305 are excluded), 246 reproduce the
-issued amount at the file's own $5 editing tolerance: the agency's
-arithmetic was correct, applied to wrong facts. The solver and the
-engine partition the 283 cases identically — two implementations with
-distinct codebases and logic reaching the same classification, though
-both consume the same file. The 37 residual cases (13.1%, binomial
-standard error about 2 points) are an upper bound on computation-side
-failure observable this way; the class includes solver limitations as
-well as genuine multi-variable or computational discrepancies. Per-case
-outputs for all three layers are committed with this paper.
+originals through the verified engine. Of 283 deviation cases surviving
+the solver's consistency filters (22 of 305 are excluded), 246 reproduce
+the issued amount at the file's own $5 editing tolerance: the agency's
+arithmetic was correct, applied to wrong facts. The rate differs by
+threshold status, and the distinction matters for how the headline reads:
+among the 97 above-threshold official error cases, 76 are explained
+(78.4%, binomial standard error about 4 points; the 21.6% residual is
+the computation-side upper bound for *official* errors), while among the
+186 sub-threshold deviations 170 are explained (91.4%). The solver and
+the engine partition the 283 cases identically — two implementations
+with distinct codebases and logic reaching the same classification,
+though both consume the same file, and 33 of the 246 explained cases
+have deviations of $5 or less, mechanically within the comparison
+tolerance. The residual class includes solver limitations as well as
+genuine multi-variable or computational discrepancies. The complete
+per-case replay output (283 rows), the layer-1 and layer-2
+classification outputs, and the reconstruction scripts are committed
+with this paper.
 
 The three layers agree on the structure: most measured SNAP payment
 error among eligible cases is information failure, not calculation
 failure — consistent with the administrative-burden literature's account
 of where compliance costs bind [@herd2018burden]. Correct-computation
 guarantees address the smaller share directly — roughly 3 to 10% of
-error dollars by layers 1–2, and bounded above by the replay's 13.1%
-case share — plus whatever share of information failures better tooling
+error dollars by layers 1–2, and bounded above by the replay's 21.6%
+case share among official errors — plus whatever share of information
+failures better tooling
 prevents indirectly through verification prompts and
 documentation-requirement computation at intake. Ineligibility errors,
 excluded from the file, are predominantly facts-driven, which would push
@@ -337,11 +363,12 @@ above the year's threshold. The signed deviation is
 $D = \texttt{RAWBEN} - \texttt{BENFIX}$, which reconciles with the
 recorded error amount for 99.997% of weighted fiscal 2024 cases; the
 recomputed formula benefit `FSBEN` — an earlier, incorrect target choice
-that an adversarial audit caught — matches only 83.65%, because it
+that an adversarial audit caught — matches only 83.64%, because it
 conflates legitimate adjustments such as proration with error.
 
 **Discrimination.** A gradient-boosted classifier on household
-covariates plus a formula-benefit anchor reaches weighted ROC AUC 0.761
+covariates plus a formula-benefit anchor reaches a weighted area under the receiver operating characteristic curve (ROC
+AUC) of 0.761
 on fiscal 2024; adding policy-burden intermediates extracted from the
 file (medical-expense claiming and documentation-requirement proxies,
 self-employment records, utility-claim structure, deduction counts)
@@ -381,7 +408,7 @@ it nowhere.
 |---|---:|---:|
 | State MAE, equal-weighted | 1.81pp | 0.885pp |
 | State MAE, issuance-weighted | 1.65pp | 0.785pp |
-| Cross-state correlation | 0.51 | 0.91 |
+| Cross-state correlation (equal-weighted) | 0.52 | 0.90 |
 
 : Fiscal 2024 state-level calibration of predicted official-error rates,
 matched frozen-model comparisons. Factors are fit on out-of-sample
@@ -409,8 +436,10 @@ never-adopting states are small and mixed — Arizona +2.07 points
 claimant-conditioned but +0.64 on the stable all-elderly/disabled
 denominator; Kentucky −0.42 claimant-conditioned; California +0.11
 claimant-conditioned but −1.40 on the stable denominator; Louisiana and
-Michigan within 0.2 points of zero — with single-digit event counts for
-several adopters. Two cautions transfer beyond this paper: an earlier
+Michigan within 0.2 points of zero, though those two adopters have zero
+treated-period events in the windows, so their contrasts are
+control-trend arithmetic only — with single-digit event counts
+throughout. Two cautions transfer beyond this paper: an earlier
 pipeline's dramatic Kentucky estimate (−5.3 points) dissolved under a
 corrected event definition and calendar windows; and
 standard-medical-deduction adoption is typically bundled with
@@ -434,15 +463,22 @@ adjustment enters only as a fixed level. All figures quote the committed
 simulation artifact.
 
 **Tier assignment approaches a coin flip for boundary states**
-(@tbl-boundary). With no policy change at all, the probability that a
-fresh QC-style sample lands in a different cost-share tier than the
-official point rate implies is 46–50% for the five states nearest
-boundaries. The formula maps a point estimate to a tier with no
+(@fig-co, @tbl-boundary). With no policy change at all, the probability
+that a fresh QC-style sample lands in a different cost-share tier than
+the official point rate implies is 46–50% for the five states nearest
+boundaries.
+
+![Colorado's simulated measured-rate distribution (100,000 resampled
+QC-style measurements, official error definition, centered on the
+official 9.97% rate) against the cost-share tier bands. The state's
+official rate sits 0.03 points below the 15%-share boundary; 52% of
+simulated measurements fall below it and 48% above. Generated by the
+committed `paper/generate_figures.py` (seed 11).](figures/co_measured_rate.svg){#fig-co} The formula maps a point estimate to a tier with no
 adjustment for sampling uncertainty; near a boundary, tier assignment
 turns as much on the sampling draw as on the underlying rate. This is
-the accountability-measurement problem documented for school ratings and
-hospital report cards [@kane2002volatility], now carrying direct fiscal
-prices.
+the accountability-measurement problem documented for school
+accountability ratings [@kane2002volatility], now carrying direct
+fiscal prices.
 
 | State | Official rate | P(different tier) | Expected annual cost share | SD of the bill |
 |---|---:|---:|---:|---:|
@@ -467,7 +503,7 @@ boundary — Missouri +$3.9M, Tennessee +$3.7M, Indiana +$3.3M annually —
 and cost money for states just above one, for whom the chance of a
 below-boundary draw had positive expected value: California −$30.3M,
 Pennsylvania −$13.1M, Texas −$13.1M. Added volume almost always reduces
-the standard deviation of the annual bill (California by $43M), so
+the standard deviation of the annual bill (California by $44M), so
 risk-averse states may rationally buy audits against their expectation.
 The formula thus embeds an asymmetry: expected cost share falls with
 additional sample volume for states just below a boundary and rises for
@@ -552,9 +588,10 @@ dataset showing that most measured error among eligible cases is
 information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
 assignment for boundary states. The modeling bar cannot be exact, and
-this paper's adversarial reviews — which found, among other things, two
-direction-of-effect errors in an earlier draft — are part of the method
-rather than an ornament to it. The system this points toward is one in
+this paper went through eleven adversarial reviews, archived unedited
+in the repository, which found — among other things — two
+direction-of-effect errors and one wrong external figure in earlier
+drafts. The system this points toward is one in
 which the rules that compute benefits, the requirements they impose on
 households, and the errors they produce are executable, testable, and
 priced from the same verified source.
@@ -562,11 +599,13 @@ priced from the same verified source.
 ## Data and code availability {#sec-availability}
 
 The repository `PolicyEngine/snap-qc-sim` contains the analysis pipeline
-(deterministic; independent clean-clone reruns reproduce all artifacts
-byte-for-byte on the pinned interpreter), the simulator, frozen
+(deterministic; independent clean-clone reruns reproduce all five
+pipeline artifacts byte-for-byte on the pinned interpreter version,
+recorded in `.python-version` and each artifact's provenance block), the simulator, frozen
 simulation, decomposition, and certification artifacts under
-`paper/snapshot/` (including per-case outputs for all three
-decomposition layers and the reconstruction script), the eleven
+`paper/snapshot/` (including the complete per-case replay output, the
+layer-1 and layer-2 classification outputs, and the reconstruction
+scripts), the eleven
 adversarial review reports under `paper/reviews/`, the fact catalog
 (`paper/FACTS.md`), and this manuscript. The verification harness and
 per-case suite reports are public in `TheAxiomFoundation/axiom-oracles`;

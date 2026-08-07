@@ -31,7 +31,7 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 | C1 | Seven states' encoded benefit computations reproduce the QC file's Minimodel chain exactly at zero tolerance for every in-scope case: 6,081 of 6,194 official-universe cases (CO 856/856, NY 847/885, CA 883/883, AZ 922/925, GA 945/945, MD 722/745, TX 906/955; 113 exclusions are enumerated program-structure classes); six asserted values per case | axiom-oracles PRs #244, #268, #269; committed suite reports; per-state suite configs ("in-scope") |
 | C2 | Scope caveat: the comparison bridge supplies several QC-derived intermediates as inputs (QC-calculated medical and child-support deductions, QC utility amount, QC categorical-eligibility status), so parity certifies the downstream benefit arithmetic given those intermediates, not independent derivation of every state-policy path | axiom-oracles bridge (snap_qc_compare.py); engine-leg recon 2026-08-06 |
 | C3 | Reaching parity surfaced and fixed two defects in the encodings themselves: a stale regulatory dollar literal superseded by statute, and a missing whole-dollar rounding step in the benefit computation | rulespec-us PRs (COLA backfill; #826 rounding); axiom-oracles #268 history |
-| C4 | The process also surfaced errata in FNS's own FY2024 technical documentation (variable-description inconsistencies identified while mapping), reported upstream | axiom-oracles issue thread; report page axiom.org/reports/colorado-snap-qc-fy2024 |
+| C4 | The process also surfaced errata in FNS's own FY2024 technical documentation (variable-description inconsistencies identified while mapping), documented in the lab analysis and report page | paper/snapshot/labs/amterr/ANALYSIS.md; axiom.org/reports/colorado-snap-qc-fy2024 |
 | C5 | A certification probe (2026-08-06) attested a reproducible toolchain: engine commit de0efdc7 (binary SHA-256 bb8ec236…) × rulespec-us b53ce208 reproduces CO 856/856 benefits and 5,136/5,136 stage cells at zero tolerance; 856 cases in 3.73 s end-to-end (230 cases/s; 279/s with compile amortized) | CERT_REPORT (paper/snapshot/cert/CERT_REPORT.md) |
 | C6 | Extrapolation at certified throughput: 6,081 cases ≈ 26 s; 44,800 × 5 scenarios ≈ 16 minutes single-threaded on a laptop | CERT_REPORT extrapolation table |
 
@@ -52,7 +52,7 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 | E2 | Hurdle: stage-1 P(deviate) AUC 0.8356; stage-2 P(cross | deviate) 0.7233; OOF Duan smear 1.1725; predicted vs observed conditional magnitude $183 vs $189 | hurdle_results.json |
 | E3 | Distributional model: nine conditional quantiles of log|D|, per-case monotone, exponential-in-logs tail (scale 0.4674) fitted on top-decile OOF residuals; weighted FY2024 quantile coverage within 3pp at 7 of 9 levels; ALL NINE gaps negative (under-coverage; q.75 −3.5pp, q.90 −3.3pp — the model UNDERSTATES mid-upper magnitudes) | distributional_results.json; FINDINGS.md |
 | E4 | Sign model P(D>0 | deviate) calibrated AUC 0.6996 | distributional_results.json |
-| E5 | State calibration, FY2024, unfactored: equal-jurisdiction MAE 1.83pp (slope 0.954), issuance-weighted 1.45pp (slope 0.769). With factors fit on out-of-sample FY2023 (train ≤ FY2022, empirical-Bayes shrinkage, frozen): equal 0.885pp, issuance-weighted 0.785pp, corr 0.906 | hurdle_results.json state_calibration |
+| E5 | State calibration, FY2024. Primary-model unfactored: equal-jurisdiction MAE 1.83pp (slope 0.954), issuance-weighted 1.45pp (slope 0.769); matched FROZEN-model unfactored: 1.81pp / 1.65pp (the manuscript quotes the matched frozen pair). With factors fit on out-of-sample FY2023 (train ≤ FY2022, empirical-Bayes shrinkage, frozen): equal 0.885pp, issuance-weighted 0.785pp, corr 0.906 | hurdle_results.json state_calibration |
 | E6 | Model-vs-bootstrap simulated measured rate (official-centering convention): the model's raw level underpredicts high-error states (NY model mean 11.02% vs bootstrap 14.10%; CO 8.62 vs 9.98) — any app use must anchor levels and disclose per-state gaps (model mode currently disabled pending review fixes) | distributional_results.json simulation_validation; FINDINGS.md |
 | E7 | Cross-sectional medical-event rates under the corrected event definition (element 365 paired with payment-impact finding, slots 1–9): 2.97% where no standard medical deduction requires documentation vs 2.60% where it does (claimant denominator) | model_results.json |
 | E8 | SMD adoption contrasts are descriptive, calendar-aligned, both denominators, with unweighted event counts: AZ +2.07pp claimant-conditioned (+0.64 stable), CA +0.11 (−1.40), KY −0.42 (−0.01), LA −0.08 (−0.15), MI +0.16 (−0.19) | model_results.json; FINDINGS.md |
@@ -64,7 +64,7 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
 |---|---|---|
 | F1 | Tier assignment near boundaries is noisy at regulatory sample sizes: P(different tier than the official point rate implies) — ND 50%, WA 48%, CO 49%, KS 47%, NV 46% | paper/snapshot/labs/results_by_state_corrected.json (official error gate, CASE==1) |
 | F2 | Colorado: official 9.97% (0.03pp below the 15% boundary), $1.268B issuance, expected FY2028-rule cost $156.4M/yr, SD $32.8M; the 10%→15% tier step is $63.4M/yr | paper/snapshot/labs/results_by_state_corrected.json |
-| F3 | Audit volume is a two-sided lever: +500 reviews raises expected cost for just-above-boundary states (CA −$30.3M, PA −$13.1M, TX −$13.1M expectation) and lowers it for just-below states (MO +$3.9M, TN +$3.7M, IN +$3.3M); it nearly always cuts the SD of the bill (CA −$43M) | paper/snapshot/labs/results_by_state_corrected.json |
+| F3 | Audit volume is a two-sided lever: +500 reviews raises expected cost for just-above-boundary states (CA −$30.3M, PA −$13.1M, TX −$13.1M expectation) and lowers it for just-below states (MO +$3.9M, TN +$3.7M, IN +$3.3M); it nearly always cuts the SD of the bill (CA −$44M) | paper/snapshot/labs/results_by_state_corrected.json |
 | F4 | Category-suppression accounting bound: removing 50% (100%) of observed error dollars in the four named simplification categories corresponds to ≈$609M/yr (≈$1,310M/yr) nationally in expected cost share | paper/snapshot/labs/results_by_state_corrected.json |
 | F5 | These lever numbers are accounting bounds on the observed FY2024 error mix — scenario dials, not causal estimates; the error process is held fixed (no behavioral response, no audit-feedback channel) | mc lab DESIGN; app method notes |
 
@@ -79,3 +79,16 @@ Numbers from the superseded pre-audit pipeline (before PR #7) are banned.
   volume only. Say so wherever relevant.
 - No references to private conversations; the reconstruction solver is cited
   as the public software it is.
+
+## H. System and statute facts added in revision (round-2 verified)
+
+| # | Fact | Source |
+|---|---|---|
+| H1 | DOJ recovered more than $67 million in False Claims Act settlements from eight states (VA, WI, AK, TX, LA, MS, FL, TN) over 2017–2021 concerning bias in QC error-review processes; national rates for FY2015–16 were not published | DOJ settlement releases (cumulative line in the Tennessee release); CRS R45147 |
+| H2 | Maryland FY2024: official rate 13.64 = 8.85 over + 4.79 under; 4.79 is the nation's highest underpayment rate | FNS FY2024 PER table (verified full-column scan) |
+| H3 | FY2024 public-use file exclusions: 1,037 ineligible-finding cases and 406 cases with overissuance ≥ issued benefit | FY2024 technical documentation Table II.1 |
+| H4 | Delay-clause threshold: rates above 13.33% (13.34% at published precision; 13.33 × 1.5 = 19.995 < 20); exactly ten jurisdictions qualify at FY2024 rates (AK, DC, FL, GA, MA, MD, NJ, NM, NY, OR) | 7 U.S.C. 2013(a)(2)(B)(iii); FY2024 PER table |
+| H5 | OBBBA cut the federal share of SNAP administrative costs from 50% to 25% beginning FY2027 | OBBBA § 10106; Federal Register 2026-12696 |
+| H6 | OBBBA § 10103 restricts the LIHEAP-triggered heat-and-eat utility allowance to households with an elderly or disabled member | Pub. L. 119-21 § 10103; state implementation letters |
+| H7 | Colorado deviation universe: 305 = 110 above-threshold official errors + 195 sub-threshold deviations; sub-threshold dollars $18.5M of $112.6M (16%); official-gate file-derived rate 7.42% | recomputed from qc_pub_fy2024.csv (official gate); paper/snapshot/labs/amterr/amterr_replay_results.json |
+| H8 | Replay explanation rates by threshold status: 76/97 = 78.4% above threshold; 170/186 = 91.4% below; 33 of 246 explained cases have deviations ≤ $5 (within comparison tolerance mechanically) | paper/snapshot/labs/amterr/amterr_replay_results.json |
