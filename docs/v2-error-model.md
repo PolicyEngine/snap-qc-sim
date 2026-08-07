@@ -36,6 +36,26 @@ the external engine or `amterr-lab` work.
 | Simulator integration and counterfactual aggregation | Implemented, disabled | A model-based mode (bootstrap + per-case redraw, official-anchored) ships in the app but is hidden in production pending adversarial-review fixes; counterfactual aggregation remains not implemented; the observed mode keeps the accounting-bound levers. |
 | Forward caseload projection | Not implemented | No calibrated FY2026–28 survey-microdata projection is part of this pipeline. |
 
+## Round-2 spine: Microcosm population simulation (approved direction, 2026-08-07)
+
+The QC file supports counterfactuals whose affected population is already
+enrolled: intensive-margin changes in both directions, and extensive-margin
+exits. Extensive-margin entries — eligibility expansions — require a
+population dataset. The approved round-2 design: Microcosm survey microdata
+supplies the population (including non-participants), aged forward to the
+FY2025–27 measurement years; PolicyEngine computes eligibility and benefits
+under baseline and counterfactual policy, applying its existing take-up
+assumptions (including for newly eligible units); QC-trained error-process
+parameters and burden features transfer to Microcosm households by
+statistical matching on shared covariates; the engine leg's verified
+computations anchor the deterministic chain. This is required even for
+baseline projection of the priced FY2025–27 rates, because OBBBA's own
+eligibility changes shift caseload composition away from the FY2024 QC file,
+and because the cost-share denominator (issuance) moves under eligibility
+change. Take-up among newly eligible units uses PolicyEngine's take-up
+machinery; imputation quality and match diagnostics get the same adversarial
+treatment as everything else here.
+
 ## The core idea
 
 The target architecture trains the error process on **policy-affected
