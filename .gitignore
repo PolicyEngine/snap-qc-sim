@@ -6,3 +6,4 @@ app/node_modules/
 app/public/.vercel/
 app/public/.env.local
 app/bun.lock
+.claude/

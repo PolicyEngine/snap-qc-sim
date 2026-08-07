@@ -43,6 +43,14 @@
       <div id="verified-badge" class="badge" hidden></div>
     </div>
     <div class="control">
+      <span class="label">Simulation mode</span>
+      <div class="mode-toggle" role="radiogroup" aria-label="Simulation mode">
+        <label><input type="radio" name="mode" value="observed" checked> Observed resample</label>
+        <label><input type="radio" name="mode" value="model"> Model-based</label>
+      </div>
+      <div class="hint" id="mode-hint">Resamples the state's observed FY 2024 QC error dollars.</div>
+    </div>
+    <div class="control">
       <label for="audits">Additional QC reviews <span class="val" id="audits-val">+0</span></label>
       <input type="range" id="audits" min="0" max="1000" step="50" value="0">
       <div class="hint">Beyond the state's FY 2024 sample size</div>
@@ -81,7 +89,7 @@
 
   <section class="chart-card" id="national">
     <h2>All states at a glance</h2>
-    <p class="sub">Baseline simulation for every jurisdiction — official FY 2024 rate and sample size, no levers. Click a column to sort, a row to load that state above. <span id="nat-note"></span></p>
+    <p class="sub">Baseline simulation for every jurisdiction (observed resample) — official FY 2024 rate and sample size, no levers. Click a column to sort, a row to load that state above. <span id="nat-note"></span></p>
     <div class="table-scroll">
       <table id="nat-table" aria-label="Baseline simulation results for all jurisdictions">
         <thead><tr>
@@ -107,6 +115,7 @@
         <li>The underlying error process is held fixed: no behavioral response, and no corrective-feedback channel from auditing more cases.</li>
         <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
         <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
+        <li>Model-based mode draws each case's payment deviation from a distribution fitted on FY 2017–23 QC data and validated on FY 2024 (quantile model with calibrated deviation probabilities; see the <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/FINDINGS.md">validation report</a>). Levels are anchored to the official rate; the model's raw-level gap by state is documented there. Simplification options require engine-computed counterfactual intermediates and are not yet available in this mode.</li>
         <li>Statute delays cost-share implementation for the highest-error states: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(iii). The simulator shows the standard FY 2028 schedule.</li>
         <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
       </ul>
