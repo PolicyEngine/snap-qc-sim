@@ -2,9 +2,10 @@
 
 **Interactive tool: https://snap-qc-sim.vercel.app** — pick a state, adjust
 audit volume and simplification options, watch the measured-rate
-distribution and the cost-share bill respond. States whose encoded rules
-are verified against their full QC sample (CO, NY, CA, AZ, GA, MD, TX)
-carry a verification badge.
+distribution and the cost-share bill respond. States whose encoded benefit
+computation is verified case-by-case against the FY 2024 QC file (CO, NY,
+CA, AZ, GA, MD, TX — every replayable review exact; exclusions are
+enumerated program-structure classes) carry a verification badge.
 
 Monte Carlo simulation of SNAP payment error rates: given a state's USDA
 Quality Control sample, simulate the distribution of its **measured** payment
@@ -30,9 +31,9 @@ noise alone materially affects tier assignment.
   under QC sampling variation (Colorado: official rate 9.97%, 0.03 points
   from the 15% boundary, with a ±0.9-point sampling SD).
 - **Simplification options carry large expected values** where they can move
-  a state across a boundary: on the order of $600M/yr in combined expected
-  state cost-share reduction nationally at 50% category-suppression
-  effectiveness.
+  a state across a boundary: about $609M/yr in combined expected state
+  cost-share reduction nationally at 50% category-suppression effectiveness
+  (reproducible via `examples/all_states.py`).
 - **The audit-volume effect is two-sided.** More audits shrink variance
   around the state's underlying rate: that lowers expected cost share for
   states just below a boundary and raises it for states just above one,
@@ -71,7 +72,9 @@ FNS's published payment error rate tables.
 - The underlying error process is held fixed: no behavioral response and no
   corrective-feedback channel from auditing more cases.
 - Case bootstrap approximates the stratified monthly QC design; official
-  rates embed a regression adjustment this model applies only as a level.
+  rates embed FNS adjustments (federal re-review integration and related
+  corrections, per the FY 2024 technical documentation) that this model
+  applies only as a level.
 - Element attribution is single-shot (a case's error is split evenly across
   its finding elements).
 - The QC sample is designed for national estimates; within-state dollar

@@ -9,7 +9,11 @@ recompute.
 
 This repository contains the corrected diagnostic v2a pipeline and a v2b
 signed per-case deviation distribution. It exports FY2024 model parameters for
-a browser, but the live simulator does not consume that export yet.
+a browser. A model-based simulator mode consuming that export was implemented
+(PR #9) and is currently disabled in production pending fixes from the
+2026-08-06 adversarial statistical review (tail refit at the attachment depth,
+per-state level factors, 53-state dollar-rate validation; see
+paper/reviews/round-1/code-stats-redteam.md).
 
 ## Implementation status
 
@@ -29,7 +33,7 @@ the external engine or `amterr-lab` work.
 | Computation-failure mixture probability π | Not implemented | No separate computation-failure channel or policy lever is estimated or simulated. |
 | Input-noise tier | Not implemented | Corrected-versus-original input pairs are not training data for this repository's pipeline. |
 | Event-study or causal DiD validation | Not implemented | The SMD results are descriptive weighted pre/post contrasts only. |
-| Simulator integration and counterfactual aggregation | Not implemented | The live tool still uses the existing accounting-bound mechanism. |
+| Simulator integration and counterfactual aggregation | Implemented, disabled | A model-based mode (bootstrap + per-case redraw, official-anchored) ships in the app but is hidden in production pending adversarial-review fixes; counterfactual aggregation remains not implemented; the observed mode keeps the accounting-bound levers. |
 | Forward caseload projection | Not implemented | No calibrated FY2026–28 survey-microdata projection is part of this pipeline. |
 
 ## The core idea
@@ -105,7 +109,9 @@ for all cases and stages, so it makes no such claim.
   experiment or causal validation.
 - Distributional validation aggregates signed case draws using the official
   centering convention and compares them with corrected observed bootstraps.
-  The live simulator still does not consume the exported distribution.
+  The app's (currently disabled) model-based mode instead bootstraps cases
+  and redraws deviations, anchored at the model's own baseline mean — a
+  configuration not yet validated; see the review findings.
 
 ### Reproducing the analysis
 
@@ -164,8 +170,9 @@ The v2b extension learns the signed conditional distribution of deviation:
 The resulting draw sets `D = 0` for nondeviators and samples sign and magnitude
 independently conditional on features. A future counterfactual rules engine
 could compute policy-specific benefits and intermediates before applying these
-draws. This repository does not yet perform that engine recomputation or wire
-the exported process into the live simulator.
+draws. This repository does not yet perform that engine recomputation; the
+exported process is wired into the app's model-based mode, which is disabled
+in production pending validation fixes.
 
 ## Proposed counterfactual tiers
 
