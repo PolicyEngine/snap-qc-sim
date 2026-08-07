@@ -279,18 +279,119 @@ function readUrl() {
   if (p.get("eff")) $("eff").value = Math.min(100, Math.max(25, +p.get("eff") || 50));
   const levers = (p.get("levers") || "").split(",");
   for (const id of LEVER_IDS) $("lever-" + id).checked = levers.includes(id);
+  if (p.get("mode") === "model") {
+    MODE = "model";
+    document.querySelector('input[name="mode"][value="model"]').checked = true;
+  }
 }
 
 function writeUrl() {
   const p = new URLSearchParams();
   p.set("state", $("state").value);
+  if (MODE === "model") p.set("mode", "model");
   if (+$("audits").value) p.set("audits", $("audits").value);
   const on = LEVER_IDS.filter((id) => $("lever-" + id).checked);
-  if (on.length) {
+  if (on.length && MODE !== "model") {
     p.set("levers", on.join(","));
     p.set("eff", $("eff").value);
   }
   history.replaceState(null, "", "?" + p.toString());
+}
+
+// ---- Model-based mode ----------------------------------------------------
+// Draws each case's deviation from the fitted distribution in model_data.json
+// (PR #8), mirroring analysis/predictive_process.py: piecewise-linear inverse
+// CDF over [log(tolerance), q05..q99] in log-dollar space, exponential tail in
+// logs beyond q99, error dollars = |D| strictly above the year threshold.
+// Levels are anchored so the model's own baseline mean sits at the official
+// rate; the model's raw-level gap by state is documented in analysis/FINDINGS.
+
+let MODEL = null;
+let MODEL_PREP = {};
+let MODE = "observed";
+
+function prepModelState(code) {
+  if (MODEL_PREP[code]) return MODEL_PREP[code];
+  const st = MODEL.states[code];
+  const n = st.n;
+  const q = new Float64Array(n * 9);
+  const minLog = Math.log(MODEL.deviation_tolerance);
+  for (let i = 0; i < n; i++) {
+    for (let k = 0; k < 9; k++) q[i * 9 + k] = Math.max(st.q[i][k], minLog);
+    for (let k = 1; k < 9; k++) {
+      const a = i * 9 + k;
+      if (q[a] < q[a - 1]) q[a] = q[a - 1];
+    }
+  }
+  MODEL_PREP[code] = {
+    n,
+    w: Float64Array.from(st.w),
+    wiss: Float64Array.from(st.w, (v, i) => v * st.iss[i]),
+    pDev: Float64Array.from(st.p_dev),
+    q,
+    minLog,
+    baseMean: null,
+  };
+  return MODEL_PREP[code];
+}
+
+function simulateModel(code, { extra = 0, seed = 11 } = {}) {
+  const ms = prepModelState(code);
+  const levels = MODEL.quantile_levels;
+  const nodeLevels = [0].concat(levels);
+  const q99 = levels[8];
+  const tail = MODEL.tail_scale_log;
+  const thr = MODEL.threshold;
+  const n = ms.n, m = n + extra;
+  const rng = mulberry32(seed);
+  const rates = new Float64Array(DRAWS);
+  for (let d = 0; d < DRAWS; d++) {
+    let e = 0, s = 0;
+    for (let j = 0; j < m; j++) {
+      const i = (rng() * n) | 0;
+      s += ms.wiss[i];
+      if (rng() < ms.pDev[i]) {
+        const u = rng();
+        let logD;
+        if (u >= q99) {
+          logD = ms.q[i * 9 + 8] + tail * Math.log((1 - q99) / (1 - u));
+        } else {
+          let k = 0;
+          while (k < 8 && u >= nodeLevels[k + 1]) k++;
+          const leftLog = k === 0 ? ms.minLog : ms.q[i * 9 + k - 1];
+          const rightLog = ms.q[i * 9 + k];
+          const span = nodeLevels[k + 1] - nodeLevels[k];
+          logD = leftLog + ((u - nodeLevels[k]) / span) * (rightLog - leftLog);
+        }
+        const absD = Math.exp(logD);
+        if (absD > thr) e += ms.w[i] * absD;
+      }
+    }
+    rates[d] = (100 * e) / s;
+  }
+  return rates;
+}
+
+function modelBase(code, official) {
+  const ms = prepModelState(code);
+  if (ms.baseMean === null) {
+    ms.baseRates = simulateModel(code, {});
+    let sum = 0;
+    for (const r of ms.baseRates) sum += r;
+    ms.baseMean = sum / ms.baseRates.length;
+  }
+  return { raw: ms.baseRates, shift: official - ms.baseMean };
+}
+
+function setModeUi() {
+  const model = MODE === "model";
+  for (const id of LEVER_IDS) $("lever-" + id).disabled = model;
+  $("eff").disabled = model;
+  document.querySelector(".levers").classList.toggle("off", model);
+  $("eff").closest(".control").classList.toggle("off", model);
+  $("mode-hint").textContent = model
+    ? "Each draw samples cases and draws each case's error from its fitted distribution; level anchored to the official rate. Simplification options need engine-computed counterfactuals (in progress) and stay in observed mode."
+    : "Resamples the state's observed FY 2024 QC error dollars.";
 }
 
 function render() {
@@ -302,10 +403,24 @@ function render() {
   $("audits-val").textContent = "+" + extra;
   $("eff-val").textContent = Math.round(eff * 100) + "%";
 
-  const base = simulate(st, {});
-  const scen = simulate(st, { extra, levers, eff });
-  const sb = summarize(base, st.issuance);
-  const ss = summarize(scen, st.issuance);
+  let base, scen, issuance;
+  if (MODE === "model" && MODEL) {
+    const { raw, shift } = modelBase(code, st.official);
+    const lift = (r) => {
+      const out = new Float64Array(r.length);
+      for (let i = 0; i < r.length; i++) out[i] = r[i] + shift;
+      return out;
+    };
+    base = lift(raw);
+    scen = extra ? lift(simulateModel(code, { extra })) : base;
+    issuance = MODEL.states[code].issuance;
+  } else {
+    base = simulate(st, {});
+    scen = simulate(st, { extra, levers, eff });
+    issuance = st.issuance;
+  }
+  const sb = summarize(base, issuance);
+  const ss = summarize(scen, issuance);
 
   $("t-official").textContent = st.official.toFixed(2) + "%";
   $("t-expected").textContent = fmtM(ss.eShare) + "/yr";
@@ -348,6 +463,22 @@ async function main() {
   }
   sel.value = "CO";
   readUrl();
+  setModeUi();
+  document.querySelectorAll('input[name="mode"]').forEach((r) => {
+    r.addEventListener("change", async () => {
+      MODE = r.value;
+      if (MODE === "model" && !MODEL) {
+        $("mode-hint").textContent = "Loading model distributions…";
+        MODEL = await (await fetch("model_data.json")).json();
+      }
+      setModeUi();
+      render();
+    });
+  });
+  if (MODE === "model" && !MODEL) {
+    MODEL = await (await fetch("model_data.json")).json();
+    setModeUi();
+  }
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
