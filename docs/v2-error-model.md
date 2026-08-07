@@ -7,9 +7,9 @@ benefits, or shift composition. v2 is the proposed replacement: a case-level
 model in which policy enters only through variables a rules engine can
 recompute.
 
-This repository currently contains a corrected diagnostic v2a pipeline, not
-the complete counterfactual model. In particular, the model is not wired into
-the live simulator.
+This repository contains the corrected diagnostic v2a pipeline and a v2b
+signed per-case deviation distribution. It exports FY2024 model parameters for
+a browser, but the live simulator does not consume that export yet.
 
 ## Implementation status
 
@@ -25,7 +25,7 @@ the external engine or `amterr-lab` work.
 | State calibration validation | Implemented | Fits through FY2022, estimates shrunken state factors from FY2023, freezes them, and evaluates factor-adjusted results on FY2024. FY2024-derived factors are descriptive anchors only. |
 | Medical-error and SMD contrasts | Implemented | Weighted descriptive contrasts use the state-year SMD registry, aligned calendar cells, event counts, and both a post-treatment-conditioned claimant denominator and a stable all-elderly/disabled denominator. They are not causal estimates. |
 | Engine recomputation under alternative policies | Not implemented | Current intermediates are extracted from QC fields; the rules engine does not yet regenerate them under a counterfactual policy. |
-| Signed conditional deviation distribution and assigned-benefit draws | Not implemented | Quantiles, sign, tail draws, and `assigned′ = true′ + D′` remain v2b work. |
+| Signed conditional deviation distribution and assigned-benefit draws | Implemented | Estimates calibrated sign probabilities and nine conditional `log(|D|)` quantiles among deviators, sorts each predicted vector, extends q99 with a training-only OOF-residual log-exponential tail, and exports parameters for signed draws. Native HistGB quantile loss preserves the hurdle's feature, missing-value, and HWGT behavior without adding a dependency. Sign and magnitude are conditionally independent given features. |
 | Computation-failure mixture probability π | Not implemented | No separate computation-failure channel or policy lever is estimated or simulated. |
 | Input-noise tier | Not implemented | Corrected-versus-original input pairs are not training data for this repository's pipeline. |
 | Event-study or causal DiD validation | Not implemented | The SMD results are descriptive weighted pre/post contrasts only. |
@@ -103,8 +103,9 @@ for all cases and stages, so it makes no such claim.
   align treated states and controls to the same pre- and post-adoption
   calendar cells. They are descriptive weighted contrasts, not a natural
   experiment or causal validation.
-- Neither the hurdle predictions nor state factors are aggregated through
-  the v1 simulator's sampling layer in the current implementation.
+- Distributional validation aggregates signed case draws using the official
+  centering convention and compares them with corrected observed bootstraps.
+  The live simulator still does not consume the exported distribution.
 
 ### Reproducing the analysis
 
@@ -116,9 +117,11 @@ the output provenance, regenerate every checked-in analysis artifact with:
 uv run --frozen --extra analysis python analysis/run_all.py
 ```
 
-The entry point stages both JSON files and the generated `analysis/FINDINGS.md`
-before replacing any of them. The JSON provenance records the Python package
-versions, SHA256 for each input, threshold map, random seed, and OOF settings.
+The entry point stages all three analysis JSON files, the generated
+`analysis/FINDINGS.md`, and `app/public/model_data.json` before replacing any
+of them. The JSON provenance records the Python package versions, SHA256 for
+each source input, threshold map, random seeds, quantile grid, tail fit, and OOF
+settings.
 
 ## Targets and estimands
 
@@ -137,7 +140,7 @@ This distinction matters because `BENFIX` incorporates the legitimate
 adjustments recognized in adjudication, including adjustments such as
 proration. Therefore, `RAWBEN − FSBEN` can mix error with legitimate
 adjustments. In weighted FY2024 data, `|RAWBEN − BENFIX| == AMTERR` for
-99.99689% of cases, compared with 83.64983% for
+99.99689% of cases, compared with 83.64472% for
 `|RAWBEN − FSBEN| == AMTERR`.
 
 The implemented diagnostic hurdle has three pieces:
@@ -151,20 +154,28 @@ error rate is **weighted error dollars divided by weighted issuance**. An
 official-error probability is a threshold-crossing probability, but the
 payment error rate is not.
 
-For a portable policy counterfactual, the next model must instead learn the
-signed conditional distribution of deviation. The rules engine would compute
-the policy-specific true or formula benefit and intermediates; a signed draw
-would then produce the assigned benefit. That distributional tier is not
-implemented in this repository.
+The v2b extension learns the signed conditional distribution of deviation:
+
+1. `P(|D| > 0.5 | features)` from the existing calibrated stage 1.
+2. `P(D > 0 | |D| > 0.5, features)` with a separately calibrated classifier.
+3. Nine conditional quantiles of `log(|D|)` among deviators, with log-linear
+   interpolation and a fitted exponential excess above q99.
+
+The resulting draw sets `D = 0` for nondeviators and samples sign and magnitude
+independently conditional on features. A future counterfactual rules engine
+could compute policy-specific benefits and intermediates before applying these
+draws. This repository does not yet perform that engine recomputation or wire
+the exported process into the live simulator.
 
 ## Proposed counterfactual tiers
 
-- **v2a distributional extension.** Estimate the sign and conditional
-  distribution of `D`, including its tails, instead of only two probabilities
-  and a conditional mean. The engine-computed benefit remains both an anchor
-  and a covariate, with benefit-position features such as relative-to-maximum
-  and distances to thresholds. This is required for assigned-benefit draws
-  and thresholds not observed in the training years.
+- **v2b distributional extension.** The implemented diagnostic model estimates
+  the sign and conditional distribution of `D`, including a q99 tail, rather
+  than only two probabilities and a conditional mean. The formula benefit
+  remains both an anchor and a covariate. The implementation predicts the
+  FY2024 error process from FY2017–19 and FY2022–23 data; it does not establish
+  causal policy effects or transport to thresholds outside the observed
+  setting without additional validation.
 - **Computation-failure mixture.** Separate cases whose issuance can be
   reproduced by correct arithmetic on incorrect inputs from cases requiring
   another computation-error channel. The external `amterr-lab` analysis
@@ -204,13 +215,14 @@ These are explicit future steps, not claims about the current pipeline:
 1. Replace QC proxies with engine-recomputed intermediates, including state
    medical-standard amounts, whether the standard binds, actuals above the
    standard, verification requirements, and distances to discontinuities.
-2. Fit and validate a signed conditional distribution or quantile model for
-   `D`, then generate assigned-benefit draws.
+2. Integrate the exported signed-deviation process with policy-specific engine
+   outputs and the live simulator, retaining the current app mechanism as a
+   labeled comparison.
 3. Build and estimate the separate computation-failure mixture π.
 4. Prepare input-noise training pairs and implement the mechanistic v2b tier.
 5. Design a credible event-study validation; do not relabel the existing SMD
    descriptive contrasts as DiD.
-6. Wire policy recomputation, model draws, and aggregation into the simulator,
-   retaining the accounting bound as a labeled comparison.
+6. Validate the conditional-independence assumption between sign and magnitude
+   and assess tail stability in later QC years.
 7. Replace the FY2024 QC sample with calibrated survey microdata aged to
    FY2026–28 for forward-looking estimates.

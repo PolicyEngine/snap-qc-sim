@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -370,19 +371,65 @@ def test_magnitude_diagnostics_fit_smear_inside_each_outer_training_fold(
     assert np.isfinite(nested_magnitude).all()
 
 
+def test_weighted_quantile_coverage_has_one_row_per_configured_quantile():
+    levels = np.array([0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.975, 0.99])
+    frame = pd.DataFrame(
+        {
+            "deviates": [1, 1, 1],
+            "D": [2.0, -4.0, 8.0],
+            "w": [1.0, 2.0, 3.0],
+        }
+    )
+    for index, column in enumerate(
+        run_all.distributional_deviation_model.QUANTILE_COLUMNS
+    ):
+        frame[column] = np.log([2.0, 4.0, 8.0]) + index / 100
+
+    rows = run_all.distributional_deviation_model.weighted_quantile_coverage(frame)
+
+    assert len(rows) == 9
+    assert [row["quantile"] for row in rows] == pytest.approx(levels)
+    assert all(
+        set(row)
+        == {
+            "quantile",
+            "n",
+            "effective_n",
+            "weighted_coverage",
+            "gap_pp",
+            "flag_over_3pp",
+        }
+        for row in rows
+    )
+
+
 def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     monkeypatch, tmp_path
 ):
     model_destination = tmp_path / "model_results.json"
     hurdle_destination = tmp_path / "hurdle_results.json"
+    distributional_destination = tmp_path / "distributional_results.json"
     findings_destination = tmp_path / "FINDINGS.md"
-    for destination in (model_destination, hurdle_destination, findings_destination):
+    model_data_destination = tmp_path / "model_data.json"
+    for destination in (
+        model_destination,
+        hurdle_destination,
+        distributional_destination,
+        findings_destination,
+        model_data_destination,
+    ):
         destination.write_text("old\n")
 
     monkeypatch.setattr(run_all, "ANALYSIS_DIR", tmp_path)
     monkeypatch.setattr(run_all, "MODEL_RESULTS", model_destination)
     monkeypatch.setattr(run_all, "HURDLE_RESULTS", hurdle_destination)
+    monkeypatch.setattr(
+        run_all,
+        "DISTRIBUTIONAL_RESULTS",
+        distributional_destination,
+    )
     monkeypatch.setattr(run_all, "FINDINGS", findings_destination)
+    monkeypatch.setattr(run_all, "MODEL_DATA", model_data_destination)
 
     def fake_classifier_main():
         path = run_all.train_error_model.OUT / model_destination.name
@@ -391,12 +438,68 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     def fake_hurdle_main(path):
         Path(path).write_text(json.dumps({"hurdle": "new"}))
 
+    def fake_distributional_main(path):
+        result = {"distributional": "new", "export": {}}
+        Path(path).write_text(json.dumps(result))
+        return SimpleNamespace(
+            result=result,
+            predictions=pd.DataFrame(),
+            bundle=SimpleNamespace(tail=SimpleNamespace(scale=0.25)),
+        )
+
+    def fake_build_model_data(
+        predictions,
+        *,
+        tail_scale,
+        output_path,
+        metadata_path,
+        threshold,
+        deviation_tolerance,
+        quantile_levels,
+        quantile_columns,
+    ):
+        assert predictions.empty
+        assert tail_scale == 0.25
+        assert metadata_path == model_data_destination.with_name("data.json")
+        assert threshold == 56
+        assert deviation_tolerance == 0.5
+        assert len(quantile_levels) == len(quantile_columns) == 9
+        Path(output_path).write_text(json.dumps({"model_data": "new"}))
+        return {
+            "raw_bytes": 21,
+            "gzip_bytes": 37,
+            "q_decimal_quantization": None,
+        }
+
     monkeypatch.setattr(run_all.train_error_model, "main", fake_classifier_main)
     monkeypatch.setattr(run_all.hurdle_deviation_model, "main", fake_hurdle_main)
-    monkeypatch.setattr(run_all, "render_findings", lambda model, hurdle: "new\n")
+    monkeypatch.setattr(
+        run_all.distributional_deviation_model,
+        "main",
+        fake_distributional_main,
+    )
+    monkeypatch.setattr(
+        run_all.scripts_build_model_data,
+        "build_model_data",
+        fake_build_model_data,
+    )
+    monkeypatch.setattr(
+        run_all,
+        "render_findings",
+        lambda model, hurdle, distributional: "new\n",
+    )
 
     run_all.main()
 
     assert json.loads(model_destination.read_text()) == {"classifier": "new"}
     assert json.loads(hurdle_destination.read_text()) == {"hurdle": "new"}
+    assert json.loads(distributional_destination.read_text()) == {
+        "distributional": "new",
+        "export": {
+            "model_data_gzip_bytes": 37,
+            "model_data_raw_bytes": 21,
+            "q_decimal_quantization": None,
+        },
+    }
     assert findings_destination.read_text() == "new\n"
+    assert json.loads(model_data_destination.read_text()) == {"model_data": "new"}
