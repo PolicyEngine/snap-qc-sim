@@ -294,6 +294,18 @@ wheels = [
 ]
 
 [[package]]
+name = "quantile-forest"
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/62/6e/3f1493d4abcce71fdc82ed575475d3e02da7b03375129e84be2622e1532f/quantile_forest-1.4.1.tar.gz", hash = "sha256:713a23c69562b7551ba4a05c22ce9d0e90db6a73d043e760b29c331cb19dc552", size = 486249, upload-time = "2025-09-10T12:48:04.578Z" }
+
+[[package]]
 name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -500,6 +512,7 @@ dependencies = [
 analysis = [
     { name = "pandas" },
     { name = "pyreadstat" },
+    { name = "quantile-forest" },
     { name = "scikit-learn" },
     { name = "scipy" },
 ]
@@ -514,6 +527,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'analysis'", specifier = ">=2.2,<3" },
     { name = "pyreadstat", marker = "extra == 'analysis'", specifier = ">=1.2.8,<2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
+    { name = "quantile-forest", marker = "extra == 'analysis'", specifier = "==1.4.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<1" },
     { name = "scikit-learn", marker = "extra == 'analysis'", specifier = ">=1.8,<1.9" },
     { name = "scipy", marker = "extra == 'analysis'", specifier = ">=1.17,<1.18" },
