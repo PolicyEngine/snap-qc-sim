@@ -105,3 +105,39 @@ Molin's [SNAP Screener QC analysis](https://www.snapscreener.com/blog/qc-data).
 ## License
 
 Apache-2.0
+
+## Reproducing the paper
+
+1. Clone the QC data repository (training files are tracked there) and
+   fetch the FY 2024 CSV and official rate table:
+
+   ```bash
+   git clone https://github.com/giannella/snap_qc ~/snap_qc
+   export SNAP_QC_SAV_DIR=~/snap_qc/qc_data
+   # FY 2024 public-use CSV and PER PDF from https://snapqcdata.net/datafiles
+   # and https://www.fns.usda.gov/snap/qc/per
+   export SNAP_QC_CSV=/path/to/qc_pub_fy2024.csv
+   export SNAP_QC_PER=/path/to/snap-fy24QC-PER.pdf
+   ```
+
+2. Run the deterministic analysis pipeline (Python 3.14, pinned in
+   `.python-version`; ~15–20 minutes; two runs are byte-identical):
+
+   ```bash
+   uv run --frozen --extra analysis python analysis/run_all.py
+   ```
+
+3. Rebuild the app data and the paper's simulation artifact
+   (`pdftotext` from poppler required):
+
+   ```bash
+   uv run --frozen --extra analysis python scripts_build_data.py "$SNAP_QC_CSV" "$SNAP_QC_PER"
+   uv run --frozen --extra analysis python examples/all_states.py "$SNAP_QC_CSV" "$SNAP_QC_PER"
+   ```
+
+4. Tests and manuscript:
+
+   ```bash
+   uv run --frozen --extra dev --extra analysis pytest -q
+   cd paper && quarto render index.qmd
+   ```

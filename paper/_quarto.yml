@@ -1,0 +1,25 @@
+project:
+  type: manuscript
+  output-dir: out
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    theme: cosmo
+  pdf:
+    toc: false
+    number-sections: true
+    colorlinks: true
+    header-includes:
+      - \usepackage{tgpagella}
+      - \usepackage[scaled=0.94]{helvet}
+      - \usepackage[scaled=0.9]{inconsolata}
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+manuscript:
+  article: index.qmd

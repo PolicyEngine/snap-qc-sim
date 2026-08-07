@@ -1,0 +1,42 @@
+{
+ "US": {
+  "benefit_dollars": 88823856912.58577,
+  "cases": 44891.0,
+  "err_cases": 17836.0,
+  "err_cases_w": 106614623.42322962,
+  "err_dollars": 8135965305.967613,
+  "err_dollars_raw": 1274439.0,
+  "under_dollars": 1998757815.942887,
+  "finding_dollars": 6607691015.146214,
+  "over_dollars": 6137207490.024713,
+  "t1_cases_w": 6957516.962670583,
+  "t1_case_dollars": 320088850.45444554,
+  "t2_cases_w": 19425350.7963121,
+  "t2_case_dollars": 1498501938.9023948,
+  "nc_cases_w": 6556589.400108398,
+  "nc_case_dollars": 574615602.6797348,
+  "t1_finding_dollars": 133016925.36118236,
+  "t2_finding_dollars": 920025170.2123636,
+  "nc_finding_dollars": 279639043.28561664
+ },
+ "CO": {
+  "benefit_dollars": 1255069797.9215636,
+  "cases": 856.0,
+  "err_cases": 305.0,
+  "err_cases_w": 1283415.6514529006,
+  "err_dollars": 112575220.48705018,
+  "err_dollars_raw": 27248.0,
+  "over_dollars": 78030476.15429781,
+  "finding_dollars": 4740779.3947923,
+  "under_dollars": 34544744.33275241,
+  "nc_cases_w": 87958.79198279999,
+  "nc_case_dollars": 7145515.539061,
+  "nc_finding_dollars": 665155.1076363,
+  "t2_cases_w": 148500.0945543,
+  "t2_case_dollars": 11870971.2470332,
+  "t2_finding_dollars": 196080.9030141,
+  "t1_cases_w": 95458.0020028,
+  "t1_case_dollars": 8189989.6966336,
+  "t1_finding_dollars": 0.0
+ }
+}

@@ -1,0 +1,11 @@
+{
+ "artifact": "results_by_state_corrected.json",
+ "generator": "examples/all_states.py at repo state d2e3972 (official error gate: STATUS in {2,3} and AMTERR > 56; CASE == 1; positive weights)",
+ "seed": 11,
+ "draws": 100000,
+ "inputs": {
+  "qc_pub_fy2024.csv_sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9",
+  "per_pdf": "snap-fy24QC-PER.pdf (FNS FY2024 payment error rates)"
+ },
+ "independently_reproduced": "round-2 red-team referee rebuilt the CO cell from the raw file to four decimals (paper/reviews/round-2/round2-redteam.md)"
+}
