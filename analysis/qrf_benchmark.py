@@ -1125,6 +1125,10 @@ def render_markdown(result: dict[str, Any]) -> str:
         ("PIT effective-n-scaled CvM", "pit_effective_n_scaled_cvm"),
         ("Raw equal-state dollar MAE (pp)", "dollar_raw_equal_state_mae"),
         (
+            "Raw issuance-weighted dollar MAE (pp)",
+            "dollar_raw_issuance_weighted_mae",
+        ),
+        (
             "FY2023-factored equal-state dollar MAE (pp)",
             "dollar_factored_equal_state_mae",
         ),
@@ -1170,9 +1174,9 @@ def render_markdown(result: dict[str, Any]) -> str:
             "",
             (
                 "| Quantile | GBM coverage | GBM gap (pp) | QRF coverage | "
-                "QRF gap (pp) | Winner by absolute gap |"
+                "QRF gap (pp) | QRF − GBM absolute-gap (pp) | Winner |"
             ),
-            "|---:|---:|---:|---:|---:|:---|",
+            "|---:|---:|---:|---:|---:|---:|:---|",
         ]
     )
     for index, level in enumerate(QUANTILE_LEVELS):
@@ -1180,12 +1184,14 @@ def render_markdown(result: dict[str, Any]) -> str:
         qrf_row = qrf["coverage"]["levels"][index]
         label = str(float(level)).replace("0.", "q").replace(".", "")
         winner = _winner_label(gates[f"coverage_{label}"]["winner"])
+        delta = gates[f"coverage_{label}"]["delta_qrf_minus_gbm"]
         lines.append(
             f"| {float(level):.3f} | "
             f"{100 * float(gbm_row['weighted_coverage']):.2f}% | "
             f"{float(gbm_row['gap_pp']):+.3f} | "
             f"{100 * float(qrf_row['weighted_coverage']):.2f}% | "
-            f"{float(qrf_row['gap_pp']):+.3f} | {winner} |"
+            f"{float(qrf_row['gap_pp']):+.3f} | {float(delta):+.3f} | "
+            f"{winner} |"
         )
     for estimator, label in ((gbm, "GBM"), (qrf, "QRF")):
         pattern = estimator["coverage"]["one_sided_pattern"]
@@ -1212,9 +1218,10 @@ def render_markdown(result: dict[str, Any]) -> str:
             "",
             (
                 "| State | Observed bootstrap SD (pp) | GBM SD (pp) | "
-                "GBM abs gap | QRF SD (pp) | QRF abs gap | Winner |"
+                "GBM abs gap | QRF SD (pp) | QRF abs gap | "
+                "QRF − GBM abs-gap (pp) | Winner |"
             ),
-            "|:---|---:|---:|---:|---:|---:|:---|",
+            "|:---|---:|---:|---:|---:|---:|---:|:---|",
         ]
     )
     for state in TARGET_STATES:
@@ -1227,6 +1234,7 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"{gbm_state['absolute_sd_gap_to_observed_pp']:.4f} | "
             f"{qrf_state['sd_pp']:.4f} | "
             f"{qrf_state['absolute_sd_gap_to_observed_pp']:.4f} | "
+            f"{gate['delta_qrf_minus_gbm']:+.4f} | "
             f"{_winner_label(gate['winner'])} |"
         )
 
@@ -1239,6 +1247,7 @@ def render_markdown(result: dict[str, Any]) -> str:
             (
                 "Run time is observational, alternates estimator order across "
                 "repetitions, and is excluded from the deterministic core hash. "
+                "Both runs constrain OpenMP/BLAS and QRF to one thread. "
                 "Model-object size is excluded: only the identically shaped "
                 "exported per-case vectors matter to the shipped consumer."
             ),
@@ -1270,13 +1279,34 @@ def render_markdown(result: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Binary validity gates",
+            "",
+            "| Gate | GBM | QRF | Winner |",
+            "|---|:---:|:---:|:---|",
+        ]
+    )
+    for label, gate_id in (
+        ("Tail finite-variance gate", "tail_finite_variance"),
+        ("Exact two-repetition determinism", "determinism_exact_repetition"),
+    ):
+        gate = gates[gate_id]
+        lines.append(
+            f"| {label} | {'Pass' if gate['gbm'] else 'Fail'} | "
+            f"{'Pass' if gate['qrf'] else 'Fail'} | "
+            f"{_winner_label(gate['winner'])} |"
+        )
+
+    lines.extend(
+        [
+            "",
             "## Method caveats",
             "",
             (
                 "- **Weights:** Both estimators receive HWGT at fit. GBM weights "
                 "its quantile losses. QRF sample weights affect split/impurity "
-                "fitting, but quantile-forest's final leaf-frequency aggregation "
-                "does not directly reuse the HWGT magnitudes."
+                "fitting, but sklearn's bootstrap and quantile-forest's "
+                "one-sample leaf retention remain uniform; final leaf-frequency "
+                "aggregation does not directly reuse the HWGT magnitudes."
             ),
             "",
             (
@@ -1321,6 +1351,18 @@ def render_markdown(result: dict[str, Any]) -> str:
             "## Recommendation",
             "",
             result["verdict"]["statement"],
+            "",
+            (
+                "Relative to GBM, QRF changes the mean absolute coverage gap by "
+                f"{gates['coverage_mean_absolute_gap']['delta_qrf_minus_gbm']:+.3f} "
+                "pp and factor-adjusted equal-state MAE by "
+                f"{gates['dollar_factored_equal_state_mae']['delta_qrf_minus_gbm']:+.3f} "
+                "pp; negative is better. The PIT gates favor "
+                f"{_winner_label(gates['pit_absolute_mean_gap']['winner'])} "
+                "on absolute mean gap and "
+                f"{_winner_label(gates['pit_effective_n_scaled_cvm']['winner'])} "
+                "on effective-n-scaled CvM."
+            ),
             "",
             (
                 "The decision rule is fixed in advance: switch only if QRF ties "
