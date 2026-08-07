@@ -1,0 +1,467 @@
+---
+title: "Administrative quality control data as an oracle: verifying encoded SNAP rules and simulating payment error under cost sharing"
+author:
+  - name: Max Ghenis
+    affiliations:
+      - name: PolicyEngine
+    email: max@policyengine.org
+date: 2026-08-06
+bibliography: references.bib
+abstract: |
+  Beginning in fiscal year 2028, each state's SNAP payment error rate sets its
+  share of benefit costs, in steps of five percentage points at rates of 6, 8,
+  and 10 percent. A measurement system built for program oversight now moves
+  hundreds of millions of dollars per state per year, which raises two
+  questions this paper treats as one: whether the rules that produce benefit
+  amounts can be executed correctly, and how the errors that remain should be
+  measured, modeled, and simulated. We use the USDA Quality Control public-use
+  files as a verification oracle for independently encoded SNAP rules,
+  reproducing 6,081 sampled case computations across seven states exactly, at
+  zero tolerance, in six asserted stages per case — a process that surfaced
+  and fixed two defects in our own encodings and errata in the federal
+  technical documentation. We then decompose Colorado's fiscal 2024 error
+  dollars by replaying reconstructed pre-edit case facts through the verified
+  engine: 86.9% of filtered error cases are correct arithmetic on wrong facts.
+  Building on that distinction, we fit and validate a distributional model of
+  case-level payment deviations, and embed it in an open, in-browser Monte
+  Carlo simulator of measured error rates under the new cost-sharing formula,
+  where sampling noise alone gives several states nearly even odds of landing
+  in a different cost tier than their point rate implies.
+---
+
+## Introduction
+
+The One Big Beautiful Bill Act rewired the incentives around a statistic that
+few people outside program-integrity offices had reason to watch. Under
+7 U.S.C. 2013(a)(2), a state whose SNAP payment error rate reaches 6% will pay
+5% of benefit costs from fiscal year 2028; at 8%, the share is 10%; at 10%, it
+is 15%. The rate that determines the share is keyed to fiscal 2025 or 2026 at
+the state's election, then to the third preceding year, and implementation is
+delayed for the highest-error states — to FY2029 or FY2030 where 1.5 times the
+keyed rate reaches 20%.[^delay] For a mid-sized state, one tier is worth tens
+of millions of dollars a year; for the largest, hundreds of millions.
+
+[^delay]: 7 U.S.C. 2013(a)(2)(B)(iii). The delay provision means the states
+with the very highest measured rates face the formula later than everyone
+else, a detail that matters for any projection of FY2028 outlays.
+
+The error rate is estimated from the Quality Control (QC) system: each state
+re-reviews a stratified sample of its own cases — on the order of hundreds to
+a couple thousand active cases per year, set by formula in 7 C.F.R. 275.11 —
+and federal reviewers re-review a subsample. The public-use files that result
+[@fns2024techdoc] record, for roughly 45,000 cases a year, both what the
+agency issued and what the reviewer concluded the case should have received,
+along with the elements, natures, and causes of every discrepancy.
+
+This paper treats those files as more than an audit byproduct. They are, we
+argue, the best available *oracle* for executable encodings of SNAP rules:
+tens of thousands of real, adjudicated benefit computations per year, each
+carrying its inputs and its reviewed outputs. We use them three ways.
+
+First, as a verification target. We test independently encoded SNAP rules —
+statutes, regulations, and state manuals encoded as executable rule modules —
+against every sampled case in seven states, and we hold the bar at exact
+reproduction: zero dollar tolerance, six asserted computation stages per case
+(@sec-oracle). Reaching that bar surfaced defects on three sides: two in our
+own encodings, several in the federal technical documentation, and a class of
+state-level computational discrepancies visible in the file itself.
+
+Second, as the raw material for decomposing what "payment error" actually is.
+QC's own cause coding, a finding-nature classification, and a replay of
+reconstructed pre-edit case facts through the verified engine give three
+nested estimates of how much of the error rate is computation — a rules-engine
+failure — versus wrong facts faithfully processed (@sec-decompose). The
+distinction determines what different interventions can plausibly buy.
+
+Third, as training and validation data for a case-level model of the error
+process (@sec-model), which powers a distributional simulator of measured
+error rates under the OBBBA formula (@sec-simulate). The simulator, public at
+[snap-qc-sim.vercel.app](https://snap-qc-sim.vercel.app), makes one point
+vividly that summary statistics obscure: at regulatory sample sizes, the
+measured rate is noisy enough that several states face nearly even odds of
+being assigned a different cost tier than their point estimate implies.
+
+Everything here is reproducible from public data. The analysis pipeline,
+simulator, and this manuscript live in one repository;[^repo] the encoding
+verification harness and its committed case-level reports are public; and the
+pre-edit reconstruction builds on the open solver of @giannella_snapqc. Two
+constraints we imposed on ourselves are worth stating up front, because they
+shape the claims: every headline number in this paper survived an adversarial
+audit that forced a full correction round of an earlier pipeline (targets,
+universes, calibration protocol, and contrast construction all changed), and
+every mechanism claim is scoped to what the artifacts show — including the
+limits of our own parity result (@sec-oracle-scope).
+
+[^repo]: github.com/PolicyEngine/snap-qc-sim. Analysis artifacts are
+deterministic: two complete reruns of the pipeline produce byte-identical
+outputs, independently reproduced by SHA-256 comparison.
+
+## The QC system and the money attached to it {#sec-qc}
+
+QC reviews produce, for each sampled case, the issued allotment, the
+reviewer-determined correct allotment, and — when they differ by more than a
+tolerance threshold ($56 in fiscal 2024) — a payment error with coded
+findings. The official state rate is a regression-adjusted combination of
+over- and underpayment rates estimated from these samples [@fns2024per].
+
+Three features of the system matter for everything that follows.
+
+**Sample sizes are set by formula and are small relative to the stakes.** The
+active-case annual minimum is 300 for states with average monthly caseloads
+up to 10,000, rising linearly (0.042 cases per additional unit) to a cap of
+2,400; an optional reduced schedule — elected by every state in fiscal 2024
+[@fns2024techdoc] — runs from 300 to a cap of 1,020. Colorado's fiscal 2024
+edited file contains 856 active cases; the largest states contribute around
+a thousand.
+
+**The tolerance and the target moved.** The error threshold, indexed
+annually, was $38 in 2017 and $56 in 2024; analyses that pool years must
+apply each year's own threshold, and models that predict "error" must be
+explicit that the label is an adjudicated, thresholded quantity — reviewer
+status codes together with the error amount — not any benefit discrepancy.
+
+**The dollars are new.** Before OBBBA, the error rate carried reputational
+and (episodically) liability consequences. From FY2028 it prices directly:
+applying the tier schedule to fiscal 2024 issuance, a state at Colorado's
+position (official rate 9.97%, issuance $1.27B) has an expected annual cost
+share of $156M with a standard deviation of $33M across sampling draws, and
+the single step from the 10% to the 15% tier is worth about $63M per year
+(@sec-simulate).
+
+## The QC file as a verification oracle {#sec-oracle}
+
+Rules-as-code — encoding statutes and regulations as executable, testable
+logic — has a well-known validation problem: against what do you test the
+encoding? Unit tests encode the encoder's own reading; cross-model
+comparisons inherit both models' assumptions [@merigoux2021catala;
+@oecd2020cracking]. Administrative QC data offers something stronger: real
+cases, adjudicated by the agency's own reviewers, with inputs and outputs
+recorded at case level.
+
+We tested encodings of federal SNAP law and seven states' policy manuals
+(Arizona, California, Colorado, Georgia, Maryland, New York, Texas),
+maintained in the open rulespec-us repository and executed by a deterministic
+rules engine, against every fiscal 2024 QC case in those states: 6,081 cases
+in total (856 in Colorado; 847 New York; 883 California; 922 Arizona; 945
+Georgia; 722 Maryland; 906 Texas). For each case the harness asserts six
+values — gross income, standard deduction, excess shelter deduction, net
+income, maximum allotment, and benefit — against the file's recorded values,
+at zero dollar tolerance.
+
+All 6,081 cases match on all asserted values: 36,486 exact cell comparisons
+(5,136 in Colorado alone), no mismatches, no missing values, no engine
+errors.
+
+### What reaching exactness taught {#sec-oracle-findings}
+
+The result is less interesting than the path to it. Early runs did not match,
+and each mismatch class was a finding about somebody's rules:
+
+- **Two defects in our own encodings.** A regulatory dollar literal that had
+  been superseded by statute (the encoding faithfully reproduced a stale
+  source), and a missing whole-dollar rounding step in the benefit chain.
+  Both were fixed in the public encoding repository; the oracle is what
+  caught them.
+- **Errata in the federal technical documentation.** Mapping the file to
+  engine inputs surfaced internal inconsistencies in the FY2024 technical
+  documentation's variable descriptions, reported upstream. The oracle
+  audits its own paperwork.
+- **A residue that is not ours.** Once the encodings reproduce the reviewer
+  arithmetic exactly, remaining discrepancies in *issued* amounts are
+  attributable to the issuing side — the subject of @sec-decompose.
+
+An audit process that treats mismatches as information, rather than noise to
+be tolerated away, is the core of the method. We held tolerance at zero
+precisely because a $1 tolerance would have hidden the rounding defect.
+
+### Scope: what the parity result does and does not certify {#sec-oracle-scope}
+
+Exactness claims invite overreading, so we state the scope precisely. The
+comparison bridge supplies several intermediates directly from the QC file
+rather than deriving them from raw case facts: the QC-calculated medical and
+child-support deduction amounts, the recorded utility allowance amount, and
+the recorded categorical-eligibility status. Parity therefore certifies that
+the encoded *computation chain from those intermediates to the benefit* —
+income aggregation, deduction sequencing, net-income arithmetic, allotment
+lookup, and rounding — is exact on every sampled case. It does not certify
+independent derivation of every state-specific eligibility and deduction
+pathway from raw facts. Extending the bridge to feed raw facts (recorded
+medical expenses rather than the computed deduction; energy-assistance facts
+rather than the utility tier) is implemented as future work in the same
+harness, and is the necessary next step before the engine can compute
+counterfactual *intermediates* under alternative policy (@sec-roadmap).
+
+### Certification as an artifact {#sec-cert}
+
+Reproducibility claims should themselves be reproducible. We certified a
+pinned toolchain — engine commit `de0efdc7` (binary SHA-256 `bb8ec236…`) with
+encoding-repository commit `b53ce208` — by rebuilding offline and re-running
+the full Colorado suite: 856/856 benefits and 5,136/5,136 stage cells, zero
+tolerance, with every applied parameter-overlay file hash recorded. The run
+takes 3.7 seconds end to end on a laptop (230 cases per second; 279/s with
+compilation amortized), which extrapolates to about 26 seconds for the full
+seven-state suite and roughly 16 minutes for a nationwide five-scenario
+simulation batch. Verification at administrative scale is not a compute
+problem.
+
+## Decomposing measured error: computation versus facts {#sec-decompose}
+
+If a verified engine issued every benefit, how much of the measured error
+rate would disappear? The QC file supports three nested answers, from
+generous to strict. We use Colorado fiscal 2024 as the worked example: 305 of
+856 sampled cases carry payment errors, $112.6M per year in weighted error
+dollars on $1.268B of issuance (the file-derived 8.88%; the official
+regression-adjusted rate is 9.97%).
+
+**Layer 1 — QC's own cause codes.** Findings carry agency-cause codes.
+Classes that name the computing apparatus — computer programming, arithmetic,
+mass-change processing — account for $8.2M per year, 7.3% of Colorado's error
+dollars; adding policy-misapplied, budgeted-wrong, and computer-user classes
+reaches $11.9M (10.5%). Nationally the same coding yields $320M per year
+(3.9%) strict and $1.5B (18.4%) broad, of $8.1B in weighted error dollars.
+
+**Layer 2 — finding natures.** Classifying findings by *nature* (rounding,
+income conversion, averaging, wrong standard, benefit incorrectly computed,
+allotment-table, proration) with cause codes disambiguating deduction-amount
+natures: pure-computation cases carry 3.3% of error dollars,
+system-caused-input cases 6.6%, mixed cases 4.2%, and other input errors
+86.0%.
+
+**Layer 3 — engine replay.** The strictest test reconstructs each error
+case's pre-edit original values using the public $3-shift reconstruction
+solver [@giannella_snapqc], adapted to fiscal 2024, then replays those
+original facts through the verified engine and compares to what the agency
+actually issued. Of 283 error cases surviving the solver's consistency
+filters, 246 — 86.9% — reproduce the issued amount: the agency's arithmetic
+was correct, applied to wrong facts. The solver and the engine partition the
+283 cases identically, an independent cross-validation of both. The residual
+37 cases are the upper bound on computation-side failure observable this way;
+they include solver limitations as well as genuine multi-variable or
+computational discrepancies.
+
+The three layers agree on the structure: **the large majority of SNAP payment
+error is information failure, not calculation failure.** Correct-computation
+guarantees — the thing a verified rules engine directly provides — address
+the smaller share directly (roughly 3–10% of error dollars by layers 1–2, and
+bounded above by 13.1% in the replay), plus whatever share of
+information failures better tooling prevents indirectly (verification
+prompts, documentation-requirement computation, consistency checks at
+intake). That indirect channel is exactly where policy *design* enters: rules
+determine how much information a caseworker must collect and verify, which is
+the mechanism the modeling section takes up.
+
+## Modeling the error process {#sec-model}
+
+Decomposition is retrospective. Pricing decisions — how much a documentation
+requirement costs in error, what an audit-volume change buys — require a
+model of the error-generating process at case level. We fit one on the QC
+files for 2017–2019 and 2022–2023 (pandemic years excluded), evaluating on
+fiscal 2024: 217,656 training and 44,800 evaluation cases in the official
+`CASE == 1` universe, all estimates weighted by the file's case weights.
+
+Targets are defined from the file's own adjudication fields. The official
+error label is reviewer status (over- or underpayment) with an error amount
+above the year's threshold. The signed deviation is issued minus corrected
+allotment (`RAWBEN − BENFIX`), which reconciles with the recorded error
+amount for 99.997% of weighted fiscal 2024 cases; the full recomputed benefit
+(`FSBEN`) — an earlier, wrong choice of target that an adversarial audit
+caught — matches only 83.65%, because it conflates legitimate adjustments
+such as proration with error.[^audit]
+
+[^audit]: The correction round replaced targets, enforced the official case
+universe, rebuilt features whose source columns had been silently missing,
+scanned all nine finding slots rather than three, and replaced an in-sample
+state calibration with the temporal protocol described below. We document
+this because the corrected numbers differ materially from what the
+uncorrected pipeline produced, and because the audit-and-correct loop is, in
+our view, as much a part of the method as the models.
+
+**Discrimination.** A gradient-boosted classifier on household covariates
+plus a formula-benefit anchor reaches weighted ROC AUC 0.761 on fiscal 2024;
+adding policy-burden intermediates extracted from the file (medical-expense
+claiming and documentation-requirement proxies, self-employment records,
+utility-claim structure, deduction counts) moves it to 0.767 (+0.006 AUC,
++0.003 PR-AUC). The honest statement is that burden intermediates add little
+*discrimination* on this label. Operationally the model is nonetheless
+useful: at a 5% weighted review budget it reaches 47.8% precision against a
+13.4% base rate — case targeting at three and a half times chance.
+
+**The deviation distribution.** For simulation we need more than a
+probability: a per-case distribution of the signed deviation. A hurdle
+structure estimates P(any deviation) (AUC 0.836) and P(above-threshold |
+deviation) (AUC 0.723), both isotonic-calibrated out of fold; a sign model
+(calibrated AUC 0.700); and nine conditional quantiles of log |D| fitted by
+quantile-loss gradient boosting [@koenker1978quantile], made monotone per
+case, with an exponential-in-logs tail beyond the 99th percentile fitted on
+top-decile out-of-fold residuals (scale 0.467, satisfying the finite-mean
+condition). Conditional magnitudes retransform with an out-of-fold Duan
+smear of 1.173 [@duan1983smearing]; predicted mean conditional magnitude is
+$183 against $189 observed.
+
+**Validation.** Weighted quantile coverage on fiscal 2024 deviators is
+within 3 percentage points of nominal at seven of nine levels (the 75th and
+90th percentiles over-cover by 3.5 and 3.3 points — the model slightly
+overstates mid-upper magnitudes). State-level calibration uses a strictly
+temporal protocol: models fit through 2022 predict 2023 out of sample; state
+observed-to-predicted ratios, shrunk by an empirical-Bayes precision rule,
+are frozen and applied to fiscal 2024. Unfactored, state mean absolute error
+is 1.83 points (equal-weighted) and 1.45 (issuance-weighted); with the
+frozen 2023 factors, 0.885 and 0.785 points, with cross-state correlation
+0.906. We report the unfactored numbers alongside because the factors absorb
+persistent state-level residuals whose interpretation — administration,
+omitted policy, model error — the data do not identify.
+
+One validation failure is worth featuring rather than burying: simulated at
+its raw level, the model underpredicts high-error states (New York's
+simulated mean measured rate is 11.0% against a 14.1% observed-bootstrap
+mean). Per-case features carry within-state structure but only part of the
+cross-state level differences. The simulator therefore anchors each state's
+baseline at its official rate and uses the model for distribution shape and
+within-state heterogeneity, an anchoring choice stated in the tool.
+
+**Policy contrasts are descriptive.** States that operate a standard medical
+deduction show slightly *lower* medical-error event rates in cross-section
+(2.60% versus 2.97% among elderly/disabled claimants, under an event
+definition requiring a medical finding with payment impact); but adoption is
+endogenous, and calendar-aligned adoption contrasts against never-adopting
+states are small and mixed (Arizona +2.07 points claimant-conditioned but
++0.64 on the stable denominator; Kentucky −0.42 claimant-conditioned;
+California, Louisiana, Michigan near zero), with single-digit event counts
+for several adopters. An earlier pipeline's dramatic Kentucky estimate
+(−5.3 points) dissolved under the corrected event definition and windows —
+a caution we pass on. Causal identification of burden-policy effects on
+error awaits the engine-computed counterfactuals of @sec-roadmap.
+
+## Simulating measured rates under cost sharing {#sec-simulate}
+
+The public simulator wraps two Monte Carlo modes around the QC file.
+
+**Observed resample.** Each draw resamples the state's own sampled cases
+with replacement at the realized (or a hypothetical, larger) sample size and
+recomputes the weighted error rate [@efron1979bootstrap], centered on the
+official rate. This mode makes no modeling assumptions beyond the sample
+representing the state's case mix.
+
+**Model-based.** Each draw additionally re-draws every sampled case's
+deviation from its fitted distribution (@sec-model), executed in the browser
+by inverting the exported quantile function — so the measured rate varies
+both because the sample composition varies and because each case's error
+realization varies. Baselines anchor at the official rate as described
+above; the mode's mechanism and its distinction from the observed resample
+are labeled in the interface.
+
+Three findings from the simulator, all on fiscal 2024 data:
+
+**Tier assignment is a coin flip for boundary states.** With no policy
+change at all, the probability that a fresh QC-style sample lands in a
+different cost-share tier than the official point rate implies is 49% for
+North Dakota (official rate 7.91%), 48% for Washington (6.06%), 47% for
+Colorado (9.97%), Kansas (9.98%), and Nevada (5.94%). The formula prices a
+noisy estimate as if it were the truth; near a boundary, sampling noise is
+worth more than most feasible policy improvements.
+
+**Audit volume is a two-sided instrument.** Increasing the QC sample size
+shrinks sampling variance around the state's underlying rate. In
+expectation that *helps* states sitting just below a boundary — the tighter
+distribution protects the better tier (Missouri +$4.0M, Tennessee +$3.7M,
+Indiana +$3.3M expected annual savings from 500 additional reviews) — and
+*hurts* states just above one, for whom variance was a lottery ticket
+(California −$29.5M, Pennsylvania −$13.3M, Texas −$13.2M in expectation).
+Yet added volume almost always reduces the standard deviation of the annual
+bill (California by $43M), so risk-averse states may rationally buy audits
+even against their expectation. The formula thus embeds an incentive
+asymmetry: below-boundary states are rewarded for measuring more precisely;
+above-boundary states are rewarded for preserving noise.
+
+**Simplification levers carry large accounting bounds.** Suppressing the
+observed error dollars attached to the finding elements that four policy
+options standardize — the standard medical deduction, standard
+self-employment deduction, heat-and-eat utility standardization, and
+broad-based categorical eligibility resource exemptions — is worth roughly
+$606M per year nationally in expected cost share at 50% effectiveness, and
+$1.31B at 100%. We label these *accounting bounds*, not causal estimates:
+they hold the error process fixed and answer "what if these categories'
+observed error dollars shrank," which is an upper-bound identity, not a
+behavioral prediction. The descriptive adoption contrasts of @sec-model are
+the reason for the caution. Deep-in-tier states get little from marginal
+simplification (New York at 14.1% and Alaska at 24.7% need larger moves);
+boundary states get the most.
+
+## From accounting bounds to engine-computed counterfactuals {#sec-roadmap}
+
+The gap this paper leaves open is the one that matters most for policy
+design: replacing accounting bounds with case-level counterfactuals in which
+the *rules engine* recomputes both the correct benefit and the
+policy-burden intermediates under alternative policy, and the error model
+responds through those intermediates. The pieces now exist separately. The
+toolchain is certified and fast (@sec-cert); the harness has a
+parameter-overlay mechanism that already applies fiscal-year parameter
+patches under recorded provenance; the model consumes burden intermediates
+(@sec-model). The work between is precise and bounded: feeding the bridge
+raw facts instead of QC-derived intermediates (@sec-oracle-scope), so that
+recomputed intermediates can *differ* under counterfactual policy; encoding
+the "off" state of options whose current encodings are structural rather
+than scalar; and defining scenario semantics for states without the option.
+Self-employment counterfactuals face a data constraint — the public file
+records net rather than gross self-employment income — that engine work
+cannot remove.
+
+We also note the encoding target the cost-sharing formula itself deserves:
+the QC sampling formulas of 7 C.F.R. 275.11(b) and the tier schedule of
+7 U.S.C. 2013(a)(2), including its election and delay clauses, are
+themselves rules that can be encoded, tested at their published boundary
+values, and cited by simulators, replacing hand-transcribed constants.
+
+## Limitations {#sec-limitations}
+
+The parity result certifies computation from QC-derived intermediates, not
+full-path derivation (@sec-oracle-scope). The replay decomposition depends
+on a reconstruction solver whose filters exclude 22 of 305 error cases and
+whose residual class is an upper bound, not a point estimate. The error
+models predict an adjudicated, thresholded label — properties of the QC
+measurement system, not just of underlying payment accuracy; a state whose
+reviewers find errors differently is a different measurement regime.
+Cross-state model transport is imperfect (the New York level gap), which is
+why the simulator anchors at official rates. All simulation results hold
+the error process fixed: no behavioral response of agencies or households
+to cost sharing, no corrective-feedback channel from audit volume, both of
+which are live questions the fiscal 2025–2027 files will begin to answer.
+Adoption contrasts are descriptive; nothing here identifies causal effects
+of burden policies on error. And the model-based simulator mode currently
+covers baseline and audit-volume scenarios only; policy levers remain
+accounting bounds until the counterfactual leg lands.
+
+## Conclusion
+
+A measurement system designed for oversight now sets prices. That makes the
+QC files three things at once: the highest-value verification oracle
+available to rules-as-code work in the benefits space; the dataset that
+shows most measured error to be information failure rather than computation
+failure; and the sampling frame whose noise the new formula converts into
+tier lotteries for boundary states. The verification bar can be exact —
+6,081 cases, six stages, zero tolerance — and holding it there is what makes
+the residuals informative. The modeling bar cannot be exact, and we have
+tried to be as clear about what the models miss as what they capture. Both
+kinds of honesty are prerequisites for the system this points toward: one
+in which the rules that compute benefits, the requirements they impose on
+households, and the errors they produce are all executable, testable, and
+priced from the same verified source.
+
+## Reproducibility
+
+The repository `PolicyEngine/snap-qc-sim` contains the analysis pipeline
+(deterministic; two complete reruns byte-identical, independently
+reproduced by SHA-256), the simulator, frozen simulation and certification
+artifacts under `paper/snapshot/`, and this manuscript. The verification
+harness, per-case suite reports, and encodings are public in
+`TheAxiomFoundation/axiom-oracles` and `TheAxiomFoundation/rulespec-us`.
+QC public-use files are available from USDA FNS [@fns2024techdoc]. The
+pre-edit reconstruction solver is @giannella_snapqc. A fact catalog mapping
+every quantitative claim in this manuscript to its artifact is committed
+alongside it (`paper/FACTS.md`).
+
+## Acknowledgments
+
+We thank Eric Giannella and Ben Molin for the open reconstruction and
+registry code this work builds on, and the maintainers of the axiom-oracles
+verification harness. Errors are ours — and, per the method, enumerable.

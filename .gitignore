@@ -7,3 +7,6 @@ app/public/.vercel/
 app/public/.env.local
 app/bun.lock
 .claude/
+paper/out/
+paper/_tex/
+paper/.quarto/
