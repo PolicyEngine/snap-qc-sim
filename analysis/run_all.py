@@ -1,12 +1,14 @@
-"""Regenerate every v2 analysis artifact from one deterministic entry point.
+"""Regenerate every model-derived v2 artifact from one deterministic entry point.
 
 Run from the repository root with::
 
     uv run --frozen --extra analysis python analysis/run_all.py
 
-All model scripts and the app-data builder finish into a staging directory
+All model scripts and the app-data builders finish into a staging directory
 before any checked-in artifact is replaced. This keeps the Markdown, JSON,
-and browser export on the same successful run if fitting or rendering fails.
+and browser exports on the same successful run if fitting or rendering fails.
+The separately generated Colorado engine counterfactual is a pinned input, not
+an output of this command.
 """
 
 from __future__ import annotations
@@ -35,6 +37,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import scripts_build_model_data
+import scripts_build_model_scenarios
 
 if __package__:
     from . import (
@@ -54,6 +57,9 @@ HURDLE_RESULTS = ANALYSIS_DIR / "hurdle_results.json"
 DISTRIBUTIONAL_RESULTS = ANALYSIS_DIR / "distributional_results.json"
 FINDINGS = ANALYSIS_DIR / "FINDINGS.md"
 MODEL_DATA = REPO_ROOT / "app" / "public" / "model_data.json"
+MODEL_SCENARIOS = REPO_ROOT / "app" / "public" / "model_scenarios.json"
+MODEL_SCENARIOS_DOCUMENT = ANALYSIS_DIR / "MODEL_SCENARIOS.md"
+COUNTERFACTUAL_SMD = ANALYSIS_DIR / "counterfactual_co_smd.json"
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -676,6 +682,15 @@ def _render_distributional_findings(
         if quantization is not None
         else " Quantile logs retain four significant figures."
     )
+    scenario_text = ""
+    if "model_scenarios_raw_bytes" in export:
+        scenario_text = (
+            " The SMD-only scenario sibling adds "
+            f"{_metric(export['model_scenarios_raw_bytes'] / 1_000_000, 3)} MB "
+            "raw and "
+            f"{_metric(export['model_scenarios_gzip_bytes'] / 1_000_000, 3)} MB "
+            "under deterministic gzip."
+        )
     lines.extend(
         [
             "",
@@ -688,7 +703,7 @@ def _render_distributional_findings(
                 f"{_metric(export['model_data_raw_bytes'] / 1_000_000, 3)} MB raw "
                 "and "
                 f"{_metric(export['model_data_gzip_bytes'] / 1_000_000, 3)} MB "
-                f"under deterministic gzip.{quantization_text}"
+                f"under deterministic gzip.{quantization_text}{scenario_text}"
             ),
             "",
         ]
@@ -734,10 +749,12 @@ def render_findings(
                 "conditional deviation process and exports its magnitude/rate "
                 "configuration with a q99 tail refit, physical caps, frozen state "
                 "dollar factors, and matched dollar-rate validation. The hidden "
-                "browser model consumer remains "
-                "disabled and does not yet read the new cap/factor metadata; "
-                "`app.js` was intentionally left unchanged in this model-only "
-                "round. Not yet implemented: a computation-failure "
+                "browser model consumer remains disabled and `app.js` is unchanged, "
+                "but `model_scenarios.json` now carries SMD adoption endpoints, "
+                "paired-bootstrap intervals, and level-gate metadata for browser "
+                "wiring. Self-employment, heat-and-eat, and BBCE scenarios are "
+                "excluded because their fitted features do not support defensible "
+                "policy flips. Not yet implemented: a computation-failure "
                 "mixture, an input-noise tier, an event-study design, and engine "
                 "recomputation under alternative policies. "
                 "See `docs/v2-error-model.md` for the implementation-status table."
@@ -767,6 +784,8 @@ def main() -> None:
         staged_distributional = staging / DISTRIBUTIONAL_RESULTS.name
         staged_findings = staging / FINDINGS.name
         staged_model_data = staging / MODEL_DATA.name
+        staged_model_scenarios = staging / MODEL_SCENARIOS.name
+        staged_model_scenarios_document = staging / MODEL_SCENARIOS_DOCUMENT.name
         hurdle_deviation_model.main(staged_hurdle)
         distributional_artifacts = distributional_deviation_model.main(
             staged_distributional
@@ -791,11 +810,27 @@ def main() -> None:
                 "written model-data payload differs from the payload used for "
                 "shipped-configuration simulation validation"
             )
+        model_payload = _read_json(staged_model)
+        scenario_report = scripts_build_model_scenarios.build_model_scenarios(
+            distributional_artifacts.predictions,
+            distributional_bundle=distributional_artifacts.bundle,
+            model_data_payload=export_report["data"],
+            base_model_path=staged_model_data,
+            model_results=model_payload,
+            counterfactual_payload=_read_json(COUNTERFACTUAL_SMD),
+            output_path=staged_model_scenarios,
+            document_output_path=staged_model_scenarios_document,
+        )
         distributional_artifacts.result["export"].update(
             {
                 "model_data_raw_bytes": export_report["raw_bytes"],
                 "model_data_gzip_bytes": export_report["gzip_bytes"],
                 "q_decimal_quantization": export_report["q_decimal_quantization"],
+                "model_scenarios_raw_bytes": scenario_report["raw_bytes"],
+                "model_scenarios_gzip_bytes": scenario_report["gzip_bytes"],
+                "model_scenarios_included_levers": scenario_report["data"][
+                    "included_levers"
+                ],
             }
         )
         distributional_deviation_model._write_result(
@@ -803,7 +838,6 @@ def main() -> None:
             staged_distributional,
         )
 
-        model_payload = _read_json(staged_model)
         hurdle_payload = _read_json(staged_hurdle)
         distributional_payload = _read_json(staged_distributional)
         report = render_findings(
@@ -819,6 +853,8 @@ def main() -> None:
             (staged_distributional, DISTRIBUTIONAL_RESULTS),
             (staged_findings, FINDINGS),
             (staged_model_data, MODEL_DATA),
+            (staged_model_scenarios, MODEL_SCENARIOS),
+            (staged_model_scenarios_document, MODEL_SCENARIOS_DOCUMENT),
         ):
             os.replace(staged, destination)
 
@@ -827,6 +863,8 @@ def main() -> None:
     print(f"wrote {DISTRIBUTIONAL_RESULTS}")
     print(f"wrote {FINDINGS}")
     print(f"wrote {MODEL_DATA}")
+    print(f"wrote {MODEL_SCENARIOS}")
+    print(f"wrote {MODEL_SCENARIOS_DOCUMENT}")
 
 
 if __name__ == "__main__":

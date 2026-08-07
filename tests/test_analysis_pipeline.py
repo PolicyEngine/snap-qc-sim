@@ -532,12 +532,16 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     distributional_destination = tmp_path / "distributional_results.json"
     findings_destination = tmp_path / "FINDINGS.md"
     model_data_destination = tmp_path / "model_data.json"
+    model_scenarios_destination = tmp_path / "model_scenarios.json"
+    model_scenarios_document_destination = tmp_path / "MODEL_SCENARIOS.md"
     for destination in (
         model_destination,
         hurdle_destination,
         distributional_destination,
         findings_destination,
         model_data_destination,
+        model_scenarios_destination,
+        model_scenarios_document_destination,
     ):
         destination.write_text("old\n")
 
@@ -551,6 +555,15 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
     )
     monkeypatch.setattr(run_all, "FINDINGS", findings_destination)
     monkeypatch.setattr(run_all, "MODEL_DATA", model_data_destination)
+    monkeypatch.setattr(run_all, "MODEL_SCENARIOS", model_scenarios_destination)
+    monkeypatch.setattr(
+        run_all,
+        "MODEL_SCENARIOS_DOCUMENT",
+        model_scenarios_document_destination,
+    )
+    counterfactual_destination = tmp_path / "counterfactual_co_smd.json"
+    counterfactual_destination.write_text(json.dumps({"counterfactual": "reference"}))
+    monkeypatch.setattr(run_all, "COUNTERFACTUAL_SMD", counterfactual_destination)
 
     def fake_classifier_main():
         path = run_all.train_error_model.OUT / model_destination.name
@@ -602,6 +615,35 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
             "q_decimal_quantization": None,
         }
 
+    def fake_build_model_scenarios(
+        predictions,
+        *,
+        distributional_bundle,
+        model_data_payload,
+        base_model_path,
+        model_results,
+        counterfactual_payload,
+        output_path,
+        document_output_path,
+    ):
+        assert predictions.empty
+        assert distributional_bundle.tail.scale == 0.25
+        assert model_data_payload == {"model_data": "new"}
+        assert Path(base_model_path).name == model_data_destination.name
+        assert Path(base_model_path).read_text() == json.dumps({"model_data": "new"})
+        assert model_results == {"classifier": "new"}
+        assert counterfactual_payload == {"counterfactual": "reference"}
+        Path(output_path).write_text(json.dumps({"model_scenarios": "new"}))
+        Path(document_output_path).write_text("scenario report\n")
+        return {
+            "data": {
+                "model_scenarios": "new",
+                "included_levers": ["smd"],
+            },
+            "raw_bytes": 25,
+            "gzip_bytes": 41,
+        }
+
     monkeypatch.setattr(run_all.train_error_model, "main", fake_classifier_main)
     monkeypatch.setattr(run_all.hurdle_deviation_model, "main", fake_hurdle_main)
     monkeypatch.setattr(
@@ -613,6 +655,11 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
         run_all.scripts_build_model_data,
         "build_model_data",
         fake_build_model_data,
+    )
+    monkeypatch.setattr(
+        run_all.scripts_build_model_scenarios,
+        "build_model_scenarios",
+        fake_build_model_scenarios,
     )
     monkeypatch.setattr(
         run_all,
@@ -629,11 +676,43 @@ def test_run_all_stages_outputs_before_replacing_checked_in_artifacts(
         "export": {
             "model_data_gzip_bytes": 37,
             "model_data_raw_bytes": 21,
+            "model_scenarios_gzip_bytes": 41,
+            "model_scenarios_included_levers": ["smd"],
+            "model_scenarios_raw_bytes": 25,
             "q_decimal_quantization": None,
         },
     }
     assert findings_destination.read_text() == "new\n"
     assert json.loads(model_data_destination.read_text()) == {"model_data": "new"}
+    assert json.loads(model_scenarios_destination.read_text()) == {
+        "model_scenarios": "new"
+    }
+    assert model_scenarios_document_destination.read_text() == "scenario report\n"
+
+    destinations = (
+        model_destination,
+        hurdle_destination,
+        distributional_destination,
+        findings_destination,
+        model_data_destination,
+        model_scenarios_destination,
+        model_scenarios_document_destination,
+    )
+    for destination in destinations:
+        destination.write_text(f"old-{destination.name}\n")
+
+    def fail_scenario_build(*args, **kwargs):
+        raise RuntimeError("scenario build failed")
+
+    monkeypatch.setattr(
+        run_all.scripts_build_model_scenarios,
+        "build_model_scenarios",
+        fail_scenario_build,
+    )
+    with pytest.raises(RuntimeError, match="scenario build failed"):
+        run_all.main()
+    for destination in destinations:
+        assert destination.read_text() == f"old-{destination.name}\n"
 
 
 def test_committed_distributional_artifact_contains_review_gates():

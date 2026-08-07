@@ -11,10 +11,11 @@ This repository contains the corrected diagnostic v2a pipeline and a v2b
 signed per-case deviation distribution. It exports FY2024 model parameters for
 a browser. The export now includes the attachment-depth tail refit, per-case
 physical caps, frozen state dollar factors, and level-gap flags required by the
-2026-08-06 adversarial statistical review. The analysis validates the intended
-browser process for all 53 jurisdictions with eight seeds and 4,000 draws per
-seed. The hidden browser consumer remains disabled and does not yet read the
-new cap and factor fields because this model round leaves `app.js` unchanged.
+2026-08-06 adversarial statistical review. A sibling scenario export supplies
+case-level SMD adoption parameters and paired-bootstrap intervals in all 53
+jurisdictions. The analysis validates the intended browser process with eight
+seeds and 4,000 draws per seed. The browser wiring remains unchanged in this
+model/export round.
 
 ## Implementation status
 
@@ -29,12 +30,13 @@ the external engine or `amterr-lab` work.
 | v2a hurdle probabilities and conditional magnitude mean | Implemented | Estimates cross-fitted isotonic stage probabilities and an expected absolute magnitude with out-of-fold Duan smearing. It does not estimate a signed conditional distribution. |
 | State calibration validation | Implemented | Fits the distributional model through FY2022, estimates EB-shrunken dollar-rate factors from out-of-sample FY2023 state ratios, freezes them, and reports matched raw and factor-adjusted FY2024 dollar rates for all 53 jurisdictions. The EB prior mean is fixed at 1, and the analysis does not propagate factor uncertainty. |
 | Medical-error and SMD contrasts | Implemented | Weighted descriptive contrasts use the state-year SMD registry, aligned calendar cells, event counts, and both a post-treatment-conditioned claimant denominator and a stable all-elderly/disabled denominator. They are not causal estimates. |
-| Engine recomputation under alternative policies | Not implemented | Current intermediates are extracted from QC fields; the rules engine does not yet regenerate them under a counterfactual policy. |
+| Model-primary scenario parameter export | Implemented for SMD only | `model_scenarios.json` reverses the exact case-level `med_doc_required` proxy for current adopters and non-adopters, predicts calibrated `p_dev` and nine magnitude quantiles with the frozen distributional model, normalizes deltas to adoption direction, and ships 10,000-draw paired-bootstrap intervals. The standard self-employment deduction, heat-and-eat, and BBCE are explicitly excluded because the fitted features do not support defensible policy flips. |
+| Engine recomputation under alternative policies | Not implemented nationally | The SMD export changes the QC-derived documentation proxy only. The rules engine does not regenerate benefit, deduction, income, or discontinuity features nationally; the separate Colorado join remains the bounded engine-repricing reference. |
 | Signed conditional deviation distribution and assigned-benefit draws | Implemented | Estimates calibrated sign probabilities and nine conditional `log(|D|)` quantiles among deviators, sorts each predicted vector, and extends q99 with the weighted mean excess beyond q99 of OOF median residuals. Draws cap `|D|` at `max(BENMAX, observed |D|)` per case-year: `BENMAX`, the case's maximum monthly allotment, supplies the default maximum-allotment-scale ceiling, while the observed-deviation override preserves the 27 realized exceptions. The export omits `p_pos` because measured-rate outputs use only `|D|`. |
 | Computation-failure mixture probability π | Not implemented | No separate computation-failure channel or policy lever is estimated or simulated. |
 | Input-noise tier | Not implemented | Corrected-versus-original input pairs are not training data for this repository's pipeline. |
 | Event-study or causal DiD validation | Not implemented | The SMD results are descriptive weighted pre/post contrasts only. |
-| Simulator integration and counterfactual aggregation | Export and Python validation implemented; browser disabled | The analysis mirrors case bootstrap, per-occurrence redraw, cap, strict threshold, state factor, model-mean anchor, and zero rate floor for all 53 jurisdictions. The disabled browser code does not yet consume the new cap and factor metadata. Counterfactual aggregation remains unimplemented; observed mode retains the accounting-bound levers. |
+| Simulator integration and counterfactual aggregation | Baseline and SMD scenario exports implemented; browser wiring pending | The analysis mirrors case bootstrap, per-occurrence redraw, cap, strict threshold, state factor, model-mean anchor, and zero rate floor for all 53 jurisdictions. The sibling export supplies sparse full flipped parameters, adoption-direction point deltas and CIs, and the seven level-gate flags. `app.js` remains unchanged; observed mode still uses accounting-bound levers until the browser is wired. |
 | Forward caseload projection | Not implemented | No calibrated FY2026–28 survey-microdata projection is part of this pipeline. |
 
 ## Round-2 spine: Microcosm population simulation (approved direction, 2026-08-07)
@@ -91,8 +93,9 @@ and it does not identify a policy mechanism or causal effect.
 A verified rules engine can, in principle, compute whether a medical
 deduction binds, whether documentation is required, how many
 verification-sensitive inputs enter the chain, the formula benefit, and the
-distance to each discontinuity. Those counterfactual recomputations are not
-performed by this repository today.
+distance to each discontinuity. The scenario export now flips the fitted SMD
+documentation proxy, but those broader counterfactual engine recomputations
+are not performed nationally by this repository today.
 
 Related engine-validation work lives outside this repository; see
 `axiom-oracles` PRs [#244](https://github.com/TheAxiomFoundation/axiom-oracles/pull/244),
@@ -149,10 +152,15 @@ uv run --frozen --extra analysis python analysis/run_all.py
 ```
 
 The entry point stages all three analysis JSON files, the generated
-`analysis/FINDINGS.md`, and `app/public/model_data.json` before replacing any
-of them. The JSON provenance records the Python package versions, SHA256 for
-each source input, threshold map, random seeds, quantile grid, tail fit, and OOF
-settings.
+`analysis/FINDINGS.md` and `analysis/MODEL_SCENARIOS.md`, and both
+`app/public/model_data.json` and `app/public/model_scenarios.json` before
+replacing any of them. The JSON provenance records the Python package versions,
+SHA256 for each source input, threshold map, random seeds, quantile grid, tail
+fit, and OOF settings. The scenario sibling also pins the exact baseline export
+SHA256 because its sparse indexes depend on state-local row alignment.
+It also records canonical-JSON hashes for `analysis/model_results.json` and the
+separately generated `analysis/counterfactual_co_smd.json` engine reference;
+`run_all.py` consumes but does not regenerate that Colorado reference.
 
 ## Targets and estimands
 
@@ -195,11 +203,10 @@ The v2b extension learns the signed conditional distribution of deviation:
 
 The resulting draw sets `D = 0` for nondeviators and samples sign and magnitude
 independently conditional on features, then applies the per-case physical cap.
-A future counterfactual rules engine
-could compute policy-specific benefits and intermediates before applying these
-draws. This repository does not yet perform that engine recomputation; the
-exported process includes the metadata needed by the model-based mode, but the
-disabled browser consumer does not yet enforce the new fields.
+A future counterfactual rules engine could compute policy-specific benefits and
+intermediates before applying these draws. This repository now exports the
+defensible SMD proxy flip but does not yet perform broader engine recomputation;
+the browser consumer does not yet enforce the new scenario fields.
 
 ## Proposed counterfactual tiers
 
@@ -250,9 +257,9 @@ These are explicit future steps, not claims about the current pipeline:
 1. Replace QC proxies with engine-recomputed intermediates, including state
    medical-standard amounts, whether the standard binds, actuals above the
    standard, verification requirements, and distances to discontinuities.
-2. Integrate the exported signed-deviation process with policy-specific engine
-   outputs and the live simulator, retaining the current app mechanism as a
-   labeled comparison.
+2. Wire the SMD scenario export into the live simulator, then extend the same
+   contract only when policy-specific engine outputs support additional levers;
+   retain the current app mechanism as a labeled comparison.
 3. Build and estimate the separate computation-failure mixture π.
 4. Prepare input-noise training pairs and implement the mechanistic v2b tier.
 5. Design a credible event-study validation; do not relabel the existing SMD

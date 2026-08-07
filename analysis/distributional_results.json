@@ -1917,12 +1917,17 @@
     "validation_year": 2024
   },
   "export": {
-    "browser_consumer_status": "model mode remains disabled; model_data contains factor/cap/gate metadata for the future browser consumer, but app.js is unchanged",
+    "browser_consumer_status": "model mode remains disabled; model_data contains factor/cap/gate metadata and run_all pairs it with the SMD-only model_scenarios export, but app.js is unchanged",
     "case_filter": "CASE == 1",
     "configuration": "frozen-through-FY2022 distributional predictions, FY2023-fit dollar factors, per-case physical caps",
     "fy2024_cases": 44800,
     "model_data_gzip_bytes": 740796,
     "model_data_raw_bytes": 3124050,
+    "model_scenarios_gzip_bytes": 48077,
+    "model_scenarios_included_levers": [
+      "smd"
+    ],
+    "model_scenarios_raw_bytes": 182944,
     "p_pos_exported": false,
     "q_decimal_quantization": 2,
     "quantiles_are_log_dollars": true,
