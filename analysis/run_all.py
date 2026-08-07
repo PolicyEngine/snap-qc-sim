@@ -4,15 +4,16 @@ Run from the repository root with::
 
     uv run --frozen --extra analysis python analysis/run_all.py
 
-Both model scripts finish into a staging directory before any checked-in
-artifact is replaced.  This keeps ``FINDINGS.md`` and the two JSON files on
-the same successful run if model fitting or report rendering fails.
+All model scripts and the app-data builder finish into a staging directory
+before any checked-in artifact is replaced. This keeps the Markdown, JSON,
+and browser export on the same successful run if fitting or rendering fails.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import sys
 from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -29,9 +30,20 @@ for _thread_variable in (
 ):
     os.environ[_thread_variable] = "1"
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+import scripts_build_model_data
+
 if __package__:
-    from . import hurdle_deviation_model, train_error_model
+    from . import (
+        distributional_deviation_model,
+        hurdle_deviation_model,
+        train_error_model,
+    )
 else:
+    import distributional_deviation_model
     import hurdle_deviation_model
     import train_error_model
 
@@ -39,7 +51,9 @@ else:
 ANALYSIS_DIR = Path(__file__).resolve().parent
 MODEL_RESULTS = ANALYSIS_DIR / "model_results.json"
 HURDLE_RESULTS = ANALYSIS_DIR / "hurdle_results.json"
+DISTRIBUTIONAL_RESULTS = ANALYSIS_DIR / "distributional_results.json"
 FINDINGS = ANALYSIS_DIR / "FINDINGS.md"
+MODEL_DATA = REPO_ROOT / "app" / "public" / "model_data.json"
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -374,17 +388,208 @@ def _render_hurdle_findings(hurdle: Mapping[str, Any]) -> list[str]:
     return lines
 
 
+def _render_distributional_findings(
+    distributional: Mapping[str, Any],
+) -> list[str]:
+    sign = distributional["sign"]
+    magnitude = distributional["magnitude_distribution"]
+    coverage = magnitude["fy2024_weighted_coverage"]
+    crossing = distributional["crossing_validation"]
+    simulation = distributional["measured_rate_simulation"]
+    export = distributional["export"]
+    tail = magnitude["tail_fit"]
+    lines = [
+        "## Distributional deviation process",
+        "",
+        (
+            "The distributional model predicts the FY2024 SNAP QC error process "
+            "from FY2017–19 and FY2022–23 records. It does not identify causal "
+            "effects. Among cases with `|D| > $0.50`, it estimates `P(D > 0)`, "
+            "nine conditional quantiles of `log(|D|)`, and a log-scale "
+            "exponential tail beyond q99. Sign and magnitude are conditionally "
+            "independent given the model features."
+        ),
+        "",
+        (
+            f"The tail scale is {_metric(tail['scale_log'], 4)} log dollars. "
+            f"The fit uses {_integer(tail['n'])} top-decile OOF residual "
+            f"exceedances (effective n {_metric(tail['effective_n'], 1)})."
+        ),
+        "",
+        (
+            "Native HistGB quantile loss retains the hurdle's feature set, NaN "
+            "routing, and HWGT support without adding another dependency."
+        ),
+        "",
+        "Sign probabilities use HWGT and the same nested outer/inner OOF isotonic calibration as the hurdle stages.",
+        "",
+        "| sign model/sample | raw AUC | calibrated AUC | raw PR-AUC | calibrated PR-AUC | raw Brier | calibrated Brier | raw calibration-in-the-large | calibrated calibration-in-the-large |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        _probability_row(
+            "Training deviators, nested OOF",
+            sign["training_oof_cross_fitted"],
+        ),
+        _probability_row(
+            "FY2024 deviators",
+            sign["fy2024_among_deviators"],
+        ),
+        "",
+        "### Weighted FY2024 quantile coverage",
+        "",
+        (
+            "Coverage uses FY2024 deviators and HWGT. A flag marks an absolute "
+            "difference from nominal coverage greater than 3 percentage points."
+        ),
+        "",
+        "| quantile | weighted coverage | difference | >3pp flag |",
+        "|---:|---:|---:|:---:|",
+    ]
+    for row in coverage:
+        lines.append(
+            f"| {_number(row['quantile'], context='quantile'):.3f} | "
+            f"{_pct(row['weighted_coverage'])} | "
+            f"{_signed(row['gap_pp'], 2, 'pp')} | "
+            f"{'Yes' if row['flag_over_3pp'] else 'No'} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "### Threshold-crossing validation",
+            "",
+            (
+                "The observed FY2024 official-error prevalence is "
+                f"{_metric(crossing['observed_official_national_prevalence_pct'], 4, '%')}. "
+                "Literal `|D| > $56` prevalence is "
+                f"{_metric(crossing['observed_literal_D_crossing_national_prevalence_pct'], 4, '%')}. "
+                f"{_integer(crossing['official_vs_literal_discordant_n'])} "
+                "reconciliation-anomaly case separates the two definitions."
+            ),
+            "",
+            "| route | specification | national predicted prevalence | equal-state MAE | issuance-weighted MAE |",
+            "|---|---|---:|---:|---:|",
+        ]
+    )
+    for row in crossing["comparison_rows"]:
+        lines.append(
+            f"| {row['route']} | {row['specification']} | "
+            f"{_metric(row['national_predicted_prevalence_pct'], 3, '%')} | "
+            f"{_metric(row['equal_state_mae_pp'], 3, 'pp')} | "
+            f"{_metric(row['issuance_weighted_mae_pp'], 3, 'pp')} |"
+        )
+    differences = crossing["primary_distributional_minus_direct_mae_pp"]
+    equal_difference = _number(
+        differences["equal_state"], context="equal-state MAE difference"
+    )
+    issuance_difference = _number(
+        differences["issuance_weighted"],
+        context="issuance-weighted MAE difference",
+    )
+    equal_direction = "higher (worse)" if equal_difference > 0 else "lower (better)"
+    issuance_direction = (
+        "higher (worse)" if issuance_difference > 0 else "lower (better)"
+    )
+    rows_by_key = {
+        (row["route"], row["specification"]): row for row in crossing["comparison_rows"]
+    }
+    frozen_specification = "frozen model through FY2022, unfactored"
+    factored_specification = "frozen model through FY2022, FY2023-fit factor adjusted"
+    frozen_direct = rows_by_key[("direct stage-2", frozen_specification)]
+    frozen_distributional = rows_by_key[
+        ("distributional implied crossing", frozen_specification)
+    ]
+    differences_by_specification = crossing[
+        "distributional_minus_direct_mae_pp_by_specification"
+    ]
+    frozen_difference = differences_by_specification[frozen_specification]
+    factored_difference = differences_by_specification[factored_specification]
+    lines.extend(
+        [
+            "",
+            (
+                "For the primary unfactored FY2024 comparison, the distributional "
+                f"route's equal-state MAE is {abs(equal_difference):.3f}pp "
+                f"{equal_direction} than the direct model, and its "
+                f"issuance-weighted MAE is {abs(issuance_difference):.3f}pp "
+                f"{issuance_direction}."
+            ),
+            "",
+            (
+                "The frozen, unfactored distributional route is materially worse "
+                "on issuance-weighted state MAE: "
+                f"{_metric(frozen_distributional['issuance_weighted_mae_pp'], 3, 'pp')} "
+                "versus "
+                f"{_metric(frozen_direct['issuance_weighted_mae_pp'], 3, 'pp')} "
+                f"for the direct route ({_signed(frozen_difference['issuance_weighted'], 3, 'pp')}). "
+                "Its equal-state difference is "
+                f"{_signed(frozen_difference['equal_state'], 3, 'pp')}. After "
+                "FY2023-fit factors, the distributional route remains higher by "
+                f"{_metric(factored_difference['equal_state'], 3, 'pp')} "
+                "equal-state and "
+                f"{_metric(factored_difference['issuance_weighted'], 3, 'pp')} "
+                "issuance-weighted."
+            ),
+            "",
+            "### Model process versus observed bootstrap",
+            "",
+            (
+                f"Each row uses {int(simulation['draws']):,} draws. The model "
+                "draws one signed deviation for every fixed FY2024 CASE == 1 "
+                "record. The observed comparator uniformly bootstraps corrected "
+                "case errors. Both retain HWGT inside the measured-rate ratio and "
+                "apply the official-rate level adjustment from `simulate.py`."
+            ),
+            "",
+            "| state | official | model mean | model SD | observed-bootstrap mean | observed-bootstrap SD |",
+            "|---|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for row in simulation["rows"]:
+        lines.append(
+            f"| {row['state']} | {_metric(row['official_rate_pct'], 3, '%')} | "
+            f"{_metric(row['model']['mean_pct'], 3, '%')} | "
+            f"{_metric(row['model']['sd_pp'], 3, 'pp')} | "
+            f"{_metric(row['observed_bootstrap']['mean_pct'], 3, '%')} | "
+            f"{_metric(row['observed_bootstrap']['sd_pp'], 3, 'pp')} |"
+        )
+    quantization = export.get("q_decimal_quantization")
+    quantization_text = (
+        f" Quantile logs use {int(quantization)} decimal places because the "
+        "four-significant-figure draft exceeded 2.5 MB."
+        if quantization is not None
+        else " Quantile logs retain four significant figures."
+    )
+    lines.extend(
+        [
+            "",
+            (
+                "The self-contained FY2024 browser export contains "
+                f"{_integer(export['fy2024_cases'])} CASE == 1 records across "
+                f"{_integer(export['state_count'])} jurisdictions. Its final size "
+                f"is {_metric(export['model_data_raw_bytes'] / 1_000_000, 2)} MB "
+                "raw and "
+                f"{_metric(export['model_data_gzip_bytes'] / 1_000_000, 2)} MB "
+                f"under deterministic gzip.{quantization_text}"
+            ),
+            "",
+        ]
+    )
+    return lines
+
+
 def render_findings(
-    model_results: Mapping[str, Any], hurdle_results: Mapping[str, Any]
+    model_results: Mapping[str, Any],
+    hurdle_results: Mapping[str, Any],
+    distributional_results: Mapping[str, Any],
 ) -> str:
-    """Render prose only from the two just-produced JSON payloads."""
+    """Render prose only from the three just-produced JSON payloads."""
     lines = [
         "# Corrected v2 diagnostic results",
         "",
         (
             "This file is generated by `analysis/run_all.py` from "
-            "`model_results.json` and `hurdle_results.json`. Do not edit reported "
-            "numbers by hand."
+            "`model_results.json`, `hurdle_results.json`, and "
+            "`distributional_results.json`. Do not edit reported numbers by hand."
         ),
         "",
         (
@@ -398,15 +603,17 @@ def render_findings(
     lines.extend(_render_classifier_findings(model_results))
     lines.extend(_render_medical_findings(model_results))
     lines.extend(_render_hurdle_findings(hurdle_results))
+    lines.extend(_render_distributional_findings(distributional_results))
     lines.extend(
         [
             "## Interpretation boundary",
             "",
             (
-                "These are diagnostic and descriptive results. This repository does "
-                "not yet implement a signed conditional distribution, assigned-benefit "
-                "draws, a computation-failure mixture, an input-noise tier, an "
-                "event-study design, or model integration with the live simulator. "
+                "These are diagnostic and descriptive results. This repository "
+                "now implements and exports a signed conditional deviation process, "
+                "but it does not yet implement a computation-failure mixture, an "
+                "input-noise tier, an event-study design, engine recomputation under "
+                "alternative policies, or integration with the live simulator. "
                 "See `docs/v2-error-model.md` for the implementation-status table."
             ),
             "",
@@ -416,7 +623,7 @@ def render_findings(
 
 
 def main() -> None:
-    """Run both analyses, render findings, then replace all outputs together."""
+    """Run every analysis and export, then replace all outputs together."""
     with TemporaryDirectory(prefix=".run-all-", dir=ANALYSIS_DIR) as directory:
         staging = Path(directory)
 
@@ -431,24 +638,61 @@ def main() -> None:
 
         staged_model = staging / MODEL_RESULTS.name
         staged_hurdle = staging / HURDLE_RESULTS.name
+        staged_distributional = staging / DISTRIBUTIONAL_RESULTS.name
         staged_findings = staging / FINDINGS.name
+        staged_model_data = staging / MODEL_DATA.name
         hurdle_deviation_model.main(staged_hurdle)
+        distributional_artifacts = distributional_deviation_model.main(
+            staged_distributional
+        )
+        export_report = scripts_build_model_data.build_model_data(
+            distributional_artifacts.predictions,
+            tail_scale=distributional_artifacts.bundle.tail.scale,
+            output_path=staged_model_data,
+            metadata_path=MODEL_DATA.with_name("data.json"),
+            threshold=distributional_deviation_model.THRESHOLD[
+                distributional_deviation_model.YEAR_TEST
+            ],
+            deviation_tolerance=(distributional_deviation_model.DEVIATION_TOLERANCE),
+            quantile_levels=distributional_deviation_model.QUANTILE_LEVELS,
+            quantile_columns=distributional_deviation_model.QUANTILE_COLUMNS,
+        )
+        distributional_artifacts.result["export"].update(
+            {
+                "model_data_raw_bytes": export_report["raw_bytes"],
+                "model_data_gzip_bytes": export_report["gzip_bytes"],
+                "q_decimal_quantization": export_report["q_decimal_quantization"],
+            }
+        )
+        distributional_deviation_model._write_result(
+            distributional_artifacts.result,
+            staged_distributional,
+        )
 
         model_payload = _read_json(staged_model)
         hurdle_payload = _read_json(staged_hurdle)
-        report = render_findings(model_payload, hurdle_payload)
+        distributional_payload = _read_json(staged_distributional)
+        report = render_findings(
+            model_payload,
+            hurdle_payload,
+            distributional_payload,
+        )
         staged_findings.write_text(report, encoding="utf-8", newline="\n")
 
         for staged, destination in (
             (staged_model, MODEL_RESULTS),
             (staged_hurdle, HURDLE_RESULTS),
+            (staged_distributional, DISTRIBUTIONAL_RESULTS),
             (staged_findings, FINDINGS),
+            (staged_model_data, MODEL_DATA),
         ):
             os.replace(staged, destination)
 
     print(f"wrote {MODEL_RESULTS}")
     print(f"wrote {HURDLE_RESULTS}")
+    print(f"wrote {DISTRIBUTIONAL_RESULTS}")
     print(f"wrote {FINDINGS}")
+    print(f"wrote {MODEL_DATA}")
 
 
 if __name__ == "__main__":
