@@ -461,8 +461,8 @@
     "implementation_sha256": {
       "analysis/counterfactual_join.py": "7f7b85dbd2fa90adf084813dd75033748027ffbd4967955c71381d7a1d729898",
       "analysis/train_error_model.py": "c83c71a4b362628620e10bcfb8c6cb8f596aba12fa45b7fbf1cffe259cb62a11",
-      "analysis/hurdle_deviation_model.py": "be88903e1ee31b2fdaec9b0b2ba8cef2e9f8756f8e95a0f68b70813335a64e70",
-      "snap_qc_sim/simulate.py": "0b9ba048790373ccaaccac3ddb99dd7599c25a7dfc3c0067260a1a13553beb79",
+      "analysis/hurdle_deviation_model.py": "e77525898147f3ca1003ee7e70e01aa3db75ca4e20169e641a634aba8656c279",
+      "snap_qc_sim/simulate.py": "8d1a724c90924ce2ec907148397999e20f083ecdd40e06a9b12801aad6fd780f",
       "paper/snapshot/labs/results_by_state_corrected.json": "00a930cb2efeb7c2f59102359ad720ad6905367682c2539791bda95df6af8889"
     },
     "determinism": {
