@@ -37,7 +37,7 @@ This engine predates the canonical-path hard cut. The modern probe failed as exp
 
 ## Overlay provenance
 
-Overlay: `us-co-snap-fy2024`, materialized from the pinned RuleSpec-US checkout at `overlay-materialized/rulespec-us/`. It made 36 module-ID replacements across 16 files and applied four asserted patches in one additional file:
+Overlay: `us-co-snap-fy2024`, materialized from the pinned RuleSpec-US checkout at `overlay-materialized/rulespec-us/`. It made 37 module-ID replacements across 16 files and applied four asserted patches in one additional file:
 
 - heating/cooling SUA: 594 → 560
 - basic SUA: 377 → 356
@@ -131,3 +131,17 @@ These are linear timing projections from this host and binary, not benchmark gua
 2. `uv run --offline` could not initialize its default cache because the managed sandbox denied a metadata write to `~/.cache/uv/sdists-v9/.git`. No network was attempted. The run instead used the cached Python 3.13.9 interpreter and cached unpacked PyYAML 6.0.3 directly, with the pinned harness source on `PYTHONPATH`. The documented `run_snap_qc_comparison` bridge was invoked directly rather than `scripts/run_comparison.py`, avoiding writes to dashboard/report paths inside the checkout; comparison semantics and parameters were unchanged.
 3. `/usr/bin/time -l` was used for the build and full run, but this sandbox denies its terminal `sysctl kern.clockrate` call. Cargo and the full harness both completed successfully and wrote their artifacts before `/usr/bin/time` returned status 1. BSD `time` printed wall/user/sys times but omitted its extended RSS fields, so peak RSS was captured in the same full-run process with Python `resource.getrusage` instead. The reported 282.469 MiB is therefore a same-run fallback, not a value emitted by `/usr/bin/time -l`.
 4. The stable provenance overlay at `overlay-materialized/` was created explicitly under the workdir. The harness's own one-case and full-run overlays used its normal temporary scratch directories and were removed automatically. No source file in any staged worktree was edited.
+## Independent verification (2026-08-06, adversarial audit)
+
+A second, independent auditor rebuilt the engine from the pinned checkout to a
+byte-identical binary (SHA-256 match) and reran the full comparison with the
+same pins, producing a byte-identical FULL_RUN.json — the 856/856 and
+5,136/5,136 figures are reproduced, not merely attested. Two precision notes
+from that audit: (1) the original prose said 36 module-ID replacements; the
+recorded OverlaySpec provenance sums to 37 (corrected above); (2) the
+5,136-cell claim rests on six per-concept counters (each comparison_count 856,
+mismatch 0, tolerance 0) plus byte-identical reproduction — the evidence JSON
+does not store six per-case stage values (per-case rows record matched status
+only). Remaining external dependency: the local QC CSV's authenticity against
+the pinned upstream archive (0f3230a4…) is not checkable offline; the CSV used
+hash-matches the harness pin's expected input and drove the identical rerun.
