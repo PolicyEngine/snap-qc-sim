@@ -8,6 +8,26 @@ Tier changes at the published point rates: 18 (AZ 10%->15%, CO 10%->15%, CT 15%-
 
 Delay clause (rate x 1.5 >= 20): 10 jurisdictions at FY2024 rates, 7 at FY2025 rates; dropped FL, MA, MD, NJ, NY; added DE, IL.
 
+## Process-drift calibration
+
+All 53 jurisdictions are included, with no exclusions. The classical method-of-moments estimate is **tau = 1.6207pp** (paired-state bootstrap 95% interval 0.8147 to 2.2531pp). Observed movement variance is 3.8843pp^2; subtracting the two-year sampling component of 1.2577pp^2 leaves 2.6266pp^2.
+
+The robust check uses the normal-consistent MAD about the median movement and twice the median squared state sampling SD. It gives **tau = 1.0740pp** (bootstrap 95% interval 0.0000 to 1.7424pp). Both estimators truncate a negative de-noised variance at zero and report the untruncated component in the JSON artifact.
+
+### Assumptions and caveats
+
+- FY2024 and FY2025 state sampling errors are independent; correlated QC errors would change the factor of two.
+- Each state's FY2025 sampling SD equals its simulated FY2024 SD. SDs may differ across states.
+- After removing the common movement location, remaining state process changes and sampling errors are independent.
+- The state-pair bootstrap treats the 53 jurisdictions as exchangeable and resamples each delta with its sampling SD.
+
+- Only one transition, FY2024 to FY2025, is observed; this cannot identify year-to-year drift stability.
+- Any FY2024-to-FY2025 QC methodology or administrative change is conflated with process drift.
+- The bootstrap interval measures cross-jurisdiction sensitivity for this transition, not temporal, model, or QC-design uncertainty.
+- The sampling SDs are Monte Carlo estimates from FY2024 observed-resample simulator draws, not published FY2025 design-based standard errors.
+
+**Recommendation:** Keep app draws sampling-only. Carry the classical tau as a candidate process-drift calibration and the robust tau as an outlier-resistant sensitivity check for the later fable decision; do not add either to simulator draws yet.
+
 | State | FY2024 | FY2025 | Delta (pp) | Sampling SD (pp) | z | Tier 24 | Tier 25 | Delay 25 |
 |---|---:|---:|---:|---:|---:|---:|---:|:---:|
 | AK | 24.66 | 23.15 | -1.51 | 0.82 | -1.84 | 15% | 15% | yes |

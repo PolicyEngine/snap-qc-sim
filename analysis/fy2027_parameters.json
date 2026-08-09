@@ -1,0 +1,376 @@
+{
+ "audit_as_of": "2026-08-09",
+ "fy2027_result": {
+  "boundary_for_60_dollars_decimal": "1025.351351351351351351351351",
+  "boundary_for_60_dollars_exact_fraction": "37938/37",
+  "convention_ambiguity": "none; floor is the unique historical match",
+  "explanation": "USDA's official archive ended at May 2026 on the audit date. May implies $59 under the historically validated floor rule. An official June cost of at least $1,025.351351... (therefore $1,025.40 at USDA's published ten-cent precision) implies $60. Available evidence does not bound the missing June input, so no finite threshold estimate range is claimed.",
+  "first_sufficient_published_tenth_for_60_dollars": 1025.4,
+  "input_uncertainty_bounded_by_available_evidence": false,
+  "latest_official_input_month": "2026-05",
+  "latest_official_tfp_cost_dollars": 1018.2,
+  "missing_input": true,
+  "nearby_threshold_sensitivity": [
+   {
+    "first_sufficient_published_tenth_dollars": 991.2,
+    "june_tfp_lower_inclusive_decimal": "991.1729729729729729729729730",
+    "june_tfp_lower_inclusive_exact_fraction": "183367/185",
+    "june_tfp_upper_exclusive_decimal": "1008.262162162162162162162162",
+    "june_tfp_upper_exclusive_exact_fraction": "373057/370",
+    "threshold_dollars": 58
+   },
+   {
+    "first_sufficient_published_tenth_dollars": 1008.3,
+    "june_tfp_lower_inclusive_decimal": "1008.262162162162162162162162",
+    "june_tfp_lower_inclusive_exact_fraction": "373057/370",
+    "june_tfp_upper_exclusive_decimal": "1025.351351351351351351351351",
+    "june_tfp_upper_exclusive_exact_fraction": "37938/37",
+    "threshold_dollars": 59
+   },
+   {
+    "first_sufficient_published_tenth_dollars": 1025.4,
+    "june_tfp_lower_inclusive_decimal": "1025.351351351351351351351351",
+    "june_tfp_lower_inclusive_exact_fraction": "37938/37",
+    "june_tfp_upper_exclusive_decimal": "1042.440540540540540540540541",
+    "june_tfp_upper_exclusive_exact_fraction": "385703/370",
+    "threshold_dollars": 60
+   },
+   {
+    "first_sufficient_published_tenth_dollars": 1042.5,
+    "june_tfp_lower_inclusive_decimal": "1042.440540540540540540540541",
+    "june_tfp_lower_inclusive_exact_fraction": "385703/370",
+    "june_tfp_upper_exclusive_decimal": "1059.529729729729729729729730",
+    "june_tfp_upper_exclusive_exact_fraction": "196013/185",
+    "threshold_dollars": 61
+   }
+  ],
+  "required_input_month": "2026-06",
+  "status": "ESTIMATE",
+  "threshold_dollars": 59,
+  "unrounded_using_latest_input_dollars": "59.581528"
+ },
+ "generated_by": "analysis/fy2027_parameters.py",
+ "legal_formula": {
+  "base_tfp_basis_month": "2013-06",
+  "base_tfp_cost_dollars": 632.3,
+  "base_threshold_dollars": 37,
+  "calculation": "floor(37 * current_June_TFP / 632.30)",
+  "citation": "7 USC 2025(c)(1)(A)(ii)",
+  "description": "$37 for FY2014, adjusted by the percentage change in the 48-state/DC reference-family TFP cost from June 30, 2013 to June 30 immediately preceding the fiscal year",
+  "whole_dollar_convention": "floor"
+ },
+ "limitations": [
+  "The FY2027 result is not official because the June 2026 TFP input is missing.",
+  "The monthly archive values used for FY2023-FY2026 are published to ten cents; the separate 2021 TFP reevaluation reports its June 2021 cost as $835.57.",
+  "No source binary was downloaded by this offline generator. Receipt hashes for FNA observations hash the canonical observation record, not remote source-file bytes."
+ ],
+ "rounding_self_test": {
+  "candidate_conventions": [
+   "floor",
+   "nearest_half_up",
+   "ceiling"
+  ],
+  "comparisons": [
+   {
+    "basis_month": "2021-06",
+    "candidate_thresholds_dollars": {
+     "ceiling": 49,
+     "floor": 48,
+     "nearest_half_up": 49
+    },
+    "fiscal_year": 2022,
+    "published_threshold_dollars": 48,
+    "source_label": "fna",
+    "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/TFP2021.pdf",
+    "tfp_cost_dollars": 835.57,
+    "unrounded_threshold_dollars": "48.894654"
+   },
+   {
+    "basis_month": "2022-06",
+    "candidate_thresholds_dollars": {
+     "ceiling": 55,
+     "floor": 54,
+     "nearest_half_up": 55
+    },
+    "fiscal_year": 2023,
+    "published_threshold_dollars": 54,
+    "source_label": "fna",
+    "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+    "tfp_cost_dollars": 939.9,
+    "unrounded_threshold_dollars": "54.999684"
+   },
+   {
+    "basis_month": "2023-06",
+    "candidate_thresholds_dollars": {
+     "ceiling": 57,
+     "floor": 56,
+     "nearest_half_up": 57
+    },
+    "fiscal_year": 2024,
+    "published_threshold_dollars": 56,
+    "source_label": "fna",
+    "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+    "tfp_cost_dollars": 973.3,
+    "unrounded_threshold_dollars": "56.954136"
+   },
+   {
+    "basis_month": "2024-06",
+    "candidate_thresholds_dollars": {
+     "ceiling": 58,
+     "floor": 57,
+     "nearest_half_up": 57
+    },
+    "fiscal_year": 2025,
+    "published_threshold_dollars": 57,
+    "source_label": "fna",
+    "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+    "tfp_cost_dollars": 975.7,
+    "unrounded_threshold_dollars": "57.094575"
+   },
+   {
+    "basis_month": "2025-06",
+    "candidate_thresholds_dollars": {
+     "ceiling": 59,
+     "floor": 58,
+     "nearest_half_up": 58
+    },
+    "fiscal_year": 2026,
+    "published_threshold_dollars": 58,
+    "source_label": "fna",
+    "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+    "tfp_cost_dollars": 994.4,
+    "unrounded_threshold_dollars": "58.188834"
+   }
+  ],
+  "correction": "FY2021 is $39; the $48 threshold begins in FY2022. The self-test therefore covers the five-year published sequence FY2022-FY2026: $48/$54/$56/$57/$58.",
+  "matching_conventions": [
+   "floor"
+  ],
+  "unique_match": true,
+  "years_tested": [
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ "schema_version": 1,
+ "source_audit": {
+  "axiom": {
+   "receipts": [
+    {
+     "fiscal_year": 2024,
+     "four_person_max_allotment_dollars": 973,
+     "path": "us/policies/usda/snap/fy-2024-cola/maximum-allotments.yaml",
+     "sha256": "623ecc0728b6a498437045e1eb8203b82e26ab23cecd62b3d8a2ca863997495a"
+    },
+    {
+     "fiscal_year": 2026,
+     "four_person_max_allotment_dollars": 994,
+     "path": "us/policies/usda/snap/fy-2026-cola/maximum-allotments.yaml",
+     "sha256": "2e4708b8df906b506f07d091fe93dbcc6aefe603a31500502ecc270d436e9f2e"
+    }
+   ],
+   "repository": "TheAxiomFoundation/rulespec-us",
+   "result": "No encoded June-30 reference-family TFP cost series or QC threshold series was found. FY2024 and FY2026 COLA modules provide rounded maximum-allotment cross-checks only.",
+   "source_label": "axiom"
+  },
+  "fna": {
+   "archive_url": "https://fns-prod.azureedge.us/research/cnpp/usda-food-plans/cost-food-monthly-reports",
+   "observations": [
+    {
+     "basis_month": "2013-06",
+     "observation_record_sha256": "28383268b5e9ac5e73f09806e8519717ae41461b89710efd7bceaa9d5a9cb636",
+     "reference_family_monthly_cost_dollars": 632.3,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-march2007-june2021.xlsx"
+    },
+    {
+     "basis_month": "2021-06",
+     "observation_record_sha256": "25808f7db31288289879821ba2ddf7661824fbc126d4ca19c3d2d9cf70fe7ae5",
+     "reference_family_monthly_cost_dollars": 835.57,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/TFP2021.pdf"
+    },
+    {
+     "basis_month": "2022-06",
+     "observation_record_sha256": "f85045499e8c3931eec203c396abc1557c141e972d5291d0ba315f079e718607",
+     "reference_family_monthly_cost_dollars": 939.9,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx"
+    },
+    {
+     "basis_month": "2023-06",
+     "observation_record_sha256": "02619006f08fcc0a544d6b9c9792aa41eec0aa1a6a47d35c9560711cac4aecf9",
+     "reference_family_monthly_cost_dollars": 973.3,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx"
+    },
+    {
+     "basis_month": "2024-06",
+     "observation_record_sha256": "3c223c829b8b21414f90474bfd02e05451afb62da966a68fadcf20990b3f927f",
+     "reference_family_monthly_cost_dollars": 975.7,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx"
+    },
+    {
+     "basis_month": "2025-06",
+     "observation_record_sha256": "43bb9eab76c22acd075b9d8e2d6b1dcab111adc6e3d65eeeed1662d77cba6e96",
+     "reference_family_monthly_cost_dollars": 994.4,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx"
+    },
+    {
+     "basis_month": "2026-05",
+     "observation_record_sha256": "2a2d98f9257aacf70db21d457e2d919d7bd8701f7524ca5b6d391708da00224d",
+     "reference_family_monthly_cost_dollars": 1018.2,
+     "source_file_sha256": null,
+     "source_file_sha256_status": "not downloaded; official source was inspected through a rendered web resource that did not expose source bytes",
+     "source_label": "fna",
+     "url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/cnpp-costfood-tfp-may2026.pdf"
+    }
+   ],
+   "result": "Official USDA/FNS/FNA monthly TFP reports supply the exact reference-family inputs. The archive was current only through May 2026 at the audit date.",
+   "source_label": "fna",
+   "threshold_table_url": "https://www.fns.usda.gov/snap/qc/ett"
+  },
+  "network_fetches_by_generator": [],
+  "pe": {
+   "receipt": {
+    "interface": "policyengine.py",
+    "observation_record_sha256": "1cd8b458432643f70e2687dc21325846bf3b71562f6125915b93695be5face53",
+    "parameter": "gov.usda.snap.max_allotment.main.CONTIGUOUS_US.4",
+    "policyengine.py_version": "4.18.8",
+    "policyengine_us_version": "1.752.2",
+    "values_by_effective_date": {
+     "2021-10-01": 835,
+     "2022-10-01": 939,
+     "2023-10-01": 973,
+     "2024-10-01": 975,
+     "2025-10-01": 994,
+     "2026-10-01": 1016.2814445828143,
+     "2027-10-01": 1038.2534246575344
+    }
+   },
+   "result": "The policyengine.py interface exposes rounded official maximum allotments through FY2026 and forecast-uprated future values, but not the required June-30 TFP cost series. Forecast values are not used in the FY2027 point estimate.",
+   "source_label": "pe"
+  }
+ },
+ "threshold_series": [
+  {
+   "fiscal_year": 2014,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 37
+  },
+  {
+   "fiscal_year": 2015,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 38
+  },
+  {
+   "fiscal_year": 2016,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 38
+  },
+  {
+   "fiscal_year": 2017,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 38
+  },
+  {
+   "fiscal_year": 2018,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 37
+  },
+  {
+   "fiscal_year": 2019,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 37
+  },
+  {
+   "fiscal_year": 2020,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 37
+  },
+  {
+   "fiscal_year": 2021,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 39
+  },
+  {
+   "fiscal_year": 2022,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 48
+  },
+  {
+   "fiscal_year": 2023,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 54
+  },
+  {
+   "fiscal_year": 2024,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 56
+  },
+  {
+   "fiscal_year": 2025,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 57
+  },
+  {
+   "fiscal_year": 2026,
+   "source_label": "fna",
+   "source_url": "https://www.fns.usda.gov/snap/qc/ett",
+   "status": "official",
+   "threshold_dollars": 58
+  },
+  {
+   "fiscal_year": 2027,
+   "input_required": "June 2026 reference-family TFP cost",
+   "input_uncertainty_bounded_by_available_evidence": false,
+   "input_used": "May 2026 reference-family TFP cost",
+   "input_used_dollars": 1018.2,
+   "source_label": "fna",
+   "source_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/cnpp-costfood-tfp-may2026.pdf",
+   "status": "ESTIMATE",
+   "threshold_dollars": 59
+  }
+ ]
+}
