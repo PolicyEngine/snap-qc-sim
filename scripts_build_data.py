@@ -1,6 +1,6 @@
 """Build app/public/data.json: per-state case arrays for in-browser Monte Carlo.
 
-Usage: python scripts_build_data.py [QC_CSV] [PER_PDF]
+Usage: python scripts_build_data.py [QC_CSV] [PER_PDF] [PER_FY2025_PDF]
 Positional arguments default to the author's cache paths so existing
 invocations keep working; pass explicit paths to reproduce elsewhere.
 """
@@ -13,16 +13,24 @@ from snap_qc_sim import LEVERS, load_cases, load_official_rates
 
 QC = "/Users/maxghenis/.cache/axiom-oracles/snap-qc/qc_pub_fy2024.csv"
 PER = "/Users/maxghenis/.cache/axiom-oracles/snap-qc/snap-fy24QC-PER.pdf"
+PER25 = "/Users/maxghenis/.cache/axiom-oracles/snap-qc/snap-qcfy25-per.pdf"
 VERIFIED = {"CO": 856, "NY": 847, "CA": 883, "AZ": 922, "GA": 945, "MD": 722, "TX": 906}
 LEVER_KEYS = ["smd", "ssed", "heat_and_eat", "bbce_resources"]
 
-if len(sys.argv) > 3:
-    raise SystemExit("usage: python scripts_build_data.py [QC_CSV] [PER_PDF]")
+if len(sys.argv) > 4:
+    raise SystemExit(
+        "usage: python scripts_build_data.py [QC_CSV] [PER_PDF] [PER_FY2025_PDF]"
+    )
 qc_path = sys.argv[1] if len(sys.argv) > 1 else QC
 per_path = sys.argv[2] if len(sys.argv) > 2 else PER
+per25_path = sys.argv[3] if len(sys.argv) > 3 else PER25
 
 cases_by_state = load_cases(qc_path)
-official = load_official_rates(per_path)
+official = load_official_rates(per_path, include_national=True)
+official_fy2025 = load_official_rates(per25_path, include_national=True)
+missing_fy2025 = sorted(set(official) - set(official_fy2025) - {"US"})
+if missing_fy2025:
+    raise SystemExit(f"FY2025 table is missing jurisdictions: {missing_fy2025}")
 out = {}
 for state, cases in sorted(cases_by_state.items()):
     if state not in official:
@@ -39,6 +47,7 @@ for state, cases in sorted(cases_by_state.items()):
             hits.append(0)
     out[state] = {
         "official": official[state],
+        "official_fy2025": official_fy2025[state],
         "issuance": round(sum(c.weight * c.issuance for c in cases)),
         "n": len(cases),
         "verified": VERIFIED.get(state),
@@ -49,6 +58,11 @@ for state, cases in sorted(cases_by_state.items()):
     }
 path = Path("app/public/data.json")
 path.parent.mkdir(parents=True, exist_ok=True)
+payload = {
+    "levers": LEVER_KEYS,
+    "national": {"fy2024": official.get("US"), "fy2025": official_fy2025.get("US")},
+    "states": out,
+}
 with path.open("w", encoding="utf-8") as output:
-    json.dump({"levers": LEVER_KEYS, "states": out}, output, separators=(",", ":"))
+    json.dump(payload, output, separators=(",", ":"))
 print(f"{path}: {path.stat().st_size / 1e6:.1f}MB, {len(out)} states")

@@ -111,8 +111,15 @@ def load_cases(
     return dict(by_state)
 
 
-def load_official_rates(pdf_path: str | Path) -> dict[str, float]:
-    """Parse the official FY payment error rate table (FNS PDF)."""
+def load_official_rates(
+    pdf_path: str | Path, *, include_national: bool = False
+) -> dict[str, float]:
+    """Parse an official FY payment error rate table (FNS/FNA PDF).
+
+    The FY2024 and FY2025 tables share one layout: state, overpayment,
+    underpayment, total. With ``include_national`` the UNITED STATES row
+    is returned under the key ``US``.
+    """
     text = subprocess.run(
         ["pdftotext", "-layout", str(pdf_path), "-"],
         capture_output=True,
@@ -125,6 +132,11 @@ def load_official_rates(pdf_path: str | Path) -> dict[str, float]:
             r"\s*([A-Z][A-Z .]+?)\s{2,}([\d.]+)\s{2,}([\d.]+)\s{2,}([\d.]+)\s*$",
             line,
         )
-        if m and m.group(1).strip() in _STATE_NAMES:
-            rates[_STATE_NAMES[m.group(1).strip()]] = float(m.group(4))
+        if not m:
+            continue
+        name = m.group(1).strip()
+        if name in _STATE_NAMES:
+            rates[_STATE_NAMES[name]] = float(m.group(4))
+        elif include_national and name == "UNITED STATES":
+            rates["US"] = float(m.group(4))
     return rates
