@@ -78,6 +78,71 @@
   "tiers": "0/5/10/15% shares at <6, 6-8, 8-10, >=10",
   "z_convention": "denominator is FY2024 sampling SD only; both years carry sampling noise, so the two-year 95% band under independence and equal SDs is |z| > 2.77"
  },
+ "drift_estimate": {
+  "assumptions": [
+   "FY2024 and FY2025 state sampling errors are independent; correlated QC errors would change the factor of two.",
+   "Each state's FY2025 sampling SD equals its simulated FY2024 SD. SDs may differ across states.",
+   "After removing the common movement location, remaining state process changes and sampling errors are independent.",
+   "The state-pair bootstrap treats the 53 jurisdictions as exchangeable and resamples each delta with its sampling SD."
+  ],
+  "bootstrap": {
+   "classical_tau": {
+    "confidence_interval_95_pp": [
+     0.8147,
+     2.2531
+    ],
+    "standard_error_pp": 0.3785,
+    "zero_estimate_share": 0.0007
+   },
+   "draws": 10000,
+   "method": "paired nonparametric i.i.d. bootstrap of jurisdiction (delta, sampling SD) rows; 95% percentile interval",
+   "robust_tau": {
+    "confidence_interval_95_pp": [
+     0.0,
+     1.7424
+    ],
+    "standard_error_pp": 0.4162,
+    "zero_estimate_share": 0.0536
+   },
+   "seed": 202507
+  },
+  "caveats": [
+   "Only one transition, FY2024 to FY2025, is observed; this cannot identify year-to-year drift stability.",
+   "Any FY2024-to-FY2025 QC methodology or administrative change is conflated with process drift.",
+   "The bootstrap interval measures cross-jurisdiction sensitivity for this transition, not temporal, model, or QC-design uncertainty.",
+   "The sampling SDs are Monte Carlo estimates from FY2024 observed-resample simulator draws, not published FY2025 design-based standard errors."
+  ],
+  "coverage": {
+   "excluded_jurisdictions": [],
+   "jurisdictions_available": 53,
+   "jurisdictions_used": 53
+  },
+  "definition": "Across-state Var(FY2025 - FY2024) = 2 * mean(FY2024 sampling SD squared) + tau squared",
+  "estimators": {
+   "boundary": "tau = sqrt(max(0, estimated drift variance)); the untruncated variance is also reported",
+   "classical_method_of_moments": "sample variance of state movements (ddof=1), less twice the mean squared state sampling SD",
+   "robust_median_mad": "squared MAD/0.6744897501960817 about the median movement, less twice the median squared state sampling SD; the MAD scaling is normal-consistent"
+  },
+  "point_estimates": {
+   "classical_method_of_moments": {
+    "mean_delta_pp": 0.0053,
+    "observed_movement_variance_pp2": 3.8843,
+    "tau_pp": 1.6207,
+    "two_year_sampling_variance_pp2": 1.2577,
+    "untruncated_drift_variance_pp2": 2.6266
+   },
+   "robust_median_mad": {
+    "median_delta_pp": 0.12,
+    "movement_mad_pp": 1.03,
+    "normal_consistent_observed_variance_pp2": 2.332,
+    "tau_pp": 1.074,
+    "two_year_median_sampling_variance_pp2": 1.1784,
+    "untruncated_drift_variance_pp2": 1.1536
+   }
+  },
+  "recommendation": "Keep app draws sampling-only. Carry the classical tau as a candidate process-drift calibration and the robust tau as an outlier-resistant sensitivity check for the later fable decision; do not add either to simulator draws yet.",
+  "unit": "percentage points"
+ },
  "national": {
   "fy2024": 10.93,
   "fy2025": 10.62
