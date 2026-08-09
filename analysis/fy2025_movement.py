@@ -27,7 +27,7 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from snap_qc_sim import load_cases, simulate  # noqa: E402
+from snap_qc_sim import load_cases, simulate
 
 DATA_JSON = REPO_ROOT / "app" / "public" / "data.json"
 OUT_JSON = REPO_ROOT / "analysis" / "fy2025_movement.json"
@@ -162,21 +162,27 @@ def render_markdown(result: dict[str, object]) -> str:
         "",
         "# FY2024 to FY2025 official-rate movement",
         "",
-        f"National: {result['national']['fy2024']}% (FY2024) to "
-        f"{result['national']['fy2025']}% (FY2025). Mean absolute state "
-        f"movement {agg['mean_abs_delta_pp']}pp; median |z| against the "
-        f"FY2024-anchored sampling SD {agg['median_abs_z']}; "
-        f"{agg['beyond_two_year_noise_95_count']} of {agg['jurisdictions']} "
-        f"jurisdictions moved beyond the two-year sampling-noise 95% band "
-        f"(|z| > {TWO_YEAR_Z:.2f}).",
+        (
+            f"National: {result['national']['fy2024']}% (FY2024) to "
+            f"{result['national']['fy2025']}% (FY2025). Mean absolute state "
+            f"movement {agg['mean_abs_delta_pp']}pp; median |z| against the "
+            f"FY2024-anchored sampling SD {agg['median_abs_z']}; "
+            f"{agg['beyond_two_year_noise_95_count']} of {agg['jurisdictions']} "
+            f"jurisdictions moved beyond the two-year sampling-noise 95% band "
+            f"(|z| > {TWO_YEAR_Z:.2f})."
+        ),
         "",
-        f"Tier changes at the published point rates: {agg['tier_flip_count']} "
-        f"({', '.join(agg['tier_flips']) or 'none'}).",
+        (
+            f"Tier changes at the published point rates: {agg['tier_flip_count']} "
+            f"({', '.join(agg['tier_flips']) or 'none'})."
+        ),
         "",
-        f"Delay clause (rate x 1.5 >= 20): {len(agg['delay_fy2024_states'])} "
-        f"jurisdictions at FY2024 rates, {len(agg['delay_fy2025_states'])} at "
-        f"FY2025 rates; dropped {', '.join(agg['delay_dropped']) or 'none'}; "
-        f"added {', '.join(agg['delay_added']) or 'none'}.",
+        (
+            f"Delay clause (rate x 1.5 >= 20): {len(agg['delay_fy2024_states'])} "
+            f"jurisdictions at FY2024 rates, {len(agg['delay_fy2025_states'])} at "
+            f"FY2025 rates; dropped {', '.join(agg['delay_dropped']) or 'none'}; "
+            f"added {', '.join(agg['delay_added']) or 'none'}."
+        ),
         "",
         "| State | FY2024 | FY2025 | Delta (pp) | Sampling SD (pp) | z | Tier 24 | Tier 25 | Delay 25 |",
         "|---|---:|---:|---:|---:|---:|---:|---:|:---:|",
