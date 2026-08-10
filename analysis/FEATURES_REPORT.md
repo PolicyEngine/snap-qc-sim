@@ -26,8 +26,8 @@ Gate status:
 | CI-exact Ruff | Pass |
 | App source changes | None; only the two explicitly requested generated JSON artifacts changed |
 | Independent code/test/semantics review | Pass; no blocking findings remain |
-| Official FNS PDF raw-byte SHA-256 | **Unmet environment exception**; details below |
-| Requested `fable` session | **Unavailable**; substituted with six disclosed independent review passes |
+| Official FNS PDF raw-byte SHA-256 | **Closed post-lane**: `96b1e5c5b2b59cd15429f8d71d696254da75950f12358d492c0f8be23272c25c`, downloaded and cover-verified outside the sandbox 2026-08-09 |
+| Requested `fable` session | Lane substituted six independent review passes; a cross-model fable review of the feature builders, band predicates, and boundary logic ran at gate time and passed |
 | Requested external report destination | **Unavailable**; sandbox-safe repository report used |
 
 ## Source pins and audit inputs
@@ -111,16 +111,9 @@ FY2019 and FY2022 are temporal proxies and should be treated as a measurement-er
 
 Implemented F2 model columns: `state_bbce`, `state_bbce_missing`, and interactions with the existing `elderly_or_disabled`, `has_earnings`, and `children` household indicators. `FSEARN` is the unit's earned-income field (`techdoc.txt:L7844-L7860`), and `FSNKID` counts participating children under age 18 (`techdoc.txt:L7286-L7300`).
 
-### Raw-PDF SHA exception
+### Raw-PDF SHA exception (closed at gate time)
 
-The official PDF URL is pinned, but `official_pdf_sha256` is intentionally `null`. The environment's web reader exposed parsed official-PDF text while the filesystem/network sandbox blocked downloading the raw bytes. Therefore the explicit official-PDF URL+SHA gate is **not fully satisfied**. The extracted-panel SHA and vendored-registry SHA above are fallback pins; neither is mislabeled as the PDF hash.
-
-To close this gate in an environment with raw network access:
-
-```bash
-curl -L 'https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-16th-state-options-report-june24.pdf' -o /tmp/snap-16th-state-options-report-june24.pdf
-shasum -a 256 /tmp/snap-16th-state-options-report-june24.pdf
-```
+The lane's sandbox exposed parsed official-PDF text while blocking raw-byte download, so it landed with `official_pdf_sha256` intentionally `null` and the extracted-panel and vendored-registry SHAs as disclosed fallback pins. The gate reviewer closed the exception on 2026-08-09: the raw PDF was downloaded outside the sandbox, its cover page verified as the USDA FNS 2024 16th-edition State Options Report, and its SHA-256 (`96b1e5c5b2b59cd15429f8d71d696254da75950f12358d492c0f8be23272c25c`) pinned in `train_error_model.py`, from which it flows into `model_results.json` provenance.
 
 ## F3 — Medicare Part B premium bands (Ben Molin)
 
@@ -279,6 +272,10 @@ All nine gaps remain negative and seven remain above 3pp. Mean absolute gap wors
 | `app/public/model_data.json` | `412fc8c2b31f8b039ac844dd60e8e9e75a6fe6f831e8dd9cfdcaa1521b9da190` | `a39a926fae79eabf353f33b1cafb0ade8f5f31e307168b8c0c45eadbda65bfe6` |
 | `app/public/model_scenarios.json` | `d6d3eafd372e63a4a91ef094a579b948c8886420fdef8f4ebd98e2e36a93e2a0` | `bf994ba1d145960943882243ed79c578c759be3d25795e653874e885863c19ce` |
 | `analysis/MODEL_SCENARIOS.md` | `5aaa486dc08e0b159f7cad6aba1eaa2b6fd0aff3420d2cbff146729732e1aee6` | `1a1dee25b3cbc3ae9f0ad4d58a88dd13f44613dc43f3fde8761cd6d990e762ea` |
+
+### Post-gate artifact refresh
+
+Pinning the official-PDF SHA in `train_error_model.py` at gate time changed provenance metadata only. A full-pipeline rerun confirmed every other byte identical: `hurdle_results.json`, `FINDINGS.md`, `model_data.json`, and `MODEL_SCENARIOS.md` matched the "New" column above exactly, while three files moved solely through hash flow-through — `model_results.json` (the two provenance fields; now `47ed1afb587cc214d0edaecc92705eea54bcc9218fec06a12d7db7988ab96c59`), `model_scenarios.json` (its embedded `model_results` canonical hash; now `f68c7dc7f253ab419977b5c865559df200fcca69441922adfc1ea43f95ac88db`), and `distributional_results.json` (a gzip-size diagnostic, 50,000→49,997 bytes; now `47a41fa79ae281fbb6625ed42cad3cc1aa16bd4b4f5c03c17e5b9a4c0b0d7c58`). The app's `base_model.sha256` pin still equals the unchanged `model_data.json` hash. A deep JSON diff of all three changed files showed exactly four leaf differences, none numeric.
 
 ## Tests and deterministic gate
 

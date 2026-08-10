@@ -1472,8 +1472,8 @@
     "bbce_registry": {
       "path": "/Users/maxghenis/PolicyEngine/snap-qc-sim/analysis/data/state_bbce.csv",
       "official_fy2024_report_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-16th-state-options-report-june24.pdf",
-      "official_pdf_sha256": null,
-      "official_pdf_sha256_note": "not available: the execution sandbox exposed parsed PDF text but blocked raw-byte download; registry and extracted-panel hashes remain pinned",
+      "official_pdf_sha256": "96b1e5c5b2b59cd15429f8d71d696254da75950f12358d492c0f8be23272c25c",
+      "official_pdf_sha256_note": "raw bytes downloaded and hashed 2026-08-09 outside the training sandbox; cover page verified as the 2024 16th-edition State Options Report",
       "source_extracted_panel_sha256": "3f3f035c7ded13996e43b1a43e7ec0e4a742bb17522d1f730edb0990aafe08cb",
       "year_sources": {
         "2017": {

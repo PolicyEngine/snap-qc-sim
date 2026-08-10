@@ -1923,7 +1923,7 @@
     "fy2024_cases": 44800,
     "model_data_gzip_bytes": 795398,
     "model_data_raw_bytes": 3111352,
-    "model_scenarios_gzip_bytes": 50000,
+    "model_scenarios_gzip_bytes": 49997,
     "model_scenarios_included_levers": [
       "smd"
     ],
