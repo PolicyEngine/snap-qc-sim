@@ -18,12 +18,22 @@
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<nav class="pe-shell-header" aria-label="PolicyEngine site header">
+  <div class="wrap pe-shell-row">
+    <a class="pe-shell-brand" href="https://policyengine.org/us">
+      <img class="logo logo-light" src="pe-logo-teal.svg" alt="PolicyEngine" height="22">
+      <img class="logo logo-dark" src="pe-logo-white.svg" alt="PolicyEngine" height="22">
+    </a>
+    <div class="pe-shell-links">
+      <a href="https://policyengine.org/us/research">Research</a>
+      <a href="https://policyengine.org/us/model/rules">Model</a>
+      <a href="https://policyengine.org/us/api">API</a>
+      <a href="https://policyengine.org/us/donate" class="pe-shell-donate">Donate</a>
+    </div>
+  </div>
+</nav>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="https://policyengine.org">
-      <img class="logo logo-light" src="pe-logo-teal.svg" alt="PolicyEngine" height="26">
-      <img class="logo logo-dark" src="pe-logo-white.svg" alt="PolicyEngine" height="26">
-    </a>
     <h1>SNAP payment error simulator</h1>
     <p class="lede">
       Beginning fiscal year 2028, a state's SNAP payment error rate sets its
@@ -134,9 +144,16 @@
 </main>
 
 <footer class="site-footer"><div class="wrap">
-  Built by <a href="https://policyengine.org">PolicyEngine</a> · <a href="paper/">working paper</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>
+  <p class="foot-tool">Built by <a href="https://policyengine.org">PolicyEngine</a> · <a href="paper/">working paper</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a></p>
+  <nav class="pe-shell-footer" aria-label="PolicyEngine site footer">
+    <a href="https://policyengine.org/us/team">About us</a>
+    <a href="https://policyengine.org/us/donate">Donate</a>
+    <a href="https://policyengine.org/us/dev-tools">Developer tools</a>
+    <a href="https://policyengine.org/us/privacy">Privacy policy</a>
+    <a href="https://policyengine.org/us/terms">Terms and conditions</a>
+  </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20260809d"></script>
+<script type="module" src="app.js?v=20260809e"></script>
 </body>
 </html>

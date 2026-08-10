@@ -13,3 +13,5 @@ paper/.quarto/
 site_libs/
 FACTS-preview.html
 *_files/
+.vercel
+.env*
