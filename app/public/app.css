@@ -27,12 +27,38 @@ body {
   line-height: 1.5;
 }
 .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-.site-header { padding: 40px 0 8px; }
+/* PolicyEngine site shell — global nav and footer links rendered by this
+   zone child so the tool carries the site header/footer at its public
+   policyengine.org path (the shell-in-child pattern the zone audit checks). */
+.pe-shell-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+  position: sticky; top: 0; z-index: 20;
+}
+.pe-shell-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+}
+.pe-shell-brand { display: inline-flex; align-items: center; }
+.pe-shell-brand .logo { height: 22px; width: auto; display: none; }
+.pe-shell-links { display: flex; align-items: center; gap: 22px; }
+.pe-shell-links a {
+  color: var(--foreground); text-decoration: none; font-size: 14px;
+  font-weight: 500;
+}
+.pe-shell-links a:hover { color: var(--primary); }
+.pe-shell-links .pe-shell-donate {
+  color: var(--primary); border: 1px solid var(--primary);
+  padding: 5px 14px; border-radius: 6px;
+}
+.pe-shell-footer {
+  display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+.pe-shell-footer a { color: var(--muted-foreground); }
+.site-header { padding: 28px 0 8px; }
 .brand { display: inline-block; margin-bottom: 14px; }
-/* Inside the policyengine.org shell the site header already carries the
-   wordmark; drop the standalone one and tighten the top spacing. */
 .framed .brand { display: none; }
-.framed .site-header { padding-top: 16px; }
 .delaytag {
   display: inline-block; margin-left: 6px; padding: 1px 6px;
   border-radius: 999px; font-size: 10.5px; font-weight: 600;

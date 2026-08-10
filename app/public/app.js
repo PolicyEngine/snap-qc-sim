@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260809d"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260809e"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
