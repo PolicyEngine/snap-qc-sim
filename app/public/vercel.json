@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/us/snap-payment-error-simulator", "destination": "/index.html" },
+    { "source": "/us/snap-payment-error-simulator/paper", "destination": "/paper/index.html" },
+    { "source": "/us/snap-payment-error-simulator/paper/", "destination": "/paper/index.html" },
+    { "source": "/us/snap-payment-error-simulator/paper/:rest*", "destination": "/paper/:rest*" },
+    { "source": "/us/snap-payment-error-simulator/:path*", "destination": "/:path*" }
+  ]
+}
