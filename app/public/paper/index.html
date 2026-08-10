@@ -1,1058 +1,124 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-<meta name="author" content="Max Ghenis">
-<meta name="dcterms.date" content="2026-08-09">
-
-<title>Administrative quality control data as an oracle: verifying encoded SNAP rules and simulating payment error under cost sharing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper — SNAP payment error simulator | PolicyEngine</title>
+<meta name="description" content="Working paper: administrative quality control data as an oracle — verifying encoded SNAP rules and simulating payment error under cost sharing.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Paper — SNAP payment error simulator | PolicyEngine">
+<meta property="og:description" content="QC files as a verification oracle (6,081 cases exact across seven states), a distributional error model with its failures reported, and the fiscal 2025 rates landing where the sampling-noise mechanism says they should.">
+<meta property="og:url" content="https://policyengine.org/us/snap-payment-error-simulator/paper/">
+<link rel="icon" href="../pe-logo-teal.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../app.css">
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-  vertical-align: middle;
-}
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
-
-
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-8ffd5f67044e5306d9846f29df41dda5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
+  .paper-head { padding: 26px 0 6px; }
+  .paper-head .kicker {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--muted-foreground);
   }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<meta name="citation_title" content="Administrative quality control data as an oracle: verifying encoded SNAP rules and simulating payment error under cost sharing">
-<meta name="citation_abstract" content="Beginning in fiscal year 2028, each state&amp;amp;#039;s Supplemental Nutrition
-Assistance Program (SNAP) payment error rate sets its share of benefit
-costs, in steps of five percentage points at rates of 6, 8, and 10
-percent. A measurement system built for oversight now moves large sums,
-which raises two questions this paper treats together: whether the rules
-that produce benefit amounts can be executed correctly, and how the
-errors that remain should be measured and simulated. I use the USDA
-Quality Control (QC) public-use files as a verification oracle for
-independently encoded SNAP rules: across seven states, the encodings
-reproduce the file's benefit-computation chain, from file-recorded
-intermediates, exactly — all 6,081 in-scope cases of the 6,194-case
-official universe (113 documented exclusions), six computation stages
-per case, zero dollar tolerance — a process that surfaced and fixed two
-defects in the encodings and surfaced errata in the federal technical
-documentation. Replaying reconstructed pre-edit case facts through the
-verified engine explains 78.4% of Colorado's above-threshold official
-error cases — and 91.4% of sub-threshold deviations — as correct
-arithmetic on wrong facts. I also fit and validate a distributional
-model of case-level payment deviations, and report its validation
-failures alongside its results. The central finding, from an open Monte
-Carlo simulator resampling each state's own QC cases, is about
-measurement: at regulatory sample sizes, several states face nearly
-even odds — 46 to 50 percent — of being assigned a different cost tier
-than their official point rate implies. The fiscal 2025 rates,
-published in June 2026, land where that mechanism says realized years
-should: 18 of 53 jurisdictions changed cost-sharing tiers in one
-year, and only seven of those changes exceed the 95% band that two
-years of sampling noise — estimated from fiscal 2024 microdata alone
-— implies.
-">
-<meta name="citation_author" content="Max Ghenis">
-<meta name="citation_publication_date" content="2026-08-09">
-<meta name="citation_cover_date" content="2026-08-09">
-<meta name="citation_year" content="2026">
-<meta name="citation_online_date" content="2026-08-09">
-<meta name="citation_language" content="en">
-<meta name="citation_reference" content="citation_title=Technical documentation for the fiscal year 2024 supplemental nutrition assistance program quality control database and the QC minimodel;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://snapqcdata.net/datafiles;">
-<meta name="citation_reference" content="citation_title=Supplemental nutrition assistance program payment error rates, fiscal year 2024;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://www.fns.usda.gov/snap/qc/per;">
-<meta name="citation_reference" content="citation_title=Snap_qc: Reconstruction and analysis code for the SNAP quality control public-use files;,citation_author=Eric Giannella;,citation_author=Ben Molin;,citation_publication_date=2026;,citation_cover_date=2026;,citation_year=2026;,citation_fulltext_html_url=https://github.com/giannella/snap_qc;">
-<meta name="citation_reference" content="citation_title=Smearing estimate: A nonparametric retransformation method;,citation_author=Naihua Duan;,citation_publication_date=1983;,citation_cover_date=1983;,citation_year=1983;,citation_fulltext_html_url=https://doi.org/10.1080/01621459.1983.10478017;,citation_issue=383;,citation_volume=78;,citation_journal_title=Journal of the American Statistical Association;">
-<meta name="citation_reference" content="citation_title=Regression quantiles;,citation_author=Roger Koenker;,citation_author=Gilbert Bassett;,citation_publication_date=1978;,citation_cover_date=1978;,citation_year=1978;,citation_fulltext_html_url=https://doi.org/10.2307/1913643;,citation_issue=1;,citation_volume=46;,citation_journal_title=Econometrica;">
-<meta name="citation_reference" content="citation_title=Bootstrap methods: Another look at the jackknife;,citation_author=Bradley Efron;,citation_publication_date=1979;,citation_cover_date=1979;,citation_year=1979;,citation_fulltext_html_url=https://doi.org/10.1214/aos/1176344552;,citation_issue=1;,citation_volume=7;,citation_journal_title=The Annals of Statistics;">
-<meta name="citation_reference" content="citation_title=Scikit-learn: Machine learning in Python;,citation_author=Fabian Pedregosa;,citation_author=Gaël Varoquaux;,citation_author=Alexandre Gramfort;,citation_author=Vincent Michel;,citation_author=Bertrand Thirion;,citation_author=Olivier Grisel;,citation_author=Mathieu Blondel;,citation_author=Peter Prettenhofer;,citation_author=Ron Weiss;,citation_author=Vincent Dubourg;,citation_author=Jake Vanderplas;,citation_author=Alexandre Passos;,citation_author=David Cournapeau;,citation_author=Matthieu Brucher;,citation_author=Matthieu Perrot;,citation_author=Édouard Duchesnay;,citation_publication_date=2011;,citation_cover_date=2011;,citation_year=2011;,citation_fulltext_html_url=https://jmlr.org/papers/v12/pedregosa11a.html;,citation_volume=12;,citation_journal_title=Journal of Machine Learning Research;">
-<meta name="citation_reference" content="citation_title=Catala: A programming language for the law;,citation_author=Denis Mérigoux;,citation_author=Nicolas Chataing;,citation_author=Jonathan Protzenko;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://doi.org/10.1145/3473582;,citation_issue=ICFP;,citation_volume=5;,citation_journal_title=Proceedings of the ACM on Programming Languages;">
-<meta name="citation_reference" content="citation_title=Cracking the code: Rulemaking for humans and machines;,citation_author=James Mohun;,citation_author=Alex Roberts;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;,citation_fulltext_html_url=https://doi.org/10.1787/3afe6ba5-en;,citation_technical_report_institution=OECD Observatory of Public Sector Innovation;,citation_technical_report_number=42;">
-<meta name="citation_reference" content="citation_title=A modern compiler for the French tax code;,citation_author=Denis Mérigoux;,citation_author=Raphaël Monat;,citation_author=Jonathan Protzenko;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://doi.org/10.1145/3446804.3446850;,citation_conference_title=Proceedings of the 30th ACM SIGPLAN international conference on compiler construction (CC ’21);">
-<meta name="citation_reference" content="citation_title=Quantile and probability curves without crossing;,citation_author=Victor Chernozhukov;,citation_author=Iván Fernández-Val;,citation_author=Alfred Galichon;,citation_publication_date=2010;,citation_cover_date=2010;,citation_year=2010;,citation_fulltext_html_url=https://doi.org/10.3982/ECTA7880;,citation_issue=3;,citation_volume=78;,citation_journal_title=Econometrica;">
-<meta name="citation_reference" content="citation_title=The promise and pitfalls of using imprecise school accountability measures;,citation_author=Thomas J. Kane;,citation_author=Douglas O. Staiger;,citation_publication_date=2002;,citation_cover_date=2002;,citation_year=2002;,citation_fulltext_html_url=https://doi.org/10.1257/089533002320950993;,citation_issue=4;,citation_volume=16;,citation_journal_title=Journal of Economic Perspectives;">
-<meta name="citation_reference" content="citation_title=Administrative burden: Policymaking by other means;,citation_author=Pamela Herd;,citation_author=Donald P. Moynihan;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;">
-<meta name="citation_reference" content="citation_title=Errors and fraud in the supplemental nutrition assistance program (SNAP);,citation_author=Congressional Research Service;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_fulltext_html_url=https://www.congress.gov/crs-product/IF10860;">
-<meta name="citation_reference" content="citation_title=FNS handbook 310: SNAP quality control review handbook;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://www.fns.usda.gov/snap/fns-handbook-310;">
-<meta name="citation_reference" content="citation_title=False claims act settlements concerning bias in SNAP quality control processes (virginia, wisconsin, alaska, texas, louisiana, mississippi, florida, tennessee), cumulative recoveries exceeding $67 million;,citation_author=U.S. Department of Justice;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability;">
-<meta name="citation_reference" content="citation_title=Errors and fraud in the supplemental nutrition assistance program (SNAP);,citation_author=Congressional Research Service;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;,citation_fulltext_html_url=https://www.congress.gov/crs_external_products/R/PDF/R45147/R45147.4.pdf;">
-<meta name="citation_reference" content="citation_title=Supplemental nutrition assistance program payment error rates, fiscal year 2025;,citation_author=U.S. Department of Agriculture, Food and Nutrition Administration;,citation_publication_date=2026;,citation_cover_date=2026;,citation_year=2026;,citation_fulltext_html_url=https://www.fns.usda.gov/snap/qc/per;">
+  .paper-head h1 { margin: 6px 0 10px; }
+  .paper-desc { max-width: 70ch; color: var(--muted-foreground); }
+  .paper-tag {
+    display: inline-block; margin: 10px 0 0; padding: 2px 10px;
+    border: 1px solid var(--border); border-radius: 999px;
+    font-size: 12.5px; color: var(--muted-foreground);
+  }
+  .paper-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0 14px; }
+  .paper-actions a {
+    display: inline-block; padding: 7px 16px; border-radius: 6px;
+    border: 1px solid var(--border); color: var(--foreground);
+    text-decoration: none; font-size: 14px; font-weight: 500;
+  }
+  .paper-actions a.primary { border-color: var(--primary); color: var(--primary); }
+  .paper-actions a:hover { border-color: var(--primary); }
+  .paper-frame-card {
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .paper-frame-card iframe {
+    display: block; width: 100%; border: 0; background: #fff;
+    height: calc(100vh - 16rem); min-height: 720px;
+  }
+  .paper-foot {
+    display: flex; gap: 10px; align-items: center; margin: 0 0 30px;
+    font-size: 13.5px; color: var(--muted-foreground);
+  }
+  .paper-foot a { color: var(--muted-foreground); }
+</style>
 </head>
-
-<body class="quarto-light">
-
-<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Administrative quality control data as an oracle: verifying encoded SNAP rules and simulating payment error under cost sharing</h1>
-          </div>
-
-    
-    <div class="quarto-title-meta-container">
-      <div class="quarto-title-meta-column-start">
-            <div class="quarto-title-meta-author">
-          <div class="quarto-title-meta-heading">Author</div>
-          <div class="quarto-title-meta-heading">Affiliation</div>
-          
-                <div class="quarto-title-meta-contents">
-            <p class="author">Max Ghenis <a href="mailto:max@policyengine.org" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
-          </div>
-                <div class="quarto-title-meta-contents">
-                    <p class="affiliation">
-                        PolicyEngine
-                      </p>
-                  </div>
-                    </div>
-        
-        <div class="quarto-title-meta">
-
-                      
-                <div>
-            <div class="quarto-title-meta-heading">Published</div>
-            <div class="quarto-title-meta-contents">
-              <p class="date">August 9, 2026</p>
-            </div>
-          </div>
-          
-                
-              </div>
-      </div>
-      <div class="quarto-title-meta-column-end quarto-other-formats-target">
-      <div class="quarto-alternate-formats"><div class="quarto-title-meta-heading">Other Formats</div><div class="quarto-title-meta-contents"><p><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></p></div></div></div>
+<body id="paper-top">
+<nav class="pe-shell-header" aria-label="PolicyEngine site header">
+  <div class="wrap pe-shell-row">
+    <a class="pe-shell-brand" href="https://policyengine.org/us">
+      <img class="logo logo-light" src="../pe-logo-teal.svg" alt="PolicyEngine" height="22">
+      <img class="logo logo-dark" src="../pe-logo-white.svg" alt="PolicyEngine" height="22">
+    </a>
+    <div class="pe-shell-links">
+      <a href="https://policyengine.org/us/research">Research</a>
+      <a href="https://policyengine.org/us/model/rules">Model</a>
+      <a href="https://policyengine.org/us/api">API</a>
+      <a href="https://policyengine.org/us/donate" class="pe-shell-donate">Donate</a>
     </div>
+  </div>
+</nav>
 
-    <div>
-      <div class="abstract">
-        <div class="block-title">Abstract</div>
-        <p>Beginning in fiscal year 2028, each state’s Supplemental Nutrition Assistance Program (SNAP) payment error rate sets its share of benefit costs, in steps of five percentage points at rates of 6, 8, and 10 percent. A measurement system built for oversight now moves large sums, which raises two questions this paper treats together: whether the rules that produce benefit amounts can be executed correctly, and how the errors that remain should be measured and simulated. I use the USDA Quality Control (QC) public-use files as a verification oracle for independently encoded SNAP rules: across seven states, the encodings reproduce the file’s benefit-computation chain, from file-recorded intermediates, exactly — all 6,081 in-scope cases of the 6,194-case official universe (113 documented exclusions), six computation stages per case, zero dollar tolerance — a process that surfaced and fixed two defects in the encodings and surfaced errata in the federal technical documentation. Replaying reconstructed pre-edit case facts through the verified engine explains 78.4% of Colorado’s above-threshold official error cases — and 91.4% of sub-threshold deviations — as correct arithmetic on wrong facts. I also fit and validate a distributional model of case-level payment deviations, and report its validation failures alongside its results. The central finding, from an open Monte Carlo simulator resampling each state’s own QC cases, is about measurement: at regulatory sample sizes, several states face nearly even odds — 46 to 50 percent — of being assigned a different cost tier than their official point rate implies. The fiscal 2025 rates, published in June 2026, land where that mechanism says realized years should: 18 of 53 jurisdictions changed cost-sharing tiers in one year, and only seven of those changes exceed the 95% band that two years of sampling noise — estimated from fiscal 2024 microdata alone — implies.</p>
-      </div>
-    </div>
+<main class="wrap">
+  <header class="paper-head">
+    <div class="kicker">Working paper</div>
+    <h1>Administrative quality control data as an oracle</h1>
+    <p class="paper-desc">
+      Verifying encoded SNAP rules and simulating payment error under cost
+      sharing. The QC files as a verification oracle — 6,081 in-scope
+      fiscal 2024 cases across seven states reproduced exactly, zero dollar
+      tolerance — a distributional error model reported with its validation
+      failures, and the fiscal 2025 rates landing where the sampling-noise
+      mechanism says realized years should: 18 of 53 jurisdictions changed
+      cost-share tiers, only 7 of those changes beyond two-year sampling
+      noise. This page embeds the revision-4 manuscript (2026-08-09), which
+      carries four rounds of adversarial review, archived unedited.
+    </p>
+    <span class="paper-tag">Revision 4 · 2026-08-09 · Max Ghenis, PolicyEngine</span>
+  </header>
 
+  <nav class="paper-actions" aria-label="Paper actions">
+    <a class="primary" href="web/index.html?v=r4-20260809">Open standalone HTML</a>
+    <a href="web/index.pdf">Download PDF</a>
+    <a href="../">Live simulator</a>
+    <a href="https://github.com/PolicyEngine/snap-qc-sim">Code and artifacts</a>
+  </nav>
 
-    <div class="quarto-other-links-text-target">
-    </div>  </div>
-</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
-<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
-  <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#sec-qc" id="toc-sec-qc" class="nav-link" data-scroll-target="#sec-qc">The QC system and the money attached to it</a></li>
-  <li><a href="#sec-oracle" id="toc-sec-oracle" class="nav-link" data-scroll-target="#sec-oracle">The QC file as a verification oracle</a>
-  <ul class="collapse">
-  <li><a href="#sec-oracle-scope" id="toc-sec-oracle-scope" class="nav-link" data-scroll-target="#sec-oracle-scope">What the parity target is</a></li>
-  </ul></li>
-  <li><a href="#sec-decompose" id="toc-sec-decompose" class="nav-link" data-scroll-target="#sec-decompose">Decomposing measured error: computation versus facts</a></li>
-  <li><a href="#sec-model" id="toc-sec-model" class="nav-link" data-scroll-target="#sec-model">Modeling the error process</a></li>
-  <li><a href="#sec-simulate" id="toc-sec-simulate" class="nav-link" data-scroll-target="#sec-simulate">Simulating measured rates under cost sharing</a>
-  <ul class="collapse">
-  <li><a href="#sec-fy2025" id="toc-sec-fy2025" class="nav-link" data-scroll-target="#sec-fy2025">The realized fiscal 2025 rates</a></li>
-  </ul></li>
-  <li><a href="#sec-roadmap" id="toc-sec-roadmap" class="nav-link" data-scroll-target="#sec-roadmap">Toward engine-computed counterfactuals</a></li>
-  <li><a href="#sec-limitations" id="toc-sec-limitations" class="nav-link" data-scroll-target="#sec-limitations">Limitations</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  <li><a href="#sec-availability" id="toc-sec-availability" class="nav-link" data-scroll-target="#sec-availability">Data and code availability</a></li>
-  <li><a href="#disclosure" id="toc-disclosure" class="nav-link" data-scroll-target="#disclosure">Disclosure</a></li>
-  <li><a href="#acknowledgments" id="toc-acknowledgments" class="nav-link" data-scroll-target="#acknowledgments">Acknowledgments</a></li>
-  </ul>
-<div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="reviews/round-1/code-cert-skeptic-preview.html"><i class="bi bi-journal-code"></i>Adversarial audit: /Users/maxghenis/.cache/axiom-oracles/v2b/CERT_REPORT.md</a></li><li><a href="reviews/round-1/code-stats-redteam-preview.html"><i class="bi bi-journal-code"></i>Adversarial statistical review: snap-qc-sim (main @ 026a362, post PR #9)</a></li><li><a href="reviews/round-1/referee-citations-preview.html"><i class="bi bi-journal-code"></i>Citation Review — snap-qc-sim paper</a></li><li><a href="reviews/round-1/code-claims-sweep-preview.html"><i class="bi bi-journal-code"></i>Claims audit — snap-qc-sim (main @ 026a362)</a></li><li><a href="snapshot/cert/CERT_REPORT-preview.html"><i class="bi bi-journal-code"></i>CO SNAP QC certification: CERTIFIED</a></li><li><a href="reviews/round-1/referee-domain-preview.html"><i class="bi bi-journal-code"></i>Domain expert review: SNAP program and quality-control specialist</a></li><li><a href="FACTS-preview.html"><i class="bi bi-journal-code"></i>Fact catalog</a></li><li><a href="reviews/round-1/code-js-fidelity-preview.html"><i class="bi bi-journal-code"></i>Fidelity audit: app.js model mode vs analysis/predictive_process.py</a></li><li><a href="reviews/round-4/methodology-preview.html"><i class="bi bi-journal-code"></i>Methodology review — revision-4 delta (verbatim, 2026-08-09)</a></li><li><a href="reviews/round-2/round2-methodology-preview.html"><i class="bi bi-journal-code"></i>Methodology review — round 2 (revised manuscript, commit 27e1b09)</a></li><li><a href="reviews/round-1/referee-methodology-preview.html"><i class="bi bi-journal-code"></i>Methodology review: "Administrative quality control data as an oracle" (paper/index.qmd)</a></li><li><a href="reviews/round-1/referee-neutrality-preview.html"><i class="bi bi-journal-code"></i>Neutrality Review</a></li><li><a href="snapshot/qrf-cross-process-attestation-preview.html"><i class="bi bi-journal-code"></i>QRF benchmark cross-process determinism attestation</a></li><li><a href="reviews/round-4/red-team-preview.html"><i class="bi bi-journal-code"></i>Red-team review — revision-4 delta (verbatim, 2026-08-09)</a></li><li><a href="reviews/round-2/round2-redteam-preview.html"><i class="bi bi-journal-code"></i>Red-Team Review — Round 2 (revised manuscript, commit 27e1b09)</a></li><li><a href="reviews/round-1/referee-redteam-preview.html"><i class="bi bi-journal-code"></i>Red-Team Review: "Administrative quality control data as an oracle" (paper/index.qmd @ bce8eb6, origin/paper)</a></li><li><a href="reviews/round-1/referee-reproducibility-preview.html"><i class="bi bi-journal-code"></i>Reproducibility Review</a></li><li><a href="reviews/round-3/methodology-preview.html"><i class="bi bi-journal-code"></i>Round 3 — methodology review (revision-3 changed regions)</a></li><li><a href="reviews/round-3/red-team-preview.html"><i class="bi bi-journal-code"></i>Round 3 — red-team review (revision-3 changed regions)</a></li><li><a href="reviews/round-3/round-diff-preview.html"><i class="bi bi-journal-code"></i>Round 3 — round-diff review (alignment-pass @ 084c6bb)</a></li><li><a href="reviews/round-1/EDITORIAL-preview.html"><i class="bi bi-journal-code"></i>Round-1 editorial synthesis</a></li><li><a href="reviews/round-2/round2-rounddiff-preview.html"><i class="bi bi-journal-code"></i>Round-Diff Review: round-1 resolution audit (paper branch @ 27e1b09)</a></li><li><a href="reviews/round-1/referee-stylistic-preview.html"><i class="bi bi-journal-code"></i>Stylistic review: "Administrative quality control data as an oracle"</a></li><li><a href="snapshot/labs/amterr/ANALYSIS-preview.html"><i class="bi bi-journal-code"></i>What share of SNAP payment errors could a verified rules engine prevent?</a></li></ul></div></nav>
-</div>
-<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-</div>
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+  <div class="paper-frame-card">
+    <iframe src="web/index.html?v=r4-20260809"
+            title="SNAP payment error working paper (embedded manuscript)"
+            loading="lazy"
+            sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+            referrerpolicy="same-origin"></iframe>
+  </div>
 
+  <p class="paper-foot">
+    <a href="#paper-top">↑ Back to top</a> ·
+    <a href="web/index.html?v=r4-20260809">Open manuscript in a new page</a>
+  </p>
+</main>
 
+<footer class="site-footer"><div class="wrap">
+  <p class="foot-tool">Built by <a href="https://policyengine.org">PolicyEngine</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a></p>
+  <nav class="pe-shell-footer" aria-label="PolicyEngine site footer">
+    <a href="https://policyengine.org/us/team">About us</a>
+    <a href="https://policyengine.org/us/donate">Donate</a>
+    <a href="https://policyengine.org/us/dev-tools">Developer tools</a>
+    <a href="https://policyengine.org/us/privacy">Privacy policy</a>
+    <a href="https://policyengine.org/us/terms">Terms and conditions</a>
+  </nav>
+</div></footer>
 
-  
-
-
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Under 7 U.S.C. § 2013(a)(2), as amended by the One Big Beautiful Bill Act (Pub. L. No.&nbsp;119-21, 2025; OBBBA), a state whose SNAP payment error rate reaches 6% will pay 5% of benefit costs beginning in fiscal year 2028; at 8%, the share is 10%; at 10%, it is 15%. The rate that determines the FY2028 share is the state’s fiscal 2025 or 2026 rate, at its election; later years use the third preceding year. Implementation is delayed for the highest-error states: a state whose fiscal 2025 rate times 1.5 reaches 20% — that is, a rate above 13.33% (13.34% at the published two-decimal precision) — starts in FY2029 instead, and a state whose fiscal 2026 rate crosses the same test starts in FY2030.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> For a mid-sized state, one tier is worth tens of millions of dollars a year; for the largest states, more than a hundred million.</p>
-<p>The error rate is estimated by the Quality Control system: each state re-reviews a probability sample of its own active cases — by formula in 7 C.F.R. § 275.11, between 300 and 2,400 annually, or 300 to 1,020 under an optional reduced schedule that every state elected in fiscal 2024 <span class="citation" data-cites="fns2024techdoc">(<a href="#ref-fns2024techdoc" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025b</a>)</span> — and federal reviewers re-review a subsample, from which the Food and Nutrition Service (FNS; renamed the Food and Nutrition Administration in 2026 — the fiscal 2025 rate publication carries the new letterhead <span class="citation" data-cites="fna2025per">(<a href="#ref-fna2025per" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Administration 2026</a>)</span>, and this paper keeps FNS, the name on every document the fiscal 2024 data cite) estimates official state rates with adjustments including federal re-review integration. The public-use files that result record, for roughly 45,000 cases a year, what the agency issued and what the review concluded the case should have received, with coded findings for every discrepancy.</p>
-<p>This paper treats those files as a research instrument with three uses, the first in the software-testing sense of an <em>oracle</em>: an external source of ground-truth outputs for given inputs.</p>
-<p>First, as a verification target for rules as code. I test independently encoded SNAP rules — statute, regulations, and state policy manuals encoded as executable rule modules — against the QC file’s recorded benefit computations in seven states, holding the bar at exact reproduction: zero dollar tolerance across six computation stages per case (<a href="#sec-oracle" class="quarto-xref">Section&nbsp;3</a>). The target’s precise character matters and is stated in <a href="#sec-oracle-scope" class="quarto-xref">Section&nbsp;3.1</a>: the file’s benefit chain is the FNS QC Minimodel’s computation on edited, internally consistent case records, so parity certifies agreement with the agency’s own computational canon, not independent adjudication. Reaching it surfaced defects on three sides: two in the encodings under test, errata in the federal technical documentation, and a residue attributable to state issuance systems.</p>
-<p>Second, as raw material for decomposing measured error. QC’s own cause coding, a finding-nature classification, and a replay of reconstructed pre-edit case facts through the verified engine give three nested estimates of how much of the error rate reflects computation failure versus wrong facts correctly processed (<a href="#sec-decompose" class="quarto-xref">Section&nbsp;4</a>).</p>
-<p>Third, as training and validation data for a case-level model of the error process (<a href="#sec-model" class="quarto-xref">Section&nbsp;5</a>) and the basis for a distributional simulator of measured rates under the cost-sharing formula (<a href="#sec-simulate" class="quarto-xref">Section&nbsp;6</a>), public at snap-qc-sim.vercel.app. The simulator’s central output is a measurement result: near tier boundaries, sampling noise alone gives several states nearly even odds of a different cost tier than their point rate implies.</p>
-<p>The analysis pipeline, simulator, and this manuscript live in one public repository; a fact catalog maps every quantitative claim to a committed artifact (<a href="#sec-availability" class="quarto-xref">Section&nbsp;10</a>). Because the claims depend on it, the project’s verification discipline applies to itself: the pipeline is deterministic (independent clean-room reruns reproduce every analysis-pipeline artifact byte-for-byte, most recently on 2026-08-07, and the headline simulation artifact was independently reproduced from the raw file to four decimals), and this revision incorporates four rounds of adversarial review — nineteen referee reports, archived unedited in the repository — whose findings included two direction-of-effect errors in an earlier draft of this manuscript and a data-definition defect in the deployed simulator. An author verification pass between the second and third rounds additionally caught validation claims that had gone stale when the model pipeline was refit after publication; the third round then found two further stale siblings from the same refit. All are corrected here, with the superseded figures preserved in the fact catalog.</p>
-</section>
-<section id="sec-qc" class="level2">
-<h2 class="anchored" data-anchor-id="sec-qc">The QC system and the money attached to it</h2>
-<p>QC reviews produce, for each sampled active case, the issued allotment (<code>RAWBEN</code>), a corrected allotment constructed from the reviewer’s findings (<code>BENFIX</code>), and — when they differ by more than a tolerance threshold ($56 in fiscal 2024, indexed from a $37 statutory base under 7 U.S.C. § 2025(c); the published sequence $48, $54, $56, $57, $58 for fiscal 2022–26 is uniquely reproduced by flooring the indexed value, which puts the fiscal 2027 threshold at an estimated $59 — $59.58 unrounded on the May 2026 Thrifty Food Plan cost of $1,018.20, with $60 requiring a June figure of at least $1,025.40) — a payment error; findings are coded for sub-threshold deviations as well. The official state rate combines over- and underpayment rates <span class="citation" data-cites="fns2024per">(<a href="#ref-fns2024per" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025a</a>)</span>: Colorado’s 9.97% is 7.91 over plus 2.06 under, and Maryland’s 13.64 includes the nation’s highest underpayment rate, 4.79 — so cost sharing partly bills states for underpaying their own residents.</p>
-<p>Four features of the system frame everything that follows.</p>
-<p><strong>The public file is not the full review universe.</strong> The edited public-use file excludes cases with ineligible findings — for which the official methodology scores the <em>entire</em> issued benefit as error dollars — cases whose overissuance equals or exceeds the issued benefit, incomplete reviews, and internal-consistency drops <span class="citation" data-cites="fns2024techdoc">(<a href="#ref-fns2024techdoc" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025b</a>)</span>. In fiscal 2024 this removed 1,037 ineligible-finding and 406 full-overissuance cases nationally. The file is therefore truncated at the top of the error-magnitude distribution. Every file-based estimate in this paper inherits that truncation: it is part of why Colorado’s file-derived rate (8.88%) sits below its official 9.97%. Restoring the excluded cases would add a large between-component variance term — their per-case error contributions are the full issued benefit — so the truncation biases simulated sampling variability downward; the i.i.d. approximation to states’ month-stratified sampling designs plausibly biases it upward, so the tier-noise results of <a href="#sec-simulate" class="quarto-xref">Section&nbsp;6</a> are likely, though not certainly, understated.</p>
-<p><strong>The measured rate is a property of the measurement system.</strong> Between roughly 2009 and 2016, several states used consultant-driven error-review practices that biased QC findings downward; the Department of Justice recovered more than $67 million in False Claims Act settlements from eight states over 2017–2021 <span class="citation" data-cites="doj2021snapqc">(<a href="#ref-doj2021snapqc" role="doc-biblioref">U.S. Department of Justice 2021</a>)</span>, FNS issued formal anti-bias guidance, and national rates for fiscal 2015–16 were not published <span class="citation" data-cites="crs2018errors">(<a href="#ref-crs2018errors" role="doc-biblioref">Congressional Research Service 2018</a>)</span>. This history is why the present analysis trains no earlier than fiscal 2017 — and why the fiscal 2025–27 rates now being measured, which carry orders of magnitude more money than the settlements-era rates did, cannot be treated as exogenous to the incentive they price.</p>
-<p><strong>Only active cases are priced.</strong> The QC system also reviews negative actions — denials, terminations, suspensions — feeding a separate case-and-procedure error rate that OBBBA does not price. A state can therefore lower its priced error rate by tightening the front door, shifting error into the unpriced metric. This paper analyzes the priced, active-case system; the asymmetry belongs on any list of the formula’s incentive properties.</p>
-<p><strong>Precision was contractually waived.</strong> A state electing the reduced sampling schedule agrees not to dispute later error-rate findings on the basis of the precision of the estimates <span class="citation" data-cites="fns2024techdoc">(<a href="#ref-fns2024techdoc" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025b</a>)</span>. All 53 jurisdictions had so elected as of fiscal 2024 — before precision determined tier placement worth tens of millions of dollars. Whether states revert to the standard schedule, regaining both precision and dispute rights, is a live sampling-plan question that <a href="#sec-simulate" class="quarto-xref">Section&nbsp;6</a> prices.</p>
-</section>
-<section id="sec-oracle" class="level2">
-<h2 class="anchored" data-anchor-id="sec-oracle">The QC file as a verification oracle</h2>
-<p>Rules as code — encoding statutes and regulations as executable, testable logic — has a recognized validation problem: against what do you test the encoding? Unit tests encode the encoder’s own reading of the law, and cross-model comparisons inherit both models’ assumptions; the literature has approached validation by compiling legal text alongside experts <span class="citation" data-cites="merigoux2021catala oecd2020cracking">(<a href="#ref-merigoux2021catala" role="doc-biblioref">Mérigoux, Chataing, et al. 2021</a>; <a href="#ref-oecd2020cracking" role="doc-biblioref">Mohun and Roberts 2020</a>)</span> and, closest to this paper, by testing an independent encoding of the French tax code against the tax authority’s own published test cases <span class="citation" data-cites="merigoux2021compiler">(<a href="#ref-merigoux2021compiler" role="doc-biblioref">Mérigoux, Monat, et al. 2021</a>)</span>. Administrative QC data extends that strategy to a benefits program at case level: tens of thousands of real cases per year, each carrying inputs and the agency’s own computed outputs.</p>
-<p>I tested encodings of federal SNAP law and seven states’ policy manuals (Arizona, California, Colorado, Georgia, Maryland, New York, Texas), maintained in the public rulespec-us repository and executed by a deterministic rules engine, against the fiscal 2024 QC file. The file contains 6,194 cases in the official universe for those states; 6,081 are in scope for replay — all 113 exclusions (1.8%) are SSI-CAP (Combined Application Project) standardized-benefit units, whose allotments follow a demonstration schedule outside the computed chain, logged per case by the harness. <a href="#tbl-verify" class="quarto-xref">Table&nbsp;1</a> reports the counts. For each in-scope case the harness asserts six values — gross income, standard deduction, excess shelter deduction, net income, maximum allotment, and benefit — against the file’s recorded values at zero dollar tolerance.</p>
-<p>All 6,081 in-scope cases match on all six asserted values — 36,486 exact cell comparisons, no mismatches.</p>
-<div id="tbl-verify" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-verify-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Fiscal 2024 verification coverage by state. All exclusions are SSI-CAP standardized-benefit units, logged per case by the harness.
-</figcaption>
-<div aria-describedby="tbl-verify-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 26%">
-<col style="width: 26%">
-<col style="width: 26%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>State</th>
-<th style="text-align: right;">In-scope cases replayed exactly</th>
-<th style="text-align: right;">Official-universe cases</th>
-<th style="text-align: right;">Excluded</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Arizona</td>
-<td style="text-align: right;">922</td>
-<td style="text-align: right;">925</td>
-<td style="text-align: right;">3</td>
-</tr>
-<tr class="even">
-<td>California</td>
-<td style="text-align: right;">883</td>
-<td style="text-align: right;">883</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td>Colorado</td>
-<td style="text-align: right;">856</td>
-<td style="text-align: right;">856</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td>Georgia</td>
-<td style="text-align: right;">945</td>
-<td style="text-align: right;">945</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td>Maryland</td>
-<td style="text-align: right;">722</td>
-<td style="text-align: right;">745</td>
-<td style="text-align: right;">23</td>
-</tr>
-<tr class="even">
-<td>New York</td>
-<td style="text-align: right;">847</td>
-<td style="text-align: right;">885</td>
-<td style="text-align: right;">38</td>
-</tr>
-<tr class="odd">
-<td>Texas</td>
-<td style="text-align: right;">906</td>
-<td style="text-align: right;">955</td>
-<td style="text-align: right;">49</td>
-</tr>
-<tr class="even">
-<td>Total</td>
-<td style="text-align: right;">6,081</td>
-<td style="text-align: right;">6,194</td>
-<td style="text-align: right;">113</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<section id="sec-oracle-scope" class="level3">
-<h3 class="anchored" data-anchor-id="sec-oracle-scope">What the parity target is</h3>
-<p>Exactness claims invite overreading, so the scope deserves a precise statement — more precise than an earlier draft of this paper gave it.</p>
-<p>The compared benefit chain is the one recorded in the edited public-use file, whose benefit variable (<code>FSBEN</code>) is computed by the FNS QC Minimodel — the agency’s own benefit-calculation software — and whose editing process reconciles case records until internal identities hold, adjusting deduction fields in a documented sequence until the calculated benefit matches the raw benefit within $5 <span class="citation" data-cites="fns2024techdoc">(<a href="#ref-fns2024techdoc" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025b</a>)</span>. The comparison also supplies several intermediates directly from the file rather than deriving them from raw facts: the QC-calculated medical and child-support deduction amounts, the recorded utility allowance, and the recorded categorical-eligibility status; eligibility screens receive passing defaults, since every filed case was enrolled.</p>
-<p>Parity therefore certifies the following: that the encoded computation chain — income aggregation, deduction sequencing, net-income arithmetic, allotment lookup, rounding — agrees exactly with the agency’s own computational canon, over the full diversity of 6,081 real case configurations, parameter values, and boundary conditions. It is an agreement between two implementations of the same rules, closer in kind to the cross-model comparisons this method extends than to independent adjudication of case outcomes; what distinguishes it from ordinary cross-model comparison is the counterparty (the agency’s own canon), the case realism, and the zero-tolerance bar. It does not certify independent derivation of every state eligibility and deduction pathway from raw facts. Extending the harness to feed raw facts — recorded medical expenses rather than the computed deduction, energy-assistance facts rather than the utility tier — is the necessary next step before the engine can compute counterfactual intermediates under alternative policy (<a href="#sec-roadmap" class="quarto-xref">Section&nbsp;7</a>). The reviewer-adjudicated quantities in the file (<code>RAWBEN</code>, <code>BENFIX</code>, error amounts and findings) are not the parity target; they are the subject of <a href="#sec-decompose" class="quarto-xref">Section&nbsp;4</a>.</p>
-<p>Holding tolerance at zero is what made the exercise informative. Early runs did not match, and each mismatch class was a finding about somebody’s rules: two defects in the encodings under test (a regulatory dollar literal superseded by statute, and a missing whole-dollar rounding step — both fixed in the public repository, with the oracle as the detector), errata in the technical documentation’s variable descriptions (reported upstream), and — once the encodings reproduced the file’s chain exactly — a residue in <em>issued</em> amounts attributable to the issuing side, which <a href="#sec-decompose" class="quarto-xref">Section&nbsp;4</a> takes up. The corrections were global rule fixes, not case-specific accommodations; still, the exactness result is post-correction on the same case set, a reuse the certification protocol mitigates but does not eliminate. A confirmatory run on the fiscal 2025 file at its release is the committed next test.</p>
-<p>The toolchain is certified for reproduction: a pinned engine build and encoding-repository commit reproduce the Colorado suite — 856 cases, 5,136 cells including the 856 benefit cells — under recorded hashes for every input, with an independent audit rebuilding the engine to a byte-identical binary and re-running the comparison to byte-identical evidence. Throughput is 230 cases per second end to end on a laptop, so verification at this scale is not compute-bound for this workload; details and timing calibration are in the repository’s certification report.</p>
-</section>
-</section>
-<section id="sec-decompose" class="level2">
-<h2 class="anchored" data-anchor-id="sec-decompose">Decomposing measured error: computation versus facts</h2>
-<p>If a verified engine issued every benefit, how much measured error would disappear? The QC file supports three nested answers for Colorado fiscal 2024, summarized in <a href="#tbl-decompose" class="quarto-xref">Table&nbsp;2</a>: 305 of 856 sampled cases carry recorded payment deviations (<code>RAWBEN</code> ≠ <code>BENFIX</code>) — but only 110 of the 305 are official errors above the $56 threshold; the other 195 are sub-threshold deviations the official rate excludes. Weighted, the 305 carry $112.6M per year in deviation dollars on $1.268B of issuance, of which $18.5M (16%) is sub-threshold: the deviation-based 8.88% file rate therefore combines an official-definition file rate of 7.42% with sub-threshold dollars, while the official 9.97% additionally incorporates the federal re-review adjustment and the excluded ineligible-case error of <a href="#sec-qc" class="quarto-xref">Section&nbsp;2</a>. All three layers exclude, by construction of the file, that ineligible-case error.</p>
-<div id="tbl-decompose" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Three nested decompositions of Colorado fiscal 2024 measured error. Layers 1–2 are shares of weighted error dollars; layer 3 is a share of filtered cases. Cause and nature coding reflect state reviewer judgment under handbook guidance <span class="citation" data-cites="fns310handbook">(<a href="#ref-fns310handbook" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2023</a>)</span> and carry cross-state coding variation; fiscal 2024 also brought minor revisions to the finding-code sets.
-</figcaption>
-<div aria-describedby="tbl-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Layer</th>
-<th>Definition</th>
-<th>Computation-side share</th>
-<th>Universe and units</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1. Cause codes</td>
-<td>QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change)</td>
-<td>7.3% strict; 10.5% adding policy-misapplied, budgeted-wrong, computer-user</td>
-<td>Colorado error dollars; nationally 3.9% strict ($320M/yr), 18.4% broad ($1.5B of $8.1B)</td>
-</tr>
-<tr class="even">
-<td>2. Finding natures</td>
-<td>Nature codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed), cause-disambiguated</td>
-<td>3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input</td>
-<td>Colorado error dollars</td>
-</tr>
-<tr class="odd">
-<td>3. Engine replay</td>
-<td>Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts</td>
-<td>Above-threshold official errors: 21.6% of cases unexplained (upper bound), 78.4% explained as correct arithmetic on wrong facts. Sub-threshold deviations: 8.6% unexplained, 91.4% explained. Blended: 13.1% / 86.9%</td>
-<td>283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>The strictest layer reconstructs each error case’s pre-edit original values using the public reconstruction solver of <span class="citation" data-cites="giannella_snapqc">Giannella and Molin (<a href="#ref-giannella_snapqc" role="doc-biblioref">2026</a>)</span> — which exploits the file’s disclosure-protection perturbation structure to recover original values — adapted to fiscal 2024, then replays those originals through the verified engine. Of 283 deviation cases surviving the solver’s consistency filters (22 of 305 are excluded), 246 reproduce the issued amount at the file’s own $5 editing tolerance: the agency’s arithmetic was correct, applied to wrong facts. The rate differs by threshold status, and the distinction matters for how the headline reads: among the 97 above-threshold official error cases, 76 are explained (78.4%, binomial standard error about 4 points; the 21.6% residual is the computation-side upper bound for <em>official</em> errors), while among the 186 sub-threshold deviations 170 are explained (91.4%). The solver and the engine partition the 283 cases identically — two implementations with distinct codebases and logic reaching the same classification, though both consume the same file, and 33 of the 246 explained cases have deviations of $5 or less, mechanically within the comparison tolerance. The residual class includes solver limitations as well as genuine multi-variable or computational discrepancies. The complete per-case replay output (283 rows), the layer-1 and layer-2 classification outputs, and the reconstruction scripts are committed with this paper.</p>
-<p>The three layers agree on the structure: most measured SNAP payment error among eligible cases is information failure, not calculation failure — consistent with the administrative-burden literature’s account of where compliance costs bind <span class="citation" data-cites="herd2018burden">(<a href="#ref-herd2018burden" role="doc-biblioref">Herd and Moynihan 2018</a>)</span>. Correct-computation guarantees address the smaller share directly — roughly 3 to 10% of error dollars by layers 1–2, and bounded above by the replay’s 21.6% case share among official errors — plus whatever share of information failures better tooling prevents indirectly through verification prompts and documentation-requirement computation at intake. Ineligibility errors, excluded from the file, are predominantly facts-driven, which would push the information-failure share higher still; that inference, unlike the in-file shares, is not directly computed here. The indirect channel is where policy design enters: rules determine what a caseworker must collect and verify, which is the mechanism the modeling section takes up.</p>
-</section>
-<section id="sec-model" class="level2">
-<h2 class="anchored" data-anchor-id="sec-model">Modeling the error process</h2>
-<p>Pricing decisions — what a documentation requirement costs in error, what an audit-volume change buys — require a model of the error-generating process at case level. I fit one on the QC files for 2017–2019 and 2022–2023 (pandemic years excluded), evaluating on fiscal 2024: 217,656 training and 44,800 evaluation cases in the official universe, all estimates weighted by the file’s case weights, with models estimated in scikit-learn <span class="citation" data-cites="pedregosa2011sklearn">(<a href="#ref-pedregosa2011sklearn" role="doc-biblioref">Pedregosa et al. 2011</a>)</span>. Fiscal 2024 informed pipeline development across the audit-and-correction rounds and is not a pristine holdout; a frozen-pipeline confirmation on fiscal 2025 is committed as the next test.</p>
-<p>Targets come from the file’s adjudication fields. The official error label is reviewer status (over- or underpayment) with an error amount above the year’s threshold. The signed deviation is <span class="math inline">\(D = \texttt{RAWBEN} - \texttt{BENFIX}\)</span>, which reconciles with the recorded error amount for 99.997% of weighted fiscal 2024 cases; the recomputed formula benefit <code>FSBEN</code> — an earlier, incorrect target choice that an adversarial audit caught — matches only 83.64%, because it conflates legitimate adjustments such as proration with error.</p>
-<p><strong>Discrimination.</strong> A gradient-boosted classifier on household covariates plus a formula-benefit anchor reaches a weighted area under the receiver operating characteristic curve (ROC AUC) of 0.761 on fiscal 2024; adding policy-burden intermediates extracted from the file (medical-expense claiming and documentation-requirement proxies, self-employment records, utility-claim structure, deduction counts) moves it to 0.767 (+0.006 AUC, +0.003 PR-AUC). Burden intermediates add little discrimination on this label. Operationally the model is nonetheless useful: at a 5% weighted review budget it reaches 47.8% precision against a 13.4% weighted base rate — case targeting at three and a half times chance, though QC-sampled cases are not the operational targeting population and the estimate carries no design-based standard error.</p>
-<p><strong>The deviation distribution.</strong> For simulation I estimate a per-case distribution of the signed deviation with a hurdle structure: a deviation probability <span class="math inline">\(P(|D| &gt; 0.5)\)</span> and an above-threshold probability, each estimated by gradient boosting with nested out-of-fold isotonic calibration; a sign model (calibrated AUC 0.700 in the shipped frozen configuration); nine conditional quantiles of <span class="math inline">\(\log|D|\)</span> fitted by quantile-loss gradient boosting <span class="citation" data-cites="koenker1978quantile">(<a href="#ref-koenker1978quantile" role="doc-biblioref">Koenker and Bassett 1978</a>)</span>, made monotone per case by rearrangement <span class="citation" data-cites="chernozhukov2010rearrange">(<a href="#ref-chernozhukov2010rearrange" role="doc-biblioref">Chernozhukov et al. 2010</a>)</span>; and an exponential tail in logs beyond the 99th percentile. Conditional magnitudes retransform with an out-of-fold Duan smear of 1.173 <span class="citation" data-cites="duan1983smearing">(<a href="#ref-duan1983smearing" role="doc-biblioref">Duan 1983</a>)</span>; predicted mean conditional magnitude is $186 against $189 observed. Model figures throughout this section quote the current committed artifacts, regenerated when the seventeen additive features described at the end of this section entered every stage; the pre-feature values (sign AUC 0.686, tail log scale 0.271, the earlier calibration table) are preserved in <code>analysis/FEATURES_REPORT.md</code> with the full before/after roll.</p>
-<p><strong>Validation, including failures.</strong> <a href="#tbl-validate" class="quarto-xref">Table&nbsp;3</a> summarizes. An adversarial statistical review of the first deployed model found the tail fitted at one depth but attached at another (overstating extreme-tail mass) and cross-state level gaps propagating into simulated spreads. The fix round repaired both — refitting the tail at its attachment depth (log scale 0.252 in the current artifact, from 0.467 pre-fix), capping each case’s magnitude at a physical maximum, and freezing fiscal-2023-fit state dollar factors — and also moved the coverage evaluation to the configuration that actually ships: the frozen model trained through fiscal 2022 (62,984 training deviators, against the through-2023 primary model’s 79,919), with fiscal 2023 held out for factor fitting. That evaluation-frame change, not the three fixes — none of which enters the coverage computation, which compares observed log-magnitudes with the raw conditional quantiles — is what moved the coverage figures. An earlier version of this section reported the through-2023 primary model’s coverage: within 3 points of nominal at seven of nine levels, gaps −0.3 to −3.5 points; the fact catalog’s E3 row records the supersession. The shipped frozen configuration does not attain it: within 3 points at only two of nine levels, all nine gaps negative (−0.38 to −7.30 points, worst at the 75th–90th percentiles). This is one-sided <em>under</em>-coverage — predicted quantiles sit too low, understating mid-to-upper magnitudes, coherent with the $186-versus-$189 comparison. A benchmark against a quantile regression forest on the identical protocol, with the decision rule fixed in the protocol code before results existed, shows the failure is not specific to the gradient-boosted quantile stack: run against the pre-feature stack (the expanded feature set has not been re-benchmarked), the forest improves mean absolute coverage (4.10 against the pre-feature 4.38 points) but shifts under-coverage from the tail to the central levels with a worse maximum gap, degrades probability-integral-transform calibration, and loses the factor-adjusted state dollar-rate comparison (0.951 against 0.928 points — a different object from <a href="#tbl-validate" class="quarto-xref">Table&nbsp;3</a>’s official-error-rate MAE), so the gradient-boosted stack is retained; causes the two estimators share — the feature set, the tree-ensemble family, the temporal gap from the frozen training window to fiscal 2024 — remain candidates. The deployed simulator serves this model in exactly one place — a standard-medical-deduction scenario whose flipped per-case parameters, paired-bootstrap intervals, and level gate ship in an export pinned to the exact model file by hash, with the seven jurisdictions outside the [0.7, 1.4] factor-adjusted level-ratio range disabled — and no simulation result in this paper uses model draws.</p>
-<div id="tbl-validate" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-validate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Fiscal 2024 state-level calibration of predicted official-error rates, matched frozen-model comparisons, from the current committed artifact (post-feature-round; the pre-feature table — 1.81/1.65pp unfactored, 0.885/0.785pp factored — is preserved in <code>analysis/FEATURES_REPORT.md</code>). Factors are fit on out-of-sample fiscal 2023 predictions and frozen before touching fiscal 2024.
-</figcaption>
-<div aria-describedby="tbl-validate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Quantity</th>
-<th style="text-align: right;">Unfactored (frozen model)</th>
-<th style="text-align: right;">With frozen FY2023 factors</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>State MAE, equal-weighted</td>
-<td style="text-align: right;">1.73pp</td>
-<td style="text-align: right;">0.875pp</td>
-</tr>
-<tr class="even">
-<td>State MAE, issuance-weighted</td>
-<td style="text-align: right;">1.57pp</td>
-<td style="text-align: right;">0.808pp</td>
-</tr>
-<tr class="odd">
-<td>Cross-state correlation (equal-weighted)</td>
-<td style="text-align: right;">0.56</td>
-<td style="text-align: right;">0.91</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>State-level calibration uses a strictly temporal protocol: models fit through 2022 predict 2023 out of sample; state observed-to-predicted ratios, shrunk toward one by an empirical-Bayes precision rule <span class="math inline">\(\tilde{f}_s = 1 + (f_s - 1)\,\tau^2/(\tau^2 + v_s)\)</span>, with <span class="math inline">\(v_s\)</span> the delta-method ratio variance on Kish effective sample size, are frozen and applied to fiscal 2024. Most cross-state alignment comes from the factors, whose interpretation — administration, omitted policy, model error — the data do not identify.</p>
-<p><strong>Policy contrasts are descriptive.</strong> Under an event definition requiring a medical finding with payment impact, elderly/disabled claimants in states <em>without</em> a standard medical deduction — where itemized documentation is required — show a 2.60% medical-event rate, against 2.97% in a mixed comparison cell (standard-deduction-state claimants pooled with below-floor claimants everywhere); the cross section runs <em>against</em> a simple burden-increases-error reading, and adoption is endogenous. Calendar-aligned adoption contrasts against never-adopting states are small and mixed — Arizona +2.07 points claimant-conditioned but +0.64 on the stable all-elderly/disabled denominator; Kentucky −0.42 claimant-conditioned; California +0.11 claimant-conditioned but −1.40 on the stable denominator; Louisiana and Michigan within 0.2 points of zero, though those two adopters have zero treated-period events in the windows, so their contrasts are control-trend arithmetic only — with single-digit event counts throughout. Two cautions transfer beyond this paper: an earlier pipeline’s dramatic Kentucky estimate (−5.3 points) dissolved under a corrected event definition and calendar windows; and standard-medical-deduction adoption is typically bundled with utility-allowance offsets for cost neutrality, so these are contrasts of policy bundles. Causal identification awaits engine-computed counterfactuals (<a href="#sec-roadmap" class="quarto-xref">Section&nbsp;7</a>).</p>
-<p>A subsequent feature round, prompted by practitioner review, added seventeen case-level features in three families: certification timing (months since certification and period length from the file’s <code>LASTCERT</code> and <code>CERTMTH</code>, a final-two-months indicator, and its interaction with elderly/disabled composition), state broad-based categorical eligibility from the FNS State Options Reports (44 adopting agencies in fiscal 2024, mapped to each training year’s report edition; the file’s own <code>CAT_ELIG</code> stays excluded because its codes conflate BBCE with traditional categorical eligibility), and Medicare Part B premium bands — reconstructing gross medical expense as the file’s excess amount plus the $35 deduction floor and comparing it with the sampled month’s published premium. The additive gains are modest and reported as such: classifier ROC AUC 0.7666 to 0.7679, hurdle stage-1 AUC 0.8356 to 0.8397, equal-state calibration MAE 1.83 to 1.71 percentage points, while distributional coverage worsens slightly (mean absolute gap 4.38 to 4.64 points) and is retained. The band feature’s descriptive validation is exact where it should be: all 36 elderly Colorado cases censored at the state’s $165 standard medical deduction map, after the floor reconstruction, to $200 gross — inside the just-above-premium band a practitioner predicted would matter — where a naive comparison on the excess scale misclassifies six of them.</p>
-</section>
-<section id="sec-simulate" class="level2">
-<h2 class="anchored" data-anchor-id="sec-simulate">Simulating measured rates under cost sharing</h2>
-<p>The public simulator resamples each state’s own sampled cases with replacement at the realized or a hypothetical sample size and recomputes the weighted error rate <span class="citation" data-cites="efron1979bootstrap">(<a href="#ref-efron1979bootstrap" role="doc-biblioref">Efron 1979</a>)</span>, centered on the official rate. The error definition is the official one — adjudicated status with the recorded amount above the threshold; an adversarial review found the deployed version initially gated on the banned benefit-difference definition, now corrected. Three findings, all on fiscal 2024 data, all inheriting the file’s truncation of ineligible-case error (which understates the variability shown) and an i.i.d. approximation to each state’s actual sampling design; the official rate’s federal re-review adjustment enters only as a fixed level. All figures quote the committed simulation artifact.</p>
-<p><strong>Tier assignment approaches a coin flip for boundary states</strong> (<a href="#fig-co" class="quarto-xref">Figure&nbsp;1</a>, <a href="#tbl-boundary" class="quarto-xref">Table&nbsp;4</a>). With no policy change at all, the probability that a fresh QC-style sample lands in a different cost-share tier than the official point rate implies is 46–50% for the five states nearest boundaries.</p>
-<div id="fig-co" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-co-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="figures/co_measured_rate.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Colorado’s simulated measured-rate distribution (100,000 resampled QC-style measurements, official error definition, centered on the official 9.97% rate) against the cost-share tier bands. The state’s official rate sits 0.03 points below the 15%-share boundary; 52% of simulated measurements fall below it and 48% above. Generated by the committed paper/generate_figures.py (seed 11)."><img src="figures/co_measured_rate.svg" class="img-fluid figure-img"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-co-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Colorado’s simulated measured-rate distribution (100,000 resampled QC-style measurements, official error definition, centered on the official 9.97% rate) against the cost-share tier bands. The state’s official rate sits 0.03 points below the 15%-share boundary; 52% of simulated measurements fall below it and 48% above. Generated by the committed <code>paper/generate_figures.py</code> (seed 11).
-</figcaption>
-</figure>
-</div>
-<p>The formula maps a point estimate to a tier with no adjustment for sampling uncertainty; near a boundary, tier assignment turns as much on the sampling draw as on the underlying rate. This is the accountability-measurement problem documented for school accountability ratings <span class="citation" data-cites="kane2002volatility">(<a href="#ref-kane2002volatility" role="doc-biblioref">Kane and Staiger 2002</a>)</span>, now carrying direct fiscal prices.</p>
-<div id="tbl-boundary" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4: Boundary states under the fiscal 2028 tier schedule applied to fiscal 2024 issuance — an illustration of stakes, not a forecast. Colorado’s step from the 10% to the 15% tier is $63.4M per year.
-</figcaption>
-<div aria-describedby="tbl-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 21%">
-<col style="width: 21%">
-<col style="width: 21%">
-<col style="width: 21%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>State</th>
-<th style="text-align: right;">Official rate</th>
-<th style="text-align: right;">P(different tier)</th>
-<th style="text-align: right;">Expected annual cost share</th>
-<th style="text-align: right;">SD of the bill</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>North Dakota</td>
-<td style="text-align: right;">7.91%</td>
-<td style="text-align: right;">50%</td>
-<td style="text-align: right;">$7.9M</td>
-<td style="text-align: right;">$3.5M</td>
-</tr>
-<tr class="even">
-<td>Washington</td>
-<td style="text-align: right;">6.06%</td>
-<td style="text-align: right;">48%</td>
-<td style="text-align: right;">$50.2M</td>
-<td style="text-align: right;">$48.5M</td>
-</tr>
-<tr class="odd">
-<td>Colorado</td>
-<td style="text-align: right;">9.97%</td>
-<td style="text-align: right;">49%</td>
-<td style="text-align: right;">$156.4M</td>
-<td style="text-align: right;">$32.8M</td>
-</tr>
-<tr class="even">
-<td>Kansas</td>
-<td style="text-align: right;">9.98%</td>
-<td style="text-align: right;">47%</td>
-<td style="text-align: right;">$46.9M</td>
-<td style="text-align: right;">$9.5M</td>
-</tr>
-<tr class="odd">
-<td>Nevada</td>
-<td style="text-align: right;">5.94%</td>
-<td style="text-align: right;">46%</td>
-<td style="text-align: right;">$23.7M</td>
-<td style="text-align: right;">$26.0M</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p><strong>Audit volume is a two-sided instrument.</strong> Increasing the QC sample shrinks sampling variance around the state’s underlying rate, holding the error process fixed (<a href="#sec-limitations" class="quarto-xref">Section&nbsp;8</a>; the corrective-feedback channel from reviewing more cases is not modeled, and these figures are gross of review costs — which rose for states when OBBBA cut the federal administrative match from 50 to 25% beginning fiscal 2027). In expectation, 500 additional reviews save money for states just below a boundary — Missouri +$3.9M, Tennessee +$3.7M, Indiana +$3.3M annually — and cost money for states just above one, for whom the chance of a below-boundary draw had positive expected value: California −$30.3M, Pennsylvania −$13.1M, Texas −$13.1M. Added volume almost always reduces the standard deviation of the annual bill (California by $44M), so risk-averse states may rationally buy audits against their expectation. The formula thus embeds an asymmetry: expected cost share falls with additional sample volume for states just below a boundary and rises for states just above one — a property worth reading alongside the no-dispute election of <a href="#sec-qc" class="quarto-xref">Section&nbsp;2</a>.</p>
-<p><strong>Category-suppression bounds are large.</strong> Removing 50% (100%) of the observed error dollars attached to the finding elements that four policy options standardize — the standard medical deduction, standard self-employment deduction, heat-and-eat utility standardization, and broad-based categorical eligibility resource exemptions — corresponds to roughly $609M ($1,310M) per year nationally in expected cost share. These are accounting bounds, not causal estimates: they hold the error process fixed and answer “what if these categories’ observed error dollars shrank,” an upper-bound identity rather than a behavioral prediction — the descriptive adoption contrasts of <a href="#sec-model" class="quarto-xref">Section&nbsp;5</a> are the reason for the caution. They speak only to measured error and cost share; the options themselves change benefit amounts, eligibility, and program cost, none of which is modeled here. Two further scope notes: OBBBA itself narrowed the heat-and-eat channel, restricting the LIHEAP-triggered utility allowance to households with an elderly or disabled member (§ 10103), so that lever’s fiscal 2024 error mix overstates its remaining reach; and the expected cost-share effect of a marginal error reduction is near zero for states deep within a tier (New York at 14.09%, Alaska at 24.66%) and largest near boundaries.</p>
-<section id="sec-fy2025" class="level3">
-<h3 class="anchored" data-anchor-id="sec-fy2025">The realized fiscal 2025 rates</h3>
-<p>The simulation’s claim — that tier assignment at current sample sizes is substantially a draw from sampling noise — is built from fiscal 2024 microdata alone. On June 24, 2026, the renamed agency published the fiscal 2025 rates <span class="citation" data-cites="fna2025per">(<a href="#ref-fna2025per" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Administration 2026</a>)</span>; this repository postdates that publication, so what follows is a check of input independence, not a registered forecast — the fiscal 2025 rates enter the analysis only as the realized outcomes being classified, and the noise scale that classifies them uses no fiscal 2025 information. Eighteen of 53 jurisdictions changed cost-sharing tiers. Whether any single change reflects program performance is exactly the question sampling error poses: under the committed simulator’s FY2024 sampling standard deviations, with both years carrying independent noise of equal scale, a year-over-year move is distinguishable from noise at 95% confidence only beyond 2.77 of a single year’s standard deviations. Ten jurisdictions cleared that bar (Delaware, Florida, Hawaii, Illinois, Kentucky, Minnesota, North Carolina, New Jersey, Ohio, and West Virginia) — but only seven of those ten changed tiers, so 11 of the 18 tier changes sit inside the noise band; the median jurisdiction moved 1.38 standard deviations. Movement figures quote the committed artifact (<code>analysis/fy2025_movement.json</code>, deterministic at seed 11); the tier-step and election dollars below come from the deployed simulator’s committed inputs (<code>app/public/data.json</code>) and its election engine.</p>
-<p>The two tails of that distribution make the point more sharply than the counts. Colorado moved from 9.97% to 10.09% — 0.12 percentage points, 0.13 standard deviations, indistinguishable from re-measuring the same program — and that move crossed the 10% boundary into the 15% tier, repricing its FY2028 exposure by roughly $63M a year. Real movement exists alongside it: Hawaii went from 6.68% to 10.92% (11.2 standard deviations, two tiers up), New Jersey from 14.33% to 6.86% (−11.2, from the top tier to the 5% tier), Kentucky from 9.11% to 4.70% (−7.2, into the 0% tier). The formula cannot tell these apart; it prices Colorado’s noise and New Jersey’s real movement — whatever mix of program change and review practice produced it — with the same schedule. The national rate fell from 10.93% to 10.62%.</p>
-<p>The realized year also calibrates how much true year-over-year process movement the sampling-only simulator omits. Across states, the variance of the one-year change decomposes as twice the mean squared sampling standard deviation plus a process-drift variance <span class="math inline">\(\tau^2\)</span>; the method-of-moments estimate is <span class="math inline">\(\tau = 1.62\)</span> percentage points (95% CI 0.81–2.25 from a paired bootstrap over jurisdiction movement–SD rows), and a median/MAD version robust to the large realized moves gives <span class="math inline">\(\tau = 1.07\)</span> (CI 0–1.74). Process drift on this transition is likely real — the classical interval excludes zero; the robust one does not — and comparable in scale to sampling noise for a typical state, though a single transition cannot separate program drift from any change in QC design or practice between the two years. The simulator’s draws remain sampling-only — a disclosed lower bound on total year-over-year uncertainty — with the drift estimate carried as a candidate calibration rather than silently added.</p>
-<p>Churn reaches the delay clause too. Had fiscal 2024 rates carried the delay test, ten jurisdictions would have met it; at fiscal 2025 — the first year the test binds — seven do. Florida, Massachusetts, Maryland, New Jersey, and New York left that hypothetical roster and Delaware and Illinois joined it: the assignment that zeroes a state’s FY2028 bill churns under the same measurement noise that moves tiers.</p>
-<p>The fiscal 2025 publication also started the clock the statute set: the FY2028 share keys to each state’s fiscal 2025 or fiscal 2026 rate, at its election, and fiscal 2026 closes September 30, 2026. The deployed simulator now prices that election — for Colorado, a 52.5% probability that a QC-sized fiscal 2026 measurement lands below the locked 10.09% rate, worth about $31M a year in expectation from the election alone; the dollars come from the near-even odds the measurement lands below the 10% tier <em>boundary</em>, repricing the $63.4M step — and models the delay clause as it binds: delayed years enter expected bills as zero, and a fiscal 2026 draw that crosses 13.33% pushes the start to FY2030, zeroing FY2029 as well.</p>
-</section>
-</section>
-<section id="sec-roadmap" class="level2">
-<h2 class="anchored" data-anchor-id="sec-roadmap">Toward engine-computed counterfactuals</h2>
-<p>The counterfactual gap has begun to close. For one state and one option — Colorado and the standard medical deduction — the pieces now run end to end, and the run itself produced findings. The first is structural: the certified parity chain never consumes Colorado’s standard-medical-deduction rule, because QC editing bakes the deduction into the stored expense fields and the federal computation path reproduces every case exactly without it — a sharper instance of the Minimodel-canon scope point of <a href="#sec-oracle-scope" class="quarto-xref">Section&nbsp;3.1</a>. (A separate raw-facts leg, reconstructing inputs rather than supplying the file’s intermediates, agrees on 845 of 856 cases, its eleven divergences diagnosed to missing public TANF facts and one utility-allowance tier conflict; only the supplied-intermediates certified chain is exact.) A simulation-only composition adapter that binds the state rule into the federal path, validated by exact baseline invariance on all 856 cases, reprices the option’s removal only as bounds, because the public file censors 46 medical-expense records at exactly $165: between −$1.46 and $0 per case-month. The second is a sign disagreement: feeding the engine-recomputed intermediates through the error model’s direct crossing classifier, applied as a level shift, implies a cost-share change of −$1.55M to −$2.20M per year for removing the deduction. That figure is a range across the three censoring variants, not a confidence interval; the paired-bootstrap intervals are wider — the point variant’s is [−$4.1M, +$0.3M] — and span zero in two of the three. The accounting-reverse bound for the same flip is +$7.1M, and the robust form of the disagreement survives the intervals: all three exclude it, with a maximum upper bound of +$0.6M. Neither sign is validated — the artifact itself warns that the fitted models implying lower error without the deduction is not evidence that documentation requirements reduce errors. The argument for retiring the accounting levers from the public simulator is accordingly not that the model is right but that the two mechanisms answer different questions — one is an upper-bound identity scaling observed error dollars by finding category, the other a model-implied association of re-adjudication risk with the flipped feature — and their divergence on a real case shows the substitution was never innocuous. The simulator now serves only the model scenario, level-gated and labeled as an association. What remains open is breadth: engine legs for the remaining options (self-employment is not identified from public data, which records net rather than gross income) and the other verified states, feeding the harness raw facts instead of file-derived intermediates (<a href="#sec-oracle-scope" class="quarto-xref">Section&nbsp;3.1</a>), and the cost-sharing formula itself as an encodable target: the sampling formulas of 7 C.F.R. § 275.11(b) and the tier schedule of 7 U.S.C. § 2013(a)(2), with its election and delay clauses, can be encoded and tested at their published boundary values, replacing hand-transcribed constants in simulators like this one.</p>
-</section>
-<section id="sec-limitations" class="level2">
-<h2 class="anchored" data-anchor-id="sec-limitations">Limitations</h2>
-<p>The parity result certifies agreement with the edited file’s Minimodel-computed chain from supplied intermediates — not independent derivation from raw facts, and not the reviewer-adjudicated outcome fields (<a href="#sec-oracle-scope" class="quarto-xref">Section&nbsp;3.1</a>); it is also post-correction on the same case set, pending a fiscal 2025 confirmatory run. The public file excludes ineligible-case and full-overissuance error, truncating the error distribution every file-based estimate inherits. The replay decomposition depends on a reconstruction solver whose filters exclude 22 of 305 error cases, and its residual class is an upper bound in case shares, not dollar shares. The error models predict an adjudicated, thresholded label — a property of the measurement system, with a documented manipulation history (<a href="#sec-qc" class="quarto-xref">Section&nbsp;2</a>). Cross-state model transport is imperfect: the model’s raw level underpredicts high-error states, all nine coverage gaps remain one-sided negative after the tail and level-factor fixes, and the deployed simulator accordingly serves the model only for its level-gated standard-medical-deduction scenario, with seven jurisdictions disabled outright; every simulation result in this paper uses the observed-resample engine. That mode resamples i.i.d. from a probability sample whose actual design varies by state, treats the official rate’s federal re-review adjustment as a fixed level with no variance contribution, and holds the error process fixed — no behavioral response of agencies or households to cost sharing, no corrective-feedback channel from audit volume, both live questions the fiscal 2025–27 files will begin to answer under the new incentives. Adoption contrasts are descriptive contrasts of policy bundles; nothing here identifies causal effects of burden policies on error.</p>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>A measurement system designed for oversight now sets prices. That makes the QC files three things at once: a case-level verification oracle against the agency’s own computational canon — where the bar can be exact, and holding it exact is what made the residuals informative; the dataset showing that most measured error among eligible cases is information failure rather than calculation failure; and a sampling frame whose noise the new formula converts into near-even-odds tier assignment for boundary states. The modeling bar cannot be exact, and this paper went through four rounds of adversarial review, archived unedited in the repository, which found — among other things — two direction-of-effect errors, one wrong external figure, and one misdescribed epistemic status (a realized-year check first framed as a committed prediction) in earlier drafts. The system this points toward is one in which the rules that compute benefits, the requirements they impose on households, and the errors they produce are executable, testable, and priced from the same verified source.</p>
-</section>
-<section id="sec-availability" class="level2">
-<h2 class="anchored" data-anchor-id="sec-availability">Data and code availability</h2>
-<p>The repository <code>PolicyEngine/snap-qc-sim</code> contains the analysis pipeline (deterministic; independent clean-clone reruns reproduce all five pipeline artifacts byte-for-byte on the pinned interpreter version, recorded in <code>.python-version</code> and each artifact’s provenance block), the simulator, frozen simulation, decomposition, and certification artifacts under <code>paper/snapshot/</code> (including the complete per-case replay output, the layer-1 and layer-2 classification outputs, and the reconstruction scripts), the seventeen adversarial review reports and round-1 editorial synthesis under <code>paper/reviews/</code>, the fact catalog (<code>paper/FACTS.md</code>), and this manuscript. The verification harness and per-case suite reports are public in <code>TheAxiomFoundation/axiom-oracles</code>; the encodings in <code>TheAxiomFoundation/rulespec-us</code>; the engine in <code>TheAxiomFoundation/axiom-rules-engine</code>. QC public-use files are available from USDA FNS <span class="citation" data-cites="fns2024techdoc">(<a href="#ref-fns2024techdoc" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2025b</a>)</span>, and the training files are tracked in the public <span class="citation" data-cites="giannella_snapqc">Giannella and Molin (<a href="#ref-giannella_snapqc" role="doc-biblioref">2026</a>)</span> repository. Reproduction commands are in the repository README.</p>
-</section>
-<section id="disclosure" class="level2">
-<h2 class="anchored" data-anchor-id="disclosure">Disclosure</h2>
-<p>The author leads PolicyEngine, which builds the simulator described here, and contributed to the axiom-oracles verification harness and the rulespec-us encodings whose parity this paper reports. The adversarial review protocol — seventeen independent reviews across three rounds, archived unedited in the repository — is the mitigation offered for that entanglement.</p>
-</section>
-<section id="acknowledgments" class="level2">
-<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
-<p>I thank Eric Giannella and Ben Molin for the open reconstruction and registry code this work builds on. All errors are my own.</p>
-
-</section>
-
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-chernozhukov2010rearrange" class="csl-entry" role="listitem">
-Chernozhukov, Victor, Iván Fernández-Val, and Alfred Galichon. 2010. <span>“Quantile and Probability Curves Without Crossing.”</span> <em>Econometrica</em> 78 (3): 1093–125. <a href="https://doi.org/10.3982/ECTA7880">https://doi.org/10.3982/ECTA7880</a>.
-</div>
-<div id="ref-crs2018errors" class="csl-entry" role="listitem">
-Congressional Research Service. 2018. <em>Errors and Fraud in the Supplemental Nutrition Assistance Program (SNAP)</em>. No. R45147. <a href="https://www.congress.gov/crs_external_products/R/PDF/R45147/R45147.4.pdf">https://www.congress.gov/crs_external_products/R/PDF/R45147/R45147.4.pdf</a>.
-</div>
-<div id="ref-duan1983smearing" class="csl-entry" role="listitem">
-Duan, Naihua. 1983. <span>“Smearing Estimate: A Nonparametric Retransformation Method.”</span> <em>Journal of the American Statistical Association</em> 78 (383): 605–10. <a href="https://doi.org/10.1080/01621459.1983.10478017">https://doi.org/10.1080/01621459.1983.10478017</a>.
-</div>
-<div id="ref-efron1979bootstrap" class="csl-entry" role="listitem">
-Efron, Bradley. 1979. <span>“Bootstrap Methods: Another Look at the Jackknife.”</span> <em>The Annals of Statistics</em> 7 (1): 1–26. <a href="https://doi.org/10.1214/aos/1176344552">https://doi.org/10.1214/aos/1176344552</a>.
-</div>
-<div id="ref-giannella_snapqc" class="csl-entry" role="listitem">
-Giannella, Eric, and Ben Molin. 2026. <em>Snap_qc: Reconstruction and Analysis Code for the SNAP Quality Control Public-Use Files</em>. <a href="https://github.com/giannella/snap_qc">https://github.com/giannella/snap_qc</a>.
-</div>
-<div id="ref-herd2018burden" class="csl-entry" role="listitem">
-Herd, Pamela, and Donald P. Moynihan. 2018. <em>Administrative Burden: Policymaking by Other Means</em>. Russell Sage Foundation.
-</div>
-<div id="ref-kane2002volatility" class="csl-entry" role="listitem">
-Kane, Thomas J., and Douglas O. Staiger. 2002. <span>“The Promise and Pitfalls of Using Imprecise School Accountability Measures.”</span> <em>Journal of Economic Perspectives</em> 16 (4): 91–114. <a href="https://doi.org/10.1257/089533002320950993">https://doi.org/10.1257/089533002320950993</a>.
-</div>
-<div id="ref-koenker1978quantile" class="csl-entry" role="listitem">
-Koenker, Roger, and Gilbert Bassett. 1978. <span>“Regression Quantiles.”</span> <em>Econometrica</em> 46 (1): 33–50. <a href="https://doi.org/10.2307/1913643">https://doi.org/10.2307/1913643</a>.
-</div>
-<div id="ref-merigoux2021catala" class="csl-entry" role="listitem">
-Mérigoux, Denis, Nicolas Chataing, and Jonathan Protzenko. 2021. <span>“Catala: A Programming Language for the Law.”</span> <em>Proceedings of the ACM on Programming Languages</em> 5 (ICFP): 1–29. <a href="https://doi.org/10.1145/3473582">https://doi.org/10.1145/3473582</a>.
-</div>
-<div id="ref-merigoux2021compiler" class="csl-entry" role="listitem">
-Mérigoux, Denis, Raphaël Monat, and Jonathan Protzenko. 2021. <span>“A Modern Compiler for the <span>French</span> Tax Code.”</span> <em>Proceedings of the 30th ACM SIGPLAN International Conference on Compiler Construction (CC ’21)</em>, 71–82. <a href="https://doi.org/10.1145/3446804.3446850">https://doi.org/10.1145/3446804.3446850</a>.
-</div>
-<div id="ref-oecd2020cracking" class="csl-entry" role="listitem">
-Mohun, James, and Alex Roberts. 2020. <em>Cracking the Code: Rulemaking for Humans and Machines</em>. OECD Working Papers on Public Governance No. 42. OECD Observatory of Public Sector Innovation. <a href="https://doi.org/10.1787/3afe6ba5-en">https://doi.org/10.1787/3afe6ba5-en</a>.
-</div>
-<div id="ref-pedregosa2011sklearn" class="csl-entry" role="listitem">
-Pedregosa, Fabian, Gaël Varoquaux, Alexandre Gramfort, et al. 2011. <span>“Scikit-Learn: Machine Learning in <span>Python</span>.”</span> <em>Journal of Machine Learning Research</em> 12: 2825–30. <a href="https://jmlr.org/papers/v12/pedregosa11a.html">https://jmlr.org/papers/v12/pedregosa11a.html</a>.
-</div>
-<div id="ref-fna2025per" class="csl-entry" role="listitem">
-U.S. Department of Agriculture, Food and Nutrition Administration. 2026. <em>Supplemental Nutrition Assistance Program Payment Error Rates, Fiscal Year 2025</em>. <a href="https://www.fns.usda.gov/snap/qc/per">https://www.fns.usda.gov/snap/qc/per</a>.
-</div>
-<div id="ref-fns310handbook" class="csl-entry" role="listitem">
-U.S. Department of Agriculture, Food and Nutrition Service. 2023. <em>FNS Handbook 310: SNAP Quality Control Review Handbook</em>. <a href="https://www.fns.usda.gov/snap/fns-handbook-310">https://www.fns.usda.gov/snap/fns-handbook-310</a>.
-</div>
-<div id="ref-fns2024per" class="csl-entry" role="listitem">
-U.S. Department of Agriculture, Food and Nutrition Service. 2025a. <em>Supplemental Nutrition Assistance Program Payment Error Rates, Fiscal Year 2024</em>. <a href="https://www.fns.usda.gov/snap/qc/per">https://www.fns.usda.gov/snap/qc/per</a>.
-</div>
-<div id="ref-fns2024techdoc" class="csl-entry" role="listitem">
-U.S. Department of Agriculture, Food and Nutrition Service. 2025b. <em>Technical Documentation for the Fiscal Year 2024 Supplemental Nutrition Assistance Program Quality Control Database and the QC Minimodel</em>. <a href="https://snapqcdata.net/datafiles">https://snapqcdata.net/datafiles</a>.
-</div>
-<div id="ref-doj2021snapqc" class="csl-entry" role="listitem">
-U.S. Department of Justice. 2021. <em>False Claims Act Settlements Concerning Bias in SNAP Quality Control Processes (Virginia, Wisconsin, Alaska, Texas, Louisiana, Mississippi, Florida, Tennessee), Cumulative Recoveries Exceeding $67 Million</em>. <a href="https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability">https://www.justice.gov/archives/opa/pr/tennessee-department-human-services-agrees-pay-68-million-resolve-false-claims-act-liability</a>.
-</div>
-</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>7 U.S.C. § 2013(a)(2)(B)(iii). The test applies mechanically to each year’s rate and is independent of the state’s election. The fiscal 2025 rates published in June 2026 settle the first leg: seven jurisdictions — Alaska (23.15%), the District of Columbia, Delaware, Georgia, Illinois, New Mexico, and Oregon — crossed on fiscal 2025 and owe nothing in FY2028, with no bill before FY2029 — keyed to the fiscal 2026 rate unless that rate also crosses, which pushes the start to FY2030 and is nearly certain for Alaska. Fiscal 2024 rates would have qualified ten, including New York (14.09%); New York’s fiscal 2025 rate of 13.18% misses the 13.33% threshold, so its delay now rides on the fiscal 2026 measurement. Any projection of FY2028 outlays must model the delay, and the simulator does: delayed years enter expected bills as zero.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main>
-<!-- /main column -->
-<script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
-    });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
-      } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
-      }
-    }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
-          }
-        } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
-            if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
-        }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
-      } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
-        });
-      }
-    }
-  });
-  </script>
-</div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
-    });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
-      }
-    });
-  
-  };
-  
-})();
-          </script>
-
-
-
-
-</body></html>
+<script>
+  const dark = matchMedia("(prefers-color-scheme: dark)");
+  const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
+  dark.addEventListener("change", setMode);
+  setMode();
+</script>
+</body>
+</html>
