@@ -7,6 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
+const ASSET_V = "20260809a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 
 const fmtM = (v) => {
@@ -329,8 +330,8 @@ async function loadModelArtifacts() {
   if (!ARTIFACTS) {
     ARTIFACTS = (async () => {
       const [mdRes, scRes] = await Promise.all([
-        fetch("model_data.json"),
-        fetch("model_scenarios.json"),
+        fetch("model_data.json?v=" + ASSET_V),
+        fetch("model_scenarios.json?v=" + ASSET_V),
       ]);
       if (!mdRes.ok || !scRes.ok) throw new Error("model artifact fetch failed");
       const mdBytes = await mdRes.arrayBuffer();
@@ -620,7 +621,7 @@ function render() {
 }
 
 async function main() {
-  DATA = await (await fetch("data.json")).json();
+  DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
   const sel = $("state");
   for (const [code, st] of Object.entries(DATA.states)) {
     const o = document.createElement("option");
