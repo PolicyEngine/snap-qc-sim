@@ -44,27 +44,35 @@ from sklearn.model_selection import KFold, StratifiedKFold, cross_val_predict
 
 if __package__:  # Package import (tests and ``python -m analysis...``).
     from .train_error_model import (
+        BBCE_PATH,
         COVARIATES,
         INTERMEDIATES,
+        MEDICARE_PART_B_PATH,
         QC_DIR,
         SMD_PATH,
         THRESHOLD,
         YEAR_TEST,
         YEARS_TRAIN,
         build_features,
+        load_bbce_registry,
+        load_medicare_part_b_premiums,
         load_smd_registry,
         load_year,
     )
 else:  # Direct script execution from the analysis directory.
     from train_error_model import (
+        BBCE_PATH,
         COVARIATES,
         INTERMEDIATES,
+        MEDICARE_PART_B_PATH,
         QC_DIR,
         SMD_PATH,
         THRESHOLD,
         YEAR_TEST,
         YEARS_TRAIN,
         build_features,
+        load_bbce_registry,
+        load_medicare_part_b_premiums,
         load_smd_registry,
         load_year,
     )
@@ -151,6 +159,8 @@ def _feature_columns(data: pd.DataFrame) -> list[str]:
 def assemble() -> pd.DataFrame:
     """Load the official CASE==1 universe and assemble hurdle inputs."""
     registry = load_smd_registry()
+    bbce_registry = load_bbce_registry()
+    part_b_premiums = load_medicare_part_b_premiums()
     frames: list[pd.DataFrame] = []
     dropped: dict[str, int] = {}
     raw_required = [
@@ -200,7 +210,12 @@ def assemble() -> pd.DataFrame:
         # records whose targets/losses cannot be defined before calling it.
         # Informative missing predictors (including FSBEN) remain in the data.
         valid_df = df.loc[valid].copy()
-        features = build_features(valid_df, registry[year]).copy()
+        features = build_features(
+            valid_df,
+            registry[year],
+            bbce_registry[year],
+            part_b_premiums,
+        ).copy()
         if not features.index.equals(valid_df.index):
             raise ValueError(f"FY{year}: build_features changed row alignment")
 
@@ -939,6 +954,10 @@ def _provenance() -> dict[str, Any]:
     if not registry.is_file():
         raise FileNotFoundError(f"missing pipeline input: {registry}")
     inputs[registry.name] = _sha256(registry)
+    for feature_registry in (BBCE_PATH, MEDICARE_PART_B_PATH):
+        if not feature_registry.is_file():
+            raise FileNotFoundError(f"missing pipeline input: {feature_registry}")
+        inputs[feature_registry.name] = _sha256(feature_registry)
     return {
         "package_versions": _package_versions(),
         "input_sha256": inputs,

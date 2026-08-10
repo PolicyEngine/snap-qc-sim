@@ -126,6 +126,269 @@ def test_smd_registry_is_derived_from_state_year_amounts(tmp_path):
     assert "AK" not in treated[2018]
 
 
+def test_bbce_registry_requires_complete_binary_state_year_data(tmp_path):
+    registry = pd.DataFrame(
+        {
+            "state_name": list(error_model.STATE_NAME_TO_ABBR),
+            **{str(year): 0 for year in error_model.YEARS},
+        }
+    )
+    registry.loc[registry["state_name"].eq("Colorado"), "2024"] = 1
+    path = tmp_path / "state_bbce.csv"
+    registry.to_csv(path, index=False)
+
+    treated = error_model.load_bbce_registry(path)
+
+    assert treated[2024] == {"CO"}
+    assert treated[2023] == set()
+
+    registry.loc[registry["state_name"].eq("Alaska"), "2024"] = 2
+    registry.to_csv(path, index=False)
+    with pytest.raises(ValueError, match="binary"):
+        error_model.load_bbce_registry(path)
+
+
+def test_committed_bbce_registry_matches_fy2024_fns_statuses():
+    registry = error_model.load_bbce_registry()
+
+    assert {year: len(registry[year]) for year in error_model.YEARS} == {
+        2017: 42,
+        2018: 42,
+        2019: 42,
+        2022: 44,
+        2023: 44,
+        2024: 44,
+    }
+    assert set(error_model.FIPS.values()) - registry[2024] == {
+        "AK",
+        "AR",
+        "KS",
+        "MO",
+        "MS",
+        "SD",
+        "TN",
+        "UT",
+        "WY",
+    }
+
+
+def test_medicare_registry_keeps_exact_calendar_year_values_and_cms_sources(
+    tmp_path,
+):
+    path = tmp_path / "part_b.csv"
+    pd.DataFrame(
+        {
+            "calendar_year": [2023, 2024],
+            "standard_monthly_premium": [164.9, 174.7],
+            "source_url": [
+                "https://www.cms.gov/2023",
+                "https://www.cms.gov/2024",
+            ],
+        }
+    ).to_csv(path, index=False)
+
+    assert error_model.load_medicare_part_b_premiums(
+        path,
+        required_calendar_years={2023, 2024},
+    ) == {
+        2023: 164.9,
+        2024: 174.7,
+    }
+
+
+def test_medicare_registry_rejects_fractional_and_missing_sample_years(tmp_path):
+    path = tmp_path / "part_b.csv"
+    pd.DataFrame(
+        {
+            "calendar_year": [2023.5, 2024],
+            "standard_monthly_premium": [164.9, 174.7],
+            "source_url": [
+                "https://www.cms.gov/2023",
+                "https://www.cms.gov/2024",
+            ],
+        }
+    ).to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="whole numbers"):
+        error_model.load_medicare_part_b_premiums(
+            path,
+            required_calendar_years={2023, 2024},
+        )
+
+    pd.DataFrame(
+        {
+            "calendar_year": [2024],
+            "standard_monthly_premium": [174.7],
+            "source_url": ["https://www.cms.gov/2024"],
+        }
+    ).to_csv(path, index=False)
+    with pytest.raises(ValueError, match=r"missing sampled calendar years.*2023"):
+        error_model.load_medicare_part_b_premiums(
+            path,
+            required_calendar_years={2023, 2024},
+        )
+
+
+def test_certification_features_use_lastcert_and_true_period_length():
+    source = pd.DataFrame(
+        {
+            "CERTMTH": [12, 12, 12, 12, -5, 24, np.nan],
+            "LASTCERT": [9, 10, 11, 12, 6, -1, np.nan],
+        }
+    )
+    elderly_or_disabled = pd.Series([0, 1, 1, 1, 1, 1, 1])
+
+    features = error_model.build_certification_features(
+        source,
+        elderly_or_disabled,
+    )
+
+    assert features["months_since_cert"].iloc[:4].tolist() == [9, 10, 11, 12]
+    assert features["near_recert"].tolist() == [0, 1, 1, 0, 0, 0, 0]
+    assert features["near_recert_elderly_or_disabled"].tolist() == [
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+    ]
+    assert features["cert_timing_inconsistent"].tolist() == [0, 0, 0, 1, 0, 0, 0]
+    assert features["cert_period_months_missing"].tolist() == [0, 0, 0, 0, 1, 0, 1]
+    assert features["months_since_cert_missing"].tolist() == [0, 0, 0, 0, 0, 1, 1]
+    assert features["near_recert_missing"].tolist() == [0, 0, 0, 0, 1, 1, 1]
+
+
+def test_bbce_features_interact_state_registry_with_household_fields():
+    source = pd.DataFrame({"state": ["CO", "AK", None]})
+    elderly_or_disabled = pd.Series([1, 1, 1])
+    has_earnings = pd.Series([1, 1, 0])
+    children = pd.Series([0, 1, 1])
+
+    features = error_model.build_bbce_features(
+        source,
+        {"CO"},
+        elderly_or_disabled,
+        has_earnings,
+        children,
+    )
+
+    assert features["state_bbce"].tolist() == [1, 0, 0]
+    assert features["state_bbce_missing"].tolist() == [0, 0, 1]
+    assert features["state_bbce_elderly_or_disabled"].tolist() == [1, 0, 0]
+    assert features["state_bbce_has_earnings"].tolist() == [1, 0, 0]
+    assert features["state_bbce_children"].tolist() == [0, 0, 0]
+
+
+def test_medicare_features_use_sample_calendar_year_and_add_back_snap_floor():
+    source = pd.DataFrame(
+        {
+            "YRMONTH": [
+                202312,
+                202312,
+                202401,
+                202401,
+                202401,
+                202401,
+                202401,
+                -1,
+            ],
+            # Gross expense is this field + $35 when the excess is positive.
+            "FSMEDEXP": [124.9, 134.9, 144.7, 144.71, 189.7, 189.71, 139.7, 140],
+        }
+    )
+    # Row 6 represents a disabled-only household: it must not enter an
+    # elderly-claimant Part B band even when its reconstructed expense matches.
+    elderly_household = pd.Series([1, 1, 1, 1, 1, 1, 0, 1])
+
+    features = error_model.build_medicare_premium_features(
+        source,
+        elderly_household,
+        {2023: 164.9, 2024: 174.7},
+    )
+
+    assert features["premium_only"].tolist() == [1, 1, 1, 0, 0, 0, 0, 0]
+    assert features["just_above_premium"].tolist() == [0, 0, 0, 1, 1, 0, 0, 0]
+    assert features["part_b_premium_reference"].iloc[:6].tolist() == [
+        164.9,
+        164.9,
+        174.7,
+        174.7,
+        174.7,
+        174.7,
+    ]
+    assert features["reconstructed_medical_expense"].iloc[0] == pytest.approx(159.9)
+    assert np.isnan(features["medical_expense_distance_to_premium"].iloc[6])
+    assert features["part_b_premium_missing"].iloc[7] == 1
+
+
+def test_medicare_summary_quantifies_both_bands_against_co_smd_censoring():
+    data = pd.DataFrame(
+        {
+            "year": [2024, 2024, 2024],
+            "w": [1.0, 2.0, 3.0],
+            "premium_only": [1, 0, 0],
+            "just_above_premium": [0, 1, 0],
+            "part_b_band_applicable": [1, 1, 1],
+            "part_b_premium_reference": [174.7, 174.7, 174.7],
+            "naive_literal_premium_only": [0, 0, 1],
+            "elderly_household_diagnostic": [1, 1, 1],
+            "medical_deduction_demo_diagnostic": [1, 1, 1],
+            "co_smd_censored_165_diagnostic": [1, 1, 1],
+        }
+    )
+
+    summary = error_model.medicare_premium_feature_summary(data)
+    censored = summary["co_smd_censored_165"]
+
+    assert censored["n"] == 3
+    assert censored["elderly_household_n"] == 3
+    assert censored["premium_only_overlap_n"] == 1
+    assert censored["just_above_premium_overlap_n"] == 1
+    assert censored["naive_literal_overlap_n"] == 1
+    assert censored["just_above_premium_overlap_rate"] == pytest.approx(1 / 3)
+    assert censored["just_above_premium_overlap_rate_among_elderly"] == pytest.approx(
+        1 / 3
+    )
+
+
+def test_classifier_findings_render_three_specs_and_additive_delta():
+    metric = {
+        "roc_auc": 0.7,
+        "pr_auc": 0.3,
+        "precision_at_5pct_weight_budget": 0.4,
+    }
+    payload = {
+        "train_n": 100,
+        "test_n": 20,
+        "prevalence": {
+            "train": {"weighted": 0.1, "unweighted": 0.09},
+            "test": {"weighted": 0.12, "unweighted": 0.11},
+        },
+        "models": {
+            "covariates_only": metric,
+            "with_burden_intermediates": {**metric, "roc_auc": 0.706},
+            "with_intermediates": {**metric, "roc_auc": 0.708},
+            "additive_lift_over_refit_burden": {
+                "roc_auc": 0.002,
+                "pr_auc": 0.001,
+                "precision_at_5pct_weight_budget": 0.01,
+            },
+        },
+        "permutation_importance_weighted_roc_auc": {
+            "near_recert": {"mean_auc_decrease": 0.001, "std": 0.0001}
+        },
+    }
+
+    rendered = "\n".join(run_all._render_classifier_findings(payload))
+
+    assert "Baseline + burden intermediates" in rendered
+    assert "Burden + three additive families" in rendered
+    assert "Additive difference" in rendered
+    assert "+0.0020 ROC AUC" in rendered
+
+
 def test_medical_payment_impact_requires_a_same_slot_complete_pair():
     row_count = 5
     findings = pd.DataFrame(
@@ -177,6 +440,9 @@ def test_features_use_person_self_employment_and_35_dollar_medical_gate():
     assert "cat_elig" not in features
     assert "deductions_per_member" not in error_model.COVARIATES
     assert "deductions_per_member" in error_model.INTERMEDIATES
+    assert set(error_model.CERTIFICATION_FEATURES) <= set(error_model.INTERMEDIATES)
+    assert set(error_model.BBCE_FEATURES) <= set(error_model.INTERMEDIATES)
+    assert set(error_model.MEDICARE_PREMIUM_FEATURES) <= set(error_model.INTERMEDIATES)
 
 
 def test_build_features_rejects_non_case_one_rows():

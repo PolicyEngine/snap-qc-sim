@@ -615,6 +615,9 @@ def run_analysis(
         model_data["year"].isin(train_error_model.YEARS_TRAIN)
     ]
     fy2024 = model_data.loc[model_data["year"].eq(FISCAL_YEAR)]
+    burden_columns = (
+        train_error_model.COVARIATES + train_error_model.BURDEN_INTERMEDIATES
+    )
     full_columns = train_error_model.COVARIATES + train_error_model.INTERMEDIATES
     _, _, covariate_metrics = train_error_model.fit_score(
         primary_train,
@@ -622,13 +625,19 @@ def run_analysis(
         train_error_model.COVARIATES,
         "counterfactual covariates",
     )
+    _, _, burden_metrics = train_error_model.fit_score(
+        primary_train,
+        fy2024,
+        burden_columns,
+        "counterfactual + burden intermediates",
+    )
     official_model, _, full_metrics = train_error_model.fit_score(
         primary_train,
         fy2024,
         full_columns,
         "counterfactual + burdens",
     )
-    auc_lift = full_metrics["roc_auc"] - covariate_metrics["roc_auc"]
+    auc_lift = burden_metrics["roc_auc"] - covariate_metrics["roc_auc"]
 
     hurdle_features = hurdle_deviation_model._feature_columns(model_data)
     hurdle = hurdle_deviation_model.fit_hurdle(primary_train, hurdle_features)

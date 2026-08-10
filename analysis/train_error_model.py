@@ -19,7 +19,7 @@ import hashlib
 import importlib.metadata
 import json
 import re
-from collections.abc import Iterator, Mapping
+from collections.abc import Collection, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -36,11 +36,64 @@ ADDITIONAL_DATA_DIR = Path(
 ).expanduser()
 SMD_PATH = ADDITIONAL_DATA_DIR / "standard_medical_deductions.csv"
 OUT = Path(__file__).parent
+FEATURE_DATA_DIR = OUT / "data"
+BBCE_PATH = FEATURE_DATA_DIR / "state_bbce.csv"
+MEDICARE_PART_B_PATH = FEATURE_DATA_DIR / "medicare_part_b_premiums.csv"
 YEARS_TRAIN = [2017, 2018, 2019, 2022, 2023]
 YEAR_TEST = 2024
 YEARS = YEARS_TRAIN + [YEAR_TEST]
+SAMPLE_CALENDAR_YEARS = (2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024)
 THRESHOLD = {2017: 38, 2018: 37, 2019: 37, 2022: 48, 2023: 54, 2024: 56}
 RANDOM_STATE = 7
+MEDICAL_EXPENSE_FLOOR = 35.0
+PREMIUM_ONLY_TOLERANCE = 5.0
+JUST_ABOVE_PREMIUM_MAX = 50.0
+BAND_COMPARISON_EPSILON = 1e-9
+BBCE_SOURCE_PANEL_SHA256 = (
+    "3f3f035c7ded13996e43b1a43e7ec0e4a742bb17522d1f730edb0990aafe08cb"
+)
+BBCE_REPORT_URL = (
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/"
+    "snap-16th-state-options-report-june24.pdf"
+)
+BBCE_YEAR_SOURCES = {
+    2017: {
+        "edition": 13,
+        "as_of": "2016-10-01",
+        "basis": "report_snapshot",
+    },
+    2018: {
+        "edition": 14,
+        "as_of": "2017-10-01",
+        "basis": "report_snapshot",
+    },
+    2019: {
+        "edition": 14,
+        "as_of": "2017-10-01",
+        "basis": "carried_forward_no_intervening_report",
+    },
+    2022: {
+        "edition": 15,
+        "as_of": "2022-10-01",
+        "basis": "end_of_fiscal_year_proxy",
+    },
+    2023: {
+        "edition": 15,
+        "as_of": "2022-10-01",
+        "basis": "report_snapshot",
+    },
+    2024: {
+        "edition": 16,
+        "as_of": "2023-10-01",
+        "basis": "report_snapshot",
+    },
+}
+COMMITTED_BURDEN_BASELINE = {
+    "roc_auc": 0.7666262908275983,
+    "pr_auc": 0.3553041682372305,
+    "precision_at_5pct_weight_budget": 0.47760784361005676,
+    "commit": "900199db293bf4120d0ed711d18f4bbec724e7ee",
+}
 PERSON_SLOTS_BY_YEAR = {
     2017: 16,
     2018: 16,
@@ -175,6 +228,8 @@ REQUIRED_COLS = [
     "FSERNDED",
     "STATE",
     "YRMONTH",
+    "CERTMTH",
+    "LASTCERT",
     "HWGT",
     "STATUS",
     "AMTERR",
@@ -190,6 +245,7 @@ REQUIRED_COLS = [
     "FSGRINC",
     "FSNETINC",
     "FSMEDEXP",
+    "MED_DED_DEMO",
     "FSMEDDED",
     "FSDEPDED",
     "FSCSDED",
@@ -199,6 +255,7 @@ REQUIRED_COLS = [
     "BENMAX",
     "MINIMUM_BEN",
     "CASE",
+    "CAT_ELIG",
     *[f"ELEMENT{i}" for i in FINDING_SLOTS],
     *[f"E_FINDG{i}" for i in FINDING_SLOTS],
     *[f"AMOUNT{i}" for i in FINDING_SLOTS],
@@ -318,6 +375,75 @@ def load_smd_registry(path: Path = SMD_PATH) -> dict[int, set[str]]:
     }
 
 
+def load_bbce_registry(path: Path = BBCE_PATH) -> dict[int, set[str]]:
+    """Return the documented state BBCE registry for each model fiscal year."""
+    wide = pd.read_csv(path, encoding="utf-8-sig")
+    year_columns = [str(year) for year in YEARS]
+    assert_required_columns(
+        wide,
+        ["state_name", *year_columns],
+        context="BBCE registry",
+    )
+    if wide["state_name"].duplicated().any():
+        duplicates = sorted(
+            wide.loc[wide["state_name"].duplicated(), "state_name"].astype(str)
+        )
+        raise ValueError(f"Duplicate states in BBCE registry: {', '.join(duplicates)}")
+    wide["state"] = wide["state_name"].map(STATE_NAME_TO_ABBR)
+    if wide["state"].isna().any():
+        names = sorted(wide.loc[wide["state"].isna(), "state_name"].astype(str))
+        raise ValueError(f"Unrecognized states in BBCE registry: {', '.join(names)}")
+    expected_states = set(FIPS.values())
+    actual_states = set(wide["state"])
+    if actual_states != expected_states:
+        missing = sorted(expected_states - actual_states)
+        extra = sorted(actual_states - expected_states)
+        raise ValueError(
+            f"BBCE registry state coverage mismatch: missing={missing}, extra={extra}"
+        )
+    values = wide[year_columns].apply(pd.to_numeric, errors="coerce")
+    if values.isna().any().any() or not values.isin([0, 1]).all().all():
+        raise ValueError("BBCE registry values must be nonmissing binary indicators")
+    return {year: set(wide.loc[values[str(year)].eq(1), "state"]) for year in YEARS}
+
+
+def load_medicare_part_b_premiums(
+    path: Path = MEDICARE_PART_B_PATH,
+    required_calendar_years: Collection[int] = SAMPLE_CALENDAR_YEARS,
+) -> dict[int, float]:
+    """Return exact standard monthly Part B premiums by calendar year."""
+    data = pd.read_csv(path, encoding="utf-8-sig")
+    assert_required_columns(
+        data,
+        ["calendar_year", "standard_monthly_premium", "source_url"],
+        context="Medicare Part B registry",
+    )
+    years = pd.to_numeric(data["calendar_year"], errors="coerce")
+    premiums = pd.to_numeric(data["standard_monthly_premium"], errors="coerce")
+    if years.isna().any() or premiums.isna().any():
+        raise ValueError("Medicare Part B years and premiums must be numeric")
+    if not years.eq(np.floor(years)).all():
+        raise ValueError("Medicare Part B calendar years must be whole numbers")
+    years = years.astype(int)
+    if years.duplicated().any():
+        duplicates = sorted(years.loc[years.duplicated()].unique())
+        raise ValueError(f"Duplicate years in Medicare Part B registry: {duplicates}")
+    if not np.isfinite(premiums).all() or premiums.le(MEDICAL_EXPENSE_FLOOR).any():
+        raise ValueError("Medicare Part B premiums must be finite and above $35")
+    if (
+        data["source_url"].isna().any()
+        or not data["source_url"].str.startswith("https://www.cms.gov/").all()
+    ):
+        raise ValueError("Every Medicare Part B premium needs an official CMS URL")
+    missing_years = sorted(set(required_calendar_years) - set(years))
+    if missing_years:
+        raise ValueError(
+            "Medicare Part B registry is missing sampled calendar years: "
+            f"{missing_years}"
+        )
+    return dict(zip(years, premiums.astype(float), strict=True))
+
+
 class _LazySmdRegistry(Mapping[int, set[str]]):
     """Compatibility mapping that avoids reading external data at import time."""
 
@@ -408,12 +534,169 @@ def medical_documentation_required(
     ).astype(int)
 
 
-def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
+def _nonnegative_qc_numeric(values: pd.Series) -> pd.Series:
+    """Coerce a nonnegative QC field and collapse restricted missing sentinels."""
+    numeric = pd.to_numeric(values, errors="coerce")
+    return numeric.mask(numeric.lt(0))
+
+
+def build_certification_features(
+    df: pd.DataFrame,
+    elderly_or_disabled: pd.Series,
+) -> pd.DataFrame:
+    """Build case-level certification cadence features from public QC fields."""
+    assert_required_columns(
+        df,
+        ["CERTMTH", "LASTCERT"],
+        context="certification feature input",
+    )
+    if not df.index.equals(elderly_or_disabled.index):
+        raise ValueError("certification inputs must share an index")
+
+    result = pd.DataFrame(index=df.index)
+    cert_period = _nonnegative_qc_numeric(df["CERTMTH"])
+    months_since = _nonnegative_qc_numeric(df["LASTCERT"])
+    source_missing = cert_period.isna() | months_since.isna()
+    structurally_valid = (
+        ~source_missing
+        & cert_period.gt(0)
+        & months_since.ge(0)
+        & months_since.lt(cert_period)
+    )
+    near_recert = structurally_valid & months_since.ge(cert_period - 2)
+
+    result["months_since_cert"] = months_since
+    result["months_since_cert_missing"] = months_since.isna().astype(int)
+    result["cert_period_months"] = cert_period
+    result["cert_period_months_missing"] = cert_period.isna().astype(int)
+    result["cert_timing_inconsistent"] = (~source_missing & ~structurally_valid).astype(
+        int
+    )
+    result["near_recert"] = near_recert.astype(int)
+    result["near_recert_missing"] = source_missing.astype(int)
+    result["near_recert_elderly_or_disabled"] = (
+        near_recert & elderly_or_disabled.astype(bool)
+    ).astype(int)
+    return result
+
+
+def build_bbce_features(
+    df: pd.DataFrame,
+    bbce_states: set[str],
+    elderly_or_disabled: pd.Series,
+    has_earnings: pd.Series,
+    children: pd.Series,
+) -> pd.DataFrame:
+    """Build official state-BBCE status and supported household interactions."""
+    assert_required_columns(df, ["state"], context="BBCE feature input")
+    inputs = [elderly_or_disabled, has_earnings, children]
+    if any(not df.index.equals(values.index) for values in inputs):
+        raise ValueError("BBCE feature inputs must share an index")
+    unknown_registry_states = sorted(set(bbce_states) - set(FIPS.values()))
+    if unknown_registry_states:
+        raise ValueError(
+            f"BBCE feature registry has unknown states: {unknown_registry_states}"
+        )
+
+    result = pd.DataFrame(index=df.index)
+    state_valid = df["state"].isin(FIPS.values())
+    state_bbce = state_valid & df["state"].isin(bbce_states)
+    result["state_bbce"] = state_bbce.astype(int)
+    result["state_bbce_missing"] = (~state_valid).astype(int)
+    result["state_bbce_elderly_or_disabled"] = (
+        state_bbce & elderly_or_disabled.astype(bool)
+    ).astype(int)
+    result["state_bbce_has_earnings"] = (state_bbce & has_earnings.astype(bool)).astype(
+        int
+    )
+    result["state_bbce_children"] = (state_bbce & children.astype(bool)).astype(int)
+    return result
+
+
+def build_medicare_premium_features(
+    df: pd.DataFrame,
+    elderly_household: pd.Series,
+    premiums_by_calendar_year: Mapping[int, float],
+) -> pd.DataFrame:
+    """Build elderly-household Part B bands on the QC excess-expense scale."""
+    assert_required_columns(
+        df,
+        ["YRMONTH", "FSMEDEXP"],
+        context="Medicare premium feature input",
+    )
+    if not df.index.equals(elderly_household.index):
+        raise ValueError("Medicare premium inputs must share an index")
+    if not premiums_by_calendar_year:
+        raise ValueError("Medicare Part B premium registry cannot be empty")
+
+    result = pd.DataFrame(index=df.index)
+    yrmonth = _nonnegative_qc_numeric(df["YRMONTH"])
+    whole_yrmonth = yrmonth.eq(np.floor(yrmonth))
+    calendar_year = np.floor(yrmonth / 100).where(whole_yrmonth)
+    calendar_month = yrmonth.mod(100).where(whole_yrmonth)
+    valid_month = calendar_month.between(1, 12)
+    calendar_year = calendar_year.where(valid_month)
+    premium = calendar_year.map(premiums_by_calendar_year)
+
+    medical_excess = _nonnegative_qc_numeric(df["FSMEDEXP"])
+    has_allowable_expense = medical_excess.gt(0)
+    applicable = (
+        elderly_household.astype(bool) & has_allowable_expense & premium.notna()
+    )
+    # FSMEDEXP is already the allowable amount above SNAP's $35 floor. Add the
+    # floor back before comparing with the published gross Part B premium.
+    reconstructed_expense = (medical_excess + MEDICAL_EXPENSE_FLOOR).where(
+        has_allowable_expense
+    )
+    signed_distance = reconstructed_expense - premium
+    absolute_distance = signed_distance.abs().where(applicable)
+
+    result["premium_only"] = (
+        applicable
+        & absolute_distance.le(PREMIUM_ONLY_TOLERANCE + BAND_COMPARISON_EPSILON)
+    ).astype(int)
+    result["just_above_premium"] = (
+        applicable
+        & signed_distance.gt(PREMIUM_ONLY_TOLERANCE + BAND_COMPARISON_EPSILON)
+        & signed_distance.le(JUST_ABOVE_PREMIUM_MAX + BAND_COMPARISON_EPSILON)
+    ).astype(int)
+    result["medical_expense_distance_to_premium"] = absolute_distance
+    result["part_b_premium_missing"] = premium.isna().astype(int)
+
+    # Diagnostics retained outside the model feature lists.
+    result["part_b_premium_reference"] = premium
+    result["reconstructed_medical_expense"] = reconstructed_expense
+    result["part_b_band_applicable"] = applicable.astype(int)
+    result["naive_literal_premium_only"] = (
+        applicable
+        & (medical_excess - premium)
+        .abs()
+        .le(PREMIUM_ONLY_TOLERANCE + BAND_COMPARISON_EPSILON)
+    ).astype(int)
+    return result
+
+
+def build_features(
+    df: pd.DataFrame,
+    smd_states: set[str],
+    bbce_states: set[str] | None = None,
+    premiums_by_calendar_year: Mapping[int, float] | None = None,
+) -> pd.DataFrame:
     """Build outcomes, covariates, and recomputable burden intermediates."""
     assert_required_columns(df, REQUIRED_COLS + ["year", "state"])
     if not df["CASE"].eq(1).all():
         raise ValueError("build_features requires the CASE == 1 analysis universe")
     se_cols = _self_employment_columns(df.columns)
+    if bbce_states is None:
+        years = pd.to_numeric(df["year"], errors="coerce").dropna().unique()
+        if len(years) != 1 or int(years[0]) not in YEARS:
+            raise ValueError(
+                "build_features needs one supported fiscal year when BBCE states "
+                "are not supplied"
+            )
+        bbce_states = load_bbce_registry()[int(years[0])]
+    if premiums_by_calendar_year is None:
+        premiums_by_calendar_year = load_medicare_part_b_premiums()
     f = pd.DataFrame(index=df.index)
 
     f["official_error"] = official_error_label(df)
@@ -434,12 +717,16 @@ def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
     size = df["CERTHHSZ"].combine_first(df["FSUSIZE"])
     f["size"] = size
     _missing_indicator(f, "size", size)
-    ed_missing = df[["FSNELDER", "FSNDIS"]].isna().any(axis=1)
+    elderly_count = _nonnegative_qc_numeric(df["FSNELDER"])
+    disabled_count = _nonnegative_qc_numeric(df["FSNDIS"])
+    ed_missing = elderly_count.isna() | disabled_count.isna()
     f["elderly_disabled_missing"] = ed_missing.astype(int)
     # These two fields are counts. Zero after a missing value is used only for
     # the binary indicator and is paired with the missingness flag above.
+    elderly_household = elderly_count.fillna(0).gt(0)
+    f["elderly_household_diagnostic"] = elderly_household.astype(int)
     f["elderly_or_disabled"] = (
-        df[["FSNELDER", "FSNDIS"]].fillna(0).sum(axis=1) > 0
+        elderly_household | disabled_count.fillna(0).gt(0)
     ).astype(int)
     for output, source in [
         ("earned", "FSEARN"),
@@ -455,8 +742,23 @@ def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
     _missing_indicator(f, "expedited", df["EXPEDSER"])
     _missing_indicator(f, "formula_benefit", df["FSBEN"])
 
+    certification = build_certification_features(df, f["elderly_or_disabled"])
+    bbce = build_bbce_features(
+        df,
+        bbce_states,
+        f["elderly_or_disabled"],
+        f["has_earnings"],
+        f["children"],
+    )
+    f = f.join(certification).join(bbce)
+    cat_elig = _nonnegative_qc_numeric(df["CAT_ELIG"])
+    # CAT_ELIG codes 2/3 are not unique BBCE identifiers. This diagnostic
+    # supports a registry cross-check but is intentionally not a model feature.
+    f["cat_elig_bbce_like_diagnostic"] = cat_elig.isin([2, 3]).astype(int)
+    f["cat_elig_missing_diagnostic"] = cat_elig.isna().astype(int)
+
     # Intermediates (documentation / verification / computation burden).
-    medical_expense = df["FSMEDEXP"]
+    medical_expense = _nonnegative_qc_numeric(df["FSMEDEXP"])
     claims_medical = medical_expense.gt(0)
     above_excess_floor = medical_expense.gt(35)
     f["claims_medical"] = claims_medical.astype(int)
@@ -468,6 +770,17 @@ def build_features(df: pd.DataFrame, smd_states: set[str]) -> pd.DataFrame:
         f["elderly_or_disabled"],
         smd,
     )
+    premium = build_medicare_premium_features(
+        df,
+        elderly_household,
+        premiums_by_calendar_year,
+    )
+    f = f.join(premium)
+    medical_demo = _nonnegative_qc_numeric(df["MED_DED_DEMO"])
+    f["medical_deduction_demo_diagnostic"] = medical_demo.eq(1).astype(int)
+    f["co_smd_censored_165_diagnostic"] = (
+        df["state"].eq("CO") & medical_demo.eq(1) & medical_expense.eq(165)
+    ).astype(int)
     # Known limitation: this binary proxy does not incorporate the state's
     # standard amount, whether the standard binds for this household, or whether
     # actual expenses above the standard still require documents.
@@ -537,7 +850,7 @@ COVARIATES = [
     "formula_benefit",
     "formula_benefit_missing",
 ]
-INTERMEDIATES = [
+BURDEN_INTERMEDIATES = [
     "claims_medical",
     "claims_medical_missing",
     "medical_expense_above_floor",
@@ -557,6 +870,31 @@ INTERMEDIATES = [
     "deductions_per_member",
     "deductions_missing",
 ]
+CERTIFICATION_FEATURES = [
+    "months_since_cert",
+    "months_since_cert_missing",
+    "cert_period_months",
+    "cert_period_months_missing",
+    "cert_timing_inconsistent",
+    "near_recert",
+    "near_recert_missing",
+    "near_recert_elderly_or_disabled",
+]
+BBCE_FEATURES = [
+    "state_bbce",
+    "state_bbce_missing",
+    "state_bbce_elderly_or_disabled",
+    "state_bbce_has_earnings",
+    "state_bbce_children",
+]
+MEDICARE_PREMIUM_FEATURES = [
+    "premium_only",
+    "just_above_premium",
+    "medical_expense_distance_to_premium",
+    "part_b_premium_missing",
+]
+ADDITIVE_FEATURES = CERTIFICATION_FEATURES + BBCE_FEATURES + MEDICARE_PREMIUM_FEATURES
+INTERMEDIATES = BURDEN_INTERMEDIATES + ADDITIVE_FEATURES
 
 
 def weighted_mean(values: pd.Series, weights: pd.Series) -> float:
@@ -785,6 +1123,187 @@ def _cross_sectional_medical_rates(data: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def certification_feature_summary(data: pd.DataFrame) -> dict[str, Any]:
+    """Return coverage and cadence diagnostics for the certification family."""
+    assert_required_columns(
+        data,
+        [
+            "year",
+            "w",
+            "elderly_or_disabled",
+            "months_since_cert_missing",
+            "cert_period_months",
+            "cert_period_months_missing",
+            "cert_timing_inconsistent",
+            "near_recert",
+        ],
+        context="certification summary input",
+    )
+
+    def summarize(frame: pd.DataFrame) -> dict[str, float | int]:
+        valid_period = frame["cert_period_months"].gt(0)
+        elderly_valid = valid_period & frame["elderly_or_disabled"].eq(1)
+        return {
+            "n": len(frame),
+            "months_since_cert_missing_n": int(
+                frame["months_since_cert_missing"].sum()
+            ),
+            "cert_period_months_missing_n": int(
+                frame["cert_period_months_missing"].sum()
+            ),
+            "cert_timing_inconsistent_n": int(frame["cert_timing_inconsistent"].sum()),
+            "near_recert_n": int(frame["near_recert"].sum()),
+            "near_recert_weighted_rate": weighted_rate(
+                frame["near_recert"], frame["w"]
+            ),
+            "valid_period_n": int(valid_period.sum()),
+            "period_24_plus_rate_valid": float(
+                frame.loc[valid_period, "cert_period_months"].ge(24).mean()
+            ),
+            "elderly_disabled_period_24_plus_rate_valid": float(
+                frame.loc[elderly_valid, "cert_period_months"].ge(24).mean()
+            ),
+        }
+
+    return {
+        "definition": (
+            "near_recert is CERTMTH - 2 <= LASTCERT < CERTMTH, with "
+            "CERTMTH > 0 and both fields observed"
+        ),
+        "all_years": summarize(data),
+        "by_year": {
+            str(int(year)): summarize(group) for year, group in data.groupby("year")
+        },
+        "state_elderly_cadence_registry": (
+            "not built: techdoc 24-48 month values identify SSI-CAP/NYSNIP "
+            "cases and do not define statewide elderly certification policy"
+        ),
+    }
+
+
+def bbce_registry_cross_check(data: pd.DataFrame) -> dict[str, Any]:
+    """Compare official state status with non-unique case CAT_ELIG patterns."""
+    assert_required_columns(
+        data,
+        [
+            "year",
+            "w",
+            "state_bbce",
+            "state_bbce_missing",
+            "cat_elig_bbce_like_diagnostic",
+            "cat_elig_missing_diagnostic",
+        ],
+        context="BBCE cross-check input",
+    )
+    by_year: dict[str, Any] = {}
+    for year, group in data.groupby("year"):
+        cells: dict[str, Any] = {}
+        for status in (0, 1):
+            cell = group.loc[group["state_bbce"].eq(status)]
+            cells[str(status)] = {
+                "n": len(cell),
+                "cat_elig_2_or_3_n": int(cell["cat_elig_bbce_like_diagnostic"].sum()),
+                "cat_elig_2_or_3_weighted_rate": weighted_rate(
+                    cell["cat_elig_bbce_like_diagnostic"], cell["w"]
+                ),
+            }
+        by_year[str(int(year))] = {
+            "registered_bbce_case_n": int(group["state_bbce"].sum()),
+            "state_status_missing_n": int(group["state_bbce_missing"].sum()),
+            "cat_elig_missing_n": int(group["cat_elig_missing_diagnostic"].sum()),
+            "case_pattern_by_state_status": cells,
+        }
+    return {
+        "interpretation": (
+            "diagnostic only: CAT_ELIG codes 2/3 include BBCE but do not "
+            "uniquely identify state adoption and are excluded from models"
+        ),
+        "year_sources": {
+            str(year): values for year, values in BBCE_YEAR_SOURCES.items()
+        },
+        "by_year": by_year,
+    }
+
+
+def medicare_premium_feature_summary(data: pd.DataFrame) -> dict[str, Any]:
+    """Return FY2024 band coverage and Colorado SMD-censoring overlap."""
+    required = [
+        "year",
+        "w",
+        "premium_only",
+        "just_above_premium",
+        "part_b_band_applicable",
+        "part_b_premium_reference",
+        "naive_literal_premium_only",
+        "elderly_household_diagnostic",
+        "medical_deduction_demo_diagnostic",
+        "co_smd_censored_165_diagnostic",
+    ]
+    assert_required_columns(data, required, context="Medicare summary input")
+    fy2024 = data.loc[data["year"].eq(YEAR_TEST)]
+    if fy2024.empty:
+        raise ValueError("Medicare summary requires FY2024 rows")
+
+    applicable = fy2024["part_b_band_applicable"].eq(1)
+    premium_only = fy2024["premium_only"].eq(1)
+    just_above = fy2024["just_above_premium"].eq(1)
+    demo = fy2024["medical_deduction_demo_diagnostic"].eq(1)
+    censored = fy2024["co_smd_censored_165_diagnostic"].eq(1)
+    censored_elderly = censored & fy2024["elderly_household_diagnostic"].eq(1)
+    naive = fy2024["naive_literal_premium_only"].eq(1)
+
+    def band(mask: pd.Series) -> dict[str, float | int]:
+        return {
+            "n": int(mask.sum()),
+            "weighted_population": float(fy2024.loc[mask, "w"].sum()),
+            "share_of_applicable_n": float(mask.sum() / applicable.sum()),
+            "smd_demo_overlap_n": int((mask & demo).sum()),
+        }
+
+    censored_n = int(censored.sum())
+    censored_elderly_n = int(censored_elderly.sum())
+    just_above_censored_n = int((censored & just_above).sum())
+    return {
+        "fiscal_year": YEAR_TEST,
+        "definition": (
+            "reconstruct gross expense as FSMEDEXP + 35 for positive claims; "
+            "for households with FSNELDER > 0, compare with the standard Part B "
+            "premium selected by YRMONTH"
+        ),
+        "population": "elderly households (FSNELDER > 0), excluding disabled-only",
+        "premium_only_tolerance_dollars": PREMIUM_ONLY_TOLERANCE,
+        "just_above_signed_distance_dollars": [
+            PREMIUM_ONLY_TOLERANCE,
+            JUST_ABOVE_PREMIUM_MAX,
+        ],
+        "applicable_n": int(applicable.sum()),
+        "reference_counts": {
+            f"{float(reference):.2f}": len(group)
+            for reference, group in fy2024.groupby("part_b_premium_reference")
+        },
+        "premium_only": band(premium_only),
+        "just_above_premium": band(just_above),
+        "co_smd_censored_165": {
+            "n": censored_n,
+            "elderly_household_n": censored_elderly_n,
+            "nonelderly_household_n": censored_n - censored_elderly_n,
+            "premium_only_overlap_n": int((censored & premium_only).sum()),
+            "premium_only_overlap_rate": float(
+                (censored & premium_only).sum() / censored_n
+            ),
+            "just_above_premium_overlap_n": just_above_censored_n,
+            "just_above_premium_overlap_rate": float(
+                just_above_censored_n / censored_n
+            ),
+            "just_above_premium_overlap_rate_among_elderly": float(
+                just_above_censored_n / censored_elderly_n
+            ),
+            "naive_literal_overlap_n": int((censored & naive).sum()),
+            "naive_literal_overlap_rate": float((censored & naive).sum() / censored_n),
+        },
+    }
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as source:
@@ -797,7 +1316,14 @@ def _provenance() -> dict[str, Any]:
     packages = {}
     for package in ["numpy", "pandas", "pyreadstat", "scikit-learn", "scipy"]:
         packages[package] = importlib.metadata.version(package)
-    inputs = [QC_DIR / f"qc_pub_fy{year}.sav" for year in YEARS] + [SMD_PATH]
+    inputs = [QC_DIR / f"qc_pub_fy{year}.sav" for year in YEARS] + [
+        SMD_PATH,
+        BBCE_PATH,
+        MEDICARE_PART_B_PATH,
+    ]
+    premium_sources = pd.read_csv(MEDICARE_PART_B_PATH).set_index("calendar_year")[
+        "source_url"
+    ]
     return {
         "packages": packages,
         "input_sha256": {path.name: _sha256(path) for path in inputs},
@@ -817,17 +1343,52 @@ def _provenance() -> dict[str, Any]:
             str(year): count for year, count in sorted(PERSON_SLOTS_BY_YEAR.items())
         },
         "smd_registry": str(SMD_PATH),
+        "bbce_registry": {
+            "path": str(BBCE_PATH),
+            "official_fy2024_report_url": BBCE_REPORT_URL,
+            "official_pdf_sha256": (
+                "96b1e5c5b2b59cd15429f8d71d696254da75950f12358d492c0f8be23272c25c"
+            ),
+            "official_pdf_sha256_note": (
+                "raw bytes downloaded and hashed 2026-08-09 outside the "
+                "training sandbox; cover page verified as the 2024 16th-"
+                "edition State Options Report"
+            ),
+            "source_extracted_panel_sha256": BBCE_SOURCE_PANEL_SHA256,
+            "year_sources": {
+                str(year): values for year, values in BBCE_YEAR_SOURCES.items()
+            },
+        },
+        "medicare_part_b_registry": {
+            "path": str(MEDICARE_PART_B_PATH),
+            "calendar_year_sources": {
+                str(int(year)): url for year, url in premium_sources.items()
+            },
+            "qc_expense_scale": "FSMEDEXP + 35 for positive allowable expenses",
+        },
     }
 
 
 def main() -> None:
     smd_amounts = load_smd_amounts()
     smd_registry = load_smd_registry()
+    bbce_registry = load_bbce_registry()
+    part_b_premiums = load_medicare_part_b_premiums()
     frames = []
     for year in YEARS:
         source = load_year(year)
-        print(f"FY{year}: SMD registry {len(smd_registry[year])} states")
-        frames.append(build_features(source, smd_registry[year]))
+        print(
+            f"FY{year}: SMD registry {len(smd_registry[year])} states; "
+            f"BBCE registry {len(bbce_registry[year])} states"
+        )
+        frames.append(
+            build_features(
+                source,
+                smd_registry[year],
+                bbce_registry[year],
+                part_b_premiums,
+            )
+        )
     data = pd.concat(frames, ignore_index=True)
     train = data.loc[data["year"].ne(YEAR_TEST)]
     test = data.loc[data["year"].eq(YEAR_TEST)]
@@ -843,9 +1404,16 @@ def main() -> None:
 
     print("\n== FY2024 evaluation ==")
     _, _, baseline = fit_score(train, test, COVARIATES, "covariates + formula anchor")
+    burden_columns = COVARIATES + BURDEN_INTERMEDIATES
+    _, _, burden = fit_score(
+        train,
+        test,
+        burden_columns,
+        "baseline + burden intermediates",
+    )
     full_columns = COVARIATES + INTERMEDIATES
     full_model, _, full = fit_score(
-        train, test, full_columns, "baseline + burden intermediates"
+        train, test, full_columns, "burden + three additive families"
     )
     lift = {
         "roc_auc": full["roc_auc"] - baseline["roc_auc"],
@@ -856,6 +1424,35 @@ def main() -> None:
         ),
     }
     print(f"lift: AUC {lift['roc_auc']:+.4f}, PR-AUC {lift['pr_auc']:+.4f}")
+    additive_lift = {
+        metric: full[metric] - burden[metric]
+        for metric in (
+            "roc_auc",
+            "pr_auc",
+            "precision_at_5pct_weight_budget",
+        )
+    }
+    committed_delta = {
+        metric: full[metric] - float(COMMITTED_BURDEN_BASELINE[metric])
+        for metric in (
+            "roc_auc",
+            "pr_auc",
+            "precision_at_5pct_weight_budget",
+        )
+    }
+    burden_reproduction_delta = {
+        metric: burden[metric] - float(COMMITTED_BURDEN_BASELINE[metric])
+        for metric in (
+            "roc_auc",
+            "pr_auc",
+            "precision_at_5pct_weight_budget",
+        )
+    }
+    print(
+        "additive vs committed burden baseline: "
+        f"AUC {committed_delta['roc_auc']:+.4f}, "
+        f"PR-AUC {committed_delta['pr_auc']:+.4f}"
+    )
 
     importance = permutation_importance(
         full_model,
@@ -883,6 +1480,9 @@ def main() -> None:
 
     cross_section = _cross_sectional_medical_rates(data)
     adoption_contrasts = medical_descriptive_contrasts(data, smd_amounts)
+    certification_summary = certification_feature_summary(data)
+    bbce_cross_check = bbce_registry_cross_check(data)
+    medicare_summary = medicare_premium_feature_summary(data)
     se_cross_check = {
         "definition": (
             "positive income in any available SLFEMP1-18 slot compared with "
@@ -922,24 +1522,44 @@ def main() -> None:
             )
 
     results = {
-        "schema_version": 2,
-        # Flat keys retained for consumers of the first committed schema.
+        "schema_version": 3,
+        # Schema v3 distinguishes the frozen burden-only comparison from the
+        # complete intermediate set. The legacy ``with_intermediates`` alias is
+        # retained, but explicit additive names are preferred by new consumers.
         "auc_covariates": baseline["roc_auc"],
         "auc_with_intermediates": full["roc_auc"],
+        "auc_with_additive_features": full["roc_auc"],
+        "auc_with_burden_intermediates": burden["roc_auc"],
         "pr_covariates": baseline["pr_auc"],
         "pr_with_intermediates": full["pr_auc"],
+        "pr_with_additive_features": full["pr_auc"],
+        "pr_with_burden_intermediates": burden["pr_auc"],
         "p_at_5pct_budget_covariates": baseline["precision_at_5pct_weight_budget"],
         "p_at_5pct_budget_with_intermediates": full["precision_at_5pct_weight_budget"],
+        "p_at_5pct_budget_with_additive_features": full[
+            "precision_at_5pct_weight_budget"
+        ],
         "train_n": len(train),
         "test_n": len(test),
         "prevalence": prevalence,
         "models": {
             "covariates_only": baseline,
+            "with_burden_intermediates": burden,
             "with_intermediates": full,
+            "with_additive_features": full,
             "lift": lift,
+            "additive_lift_over_refit_burden": additive_lift,
+            "additive_lift_over_committed_burden": committed_delta,
+            "committed_burden_baseline": COMMITTED_BURDEN_BASELINE,
+            "refit_burden_reproduction_delta": burden_reproduction_delta,
         },
         "feature_sets": {
             "covariates": COVARIATES,
+            "burden_intermediates": BURDEN_INTERMEDIATES,
+            "certification": CERTIFICATION_FEATURES,
+            "bbce": BBCE_FEATURES,
+            "medicare_premium": MEDICARE_PREMIUM_FEATURES,
+            "additive": ADDITIVE_FEATURES,
             "intermediates": INTERMEDIATES,
         },
         "smd_treatment_by_year": {
@@ -953,6 +1573,9 @@ def main() -> None:
         "self_employment_cross_check": se_cross_check,
         "medical_cross_section": cross_section,
         "smd_adoption_contrasts": adoption_contrasts,
+        "certification_features": certification_summary,
+        "bbce_registry_cross_check": bbce_cross_check,
+        "medicare_premium_features": medicare_summary,
         "provenance": _provenance(),
     }
     output_path = OUT / "model_results.json"

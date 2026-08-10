@@ -217,7 +217,14 @@ def _extract_model_diagnostics(
     model_results: Mapping[str, Any],
 ) -> tuple[float, dict[str, dict[str, float]]]:
     try:
-        auc_lift = float(model_results["models"]["lift"]["roc_auc"])
+        models = model_results["models"]
+        burden_lift = models.get("with_burden_intermediates")
+        if burden_lift is None:
+            auc_lift = float(models["lift"]["roc_auc"])
+        else:
+            auc_lift = float(
+                burden_lift["roc_auc"] - models["covariates_only"]["roc_auc"]
+            )
         populations = model_results["smd_adoption_contrasts"]["populations"]
         claimant = populations["claimant_conditioned"]
         stable = populations["all_elderly_disabled"]
