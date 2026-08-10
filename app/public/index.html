@@ -30,11 +30,15 @@
       share of benefit costs — 0% below a 6% rate, 5% from 6–8, 10% from
       8–10, 15% at or above 10 — keyed to the state's choice of its FY 2025
       rate (published June 2026) or its FY 2026 rate, still being measured
-      through September 30. This simulator draws from the state's own USDA
-      Quality Control sample to show the <em>distribution</em> of a measured
-      rate, the odds its FY 2026 election beats its locked FY 2025 rate, and
-      what audit volume and a model-based standard medical deduction
-      scenario do to the bill.
+      through September 30. One more twist sits at the top: a rate whose
+      1.5× reaches 20% (above 13.33%) delays the state's first billed year —
+      FY 2025 crossing pushes the start to FY 2029, FY 2026 crossing to
+      FY 2030 — so the highest-error states owe $0 in FY 2028. This
+      simulator draws from the state's own USDA Quality Control sample to
+      show the <em>distribution</em> of a measured rate, the odds its FY 2026
+      election beats its locked FY 2025 rate, the delay odds, and what audit
+      volume and a model-based standard medical deduction scenario do to the
+      bill.
     </p>
   </div>
 </header>
@@ -61,9 +65,9 @@
 
   <section class="tiles" aria-label="Headline results">
     <div class="tile"><div class="k" id="t-official">–</div><div class="l">Official FY 2025 payment error rate (locked election year)</div><div class="d" id="t-official-24"></div></div>
-    <div class="tile"><div class="k" id="t-expected">–</div><div class="l">Expected annual cost share, scenario</div><div class="d" id="t-delta"></div></div>
+    <div class="tile"><div class="k" id="t-expected">–</div><div class="l">Expected FY 2028 bill, scenario (elected rate, delay-aware)</div><div class="d" id="t-delta"></div></div>
     <div class="tile"><div class="k" id="t-tier">–</div><div class="l">Most likely tier, scenario</div><div class="d" id="t-tierp"></div></div>
-    <div class="tile"><div class="k" id="t-sd">–</div><div class="l">Std. dev. of the annual bill</div><div class="d" id="t-sdd"></div></div>
+    <div class="tile"><div class="k" id="t-sd">–</div><div class="l">Std. dev. of the FY 2028 bill</div><div class="d" id="t-sdd"></div></div>
   </section>
 
   <section class="chart-card" id="election">
@@ -99,7 +103,7 @@
           <th scope="col" class="num"><button data-k="fy2025">FY 2025</button></th>
           <th scope="col"><button data-k="tier">FY 2025 tier</button></th>
           <th scope="col" class="num"><button data-k="pmis">P(different tier)</button></th>
-          <th scope="col" class="num"><button data-k="eShare">Expected cost / yr</button></th>
+          <th scope="col" class="num"><button data-k="eShare" title="Expected FY 2028 bill electing the better year; delayed states show the FY 2029 bill">Expected bill / yr</button></th>
           <th scope="col" class="num"><button data-k="sd">Bill std. dev.</button></th>
         </tr></thead>
         <tbody></tbody>
@@ -120,7 +124,7 @@
         <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
         <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
         <li>When the scenario is on, both baseline and scenario draw each case's payment deviation from distributions fitted on FY 2017–19 and 2022 QC data (pandemic years excluded), with levels anchored to the official rate; with it off, the simulator resamples observed QC error dollars. Model output is disabled for seven jurisdictions (AK, HI, ID, MN, SD, VI, WY) whose factor-adjusted FY 2024 model-to-observed dollar-rate ratio falls outside [0.7, 1.4]. Validation results — including quantile under-coverage at most levels and under-dispersion of simulated rates — and the adversarial review history are in the <a href="https://github.com/PolicyEngine/snap-qc-sim">repository</a>.</li>
-        <li>Statute delays cost-share implementation for the highest-error states: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(iii). The simulator shows the standard FY 2028 schedule.</li>
+        <li>The delay clause is modeled: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(ii)–(iii). Expected-bill figures zero delayed years; the FY 2029 bill keys to the FY 2026 rate (the third preceding year). A start pushed to FY 2030 keys to the FY 2027 rate, which this simulator does not model — those draws contribute $0 to the shown FY 2028 and FY 2029 expectations.</li>
         <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
       </ul>
     </details>
@@ -133,6 +137,6 @@
   Built by <a href="https://policyengine.org">PolicyEngine</a> · <a href="paper/">working paper</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>
 </div></footer>
 
-<script type="module" src="app.js?v=20260809c"></script>
+<script type="module" src="app.js?v=20260809d"></script>
 </body>
 </html>

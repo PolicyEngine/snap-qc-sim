@@ -7,8 +7,21 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260809c"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260809d"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
+
+// 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
+// state's first billed year — FY 2025 crossing pushes the start to FY 2029,
+// FY 2026 crossing to FY 2030 — mechanically, independent of the election.
+// Above 13.33% (13.34% at published two-decimal precision) the FY 2028
+// share is therefore 0%.
+const DELAY_THRESHOLD = 20 / 1.5;
+const delayMet = (rate) => rate * 1.5 >= 20;
+
+// Inside the policyengine.org AppPage iframe the site shell provides the
+// PolicyEngine header/footer; hide the standalone wordmark and mirror URL
+// state up to the parent so the address bar stays shareable.
+const FRAMED = window.self !== window.top;
 
 const fmtM = (v) => {
   const m = v / 1e6;
@@ -74,20 +87,41 @@ function simulate(st, { extra = 0, seed = 11, anchor } = {}) {
 function electionStats(st, draws) {
   const fy25 = st.official_fy2025;
   const lockShare = tierOf(fy25);
-  let win = 0, effCost = 0, delay26 = 0;
+  const delay25 = delayMet(fy25);
+  // Per draw d (the simulated FY 2026 measurement):
+  //   FY 2028 bill — keyed to the elected FY 2025-or-FY 2026 rate, but $0
+  //   whenever either year crosses the delay test (the delay is mechanical
+  //   and election-independent).
+  //   FY 2029 bill — keyed to the FY 2026 rate for every state (third
+  //   preceding year), $0 when FY 2026 itself crosses (start moves to
+  //   FY 2030, keyed to the unsimulated FY 2027).
+  let win = 0, delay26 = 0;
+  let lock28 = 0, elect28 = 0, elect28sq = 0, bill29 = 0;
   for (const d of draws) {
     if (d < fy25) win++;
-    effCost += (tierOf(Math.min(d, fy25)) / 100) * st.issuance;
-    if (d * 1.5 >= 20) delay26++;
+    const crossed = delayMet(d);
+    if (crossed) delay26++;
+    const zero28 = delay25 || crossed;
+    const l = zero28 ? 0 : (lockShare / 100) * st.issuance;
+    const e = zero28 ? 0 : (tierOf(Math.min(d, fy25)) / 100) * st.issuance;
+    lock28 += l;
+    elect28 += e;
+    elect28sq += e * e;
+    bill29 += crossed ? 0 : (tierOf(d) / 100) * st.issuance;
   }
+  const n = draws.length;
+  const elect28Mean = elect28 / n;
   return {
     fy25,
     lockShare,
-    lockCost: (lockShare / 100) * st.issuance,
-    pWin: win / draws.length,
-    electCost: effCost / draws.length,
-    pDelay26: delay26 / draws.length,
-    delay25: fy25 * 1.5 >= 20,
+    delay25,
+    lockTierCost: (lockShare / 100) * st.issuance,
+    lock28: lock28 / n,
+    elect28: elect28Mean,
+    sd28: Math.sqrt(Math.max(0, elect28sq / n - elect28Mean * elect28Mean)),
+    bill29: bill29 / n,
+    pWin: win / n,
+    pDelay26: delay26 / n,
   };
 }
 
@@ -153,6 +187,11 @@ function histogram(el, base, scen, official) {
   s += `<path d="${path}" fill="none" stroke="${ink}" stroke-width="1.6" opacity="0.9"/>`;
   s += `<line x1="${x(official)}" x2="${x(official)}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
   s += `<text x="${x(official) + 4}" y="${H - B - 6}" font-size="10" fill="${ink}">FY25 official ${official.toFixed(2)}%</text>`;
+  if (hi > DELAY_THRESHOLD) {
+    const xd = x(DELAY_THRESHOLD);
+    s += `<line x1="${xd}" x2="${xd}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
+    s += `<text x="${xd + 4}" y="${T + 12}" font-size="10" fill="${ink}" opacity="0.85">delay ≥13.34% → $0 in FY28</text>`;
+  }
   for (let v = Math.ceil(lo); v <= hi; v += 2) {
     s += `<line x1="${x(v)}" x2="${x(v)}" y1="${H - B}" y2="${H - B + 4}" stroke="${border}"/>`;
     s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
@@ -222,16 +261,20 @@ function computeNational() {
     while (i < codes.length && performance.now() - t0 < 40) {
       const code = codes[i++];
       const st = DATA.states[code];
-      const sm = summarize(simulate(st, {}), st.issuance);
+      const draws = simulate(st, {});
+      const sm = summarize(draws, st.issuance);
+      const el = electionStats(st, draws);
       const tier = tierOf(st.official_fy2025);
       NAT.set(code, {
         code,
         official: st.official,
         fy2025: st.official_fy2025,
         tier,
+        delay25: el.delay25,
         pmis: 1 - sm.pt[tier],
-        eShare: sm.eShare,
-        sd: sm.sd,
+        eShare: el.elect28,
+        bill29: el.bill29,
+        sd: el.sd28,
         verified: !!st.verified,
       });
     }
@@ -245,11 +288,14 @@ function computeNational() {
 function renderNatTakeaway() {
   const rows = [...NAT.values()];
   const flip = rows.filter((r) => r.pmis >= 0.4).length;
+  const delayed = rows.filter((r) => r.delay25).length;
   const totalE = rows.reduce((a, r) => a + r.eShare, 0);
   $("nat-takeaway").textContent =
     `At FY 2025 official rates and FY 2024 sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
-    `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Summed expected cost across all ` +
-    `jurisdictions under the FY 2028 tiers: ${fmtM(totalE)}/yr. Between FY 2024 and FY 2025, 18 jurisdictions changed tiers while only 10 moved beyond two-year sampling noise.`;
+    `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Summed expected FY 2028 ` +
+    `bills across all jurisdictions — each electing its better year, net of delayed starts: ${fmtM(totalE)}/yr. ${delayed} jurisdictions ` +
+    `above the 13.33% delay threshold owe $0 in FY 2028 and are first billed in FY 2029, keyed to the FY 2026 rate. Between FY 2024 and ` +
+    `FY 2025, 18 jurisdictions changed tiers while only 10 moved beyond two-year sampling noise.`;
 }
 
 function renderNatTable() {
@@ -265,9 +311,9 @@ function renderNatTable() {
       <td>${r.code}${r.verified ? ' <span class="vmark" title="Benefit computation verified against every replayable FY 2024 QC case">✓</span>' : ""}</td>
       <td class="num">${r.official.toFixed(2)}%</td>
       <td class="num">${r.fy2025.toFixed(2)}%</td>
-      <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}</td>
+      <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}${r.delay25 ? ' <span class="delaytag" title="Rate × 1.5 ≥ 20%: $0 in FY 2028, first bill FY 2029 keyed to the FY 2026 rate">delayed</span>' : ""}</td>
       <td class="num">${(r.pmis * 100).toFixed(0)}%</td>
-      <td class="num">${fmtM(r.eShare)}</td>
+      <td class="num">${r.delay25 ? `${fmtM(r.bill29)} <span class="muted">FY29</span>` : fmtM(r.eShare)}</td>
       <td class="num">${fmtM(r.sd)}</td>
     </tr>`
     )
@@ -306,6 +352,11 @@ function writeUrl() {
   if (+$("audits").value) p.set("audits", $("audits").value);
   if ($("lever-smd").checked) p.set("smd", "1");
   history.replaceState(null, "", "?" + p.toString());
+  if (FRAMED) {
+    // The AppPage shell listens for urlUpdate and mirrors the params onto
+    // the parent address bar so copied links keep the app state.
+    window.parent.postMessage({ type: "urlUpdate", params: p.toString() }, "*");
+  }
 }
 
 // ---- Model-based scenario engine -----------------------------------------
@@ -570,39 +621,49 @@ function render() {
   }
   const observed = scenarioOn ? simulate(st, {}) : base;
   const elec = electionStats(st, observed);
+  const elecB = electionStats(st, base);
+  const elecS = electionStats(st, scen);
   $("mechanism").textContent = mechanismLine(scenarioOn);
   const sb = summarize(base, issuance);
   const ss = summarize(scen, issuance);
 
   $("t-official").textContent = st.official_fy2025.toFixed(2) + "%";
   $("t-official-24").textContent = "FY 2024: " + st.official.toFixed(2) + "%";
-  $("t-expected").textContent = fmtM(ss.eShare) + "/yr";
-  const d = sb.eShare - ss.eShare;
-  $("t-delta").textContent = (d >= 0 ? "−" : "+") + fmtM(Math.abs(d)).slice(1) + " vs baseline";
-  $("t-delta").className = "d " + (d >= 0 ? "delta-good" : "delta-bad");
+  $("t-expected").textContent = fmtM(elecS.elect28) + "/yr";
+  if (elecS.delay25) {
+    $("t-delta").textContent = `delayed start — first bill FY 2029: ${fmtM(elecS.bill29)}/yr`;
+    $("t-delta").className = "d";
+  } else {
+    const d = elecB.elect28 - elecS.elect28;
+    $("t-delta").textContent = (d >= 0 ? "−" : "+") + fmtM(Math.abs(d)).slice(1) + " vs baseline";
+    $("t-delta").className = "d " + (d >= 0 ? "delta-good" : "delta-bad");
+  }
   const top = Object.entries(ss.pt).sort((a, b) => b[1] - a[1])[0];
   $("t-tier").textContent = TIER_LABELS[top[0]];
   $("t-tierp").textContent = (top[1] * 100).toFixed(0) + "% of draws";
-  $("t-sd").textContent = fmtM(ss.sd);
-  $("t-sdd").textContent = "baseline " + fmtM(sb.sd);
+  $("t-sd").textContent = fmtM(elecS.sd28);
+  $("t-sdd").textContent = "baseline " + fmtM(elecB.sd28);
 
   histogram($("hist"), base, scen, st.official_fy2025);
   tierBars($("tiers"), [["Baseline", sb.pt], ["Scenario", ss.pt]], st.issuance);
 
   const lockTier = TIER_LABELS[elec.lockShare];
   $("elect-locked").textContent =
-    `${elec.fy25.toFixed(2)}% — ${lockTier} (${fmtM(elec.lockCost)}/yr)` +
-    (elec.delay25 ? " · delay clause met: cost share starts FY 2029" : "");
+    `${elec.fy25.toFixed(2)}% — ${lockTier} (${fmtM(elec.lockTierCost)}/yr if billed)` +
+    (elec.delay25 ? " · delay clause met: $0 in FY 2028, first bill FY 2029" : "");
   $("elect-pwin").textContent = (100 * elec.pWin).toFixed(0) + "%";
-  $("elect-cost").textContent =
-    `${fmtM(elec.electCost)}/yr vs ${fmtM(elec.lockCost)}/yr locking FY 2025 ` +
-    `(saves ${fmtM(Math.max(0, elec.lockCost - elec.electCost))}/yr in expectation)`;
+  $("elect-cost").textContent = elec.delay25
+    ? `$0 in FY 2028 (delayed start); the FY 2029 bill keys to the FY 2026 rate — ` +
+      `${fmtM(elec.bill29)}/yr expected`
+    : `${fmtM(elec.elect28)}/yr vs ${fmtM(elec.lock28)}/yr locking FY 2025 ` +
+      `(saves ${fmtM(Math.max(0, elec.lock28 - elec.elect28))}/yr in expectation)`;
   $("elect-delay").textContent =
     (elec.delay25
       ? "met at FY 2025 (start moves to FY 2029); "
       : "not met at FY 2025; ") +
     (100 * elec.pDelay26).toFixed(0) +
-    "% chance the simulated FY 2026 rate meets it (start FY 2030)";
+    "% chance the simulated FY 2026 rate meets it — that pushes the start to " +
+    "FY 2030 and zeroes both FY 2028 and FY 2029";
   writeUrl();
   document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
     tr.classList.toggle("current", tr.dataset.code === code)
@@ -621,6 +682,7 @@ function render() {
 }
 
 async function main() {
+  if (FRAMED) document.documentElement.classList.add("framed");
   DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
   const sel = $("state");
   for (const [code, st] of Object.entries(DATA.states)) {
