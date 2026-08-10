@@ -1346,11 +1346,13 @@ def _provenance() -> dict[str, Any]:
         "bbce_registry": {
             "path": str(BBCE_PATH),
             "official_fy2024_report_url": BBCE_REPORT_URL,
-            "official_pdf_sha256": None,
+            "official_pdf_sha256": (
+                "96b1e5c5b2b59cd15429f8d71d696254da75950f12358d492c0f8be23272c25c"
+            ),
             "official_pdf_sha256_note": (
-                "not available: the execution sandbox exposed parsed PDF text "
-                "but blocked raw-byte download; registry and extracted-panel "
-                "hashes remain pinned"
+                "raw bytes downloaded and hashed 2026-08-09 outside the "
+                "training sandbox; cover page verified as the 2024 16th-"
+                "edition State Options Report"
             ),
             "source_extracted_panel_sha256": BBCE_SOURCE_PANEL_SHA256,
             "year_sources": {
