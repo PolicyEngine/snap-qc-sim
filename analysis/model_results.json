@@ -1,11 +1,16 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "auc_covariates": 0.7608905023931776,
-  "auc_with_intermediates": 0.7666262908275983,
+  "auc_with_intermediates": 0.7679474301860065,
+  "auc_with_additive_features": 0.7679474301860065,
+  "auc_with_burden_intermediates": 0.7666262908275983,
   "pr_covariates": 0.3522564685938263,
-  "pr_with_intermediates": 0.3553041682372305,
+  "pr_with_intermediates": 0.3580925987200655,
+  "pr_with_additive_features": 0.3580925987200655,
+  "pr_with_burden_intermediates": 0.3553041682372305,
   "p_at_5pct_budget_covariates": 0.4762910976010614,
-  "p_at_5pct_budget_with_intermediates": 0.47760784361005676,
+  "p_at_5pct_budget_with_intermediates": 0.4816595056358848,
+  "p_at_5pct_budget_with_additive_features": 0.4816595056358848,
   "train_n": 217656,
   "test_n": 44800,
   "prevalence": {
@@ -28,15 +33,46 @@
       "pr_auc": 0.3522564685938263,
       "precision_at_5pct_weight_budget": 0.4762910976010614
     },
-    "with_intermediates": {
+    "with_burden_intermediates": {
       "roc_auc": 0.7666262908275983,
       "pr_auc": 0.3553041682372305,
       "precision_at_5pct_weight_budget": 0.47760784361005676
     },
+    "with_intermediates": {
+      "roc_auc": 0.7679474301860065,
+      "pr_auc": 0.3580925987200655,
+      "precision_at_5pct_weight_budget": 0.4816595056358848
+    },
+    "with_additive_features": {
+      "roc_auc": 0.7679474301860065,
+      "pr_auc": 0.3580925987200655,
+      "precision_at_5pct_weight_budget": 0.4816595056358848
+    },
     "lift": {
-      "roc_auc": 0.0057357884344206855,
-      "pr_auc": 0.003047699643404178,
-      "precision_at_5pct_weight_budget": 0.0013167460089953398
+      "roc_auc": 0.00705692779282896,
+      "pr_auc": 0.005836130126239181,
+      "precision_at_5pct_weight_budget": 0.005368408034823358
+    },
+    "additive_lift_over_refit_burden": {
+      "roc_auc": 0.0013211393584082742,
+      "pr_auc": 0.0027884304828350026,
+      "precision_at_5pct_weight_budget": 0.004051662025828018
+    },
+    "additive_lift_over_committed_burden": {
+      "roc_auc": 0.0013211393584082742,
+      "pr_auc": 0.0027884304828350026,
+      "precision_at_5pct_weight_budget": 0.004051662025828018
+    },
+    "committed_burden_baseline": {
+      "roc_auc": 0.7666262908275983,
+      "pr_auc": 0.3553041682372305,
+      "precision_at_5pct_weight_budget": 0.47760784361005676,
+      "commit": "900199db293bf4120d0ed711d18f4bbec724e7ee"
+    },
+    "refit_burden_reproduction_delta": {
+      "roc_auc": 0.0,
+      "pr_auc": 0.0,
+      "precision_at_5pct_weight_budget": 0.0
     }
   },
   "feature_sets": {
@@ -60,7 +96,7 @@
       "formula_benefit",
       "formula_benefit_missing"
     ],
-    "intermediates": [
+    "burden_intermediates": [
       "claims_medical",
       "claims_medical_missing",
       "medical_expense_above_floor",
@@ -79,6 +115,85 @@
       "net_share_undefined",
       "deductions_per_member",
       "deductions_missing"
+    ],
+    "certification": [
+      "months_since_cert",
+      "months_since_cert_missing",
+      "cert_period_months",
+      "cert_period_months_missing",
+      "cert_timing_inconsistent",
+      "near_recert",
+      "near_recert_missing",
+      "near_recert_elderly_or_disabled"
+    ],
+    "bbce": [
+      "state_bbce",
+      "state_bbce_missing",
+      "state_bbce_elderly_or_disabled",
+      "state_bbce_has_earnings",
+      "state_bbce_children"
+    ],
+    "medicare_premium": [
+      "premium_only",
+      "just_above_premium",
+      "medical_expense_distance_to_premium",
+      "part_b_premium_missing"
+    ],
+    "additive": [
+      "months_since_cert",
+      "months_since_cert_missing",
+      "cert_period_months",
+      "cert_period_months_missing",
+      "cert_timing_inconsistent",
+      "near_recert",
+      "near_recert_missing",
+      "near_recert_elderly_or_disabled",
+      "state_bbce",
+      "state_bbce_missing",
+      "state_bbce_elderly_or_disabled",
+      "state_bbce_has_earnings",
+      "state_bbce_children",
+      "premium_only",
+      "just_above_premium",
+      "medical_expense_distance_to_premium",
+      "part_b_premium_missing"
+    ],
+    "intermediates": [
+      "claims_medical",
+      "claims_medical_missing",
+      "medical_expense_above_floor",
+      "med_doc_required",
+      "se_records",
+      "se_records_missing",
+      "utility_actuals",
+      "utility_actuals_missing",
+      "deduction_count",
+      "deduction_components_missing",
+      "at_max",
+      "at_min",
+      "ben_rel_max",
+      "benefit_position_missing",
+      "net_share_of_gross",
+      "net_share_undefined",
+      "deductions_per_member",
+      "deductions_missing",
+      "months_since_cert",
+      "months_since_cert_missing",
+      "cert_period_months",
+      "cert_period_months_missing",
+      "cert_timing_inconsistent",
+      "near_recert",
+      "near_recert_missing",
+      "near_recert_elderly_or_disabled",
+      "state_bbce",
+      "state_bbce_missing",
+      "state_bbce_elderly_or_disabled",
+      "state_bbce_has_earnings",
+      "state_bbce_children",
+      "premium_only",
+      "just_above_premium",
+      "medical_expense_distance_to_premium",
+      "part_b_premium_missing"
     ]
   },
   "smd_treatment_by_year": {
@@ -249,44 +364,44 @@
   },
   "permutation_importance_weighted_roc_auc": {
     "size": {
-      "mean_auc_decrease": 0.014333622328226858,
-      "std": 0.001339357761748594
+      "mean_auc_decrease": 0.01388888099509571,
+      "std": 0.0012938852978982007
     },
     "size_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "elderly_or_disabled": {
-      "mean_auc_decrease": 0.009958483877877945,
-      "std": 0.0006140855599540093
+      "mean_auc_decrease": 0.008004143013627063,
+      "std": 0.0008464114837712673
     },
     "elderly_disabled_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "has_earnings": {
-      "mean_auc_decrease": 3.0360753430103138e-05,
-      "std": 5.578551726611868e-05
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
     },
     "earned": {
-      "mean_auc_decrease": 0.025168221709034322,
-      "std": 0.0026197444126321904
+      "mean_auc_decrease": 0.017333847071452513,
+      "std": 0.0021970626565725082
     },
     "earned_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "unearned": {
-      "mean_auc_decrease": 0.010697987094204376,
-      "std": 0.00045923434783715804
+      "mean_auc_decrease": 0.00751457442712491,
+      "std": 0.001116220356651026
     },
     "unearned_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "gross": {
-      "mean_auc_decrease": 0.035061822340936334,
-      "std": 0.002274502307116033
+      "mean_auc_decrease": 0.0329215377815276,
+      "std": 0.0023858712883065287
     },
     "gross_missing": {
       "mean_auc_decrease": 0.0,
@@ -297,98 +412,166 @@
       "std": 0.0
     },
     "children": {
-      "mean_auc_decrease": 0.0007562964158396746,
-      "std": 0.0004237129377816353
+      "mean_auc_decrease": 0.0005119183930618832,
+      "std": 0.00022485871353148854
     },
     "children_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "expedited": {
-      "mean_auc_decrease": 0.00822647240007739,
-      "std": 0.0012427577125297617
+      "mean_auc_decrease": 0.0071749057216141665,
+      "std": 0.0011282081722848586
     },
     "expedited_missing": {
-      "mean_auc_decrease": 3.629769761712698e-05,
-      "std": 4.462339413247226e-06
+      "mean_auc_decrease": 3.838804489360026e-05,
+      "std": 4.663143573105751e-06
     },
     "formula_benefit": {
-      "mean_auc_decrease": 0.006050466440904479,
-      "std": 0.0010746014510084674
+      "mean_auc_decrease": 0.0070134342463086695,
+      "std": 0.0012171084882110377
     },
     "formula_benefit_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "claims_medical": {
-      "mean_auc_decrease": 0.0005357089921199209,
-      "std": 0.00012304286164796282
+      "mean_auc_decrease": 2.081836902654288e-05,
+      "std": 6.205702156650644e-06
     },
     "claims_medical_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "medical_expense_above_floor": {
-      "mean_auc_decrease": 0.00044131002774743243,
-      "std": 0.0001541679831565836
+      "mean_auc_decrease": -1.2635214807166229e-05,
+      "std": 2.7944298727185616e-06
     },
     "med_doc_required": {
-      "mean_auc_decrease": 0.00028411904443865766,
-      "std": 5.738776829863624e-05
+      "mean_auc_decrease": 6.626908520019903e-05,
+      "std": 7.749914656808257e-05
     },
     "se_records": {
-      "mean_auc_decrease": 0.0002081211275458905,
-      "std": 0.00010205995307521041
+      "mean_auc_decrease": 0.00010547267737592847,
+      "std": 0.00014158660175750062
     },
     "se_records_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "utility_actuals": {
-      "mean_auc_decrease": 0.000131882146567075,
-      "std": 0.00018020396373808197
+      "mean_auc_decrease": 0.0001088891180603957,
+      "std": 0.0001460060007016623
     },
     "utility_actuals_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "deduction_count": {
-      "mean_auc_decrease": -5.545809718614514e-05,
-      "std": 0.00011359759007002427
+      "mean_auc_decrease": 0.0004001891658109047,
+      "std": 0.0002525367904150487
     },
     "deduction_components_missing": {
-      "mean_auc_decrease": 0.0003754213259706374,
-      "std": 0.00015632997222566017
+      "mean_auc_decrease": 0.0003567093065041327,
+      "std": 0.00013656247711954573
     },
     "at_max": {
-      "mean_auc_decrease": -8.449648950970001e-07,
-      "std": 2.310811628064945e-06
+      "mean_auc_decrease": 6.217024717649621e-05,
+      "std": 5.448540275874809e-05
     },
     "at_min": {
-      "mean_auc_decrease": 0.0024015975844609238,
-      "std": 0.00025093291554929674
+      "mean_auc_decrease": 0.0012155140692472921,
+      "std": 0.0002601498945835786
     },
     "ben_rel_max": {
-      "mean_auc_decrease": 0.0249753972534388,
-      "std": 0.0012186452344695173
+      "mean_auc_decrease": 0.02622006184702621,
+      "std": 0.0008951934060937019
     },
     "benefit_position_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "net_share_of_gross": {
-      "mean_auc_decrease": 0.05931347350596141,
-      "std": 0.0013398646194578516
+      "mean_auc_decrease": 0.05392277905998346,
+      "std": 0.0026001456310889974
     },
     "net_share_undefined": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     },
     "deductions_per_member": {
-      "mean_auc_decrease": 0.007452209529936615,
-      "std": 0.0012155761262927077
+      "mean_auc_decrease": 0.0091584463469629,
+      "std": 0.0008168862246440453
     },
     "deductions_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "months_since_cert": {
+      "mean_auc_decrease": 0.0013351639334664655,
+      "std": 0.0007079125502767068
+    },
+    "months_since_cert_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "cert_period_months": {
+      "mean_auc_decrease": 0.00193141090873008,
+      "std": 0.0004104301215575363
+    },
+    "cert_period_months_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "cert_timing_inconsistent": {
+      "mean_auc_decrease": -7.444395682922877e-05,
+      "std": 4.813599355865158e-05
+    },
+    "near_recert": {
+      "mean_auc_decrease": -4.951333130325253e-05,
+      "std": 3.538743209027271e-05
+    },
+    "near_recert_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "near_recert_elderly_or_disabled": {
+      "mean_auc_decrease": -1.945514574979157e-05,
+      "std": 1.469603262295063e-05
+    },
+    "state_bbce": {
+      "mean_auc_decrease": 0.0015553861730599916,
+      "std": 0.0006400515033753635
+    },
+    "state_bbce_missing": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "state_bbce_elderly_or_disabled": {
+      "mean_auc_decrease": -6.267264163801744e-05,
+      "std": 4.99245953612744e-05
+    },
+    "state_bbce_has_earnings": {
+      "mean_auc_decrease": 0.001319802787521418,
+      "std": 0.0005976584588676762
+    },
+    "state_bbce_children": {
+      "mean_auc_decrease": 0.0007230162676591823,
+      "std": 0.0006157800700691067
+    },
+    "premium_only": {
+      "mean_auc_decrease": 0.0,
+      "std": 0.0
+    },
+    "just_above_premium": {
+      "mean_auc_decrease": -3.757079301660582e-05,
+      "std": 3.590782747448293e-05
+    },
+    "medical_expense_distance_to_premium": {
+      "mean_auc_decrease": -5.347894926910346e-05,
+      "std": 0.00031895646532744
+    },
+    "part_b_premium_missing": {
       "mean_auc_decrease": 0.0,
       "std": 0.0
     }
@@ -975,6 +1158,267 @@
       }
     }
   },
+  "certification_features": {
+    "definition": "near_recert is CERTMTH - 2 <= LASTCERT < CERTMTH, with CERTMTH > 0 and both fields observed",
+    "all_years": {
+      "n": 262456,
+      "months_since_cert_missing_n": 196,
+      "cert_period_months_missing_n": 162,
+      "cert_timing_inconsistent_n": 3727,
+      "near_recert_n": 38326,
+      "near_recert_weighted_rate": 0.14010141395092574,
+      "valid_period_n": 262261,
+      "period_24_plus_rate_valid": 0.23321424077541075,
+      "elderly_disabled_period_24_plus_rate_valid": 0.46545919688610915
+    },
+    "by_year": {
+      "2017": {
+        "n": 45518,
+        "months_since_cert_missing_n": 22,
+        "cert_period_months_missing_n": 77,
+        "cert_timing_inconsistent_n": 627,
+        "near_recert_n": 7004,
+        "near_recert_weighted_rate": 0.155474730466986,
+        "valid_period_n": 45438,
+        "period_24_plus_rate_valid": 0.1834367709846384,
+        "elderly_disabled_period_24_plus_rate_valid": 0.39527665971582365
+      },
+      "2018": {
+        "n": 43729,
+        "months_since_cert_missing_n": 29,
+        "cert_period_months_missing_n": 24,
+        "cert_timing_inconsistent_n": 580,
+        "near_recert_n": 6691,
+        "near_recert_weighted_rate": 0.15459321133678683,
+        "valid_period_n": 43702,
+        "period_24_plus_rate_valid": 0.19930437966225803,
+        "elderly_disabled_period_24_plus_rate_valid": 0.4122674955077461
+      },
+      "2019": {
+        "n": 43252,
+        "months_since_cert_missing_n": 43,
+        "cert_period_months_missing_n": 18,
+        "cert_timing_inconsistent_n": 532,
+        "near_recert_n": 6538,
+        "near_recert_weighted_rate": 0.14716787914014937,
+        "valid_period_n": 43233,
+        "period_24_plus_rate_valid": 0.21978581176416165,
+        "elderly_disabled_period_24_plus_rate_valid": 0.4343065693430657
+      },
+      "2022": {
+        "n": 41386,
+        "months_since_cert_missing_n": 45,
+        "cert_period_months_missing_n": 32,
+        "cert_timing_inconsistent_n": 782,
+        "near_recert_n": 5917,
+        "near_recert_weighted_rate": 0.1340381225104981,
+        "valid_period_n": 41350,
+        "period_24_plus_rate_valid": 0.25760580411124545,
+        "elderly_disabled_period_24_plus_rate_valid": 0.48139813263107495
+      },
+      "2023": {
+        "n": 43771,
+        "months_since_cert_missing_n": 29,
+        "cert_period_months_missing_n": 8,
+        "cert_timing_inconsistent_n": 583,
+        "near_recert_n": 6028,
+        "near_recert_weighted_rate": 0.12550832623634528,
+        "valid_period_n": 43742,
+        "period_24_plus_rate_valid": 0.2640482831146267,
+        "elderly_disabled_period_24_plus_rate_valid": 0.5169604639388778
+      },
+      "2024": {
+        "n": 44800,
+        "months_since_cert_missing_n": 28,
+        "cert_period_months_missing_n": 3,
+        "cert_timing_inconsistent_n": 623,
+        "near_recert_n": 6148,
+        "near_recert_weighted_rate": 0.12673745025450497,
+        "valid_period_n": 44796,
+        "period_24_plus_rate_valid": 0.27712295740691134,
+        "elderly_disabled_period_24_plus_rate_valid": 0.5444609364458238
+      }
+    },
+    "state_elderly_cadence_registry": "not built: techdoc 24-48 month values identify SSI-CAP/NYSNIP cases and do not define statewide elderly certification policy"
+  },
+  "bbce_registry_cross_check": {
+    "interpretation": "diagnostic only: CAT_ELIG codes 2/3 include BBCE but do not uniquely identify state adoption and are excluded from models",
+    "year_sources": {
+      "2017": {
+        "edition": 13,
+        "as_of": "2016-10-01",
+        "basis": "report_snapshot"
+      },
+      "2018": {
+        "edition": 14,
+        "as_of": "2017-10-01",
+        "basis": "report_snapshot"
+      },
+      "2019": {
+        "edition": 14,
+        "as_of": "2017-10-01",
+        "basis": "carried_forward_no_intervening_report"
+      },
+      "2022": {
+        "edition": 15,
+        "as_of": "2022-10-01",
+        "basis": "end_of_fiscal_year_proxy"
+      },
+      "2023": {
+        "edition": 15,
+        "as_of": "2022-10-01",
+        "basis": "report_snapshot"
+      },
+      "2024": {
+        "edition": 16,
+        "as_of": "2023-10-01",
+        "basis": "report_snapshot"
+      }
+    },
+    "by_year": {
+      "2017": {
+        "registered_bbce_case_n": 36614,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 8904,
+            "cat_elig_2_or_3_n": 170,
+            "cat_elig_2_or_3_weighted_rate": 0.012285568676685206
+          },
+          "1": {
+            "n": 36614,
+            "cat_elig_2_or_3_n": 2125,
+            "cat_elig_2_or_3_weighted_rate": 0.04587514957395398
+          }
+        }
+      },
+      "2018": {
+        "registered_bbce_case_n": 34919,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 8810,
+            "cat_elig_2_or_3_n": 666,
+            "cat_elig_2_or_3_weighted_rate": 0.08068207623262424
+          },
+          "1": {
+            "n": 34919,
+            "cat_elig_2_or_3_n": 1402,
+            "cat_elig_2_or_3_weighted_rate": 0.027932014408911944
+          }
+        }
+      },
+      "2019": {
+        "registered_bbce_case_n": 34796,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 8456,
+            "cat_elig_2_or_3_n": 796,
+            "cat_elig_2_or_3_weighted_rate": 0.10168407332565954
+          },
+          "1": {
+            "n": 34796,
+            "cat_elig_2_or_3_n": 1122,
+            "cat_elig_2_or_3_weighted_rate": 0.02351155586990646
+          }
+        }
+      },
+      "2022": {
+        "registered_bbce_case_n": 34826,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 6560,
+            "cat_elig_2_or_3_n": 103,
+            "cat_elig_2_or_3_weighted_rate": 0.011819163807134566
+          },
+          "1": {
+            "n": 34826,
+            "cat_elig_2_or_3_n": 2027,
+            "cat_elig_2_or_3_weighted_rate": 0.04232661626043483
+          }
+        }
+      },
+      "2023": {
+        "registered_bbce_case_n": 36996,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 6775,
+            "cat_elig_2_or_3_n": 102,
+            "cat_elig_2_or_3_weighted_rate": 0.01000087282631663
+          },
+          "1": {
+            "n": 36996,
+            "cat_elig_2_or_3_n": 2231,
+            "cat_elig_2_or_3_weighted_rate": 0.04116536019682625
+          }
+        }
+      },
+      "2024": {
+        "registered_bbce_case_n": 37485,
+        "state_status_missing_n": 0,
+        "cat_elig_missing_n": 0,
+        "case_pattern_by_state_status": {
+          "0": {
+            "n": 7315,
+            "cat_elig_2_or_3_n": 194,
+            "cat_elig_2_or_3_weighted_rate": 0.02001142325471369
+          },
+          "1": {
+            "n": 37485,
+            "cat_elig_2_or_3_n": 26214,
+            "cat_elig_2_or_3_weighted_rate": 0.680361985573395
+          }
+        }
+      }
+    }
+  },
+  "medicare_premium_features": {
+    "fiscal_year": 2024,
+    "definition": "reconstruct gross expense as FSMEDEXP + 35 for positive claims; for households with FSNELDER > 0, compare with the standard Part B premium selected by YRMONTH",
+    "population": "elderly households (FSNELDER > 0), excluding disabled-only",
+    "premium_only_tolerance_dollars": 5.0,
+    "just_above_signed_distance_dollars": [
+      5.0,
+      50.0
+    ],
+    "applicable_n": 2054,
+    "reference_counts": {
+      "164.90": 11003,
+      "174.70": 33797
+    },
+    "premium_only": {
+      "n": 739,
+      "weighted_population": 4641534.0265455535,
+      "share_of_applicable_n": 0.35978578383641674,
+      "smd_demo_overlap_n": 220
+    },
+    "just_above_premium": {
+      "n": 595,
+      "weighted_population": 3398127.0269149425,
+      "share_of_applicable_n": 0.28967867575462514,
+      "smd_demo_overlap_n": 529
+    },
+    "co_smd_censored_165": {
+      "n": 46,
+      "elderly_household_n": 36,
+      "nonelderly_household_n": 10,
+      "premium_only_overlap_n": 0,
+      "premium_only_overlap_rate": 0.0,
+      "just_above_premium_overlap_n": 36,
+      "just_above_premium_overlap_rate": 0.782608695652174,
+      "just_above_premium_overlap_rate_among_elderly": 1.0,
+      "naive_literal_overlap_n": 6,
+      "naive_literal_overlap_rate": 0.13043478260869565
+    }
+  },
   "provenance": {
     "packages": {
       "numpy": "2.5.1",
@@ -990,7 +1434,9 @@
       "qc_pub_fy2022.sav": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
       "qc_pub_fy2023.sav": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
       "qc_pub_fy2024.sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
-      "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca"
+      "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca",
+      "state_bbce.csv": "47c0255266f8fd62c6408697fc53b465c49f19004de8bf99c5c7d4f1def70b22",
+      "medicare_part_b_premiums.csv": "b8f192092823e5158737fe412c63a1cad19c768d040fe5b5bc2aa229afb00afa"
     },
     "threshold_map": {
       "2017": 38,
@@ -1022,6 +1468,59 @@
       "2023": 17,
       "2024": 18
     },
-    "smd_registry": "/Users/maxghenis/.cache/axiom-oracles/snap_qc_repo/additional_data/standard_medical_deductions.csv"
+    "smd_registry": "/Users/maxghenis/.cache/axiom-oracles/snap_qc_repo/additional_data/standard_medical_deductions.csv",
+    "bbce_registry": {
+      "path": "/Users/maxghenis/PolicyEngine/snap-qc-sim/analysis/data/state_bbce.csv",
+      "official_fy2024_report_url": "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-16th-state-options-report-june24.pdf",
+      "official_pdf_sha256": null,
+      "official_pdf_sha256_note": "not available: the execution sandbox exposed parsed PDF text but blocked raw-byte download; registry and extracted-panel hashes remain pinned",
+      "source_extracted_panel_sha256": "3f3f035c7ded13996e43b1a43e7ec0e4a742bb17522d1f730edb0990aafe08cb",
+      "year_sources": {
+        "2017": {
+          "edition": 13,
+          "as_of": "2016-10-01",
+          "basis": "report_snapshot"
+        },
+        "2018": {
+          "edition": 14,
+          "as_of": "2017-10-01",
+          "basis": "report_snapshot"
+        },
+        "2019": {
+          "edition": 14,
+          "as_of": "2017-10-01",
+          "basis": "carried_forward_no_intervening_report"
+        },
+        "2022": {
+          "edition": 15,
+          "as_of": "2022-10-01",
+          "basis": "end_of_fiscal_year_proxy"
+        },
+        "2023": {
+          "edition": 15,
+          "as_of": "2022-10-01",
+          "basis": "report_snapshot"
+        },
+        "2024": {
+          "edition": 16,
+          "as_of": "2023-10-01",
+          "basis": "report_snapshot"
+        }
+      }
+    },
+    "medicare_part_b_registry": {
+      "path": "/Users/maxghenis/PolicyEngine/snap-qc-sim/analysis/data/medicare_part_b_premiums.csv",
+      "calendar_year_sources": {
+        "2016": "https://www.cms.gov/newsroom/press-releases/2016-medicare-parts-b-premiums-and-deductibles-announced",
+        "2017": "https://www.cms.gov/newsroom/press-releases/2017-medicare-parts-b-premiums-and-deductibles-announced",
+        "2018": "https://www.cms.gov/newsroom/fact-sheets/2018-medicare-parts-b-premiums-and-deductibles",
+        "2019": "https://www.cms.gov/newsroom/fact-sheets/2019-medicare-parts-b-premiums-deductibles",
+        "2021": "https://www.cms.gov/newsroom/fact-sheets/2022-medicare-parts-b-premiums-deductibles-2022-medicare-part-d-income-related-monthly-adjustment",
+        "2022": "https://www.cms.gov/newsroom/fact-sheets/2022-medicare-parts-b-premiums-deductibles-2022-medicare-part-d-income-related-monthly-adjustment",
+        "2023": "https://www.cms.gov/newsroom/fact-sheets/2023-medicare-parts-b-premiums-and-deductibles-2023-medicare-part-d-income-related-monthly",
+        "2024": "https://www.cms.gov/newsroom/fact-sheets/2024-medicare-parts-b-premiums-and-deductibles"
+      },
+      "qc_expense_scale": "FSMEDEXP + 35 for positive allowable expenses"
+    }
   }
 }

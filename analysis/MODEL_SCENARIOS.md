@@ -15,7 +15,7 @@ The browser scenario export includes only the standard medical deduction (SMD). 
 
 ## Interpretation boundary
 
-Deltas are model-implied associations from features carrying +0.0057 ROC AUC, which rounds to +0.006. They are not causal policy effects. The requested generalization that 'CIs typically span zero' is not literally borne out by the completed table: 25 of 53 state intervals span zero. Descriptive SMD-adoption contrasts are the calibration reference.
+Deltas are model-implied associations from features carrying +0.0057 ROC AUC, which rounds to +0.006. They are not causal policy effects. CIs typically span zero: 28 of 53 state intervals do so. Descriptive SMD-adoption contrasts are the calibration reference.
 
 The SMD feature is itself limited: it does not model the state's standard amount, whether that amount binds, or documentation of actual expenses above the standard. Near-zero results are retained rather than replaced with accounting suppression.
 
@@ -33,66 +33,66 @@ Each delta is the HWGT-weighted difference in expected threshold-crossing probab
 
 | State | FY2024 SMD | Feature flip | Cases | Adoption crossing delta (pp) | 95% CI (pp) | Gate |
 |---|---|---|---:|---:|---:|---|
-| AK | not adopted | `1_to_0` | 4 | +0.0032 | [-0.0033, +0.0144] | Gated |
-| AL | adopted | `0_to_1` | 45 | -0.0025 | [-0.0219, +0.0201] | Pass |
-| AR | adopted | `0_to_1` | 21 | -0.0109 | [-0.0228, +0.0004] | Pass |
-| AZ | adopted | `0_to_1` | 35 | +0.0413 | [+0.0044, +0.0833] | Pass |
-| CA | adopted | `0_to_1` | 28 | +0.0534 | [+0.0097, +0.1103] | Pass |
-| CO | adopted | `0_to_1` | 53 | +0.0335 | [-0.0044, +0.0773] | Pass |
-| CT | not adopted | `1_to_0` | 14 | +0.0117 | [-0.0078, +0.0434] | Pass |
-| DC | not adopted | `1_to_0` | 23 | +0.0322 | [+0.0060, +0.0616] | Pass |
-| DE | not adopted | `1_to_0` | 33 | +0.0536 | [+0.0146, +0.0977] | Pass |
-| FL | not adopted | `1_to_0` | 29 | +0.0227 | [-0.0027, +0.0525] | Pass |
-| GA | adopted | `0_to_1` | 72 | +0.0670 | [+0.0216, +0.1183] | Pass |
-| GU | not adopted | `1_to_0` | 25 | -0.0388 | [-0.1617, +0.0749] | Pass |
-| HI | not adopted | `1_to_0` | 28 | -0.0219 | [-0.0505, +0.0046] | Gated |
-| IA | adopted | `0_to_1` | 49 | +0.0047 | [-0.0168, +0.0261] | Pass |
-| ID | adopted | `0_to_1` | 34 | -0.0174 | [-0.0292, -0.0065] | Gated |
-| IL | adopted | `0_to_1` | 51 | +0.0701 | [+0.0177, +0.1294] | Pass |
-| IN | not adopted | `1_to_0` | 3 | -0.0040 | [-0.0093, +0.0000] | Pass |
-| KS | adopted | `0_to_1` | 68 | -0.0349 | [-0.0578, -0.0134] | Pass |
-| KY | adopted | `0_to_1` | 40 | +0.0189 | [-0.0046, +0.0444] | Pass |
-| LA | adopted | `0_to_1` | 53 | +0.0297 | [-0.0110, +0.0773] | Pass |
-| MA | adopted | `0_to_1` | 97 | +0.1171 | [+0.0419, +0.2024] | Pass |
-| MD | not adopted | `1_to_0` | 42 | +0.0457 | [+0.0022, +0.0970] | Pass |
-| ME | not adopted | `1_to_0` | 21 | +0.0146 | [-0.0081, +0.0421] | Pass |
-| MI | adopted | `0_to_1` | 83 | +0.0690 | [+0.0076, +0.1392] | Pass |
-| MN | not adopted | `1_to_0` | 45 | +0.0349 | [+0.0043, +0.0715] | Gated |
-| MO | adopted | `0_to_1` | 102 | -0.0519 | [-0.0881, -0.0112] | Pass |
-| MS | not adopted | `1_to_0` | 16 | -0.0007 | [-0.0139, +0.0130] | Pass |
-| MT | not adopted | `1_to_0` | 68 | +0.1008 | [+0.0354, +0.1751] | Pass |
-| NC | not adopted | `1_to_0` | 90 | +0.1116 | [+0.0631, +0.1626] | Pass |
-| ND | adopted | `0_to_1` | 59 | -0.0678 | [-0.1039, -0.0350] | Pass |
-| NE | not adopted | `1_to_0` | 57 | -0.0174 | [-0.0358, +0.0017] | Pass |
-| NH | adopted | `0_to_1` | 79 | +0.0451 | [-0.0180, +0.1184] | Pass |
-| NJ | not adopted | `1_to_0` | 71 | +0.0079 | [-0.0266, +0.0434] | Pass |
-| NM | not adopted | `1_to_0` | 29 | +0.0264 | [-0.0013, +0.0631] | Pass |
-| NV | not adopted | `1_to_0` | 27 | +0.0143 | [-0.0059, +0.0376] | Pass |
-| NY | not adopted | `1_to_0` | 73 | +0.0065 | [-0.0246, +0.0423] | Pass |
-| OH | not adopted | `1_to_0` | 51 | +0.0847 | [+0.0390, +0.1379] | Pass |
-| OK | not adopted | `1_to_0` | 18 | +0.0292 | [+0.0013, +0.0646] | Pass |
-| OR | adopted | `0_to_1` | 41 | +0.0529 | [+0.0057, +0.1078] | Pass |
-| PA | not adopted | `1_to_0` | 66 | +0.0665 | [+0.0253, +0.1151] | Pass |
-| RI | adopted | `0_to_1` | 100 | +0.0305 | [-0.0155, +0.0820] | Pass |
-| SC | adopted | `0_to_1` | 42 | +0.0099 | [-0.0173, +0.0434] | Pass |
-| SD | adopted | `0_to_1` | 64 | -0.0405 | [-0.0701, -0.0124] | Gated |
-| TN | not adopted | `1_to_0` | 34 | -0.0168 | [-0.0306, -0.0033] | Pass |
-| TX | adopted | `0_to_1` | 43 | -0.0114 | [-0.0476, +0.0278] | Pass |
-| UT | not adopted | `1_to_0` | 30 | -0.0101 | [-0.0238, +0.0035] | Pass |
-| VA | adopted | `0_to_1` | 53 | +0.0631 | [+0.0196, +0.1145] | Pass |
-| VI | not adopted | `1_to_0` | 51 | -0.1107 | [-0.2160, -0.0074] | Gated |
-| VT | adopted | `0_to_1` | 100 | +0.0222 | [-0.0305, +0.0830] | Pass |
-| WA | not adopted | `1_to_0` | 27 | +0.0524 | [+0.0196, +0.0896] | Pass |
-| WI | not adopted | `1_to_0` | 108 | +0.1453 | [+0.0898, +0.2067] | Pass |
-| WV | not adopted | `1_to_0` | 38 | +0.0807 | [+0.0434, +0.1211] | Pass |
-| WY | adopted | `0_to_1` | 31 | -0.0880 | [-0.1367, -0.0429] | Gated |
+| AK | not adopted | `1_to_0` | 4 | -0.0005 | [-0.0064, +0.0058] | Gated |
+| AL | adopted | `0_to_1` | 45 | -0.0080 | [-0.0244, +0.0113] | Pass |
+| AR | adopted | `0_to_1` | 21 | -0.0087 | [-0.0200, +0.0020] | Pass |
+| AZ | adopted | `0_to_1` | 35 | +0.0312 | [-0.0015, +0.0680] | Pass |
+| CA | adopted | `0_to_1` | 28 | +0.0202 | [+0.0001, +0.0454] | Pass |
+| CO | adopted | `0_to_1` | 53 | +0.0599 | [+0.0155, +0.1092] | Pass |
+| CT | not adopted | `1_to_0` | 14 | -0.0019 | [-0.0160, +0.0158] | Pass |
+| DC | not adopted | `1_to_0` | 23 | +0.0224 | [+0.0021, +0.0457] | Pass |
+| DE | not adopted | `1_to_0` | 33 | +0.0358 | [+0.0065, +0.0710] | Pass |
+| FL | not adopted | `1_to_0` | 29 | +0.0117 | [-0.0041, +0.0303] | Pass |
+| GA | adopted | `0_to_1` | 72 | +0.0791 | [+0.0366, +0.1260] | Pass |
+| GU | not adopted | `1_to_0` | 25 | -0.0954 | [-0.2124, -0.0013] | Pass |
+| HI | not adopted | `1_to_0` | 28 | -0.0251 | [-0.0493, -0.0058] | Gated |
+| IA | adopted | `0_to_1` | 49 | -0.0208 | [-0.0452, +0.0001] | Pass |
+| ID | adopted | `0_to_1` | 34 | -0.0234 | [-0.0377, -0.0107] | Gated |
+| IL | adopted | `0_to_1` | 51 | +0.0780 | [+0.0337, +0.1280] | Pass |
+| IN | not adopted | `1_to_0` | 3 | -0.0046 | [-0.0107, +0.0000] | Pass |
+| KS | adopted | `0_to_1` | 68 | -0.0733 | [-0.0989, -0.0496] | Pass |
+| KY | adopted | `0_to_1` | 40 | +0.0248 | [-0.0003, +0.0534] | Pass |
+| LA | adopted | `0_to_1` | 53 | +0.0204 | [-0.0138, +0.0582] | Pass |
+| MA | adopted | `0_to_1` | 97 | +0.0492 | [-0.0037, +0.1085] | Pass |
+| MD | not adopted | `1_to_0` | 42 | +0.0324 | [-0.0011, +0.0722] | Pass |
+| ME | not adopted | `1_to_0` | 21 | +0.0047 | [-0.0126, +0.0223] | Pass |
+| MI | adopted | `0_to_1` | 83 | +0.0641 | [+0.0133, +0.1225] | Pass |
+| MN | not adopted | `1_to_0` | 45 | +0.0229 | [-0.0077, +0.0610] | Gated |
+| MO | adopted | `0_to_1` | 102 | -0.1233 | [-0.1539, -0.0949] | Pass |
+| MS | not adopted | `1_to_0` | 16 | -0.0033 | [-0.0128, +0.0066] | Pass |
+| MT | not adopted | `1_to_0` | 68 | +0.0658 | [+0.0060, +0.1325] | Pass |
+| NC | not adopted | `1_to_0` | 90 | +0.0379 | [-0.0011, +0.0776] | Pass |
+| ND | adopted | `0_to_1` | 59 | -0.0735 | [-0.1114, -0.0391] | Pass |
+| NE | not adopted | `1_to_0` | 57 | -0.0212 | [-0.0368, -0.0055] | Pass |
+| NH | adopted | `0_to_1` | 79 | -0.0351 | [-0.0720, +0.0030] | Pass |
+| NJ | not adopted | `1_to_0` | 71 | -0.0267 | [-0.0563, +0.0020] | Pass |
+| NM | not adopted | `1_to_0` | 29 | +0.0212 | [-0.0048, +0.0518] | Pass |
+| NV | not adopted | `1_to_0` | 27 | +0.0118 | [-0.0023, +0.0281] | Pass |
+| NY | not adopted | `1_to_0` | 73 | -0.0153 | [-0.0462, +0.0192] | Pass |
+| OH | not adopted | `1_to_0` | 51 | +0.0371 | [-0.0009, +0.0780] | Pass |
+| OK | not adopted | `1_to_0` | 18 | +0.0097 | [-0.0057, +0.0283] | Pass |
+| OR | adopted | `0_to_1` | 41 | +0.0709 | [+0.0262, +0.1225] | Pass |
+| PA | not adopted | `1_to_0` | 66 | +0.0499 | [+0.0153, +0.0886] | Pass |
+| RI | adopted | `0_to_1` | 100 | +0.0232 | [-0.0151, +0.0637] | Pass |
+| SC | adopted | `0_to_1` | 42 | +0.0044 | [-0.0176, +0.0328] | Pass |
+| SD | adopted | `0_to_1` | 64 | -0.0704 | [-0.1059, -0.0391] | Gated |
+| TN | not adopted | `1_to_0` | 34 | -0.0336 | [-0.0500, -0.0188] | Pass |
+| TX | adopted | `0_to_1` | 43 | -0.0098 | [-0.0409, +0.0221] | Pass |
+| UT | not adopted | `1_to_0` | 30 | -0.0294 | [-0.0454, -0.0151] | Pass |
+| VA | adopted | `0_to_1` | 53 | +0.0590 | [+0.0195, +0.1011] | Pass |
+| VI | not adopted | `1_to_0` | 51 | -0.0813 | [-0.1693, +0.0097] | Gated |
+| VT | adopted | `0_to_1` | 100 | -0.0084 | [-0.0430, +0.0288] | Pass |
+| WA | not adopted | `1_to_0` | 27 | +0.0286 | [+0.0040, +0.0576] | Pass |
+| WI | not adopted | `1_to_0` | 108 | +0.0797 | [+0.0373, +0.1258] | Pass |
+| WV | not adopted | `1_to_0` | 38 | +0.0522 | [+0.0234, +0.0839] | Pass |
+| WY | adopted | `0_to_1` | 31 | -0.0989 | [-0.1411, -0.0608] | Gated |
 
 ## Colorado reconciliation
 
-The exported Colorado burden-only SMD-off delta is -0.0335pp. The feature-only `ceiling` comparison in `counterfactual_co_smd.json` is -0.0727pp for the direct classifier and -0.0433pp for the hurdle crossing. Both use the shared documented predicate and report 53 and 53 flipped cases, respectively. The reference artifact does not expose case identifiers, so exact mask membership is not independently verified.
+The exported Colorado burden-only SMD-off delta is -0.0599pp. The feature-only `ceiling` comparison in `counterfactual_co_smd.json` is -0.0727pp for the direct classifier and -0.0433pp for the hurdle crossing. Both use the shared documented predicate and report 53 and 53 flipped cases, respectively. The reference artifact does not expose case identifiers, so exact mask membership is not independently verified.
 
-After normalizing to not adopted minus adopted, the checks are: point-sign concordance=yes; conditional-interval overlap=yes; reference direct point in export interval=yes. The recorded reconciliation therefore passes. The point estimates are not required to equal one another. This export freezes the distributional model after FY2022; the reference fits its direct and hurdle estimators through FY2023. The reported gaps are +0.0392pp versus direct and +0.0098pp versus hurdle.
+After normalizing to not adopted minus adopted, the checks are: point-sign concordance=yes; conditional-interval overlap=yes; reference direct point in export interval=yes. The recorded reconciliation therefore passes. The point estimates are not required to equal one another. This export freezes the distributional model after FY2022; the reference fits its direct and hurdle estimators through FY2023. The reported gaps are +0.0128pp versus direct and -0.0166pp versus hurdle.
 
 ## Browser contract
 
-`model_scenarios.json` is valid only with the exact `model_data.json` SHA-256 `412fc8c2b31f8b039ac844dd60e8e9e75a6fe6f831e8dd9cfdcaa1521b9da190`. Each sparse patch replaces full quantized parameters at state-local indexes; unlisted rows retain the baseline values. Reported gzip size uses compression level 9 with `mtime=0`.
+`model_scenarios.json` is valid only with the exact `model_data.json` SHA-256 `a39a926fae79eabf353f33b1cafb0ade8f5f31e307168b8c0c45eadbda65bfe6`. Each sparse patch replaces full quantized parameters at state-local indexes; unlisted rows retain the baseline values. Reported gzip size uses compression level 9 with `mtime=0`.

@@ -16,6 +16,7 @@ from scripts_build_model_data import QUANTILE_COLUMNS, QUANTILE_LEVELS
 from scripts_build_model_scenarios import (
     _canonical_json_sha256,
     _crossing_probability,
+    _extract_model_diagnostics,
     _read_bound_model_data,
     flip_smd_documentation_features,
     prepare_model_scenarios,
@@ -207,6 +208,17 @@ def _model_results() -> dict:
             },
         },
     }
+
+
+def test_model_diagnostics_keep_burden_lift_when_additive_model_changes():
+    payload = _model_results()
+    payload["models"]["with_burden_intermediates"] = {"roc_auc": 0.766}
+    payload["models"]["with_intermediates"] = {"roc_auc": 0.900}
+    payload["models"]["lift"] = {"roc_auc": 0.140}
+
+    auc_lift, _ = _extract_model_diagnostics(payload)
+
+    assert auc_lift == pytest.approx(0.006)
 
 
 def _counterfactual_payload() -> dict:

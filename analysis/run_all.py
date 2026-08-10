@@ -133,14 +133,17 @@ def _render_classifier_findings(model: Mapping[str, Any]) -> list[str]:
     test_prevalence = prevalence["test"]
     models = model["models"]
     baseline = models["covariates_only"]
-    full = models["with_intermediates"]
-    lift = models["lift"]
-    auc_lift = _number(lift["roc_auc"], context="AUC lift")
-    pr_lift = _number(lift["pr_auc"], context="PR-AUC lift")
+    burden = models["with_burden_intermediates"]
+    full = models.get("with_additive_features", models["with_intermediates"])
+    lift = models["additive_lift_over_refit_burden"]
+    auc_lift = _number(lift["roc_auc"], context="additive AUC lift")
+    pr_lift = _number(lift["pr_auc"], context="additive PR-AUC lift")
     interpretation = (
-        "The burden intermediates change FY2024 discrimination by "
+        "The certification, BBCE, and Medicare-premium families change FY2024 "
+        "discrimination relative to the refit burden model by "
         f"{auc_lift:+.4f} ROC AUC and {pr_lift:+.4f} PR-AUC. These are "
-        "predictive evaluation-sample differences, not mechanism estimates."
+        "additive-feature results on the same train/evaluation protocol, not "
+        "mechanism estimates."
     )
 
     lines = [
@@ -164,12 +167,17 @@ def _render_classifier_findings(model: Mapping[str, Any]) -> list[str]:
             f"{_pct(baseline['precision_at_5pct_weight_budget'])} |"
         ),
         (
-            f"| Baseline + burden intermediates | {_metric(full['roc_auc'])} | "
+            f"| Baseline + burden intermediates | {_metric(burden['roc_auc'])} | "
+            f"{_metric(burden['pr_auc'])} | "
+            f"{_pct(burden['precision_at_5pct_weight_budget'])} |"
+        ),
+        (
+            f"| Burden + three additive families | {_metric(full['roc_auc'])} | "
             f"{_metric(full['pr_auc'])} | "
             f"{_pct(full['precision_at_5pct_weight_budget'])} |"
         ),
         (
-            f"| Difference | {_signed(auc_lift)} | {_signed(pr_lift)} | "
+            f"| Additive difference | {_signed(auc_lift)} | {_signed(pr_lift)} | "
             f"{_signed(100 * _number(lift['precision_at_5pct_weight_budget'], context='precision lift'), 2, 'pp')} |"
         ),
         "",
