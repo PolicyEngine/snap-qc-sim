@@ -121,7 +121,7 @@ deterministic (independent clean-room reruns reproduce every
 analysis-pipeline artifact byte-for-byte, most recently on
 2026-08-07, and the headline simulation artifact was independently
 reproduced from the raw file to four decimals), and this revision
-incorporates three rounds of adversarial review — seventeen referee
+incorporates four rounds of adversarial review — nineteen referee
 reports, archived unedited in the repository — whose findings included
 two direction-of-effect errors in an earlier draft of this manuscript
 and a data-definition defect in the deployed simulator. An author
@@ -783,10 +783,11 @@ dataset showing that most measured error among eligible cases is
 information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
 assignment for boundary states. The modeling bar cannot be exact, and
-this paper went through three rounds of adversarial review, archived
+this paper went through four rounds of adversarial review, archived
 unedited in the repository, which found — among other things — two
-direction-of-effect errors and one wrong external figure in earlier
-drafts. The system this points toward is one in
+direction-of-effect errors, one wrong external figure, and one
+misdescribed epistemic status (a realized-year check first framed as a
+committed prediction) in earlier drafts. The system this points toward is one in
 which the rules that compute benefits, the requirements they impose on
 households, and the errors they produce are executable, testable, and
 priced from the same verified source.
