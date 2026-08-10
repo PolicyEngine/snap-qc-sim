@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-07
+date: 2026-08-09
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -31,7 +31,12 @@ abstract: |
   Carlo simulator resampling each state's own QC cases, is about
   measurement: at regulatory sample sizes, several states face nearly
   even odds — 46 to 50 percent — of being assigned a different cost tier
-  than their official point rate implies.
+  than their official point rate implies. The fiscal 2025 rates,
+  published in June 2026, land where that mechanism says realized years
+  should: 18 of 53 jurisdictions changed cost-sharing tiers in one
+  year, and only seven of those changes exceed the 95% band that two
+  years of sampling noise — estimated from fiscal 2024 microdata alone
+  — implies.
 ---
 
 ## Introduction
@@ -50,18 +55,29 @@ For a mid-sized state, one tier is worth tens of millions of dollars a
 year; for the largest states, more than a hundred million.
 
 [^delay]: 7 U.S.C. § 2013(a)(2)(B)(iii). The test applies mechanically to
-each year's rate and is independent of the state's election. At fiscal
-2024 rates, roughly ten jurisdictions — including Alaska (24.66%), the
-District of Columbia, and New York — would qualify, so any projection of
-FY2028 outlays must model the delay.
+each year's rate and is independent of the state's election. The fiscal
+2025 rates published in June 2026 settle the first leg: seven
+jurisdictions — Alaska (23.15%), the District of Columbia, Delaware,
+Georgia, Illinois, New Mexico, and Oregon — crossed on fiscal 2025 and
+owe nothing in FY2028, with no bill before FY2029 — keyed to the fiscal
+2026 rate unless that rate also crosses, which pushes the start to
+FY2030 and is nearly certain for Alaska. Fiscal 2024 rates would have
+qualified ten, including
+New York (14.09%); New York's fiscal 2025 rate of 13.18% misses the
+13.33% threshold, so its delay now rides on the fiscal 2026 measurement.
+Any projection of FY2028 outlays must model the delay, and the simulator
+does: delayed years enter expected bills as zero.
 
 The error rate is estimated by the Quality Control system: each state
 re-reviews a probability sample of its own active cases — by formula in
 7 C.F.R. § 275.11, between 300 and 2,400 annually, or 300 to 1,020 under
 an optional reduced schedule that every state elected in fiscal 2024
 [@fns2024techdoc] — and federal reviewers re-review a subsample, from
-which the Food and Nutrition Service (FNS) estimates official state rates
-with adjustments including federal re-review integration. The public-use
+which the Food and Nutrition Service (FNS; renamed the Food and
+Nutrition Administration in 2026 — the fiscal 2025 rate publication
+carries the new letterhead [@fna2025per], and this paper keeps FNS, the
+name on every document the fiscal 2024 data cite) estimates official
+state rates with adjustments including federal re-review integration. The public-use
 files that result record, for roughly 45,000 cases a year, what the
 agency issued and what the review concluded the case should have
 received, with coded findings for every discrepancy.
@@ -121,8 +137,12 @@ QC reviews produce, for each sampled active case, the issued allotment
 (`RAWBEN`), a corrected allotment constructed from the reviewer's
 findings (`BENFIX`), and — when they differ by more than a tolerance
 threshold ($56 in fiscal 2024, indexed from a $37 statutory base under
-7 U.S.C. § 2025(c)) — a payment error; findings are coded for
-sub-threshold deviations as well. The official
+7 U.S.C. § 2025(c); the published sequence $48, $54, $56, $57, $58 for
+fiscal 2022–26 is uniquely reproduced by flooring the indexed value,
+which puts the fiscal 2027 threshold at an estimated $59 — $59.58
+unrounded on the May 2026 Thrifty Food Plan cost of $1,018.20, with $60
+requiring a June figure of at least $1,025.40) — a payment error;
+findings are coded for sub-threshold deviations as well. The official
 state rate combines over- and underpayment rates [@fns2024per]: Colorado's
 9.97% is 7.91 over plus 2.06 under, and Maryland's 13.64 includes the
 nation's highest underpayment rate, 4.79 — so cost sharing partly bills
@@ -390,21 +410,27 @@ error.
 distribution of the signed deviation with a hurdle structure: a
 deviation probability $P(|D| > 0.5)$ and an above-threshold probability,
 each estimated by gradient boosting with nested out-of-fold isotonic
-calibration; a sign model (calibrated AUC 0.686 in the shipped frozen
+calibration; a sign model (calibrated AUC 0.700 in the shipped frozen
 configuration); nine conditional
 quantiles of $\log|D|$ fitted by quantile-loss gradient boosting
 [@koenker1978quantile], made monotone per case by rearrangement
 [@chernozhukov2010rearrange]; and an exponential tail in logs beyond the
 99th percentile. Conditional magnitudes retransform with an out-of-fold
 Duan smear of 1.173 [@duan1983smearing]; predicted mean conditional
-magnitude is $183 against $189 observed.
+magnitude is $186 against $189 observed. Model figures throughout this
+section quote the current committed artifacts, regenerated when the
+seventeen additive features described at the end of this section
+entered every stage; the pre-feature values (sign AUC 0.686, tail log
+scale 0.271, the earlier calibration table) are preserved in
+`analysis/FEATURES_REPORT.md` with the full before/after roll.
 
 **Validation, including failures.** @tbl-validate summarizes. An
 adversarial statistical review of the first deployed model found the
 tail fitted at one depth but attached at another (overstating
 extreme-tail mass) and cross-state level gaps propagating into simulated
 spreads. The fix round repaired both — refitting the tail at its
-attachment depth (log scale 0.271, from 0.467), capping each case's
+attachment depth (log scale 0.252 in the current artifact, from 0.467
+pre-fix), capping each case's
 magnitude at a physical maximum, and freezing fiscal-2023-fit state
 dollar factors — and also moved the coverage evaluation to the
 configuration that actually ships: the frozen model trained through
@@ -419,15 +445,17 @@ model's coverage: within 3 points of nominal at seven of nine levels,
 gaps −0.3 to −3.5 points; the fact catalog's E3 row records the
 supersession. The shipped frozen configuration does not attain it:
 within 3 points at only two of nine levels, all nine gaps negative
-(−0.2 to −7.4 points, worst at the 75th–90th percentiles). This is
+(−0.38 to −7.30 points, worst at the 75th–90th percentiles). This is
 one-sided *under*-coverage — predicted quantiles sit too low,
 understating mid-to-upper magnitudes, coherent with the
-$183-versus-$189 comparison. A benchmark against a quantile regression
+$186-versus-$189 comparison. A benchmark against a quantile regression
 forest on the identical protocol, with the decision rule fixed in the
 protocol code before results existed, shows the failure is not specific
-to the gradient-boosted quantile stack: the forest improves mean
-absolute coverage (4.10 against 4.38 points) but shifts under-coverage
-from the tail to the central levels with a worse maximum gap, degrades
+to the gradient-boosted quantile stack: run against the pre-feature
+stack (the expanded feature set has not been re-benchmarked), the
+forest improves mean absolute coverage (4.10 against the pre-feature
+4.38 points) but shifts under-coverage from the tail to the central
+levels with a worse maximum gap, degrades
 probability-integral-transform calibration, and loses the
 factor-adjusted state dollar-rate comparison (0.951 against 0.928
 points — a different object from @tbl-validate's official-error-rate
@@ -444,14 +472,16 @@ simulation result in this paper uses model draws.
 
 | Quantity | Unfactored (frozen model) | With frozen FY2023 factors |
 |---|---:|---:|
-| State MAE, equal-weighted | 1.81pp | 0.885pp |
-| State MAE, issuance-weighted | 1.65pp | 0.785pp |
-| Cross-state correlation (equal-weighted) | 0.52 | 0.90 |
+| State MAE, equal-weighted | 1.73pp | 0.875pp |
+| State MAE, issuance-weighted | 1.57pp | 0.808pp |
+| Cross-state correlation (equal-weighted) | 0.56 | 0.91 |
 
 : Fiscal 2024 state-level calibration of predicted official-error rates,
-matched frozen-model comparisons. Factors are fit on out-of-sample
-fiscal 2023 predictions and frozen before touching fiscal 2024.
-{#tbl-validate}
+matched frozen-model comparisons, from the current committed artifact
+(post-feature-round; the pre-feature table — 1.81/1.65pp unfactored,
+0.885/0.785pp factored — is preserved in `analysis/FEATURES_REPORT.md`).
+Factors are fit on out-of-sample fiscal 2023 predictions and frozen
+before touching fiscal 2024. {#tbl-validate}
 
 State-level calibration uses a strictly temporal protocol: models fit
 through 2022 predict 2023 out of sample; state observed-to-predicted
@@ -484,6 +514,28 @@ standard-medical-deduction adoption is typically bundled with
 utility-allowance offsets for cost neutrality, so these are contrasts of
 policy bundles. Causal identification awaits engine-computed
 counterfactuals (@sec-roadmap).
+
+A subsequent feature round, prompted by practitioner review, added
+seventeen case-level features in three families: certification timing
+(months since certification and period length from the file's
+`LASTCERT` and `CERTMTH`, a final-two-months indicator, and its
+interaction with elderly/disabled composition), state broad-based
+categorical eligibility from the FNS State Options Reports (44 adopting
+agencies in fiscal 2024, mapped to each training year's report edition;
+the file's own `CAT_ELIG` stays excluded because its codes conflate
+BBCE with traditional categorical eligibility), and Medicare Part B
+premium bands — reconstructing gross medical expense as the file's
+excess amount plus the $35 deduction floor and comparing it with the
+sampled month's published premium. The additive gains are modest and
+reported as such: classifier ROC AUC 0.7666 to 0.7679, hurdle stage-1
+AUC 0.8356 to 0.8397, equal-state calibration MAE 1.83 to 1.71
+percentage points, while distributional coverage worsens slightly (mean
+absolute gap 4.38 to 4.64 points) and is retained. The band feature's
+descriptive validation is exact where it should be: all 36 elderly
+Colorado cases censored at the state's $165 standard medical deduction
+map, after the floor reconstruction, to $200 gross — inside the
+just-above-premium band a practitioner predicted would matter — where a
+naive comparison on the excess scale misclassifies six of them.
 
 ## Simulating measured rates under cost sharing {#sec-simulate}
 
@@ -569,6 +621,79 @@ disabled member (§ 10103), so that lever's fiscal 2024 error mix
 overstates its remaining reach; and the expected cost-share effect of a
 marginal error reduction is near zero for states deep within a tier
 (New York at 14.09%, Alaska at 24.66%) and largest near boundaries.
+
+### The realized fiscal 2025 rates {#sec-fy2025}
+
+The simulation's claim — that tier assignment at current sample sizes is
+substantially a draw from sampling noise — is built from fiscal 2024
+microdata alone. On June 24, 2026, the renamed agency published the
+fiscal 2025 rates [@fna2025per]; this repository postdates that
+publication, so what follows is a check of input independence, not a
+registered forecast — the fiscal 2025 rates enter the analysis only as
+the realized outcomes being classified, and the noise scale that
+classifies them uses no fiscal 2025 information. Eighteen of 53
+jurisdictions changed cost-sharing tiers. Whether any single change
+reflects program performance is exactly the question sampling error
+poses: under the committed simulator's FY2024 sampling standard
+deviations, with both years carrying independent noise of equal scale, a
+year-over-year move is distinguishable from noise at 95% confidence only
+beyond 2.77 of a single year's standard deviations. Ten jurisdictions
+cleared that bar (Delaware, Florida, Hawaii, Illinois, Kentucky,
+Minnesota, North Carolina, New Jersey, Ohio, and West Virginia) — but
+only seven of those ten changed tiers, so 11 of the 18 tier changes sit
+inside the noise band; the median jurisdiction moved 1.38 standard
+deviations. Movement figures quote the committed artifact
+(`analysis/fy2025_movement.json`, deterministic at seed 11); the
+tier-step and election dollars below come from the deployed simulator's
+committed inputs (`app/public/data.json`) and its election engine.
+
+The two tails of that distribution make the point more sharply than the
+counts. Colorado moved from 9.97% to 10.09% — 0.12 percentage points,
+0.13 standard deviations, indistinguishable from re-measuring the same
+program — and that move crossed the 10% boundary into the 15% tier,
+repricing its FY2028 exposure by roughly $63M a year. Real movement
+exists alongside it: Hawaii went from 6.68% to 10.92% (11.2 standard
+deviations, two tiers up), New Jersey from 14.33% to 6.86% (−11.2, from
+the top tier to the 5% tier), Kentucky from 9.11% to 4.70% (−7.2, into
+the 0% tier). The formula cannot tell these apart; it prices Colorado's
+noise and New Jersey's real movement — whatever mix of program change
+and review practice produced it — with the same schedule. The national
+rate fell from 10.93% to 10.62%.
+
+The realized year also calibrates how much true year-over-year process
+movement the sampling-only simulator omits. Across states, the variance
+of the one-year change decomposes as twice the mean squared sampling
+standard deviation plus a process-drift variance $\tau^2$; the
+method-of-moments estimate is $\tau = 1.62$ percentage points (95% CI
+0.81–2.25 from a paired bootstrap over jurisdiction movement–SD rows),
+and a median/MAD version robust to the large realized moves gives
+$\tau = 1.07$ (CI 0–1.74). Process drift on this transition is likely
+real — the classical interval excludes zero; the robust one does not —
+and comparable in scale to sampling noise for a typical state, though a
+single transition cannot separate program drift from any change in QC
+design or practice between the two years. The simulator's draws remain
+sampling-only — a disclosed lower bound on total year-over-year
+uncertainty — with the drift estimate carried as a candidate
+calibration rather than silently added.
+
+Churn reaches the delay clause too. Had fiscal 2024 rates carried the
+delay test, ten jurisdictions would have met it; at fiscal 2025 — the
+first year the test binds — seven do. Florida, Massachusetts, Maryland,
+New Jersey, and New York left that hypothetical roster and Delaware and
+Illinois joined it: the assignment that zeroes a state's FY2028 bill
+churns under the same measurement noise that moves tiers.
+
+The fiscal 2025 publication also started the clock the statute set: the
+FY2028 share keys to each state's fiscal 2025 or fiscal 2026 rate, at
+its election, and fiscal 2026 closes September 30, 2026. The deployed
+simulator now prices that election — for Colorado, a 52.5% probability
+that a QC-sized fiscal 2026 measurement lands below the locked 10.09%
+rate, worth about $31M a year in expectation from the election alone;
+the dollars come from the near-even odds the measurement lands below
+the 10% tier *boundary*, repricing the $63.4M step — and models the
+delay clause as it binds: delayed years enter expected bills as zero,
+and a fiscal 2026 draw that crosses 13.33% pushes the start to FY2030,
+zeroing FY2029 as well.
 
 ## Toward engine-computed counterfactuals {#sec-roadmap}
 
