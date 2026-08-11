@@ -438,8 +438,10 @@ case-by-case catalog quantifies the conflation for the seven verified
 states (`analysis/engine_comparison.json`, served in the deployed
 simulator's engine view): per state, `BENFIX` reconciles with the
 recorded error amount exactly while `FSBEN` concordance runs 0.80–0.91,
-with 881 of the 6,081 replayed cases diverging, classified by the
-file's own coding into allotment adjustments, error corrections, and
+with 881 of the 6,194 official-universe cases diverging — the
+comparison reads only file columns, so it covers the 113
+replay-excluded SSI-CAP cases as well — classified by the file's own
+coding into allotment adjustments, error corrections, and
 recorded-correct nonformula cases. The official error
 label (reviewer status with an amount above the year's threshold)
 defines the binary outcome used for discrimination checks.
