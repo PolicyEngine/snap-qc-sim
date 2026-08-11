@@ -433,7 +433,14 @@ weighted fiscal 2024 cases. The recomputed formula benefit `FSBEN` is
 not a usable target — $|\texttt{RAWBEN} - \texttt{FSBEN}|$ matches the
 recorded error amount for only 83.64%, because it conflates legitimate
 adjustments such as proration with error — but it serves as a model
-feature, anchoring each case's formula benefit. The official error
+feature, anchoring each case's formula benefit. A committed
+case-by-case catalog quantifies the conflation for the seven verified
+states (`analysis/engine_comparison.json`, served in the deployed
+simulator's engine view): per state, `BENFIX` reconciles with the
+recorded error amount exactly while `FSBEN` concordance runs 0.80–0.91,
+with 881 of the 6,081 replayed cases diverging, classified by the
+file's own coding into allotment adjustments, error corrections, and
+recorded-correct nonformula cases. The official error
 label (reviewer status with an amount above the year's threshold)
 defines the binary outcome used for discrimination checks.
 
