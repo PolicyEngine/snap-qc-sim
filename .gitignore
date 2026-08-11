@@ -15,3 +15,4 @@ FACTS-preview.html
 *_files/
 .vercel
 .env*
+.DS_Store
