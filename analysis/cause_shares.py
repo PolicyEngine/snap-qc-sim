@@ -194,6 +194,31 @@ SCENARIO_CODE_SETS = {
     },
 }
 
+FINDING_NATURE_CLASSES = (
+    "pure_math",
+    "input_system_caused",
+    "mixed",
+    "input_other",
+)
+# These codes are NATURE values, not E_FINDG values.  The FY2024 codebook
+# defines E_FINDG only as the 2/3/4 payment impact of a variance.
+INHERENT_COMPUTATION_NATURE_CODES = frozenset(
+    {36, 42, 43, 54, 64, 65, 75, 79, 80, 98, 123}
+)
+CONDITIONAL_DEDUCTION_NATURE_CODES = frozenset({52, 53, 56, 57})
+ARITHMETIC_COMPUTATION_ELEMENT_CODE = 520
+AGENCY_OR_SYSTEM_CODES = frozenset(
+    code
+    for code, details in CAUSE_CODES.items()
+    if details["class"] == "agency_or_system"
+)
+# The archived Layer 2 totals used the narrower set already named
+# ``broad_rules_engine`` in this artifact.  Retain it only as an explicit
+# regression rule; the primary tabulation uses AGENCY_OR_SYSTEM_CODES.
+LAB_LEGACY_SYSTEM_CODES = frozenset(
+    SCENARIO_CODE_SETS["broad_rules_engine"]["codes"]
+)
+
 STATE_NAME_BY_ABBR = {
     abbreviation: name
     for name, abbreviation in error_model.STATE_NAME_TO_ABBR.items()
@@ -269,9 +294,8 @@ FIELD_SEMANTICS = {
     },
     "AMTERR": {
         "meaning": (
-            "Nonnegative dollar magnitude of any identified case benefit error: "
-            "the difference between what the State authorized and should have "
-            "authorized."
+            "Case benefit error: authorized benefit minus the benefit the State "
+            "should have authorized, expressed as a nonnegative dollar amount."
         ),
         "techdoc_citations": ["techdoc.txt:L9484-L9501"],
     },
@@ -286,6 +310,74 @@ FIELD_SEMANTICS = {
     "STATE": {
         "meaning": "FIPS code for State or territory.",
         "techdoc_citations": ["techdoc.txt:L7534-L7550"],
+    },
+}
+
+
+FINDING_NATURE_SEMANTICS = {
+    "populated_finding_slot": {
+        "rule": "ELEMENTi is nonmissing; pair ELEMENTi, NATUREi, and AGENCYi by suffix i.",
+        "reason": (
+            "The archived lab represented each populated finding as the same-slot "
+            "tuple (ELEMENTi, NATUREi, AGENCYi)."
+        ),
+        "techdoc_citations": [
+            "techdoc.txt:L6179-L6234",
+            "techdoc.txt:L12132-L12145",
+            "techdoc.txt:L12486-L12508",
+        ],
+    },
+    "field_correction": {
+        "rule": (
+            "Codes 36, 42, 43, 52, 53, 54, 56, 57, 64, 65, 75, 79, "
+            "80, 98, and 123 are NATUREi values. E_FINDGi is not used to "
+            "identify computational nature. Code 520 is an ELEMENTi value."
+        ),
+        "reason": (
+            "The FY2024 codebook defines E_FINDGi only as impact codes 2-4, "
+            "defines 520 as arithmetic computation under ELEMENTi, and lists "
+            "the remaining requested codes under NATUREi."
+        ),
+        "techdoc_citations": [
+            "techdoc.txt:L12090-L12130",
+            "techdoc.txt:L12444-L12454",
+            "techdoc.txt:L12486-L12508",
+            "techdoc.txt:L12600-L12760",
+            "techdoc.txt:L12788-L12798",
+        ],
+    },
+    "inherent_computation": {
+        "nature_codes": sorted(INHERENT_COMPUTATION_NATURE_CODES),
+        "element_codes": [ARITHMETIC_COMPUTATION_ELEMENT_CODE],
+    },
+    "conditional_deduction": {
+        "nature_codes": sorted(CONDITIONAL_DEDUCTION_NATURE_CODES),
+        "rule": (
+            "A deduction nature is computational only when the same suffix's "
+            "AGENCYi code belongs to agency_or_system."
+        ),
+        "agency_or_system_codes": sorted(AGENCY_OR_SYSTEM_CODES),
+        "agency_code_techdoc_citations": [
+            "techdoc.txt:L11816-L11838",
+            "techdoc.txt:L11882-L11960",
+        ],
+    },
+    "case_classes": {
+        "pure_math": "Every populated finding slot is computational.",
+        "input_system_caused": (
+            "No populated finding is computational and at least one populated "
+            "slot has an agency_or_system AGENCYi cause."
+        ),
+        "mixed": "At least one but not every populated finding is computational.",
+        "input_other": "All remaining deviation cases.",
+    },
+    "lab_regression_rule": {
+        "status": "legacy cross-check, not the primary classification",
+        "system_codes": sorted(LAB_LEGACY_SYSTEM_CODES),
+        "reason": (
+            "The archived Colorado 13/19/13/260 partition reproduces only when "
+            "system-side means the narrower broad_rules_engine scenario set."
+        ),
     },
 }
 
@@ -509,11 +601,6 @@ def _element_summary(
     )
     return {
         "selection": "E_FINDGi in {2,3,4} and AMOUNTi > 0, paired at suffix i",
-        "scope_warning": (
-            "These are recorded variance amounts inside official-error cases, not "
-            "a guaranteed decomposition of case AMTERR. In particular, code 8 is "
-            "documented as excluded from error determination."
-        ),
         "total": _element_metric(
             elements,
             official_dollars=official_dollars,
@@ -682,19 +769,135 @@ def _case_summary(cases: pd.DataFrame, official_dollars: float) -> dict[str, Any
     }
 
 
+def _optional_integer_code(value: object, *, field: str) -> int | None:
+    """Return a nullable whole-number public-file code."""
+    if pd.isna(value):
+        return None
+    number = float(value)
+    if not number.is_integer():
+        raise ValueError(f"Fractional {field} code: {value}")
+    return int(number)
+
+
+def _finding_nature_classes(
+    cases: pd.DataFrame,
+    *,
+    system_codes: frozenset[int] = AGENCY_OR_SYSTEM_CODES,
+) -> pd.Series:
+    """Classify cases from paired, populated detailed-finding slots."""
+    result: dict[Any, str] = {}
+    for index, row in cases.iterrows():
+        computational: list[bool] = []
+        any_system_cause = False
+        for slot in SLOTS:
+            element = _optional_integer_code(
+                row[f"ELEMENT{slot}"], field=f"ELEMENT{slot}"
+            )
+            if element is None:
+                continue
+            nature = _optional_integer_code(
+                row[f"NATURE{slot}"], field=f"NATURE{slot}"
+            )
+            agency = _cause_code(row[f"AGENCY{slot}"])
+            any_system_cause |= agency in system_codes
+            computational.append(
+                element == ARITHMETIC_COMPUTATION_ELEMENT_CODE
+                or nature in INHERENT_COMPUTATION_NATURE_CODES
+                or (
+                    nature in CONDITIONAL_DEDUCTION_NATURE_CODES
+                    and agency in system_codes
+                )
+            )
+
+        if computational and all(computational):
+            result[index] = "pure_math"
+        elif any(computational):
+            result[index] = "mixed"
+        elif any_system_cause:
+            result[index] = "input_system_caused"
+        else:
+            result[index] = "input_other"
+    return pd.Series(result, name="finding_nature_class")
+
+
+def _finding_nature_metric(
+    mask: pd.Series,
+    *,
+    cases: pd.DataFrame,
+    denominator_dollars: float,
+    share_key: str,
+) -> dict[str, int | float]:
+    selected = mask.fillna(False).astype(bool)
+    weights = cases["HWGT"]
+    dollars = weights * cases["AMTERR"]
+    selected_dollars = float(dollars.loc[selected].sum())
+    return {
+        "n": int(selected.sum()),
+        "weighted_n": _rounded(weights.loc[selected].sum(), 6),
+        "dollars": _rounded(selected_dollars, 2),
+        share_key: _share(selected_dollars, denominator_dollars),
+    }
+
+
+def _finding_nature_summary(
+    cases: pd.DataFrame,
+    *,
+    denominator_label: str,
+    universe_rule: str,
+    system_codes: frozenset[int] = AGENCY_OR_SYSTEM_CODES,
+) -> dict[str, Any]:
+    """Return an exhaustive nature-class partition for one denominator."""
+    denominator_dollars = float((cases["HWGT"] * cases["AMTERR"]).sum())
+    share_key = f"share_of_{denominator_label}_dollars"
+    classes = _finding_nature_classes(cases, system_codes=system_codes)
+    metrics = {
+        case_class: _finding_nature_metric(
+            classes.eq(case_class),
+            cases=cases,
+            denominator_dollars=denominator_dollars,
+            share_key=share_key,
+        )
+        for case_class in FINDING_NATURE_CLASSES
+    }
+    if sum(metric["n"] for metric in metrics.values()) != len(cases):
+        raise AssertionError("Finding-nature classes do not exhaust cases")
+    class_dollars = sum(float(metric["dollars"]) for metric in metrics.values())
+    if not np.isclose(class_dollars, denominator_dollars, rtol=0, atol=0.02):
+        raise AssertionError("Finding-nature classes do not exhaust dollars")
+    populated = pd.concat(
+        [cases[f"ELEMENT{slot}"].notna() for slot in SLOTS], axis=1
+    ).sum(axis=1)
+    return {
+        "universe": universe_rule,
+        "denominator": {
+            "n": len(cases),
+            "weighted_n": _rounded(cases["HWGT"].sum(), 6),
+            "dollars": _rounded(denominator_dollars, 2),
+        },
+        "classes": metrics,
+        "diagnostics": {
+            "n_cases_without_populated_finding": int(populated.eq(0).sum()),
+            "populated_finding_slots": int(populated.sum()),
+        },
+    }
+
+
 def _state_row(
     state: str,
     universe: pd.DataFrame,
     official_cases: pd.DataFrame,
+    deviation_cases: pd.DataFrame,
 ) -> dict[str, Any]:
     if state == "US":
         state_universe = universe
         cases = official_cases
+        deviations = deviation_cases
         state_fips: int | None = None
         state_name = "United States"
     else:
         state_universe = universe.loc[universe["state"].eq(state)]
         cases = official_cases.loc[official_cases["state"].eq(state)]
+        deviations = deviation_cases.loc[deviation_cases["state"].eq(state)]
         state_fips = STATE_FIPS_BY_ABBR[state]
         state_name = STATE_NAME_BY_ABBR[state]
 
@@ -712,6 +915,28 @@ def _state_row(
         "official_error_dollars": _rounded(official_dollars, 2),
         "case_attributed": _case_summary(cases, official_dollars),
         "element_attributed": _element_summary(elements, official_dollars, cases),
+        "finding_nature": {
+            "primary_agency_or_system": {
+                "deviation": _finding_nature_summary(
+                    deviations,
+                    denominator_label="deviation",
+                    universe_rule="STATUS in {2,3} and AMTERR > 0",
+                ),
+                "official_error": _finding_nature_summary(
+                    cases,
+                    denominator_label="official_error",
+                    universe_rule="STATUS in {2,3} and AMTERR > 56",
+                ),
+            },
+            "lab_legacy_broad_rules_engine": {
+                "deviation": _finding_nature_summary(
+                    deviations,
+                    denominator_label="deviation",
+                    universe_rule="STATUS in {2,3} and AMTERR > 0",
+                    system_codes=LAB_LEGACY_SYSTEM_CODES,
+                )
+            },
+        },
     }
 
 
@@ -736,6 +961,11 @@ def compute_rows(universe: pd.DataFrame) -> list[dict[str, Any]]:
 
     official_mask = error_model.official_error_label(universe).eq(1)
     official_cases = universe.loc[official_mask].copy()
+    status = pd.to_numeric(universe["STATUS"], errors="coerce")
+    amount = pd.to_numeric(universe["AMTERR"], errors="coerce")
+    if status.isna().any() or amount.isna().any():
+        raise ValueError("Deviation fields STATUS and AMTERR must be nonmissing")
+    deviation_cases = universe.loc[status.isin([2, 3]) & amount.gt(0)].copy()
     expected_states = set(error_model.FIPS.values())
     observed_states = set(universe["state"])
     if observed_states != expected_states:
@@ -746,10 +976,10 @@ def compute_rows(universe: pd.DataFrame) -> list[dict[str, Any]]:
         )
 
     rows = [
-        _state_row(state, universe, official_cases)
+        _state_row(state, universe, official_cases, deviation_cases)
         for state in sorted(expected_states)
     ]
-    rows.append(_state_row("US", universe, official_cases))
+    rows.append(_state_row("US", universe, official_cases, deviation_cases))
     return rows
 
 
@@ -1003,18 +1233,18 @@ def build_artifact() -> dict[str, Any]:
         )
 
     return {
-        "schema": "snap_qc_sim.cause_shares.v1",
-        "schema_version": 1,
+        "schema": "snap_qc_sim.cause_shares.v2",
+        "schema_version": 2,
         "fiscal_year": FISCAL_YEAR,
         "public_file_supports_element_primary_cause": True,
         "support_statement": (
             "The public SAV contains AGENCY1-9, documented as agency or client "
             "responsibility and primary cause of variance. It does not contain an "
-            "exhaustive binary agency/client flag or a direct allocation of case "
-            "AMTERR across findings, and cause attribution is not a causal estimate "
-            "of errors preventable by a verified rules engine."
+            "exhaustive binary agency/client flag, and cause attribution is not a "
+            "causal estimate of errors preventable by a verified rules engine."
         ),
         "field_semantics": FIELD_SEMANTICS,
+        "finding_nature_semantics": FINDING_NATURE_SEMANTICS,
         "cause_codes": _cause_code_metadata(),
         "class_semantics": {
             "agency_or_system": (
@@ -1039,9 +1269,7 @@ def build_artifact() -> dict[str, Any]:
         "attribution_conventions": {
             "primary_case_partition": (
                 "Equal split across distinct cause classes in the case; exhaustive "
-                "and nonoverlapping after fractional allocation. It scans all "
-                "recorded variance causes, including findings that may not contribute "
-                "to case AMTERR, because the public file supplies no exact linkage."
+                "and nonoverlapping after fractional allocation."
             ),
             "exclusive_axis": (
                 "Whole-case agency-only/client-only/mixed/residual diagnostic."
@@ -1052,9 +1280,7 @@ def build_artifact() -> dict[str, Any]:
             ),
             "element": (
                 "Positive AMOUNTi with same-slot E_FINDGi in {2,3,4}; no attempt "
-                "to force element sums to equal AMTERR. These are recorded variance "
-                "amounts inside official-error cases; code 8 is expressly excluded "
-                "from error determination by the codebook."
+                "to force element sums to equal AMTERR."
             ),
         },
         "provenance": {
@@ -1082,6 +1308,7 @@ def build_artifact() -> dict[str, Any]:
             },
             "universe": "CASE == 1",
             "official_error": "STATUS in {2,3} and AMTERR > 56",
+            "deviation": "STATUS in {2,3} and AMTERR > 0",
             "threshold_dollars": error_model.THRESHOLD[FISCAL_YEAR],
             "threshold_comparison": "strictly greater than",
             "dollar_formula": "sum(HWGT * AMTERR) over official-error cases",
