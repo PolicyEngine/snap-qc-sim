@@ -352,17 +352,21 @@ construction of the file, that ineligible-case error.
 | Layer | Definition | Computation-side share | Universe and units |
 |---|---|---|---|
 | 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change), any-presence across a case's nine cause slots, share of official error dollars (HWGT × `AMTERR`) | 7.4% strict ($6.9M/yr); 10.6% ($10.0M/yr) adding policy-misapplied, budgeted-wrong, computer-user | Colorado; nationally 3.5% strict ($232M/yr), 19.3% broad ($1.27B of $6.59B) |
-| 2. Finding natures | Nature codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed), cause-disambiguated | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado error dollars |
+| 2. Finding natures | `NATURE` codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic `ELEMENT`; deduction-amount natures count only when the paired cause is in layer 1's broad computing-apparatus set | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7% |
 | 3. Engine replay | Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts | Above-threshold official errors: 21.6% of cases unexplained (upper bound), 78.4% explained as correct arithmetic on wrong facts. Sub-threshold deviations: 8.6% unexplained, 91.4% explained. Blended: 13.1% / 86.9% | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
 : Three nested decompositions of Colorado fiscal 2024 measured error.
-Layer 1 quotes the committed cause-share artifact
-(`analysis/cause_shares.json`, all 53 jurisdictions, conventions
-serialized in the file); layer 2 is a share of Colorado's weighted
-deviation dollars from the archived replay-lab tabulation; layer 3 is a
-share of filtered cases. Any-presence attribution counts a case's
-dollars toward every cause class present in its slots, so layer-1
-classes overlap. Cause and nature coding reflect state reviewer
+Layers 1–2 quote the committed cause-share artifact
+(`analysis/cause_shares.json`, all 53 jurisdictions, conventions and
+code-to-class maps serialized in the file); layer 3 is a share of
+filtered cases. Any-presence attribution counts a case's dollars toward
+every cause class present in its slots, so layer-1 classes overlap.
+Layer 2 partitions cases; its system-side test reuses layer 1's broad
+computing-apparatus cause set — the artifact also carries a wider
+agency-responsibility convention under which the system-side shares are
+several times larger (Colorado system-caused input 31% rather than
+6.6%), answering a responsibility question rather than this table's
+computation question. Cause and nature coding reflect state reviewer
 judgment under handbook guidance [@fns310handbook] and carry
 cross-state coding variation; fiscal 2024 also brought minor revisions
 to the finding-code sets. {#tbl-decompose}
