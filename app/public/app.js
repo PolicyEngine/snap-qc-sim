@@ -7,8 +7,14 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260809e"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260811a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
+const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
+// SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
+// and locked by tests/test_engine_comparison.py; the browser refuses a payload
+// that does not hash to this pin.
+const ENGINE_DATA_SHA256 =
+  "2517d26e151cbeb8f9808d16750e531d7fc078fc8e15e4c1869d14c10d30c599";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,
@@ -343,7 +349,7 @@ function readUrl() {
   // Legacy accounting-lever params (levers, eff, mode) are ignored: those
   // scenarios suppressed observed error dollars by finding category, which
   // is an accounting bound, not a prediction, and were removed 2026-08-07.
-  return p.get("smd") === "1";
+  return { smd: p.get("smd") === "1", engine: p.get("engine") === "1" };
 }
 
 function writeUrl() {
@@ -351,6 +357,7 @@ function writeUrl() {
   p.set("state", $("state").value);
   if (+$("audits").value) p.set("audits", $("audits").value);
   if ($("lever-smd").checked) p.set("smd", "1");
+  if ($("engine-mode").checked) p.set("engine", "1");
   history.replaceState(null, "", "?" + p.toString());
   if (FRAMED) {
     // The AppPage shell listens for urlUpdate and mirrors the params onto
@@ -599,6 +606,136 @@ function mechanismLine(scenarioOn) {
     : "Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.";
 }
 
+// ---- Axiom rules-engine comparison mode ----------------------------------
+// The engine mode surfaces precomputed verification artifacts: the committed
+// axiom-oracles suite reports (stage-by-stage parity of the Axiom RuleSpec
+// computation against the QC file's Minimodel-recomputed benefit chain) and
+// the formula-benefit divergence catalog built by analysis/engine_comparison.py.
+// It does not change the Monte Carlo simulation — engine runs are precomputed,
+// never recomputed in the browser.
+
+let ENGINE = null;         // engine_data.json payload
+let ENGINE_LOAD = null;    // load promise
+let ENGINE_ERROR = null;
+
+async function loadEngineArtifact() {
+  if (!ENGINE_LOAD) {
+    ENGINE_LOAD = (async () => {
+      const res = await fetch("engine_data.json?v=" + ASSET_V);
+      if (!res.ok) throw new Error("engine artifact fetch failed");
+      const bytes = await res.arrayBuffer();
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      const hex = [...new Uint8Array(digest)]
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      if (hex !== ENGINE_DATA_SHA256)
+        throw new Error(
+          `engine_data.json sha256 ${hex.slice(0, 12)}… does not match the committed pin ${ENGINE_DATA_SHA256.slice(0, 12)}…`
+        );
+      const payload = JSON.parse(new TextDecoder().decode(bytes));
+      if (payload.schema !== ENGINE_SCHEMA)
+        throw new Error(`unexpected engine schema ${payload.schema}`);
+      ENGINE = payload;
+    })().catch((err) => {
+      ENGINE_ERROR = err;
+      throw err;
+    });
+  }
+  return ENGINE_LOAD;
+}
+
+const pct = (share, digits = 1) => (100 * share).toFixed(digits) + "%";
+
+function enginePanelBody(code) {
+  const st = ENGINE.states[code];
+  const totals = ENGINE.totals;
+  const nat = ENGINE.national;
+  const prov = ENGINE.provenance;
+  const provLine =
+    `<p class="engine-prov">Suite reports committed in ` +
+    `<a href="https://github.com/TheAxiomFoundation/axiom-oracles">axiom-oracles</a> @ ${prov.oracle_commit.slice(0, 12)} ` +
+    `(byte-identical copies and SHA-256 pins in <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/oracle-suites">this repository</a>); ` +
+    `QC source archive ${prov.qc_archive_sha256.slice(0, 12)}…; certified toolchain (Colorado probe): ` +
+    `engine ${prov.certified_toolchain.engine_commit.slice(0, 12)} × rulespec-us ${prov.certified_toolchain.rulespec_us_commit.slice(0, 12)}. ` +
+    `Catalog: <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/ENGINE_COMPARISON.md">analysis/ENGINE_COMPARISON.md</a> · ` +
+    `<a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a></p>`;
+  const conflates =
+    `<h3>What the formula benefit conflates with error</h3>` +
+    `<p>The file records three benefit anchors per case: the allotment the state issued (RAWBEN), ` +
+    `the allotment corrected for the reviewer's findings (BENFIX), and the Minimodel's full-formula ` +
+    `recomputation (FSBEN). |RAWBEN − BENFIX| equals the recorded error amount for every ` +
+    `official-universe case in the seven verified states — nationally ${pct(nat.concordance_weighted.benfix, 3)} of ` +
+    `weighted FY 2024 cases. Taking the formula benefit as the error anchor instead — |RAWBEN − FSBEN| — matches ` +
+    `the recorded error for only ${pct(nat.concordance_weighted.fsben, 1)} weighted: a formula recomputation alone ` +
+    `conflates recorded allotment adjustments with error. This simulator's deviation measure therefore anchors to ` +
+    `BENFIX, and the engine exposes the full six-stage chain rather than one formula number.</p>`;
+  if (!st) {
+    return (
+      `<p>This jurisdiction's encoded rules are not yet engine-verified. Across the seven states that are ` +
+      `(CO, NY, CA, AZ, GA, MD, TX), the Axiom RuleSpec computation reproduces the QC file's recorded benefit ` +
+      `chain for all ${totals.compared.toLocaleString()} replayable FY 2024 reviews — ` +
+      `${totals.stage_cells.toLocaleString()} stage comparisons, zero tolerance, ` +
+      `${totals.excluded} enumerated exclusions. Interested in verification for your state? ` +
+      `<a href="mailto:hello@policyengine.org">hello@policyengine.org</a></p>` +
+      conflates +
+      provLine
+    );
+  }
+  const cat = st.catalog;
+  const cls = cat.classes;
+  const adj = cls.allotment_adjustment;
+  const corr = cls.error_correction_arithmetic;
+  const rec = cls.recorded_correct_nonformula;
+  const chips = st.stages
+    .map(
+      (s) =>
+        `<span class="stage-chip" title="Zero-tolerance match of the engine's ${s.label} against the QC file's recorded value for every compared case"><span class="n">${s.matched}/${s.n}</span>${s.label}</span>`
+    )
+    .join("");
+  const excl = st.excluded
+    ? ` ${st.excluded} SSI-CAP standardized-benefit cases are excluded — an enumerated program-structure class using a separate benefit procedure (NYSCAP units follow the regular chain and are in scope).`
+    : "";
+  return (
+    `<p><strong>${code}: the engine reproduces the file's recorded benefit chain for all ` +
+    `${st.compared} replayable FY 2024 reviews</strong> — every stage below exact at zero tolerance.${excl} ` +
+    `QC-adjudicated deductions, utility allowances, and eligibility findings enter as inputs, so parity ` +
+    `certifies the downstream benefit arithmetic given those intermediates.</p>` +
+    `<div class="stage-chips">${chips}</div>` +
+    conflates +
+    `<p>In ${code}, the formula benefit differs from the corrected allotment for ` +
+    `${cat.divergent} of ${cat.universe} cases (${pct(cat.divergent_weighted_share)} weighted) — the divergence catalog:</p>` +
+    `<ul class="catalog-list">` +
+    `<li><strong>Coded allotment adjustments:</strong> ${adj.n} cases (${adj.prorated_n} prorated benefits; ` +
+    `${adj.no_error_n} with no recorded error at all — pure adjustments a formula-anchor would mislabel as error)</li>` +
+    `<li><strong>Error-correction arithmetic:</strong> ${corr.n} cases where the reviewer's corrected allotment ` +
+    `differs from the full recomputation (${corr.within_rounding_band_n} within $2, rounding-scale)</li>` +
+    `<li><strong>Recorded-correct issuance outside the formula chain:</strong> ${rec.n} cases the review judged ` +
+    `correct as issued (${rec.ssi_cap_coded_n} SSI-CAP-coded, ${rec.minimum_benefit_n} minimum-benefit)</li>` +
+    `</ul>` +
+    `<p class="hint">Counts are accounting classes recorded in the public file (ALLADJ, AMTERR, SSI_CAP, FSMINBEN), ` +
+    `not causal attributions. The Monte Carlo simulation above is unchanged in this view: engine runs are ` +
+    `precomputed verification artifacts, and the engine does not yet recompute counterfactual scenarios in this app.</p>` +
+    provLine
+  );
+}
+
+function renderEnginePanel() {
+  const panel = $("engine-panel");
+  const on = $("engine-mode").checked;
+  panel.hidden = !on;
+  if (!on) return;
+  const body = $("engine-body");
+  if (ENGINE_ERROR) {
+    body.innerHTML = `<p>The engine comparison artifact failed its integrity check and this view is unavailable: ${ENGINE_ERROR.message}</p>`;
+    return;
+  }
+  if (!ENGINE) {
+    body.innerHTML = `<p>Loading the verification artifact…</p>`;
+    return;
+  }
+  body.innerHTML = enginePanelBody($("state").value);
+}
+
 // ---- Render --------------------------------------------------------------
 
 function render() {
@@ -665,6 +802,7 @@ function render() {
     "% chance the simulated FY 2026 rate meets it — that pushes the start to " +
     "FY 2030 and zeroes both FY 2028 and FY 2029";
   writeUrl();
+  renderEnginePanel();
   document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
     tr.classList.toggle("current", tr.dataset.code === code)
   );
@@ -692,7 +830,7 @@ async function main() {
     sel.appendChild(o);
   }
   sel.value = "CO";
-  const wantScenario = readUrl();
+  const urlState = readUrl();
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
@@ -713,6 +851,14 @@ async function main() {
     }
     queue();
   });
+  $("engine-mode").addEventListener("change", () => {
+    if ($("engine-mode").checked && !ENGINE) {
+      // Render immediately (the panel shows its loading line), then again
+      // when the artifact arrives or its integrity check fails.
+      loadEngineArtifact().catch(() => {}).finally(queue);
+    }
+    queue();
+  });
   document.querySelectorAll("#nat-table th button").forEach((b) => {
     b.addEventListener("click", () => {
       const k = b.dataset.k;
@@ -720,13 +866,17 @@ async function main() {
       renderNatTable();
     });
   });
-  if (wantScenario) {
+  if (urlState.smd) {
     try {
       await loadModelArtifacts();
       if (!scenarioInfo(sel.value)?.gated) $("lever-smd").checked = true;
     } catch {
       // Shared links to gated or broken scenarios load the observed view.
     }
+  }
+  if (urlState.engine) {
+    $("engine-mode").checked = true;
+    loadEngineArtifact().catch(() => {}).finally(queue);
   }
   render();
   setTimeout(computeNational, 60);
