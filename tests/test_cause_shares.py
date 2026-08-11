@@ -127,6 +127,60 @@ def test_partition_arithmetic_is_exhaustive_and_handles_overlap():
     )
 
 
+def _finding_nature_fixture() -> pd.DataFrame:
+    cases = pd.DataFrame(
+        {
+            "HWGT": [1.0] * 5,
+            "AMTERR": [10.0, 20.0, 30.0, 40.0, 50.0],
+        }
+    )
+    for slot in cause_shares.SLOTS:
+        cases[f"AGENCY{slot}"] = np.nan
+        cases[f"ELEMENT{slot}"] = np.nan
+        cases[f"NATURE{slot}"] = np.nan
+
+    # Inherent computation nature: pure_math regardless of cause.
+    cases.loc[0, ["AGENCY1", "ELEMENT1", "NATURE1"]] = [1, 311, 36]
+    # Conditional deduction nature: code 14 is in agency_or_system.
+    cases.loc[1, ["AGENCY1", "ELEMENT1", "NATURE1"]] = [14, 363, 52]
+    # The client-caused deduction is not made computational by a system cause
+    # in a different slot. With no computational finding, this is system input.
+    cases.loc[2, ["AGENCY1", "ELEMENT1", "NATURE1"]] = [1, 363, 52]
+    cases.loc[2, ["AGENCY2", "ELEMENT2", "NATURE2"]] = [17, 311, 35]
+    # One inherent computation finding plus one other finding is mixed.
+    cases.loc[3, ["AGENCY1", "ELEMENT1", "NATURE1"]] = [1, 311, 42]
+    cases.loc[3, ["AGENCY2", "ELEMENT2", "NATURE2"]] = [1, 331, 35]
+    # Client-caused deduction alone is input_other.
+    cases.loc[4, ["AGENCY1", "ELEMENT1", "NATURE1"]] = [1, 365, 57]
+    return cases
+
+
+def test_finding_nature_classes_pair_deduction_cause_and_cover_each_class():
+    cases = _finding_nature_fixture()
+
+    classes = cause_shares._finding_nature_classes(cases)
+
+    assert classes.tolist() == [
+        "pure_math",
+        "pure_math",
+        "input_system_caused",
+        "mixed",
+        "input_other",
+    ]
+
+
+def test_lab_legacy_rule_does_not_expand_to_full_agency_class():
+    cases = _finding_nature_fixture().iloc[[1]]
+
+    primary = cause_shares._finding_nature_classes(cases)
+    legacy = cause_shares._finding_nature_classes(
+        cases, system_codes=cause_shares.LAB_LEGACY_SYSTEM_CODES
+    )
+
+    assert primary.iloc[0] == "pure_math"
+    assert legacy.iloc[0] == "input_other"
+
+
 def test_committed_colorado_values_are_locked():
     artifact_path = Path("analysis/cause_shares.json")
     artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
@@ -145,6 +199,33 @@ def test_committed_colorado_values_are_locked():
     assert fractional["client_or_fact"]["dollars"] == 40_954_031.43
     assert colorado["element_attributed"]["total"]["dollars"] == 4_177_027.62
 
+    lab = colorado["finding_nature"]["lab_legacy_broad_rules_engine"][
+        "deviation"
+    ]
+    assert lab["denominator"]["n"] == 305
+    assert lab["denominator"]["dollars"] == 112_575_220.49
+    assert {
+        name: (metric["n"], metric["dollars"])
+        for name, metric in lab["classes"].items()
+    } == {
+        "pure_math": (13, 3_662_840.51),
+        "input_system_caused": (19, 7_468_437.90),
+        "mixed": (13, 4_683_116.80),
+        "input_other": (260, 96_760_825.27),
+    }
+    assert lab["classes"]["pure_math"][
+        "share_of_deviation_dollars"
+    ] == pytest.approx(0.032536827296, abs=0)
+    assert lab["classes"]["input_system_caused"][
+        "share_of_deviation_dollars"
+    ] == pytest.approx(0.06634175685, abs=0)
+    assert lab["classes"]["mixed"][
+        "share_of_deviation_dollars"
+    ] == pytest.approx(0.041599890114, abs=0)
+    assert lab["classes"]["input_other"][
+        "share_of_deviation_dollars"
+    ] == pytest.approx(0.85952152574, abs=0)
+
 
 def test_committed_artifact_has_all_states_and_additive_national_partition():
     artifact = json.loads(Path("analysis/cause_shares.json").read_text(encoding="utf-8"))
@@ -162,3 +243,14 @@ def test_committed_artifact_has_all_states_and_additive_national_partition():
     assert sum(group["dollars"] for group in classes.values()) == pytest.approx(
         national["official_error_dollars"], abs=0.02
     )
+    for row in artifact["rows"]:
+        for denominator in ("deviation", "official_error"):
+            summary = row["finding_nature"]["primary_agency_or_system"][
+                denominator
+            ]
+            assert sum(
+                metric["n"] for metric in summary["classes"].values()
+            ) == summary["denominator"]["n"]
+            assert sum(
+                metric["dollars"] for metric in summary["classes"].values()
+            ) == pytest.approx(summary["denominator"]["dollars"], abs=0.02)

@@ -410,7 +410,7 @@ Table&nbsp;2: Fiscal 2024 verification coverage by state. All exclusions are SSI
 <div id="tbl-decompose" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Three nested decompositions of Colorado fiscal 2024 measured error. Layer 1 quotes the committed cause-share artifact (<code>analysis/cause_shares.json</code>, all 53 jurisdictions, conventions serialized in the file); layer 2 is a share of Colorado’s weighted deviation dollars from the archived replay-lab tabulation; layer 3 is a share of filtered cases. Any-presence attribution counts a case’s dollars toward every cause class present in its slots, so layer-1 classes overlap. Cause and nature coding reflect state reviewer judgment under handbook guidance <span class="citation" data-cites="fns310handbook">(<a href="#ref-fns310handbook" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2023</a>)</span> and carry cross-state coding variation; fiscal 2024 also brought minor revisions to the finding-code sets.
+Table&nbsp;3: Three nested decompositions of Colorado fiscal 2024 measured error. Layers 1–2 quote the committed cause-share artifact (<code>analysis/cause_shares.json</code>, all 53 jurisdictions, conventions and code-to-class maps serialized in the file); layer 3 is a share of filtered cases. Any-presence attribution counts a case’s dollars toward every cause class present in its slots, so layer-1 classes overlap. Layer 2 partitions cases; its system-side test reuses layer 1’s broad computing-apparatus cause set — the artifact also carries a wider agency-responsibility convention under which the system-side shares are several times larger (Colorado system-caused input 31% rather than 6.6%), answering a responsibility question rather than this table’s computation question. Cause and nature coding reflect state reviewer judgment under handbook guidance <span class="citation" data-cites="fns310handbook">(<a href="#ref-fns310handbook" role="doc-biblioref">U.S. Department of Agriculture, Food and Nutrition Service 2023</a>)</span> and carry cross-state coding variation; fiscal 2024 also brought minor revisions to the finding-code sets.
 </figcaption>
 <div aria-describedby="tbl-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -437,9 +437,9 @@ Table&nbsp;3: Three nested decompositions of Colorado fiscal 2024 measured error
 </tr>
 <tr class="even">
 <td>2. Finding natures</td>
-<td>Nature codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed), cause-disambiguated</td>
+<td><code>NATURE</code> codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic <code>ELEMENT</code>; deduction-amount natures count only when the paired cause is in layer 1’s broad computing-apparatus set</td>
 <td>3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input</td>
-<td>Colorado error dollars</td>
+<td>Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7%</td>
 </tr>
 <tr class="odd">
 <td>3. Engine replay</td>
