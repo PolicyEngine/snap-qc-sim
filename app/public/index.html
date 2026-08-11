@@ -75,6 +75,11 @@
       <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
       <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's FNA Minimodel benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
     </div>
+    <div class="control levers">
+      <span class="label">Uncertainty</span>
+      <label><input type="checkbox" id="lever-drift"> <span>Year-over-year drift band (τ = 1.07pp)</span></label>
+      <div class="hint">Adds process movement on top of sampling noise, calibrated to the single realized FY 2024→2025 transition (robust estimate). Off = sampling noise only, a disclosed lower bound.</div>
+    </div>
   </section>
   <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
 
@@ -89,6 +94,11 @@
     <div class="tile"><div class="k" id="t-expected">–</div><div class="l">Expected FY 2028 bill, scenario (elected rate, delay-aware)</div><div class="d" id="t-delta"></div></div>
     <div class="tile"><div class="k" id="t-tier">–</div><div class="l">Most likely tier, scenario</div><div class="d" id="t-tierp"></div></div>
     <div class="tile"><div class="k" id="t-sd">–</div><div class="l">Std. dev. of the FY 2028 bill</div><div class="d" id="t-sdd"></div></div>
+  </section>
+
+  <section class="chart-card" id="fy2027">
+    <h2>The FY 2027 measurement year</h2>
+    <div id="fy2027-body"></div>
   </section>
 
   <section class="chart-card" id="election">
@@ -166,6 +176,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20260811a"></script>
+<script type="module" src="app.js?v=20260811b"></script>
 </body>
 </html>

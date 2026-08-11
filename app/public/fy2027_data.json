@@ -1,0 +1,167 @@
+{
+ "accounting_note": "D-fixed and D-proportional are accounting conventions for carrying observed FY2024 deviations to repriced benefits, not behavioral predictions; the band between them is convention uncertainty.",
+ "drift_tau_pp": {
+  "calibration": "single FY2024\u2192FY2025 transition; see analysis/fy2025_movement.json",
+  "classical": 1.6207,
+  "robust": 1.074
+ },
+ "fy2027_max_allotment_4p_48dc": {
+  "dollars": 1029,
+  "possible_published_values": [
+   1029
+  ],
+  "rule": "OBBBA \u00a710101: June-to-June CPI-U indexation of 7 U.S.C. 2012(u)",
+  "status": "ESTIMATE"
+ },
+ "provenance": {
+  "data_json_sha256": "2fb60670d79d93a107c60b08e6fbbac9e3953df0da3b15c9edad5620e675d953",
+  "fy2027_params_sha256": "d8a4c35201a0695f2247f54687d1af7490064d0ea9af37ef7c08c8dfc9de8d54",
+  "grid_sha256": "1dbc0c3cc33a898863155c3097f71a9487b9f0a286ebfcbb71de82383ff1126f",
+  "movement_sha256": "11faaf42081f7eca8676c28a7ed3741d26bcbb46eb6b63c40744fefad82cfd7c",
+  "reprice_manifest_sha256": "8d44e576948b1ed56720e7b2ef6e596dfb9c0f82e26349c9394b913b31f13473"
+ },
+ "schema": "snap_qc_sim.fy2027_mode.v1",
+ "states": {
+  "AZ": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 10.6079,
+     "anchored_proportional_pct": 12.4387,
+     "mechanical_fixed_pct": 6.3528,
+     "mechanical_proportional_pct": 8.1836
+    },
+    "2027": {
+     "anchored_fixed_pct": 10.1278,
+     "anchored_proportional_pct": 13.9517,
+     "mechanical_fixed_pct": 5.8727,
+     "mechanical_proportional_pct": 9.6966
+    }
+   },
+   "fy2024_mechanical_pct": 6.5449,
+   "official_fy2025_pct": 10.8
+  },
+  "CA": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 10.433,
+     "anchored_proportional_pct": 11.4613,
+     "mechanical_fixed_pct": 7.4558,
+     "mechanical_proportional_pct": 8.484
+    },
+    "2027": {
+     "anchored_fixed_pct": 9.9126,
+     "anchored_proportional_pct": 11.9111,
+     "mechanical_fixed_pct": 6.9354,
+     "mechanical_proportional_pct": 8.9338
+    }
+   },
+   "fy2024_mechanical_pct": 7.9527,
+   "official_fy2025_pct": 10.93
+  },
+  "CO": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 9.7466,
+     "anchored_proportional_pct": 10.6949,
+     "mechanical_fixed_pct": 7.0774,
+     "mechanical_proportional_pct": 8.0257
+    },
+    "2027": {
+     "anchored_fixed_pct": 9.3757,
+     "anchored_proportional_pct": 11.294,
+     "mechanical_fixed_pct": 6.7065,
+     "mechanical_proportional_pct": 8.6248
+    }
+   },
+   "fy2024_mechanical_pct": 7.4208,
+   "official_fy2025_pct": 10.09
+  },
+  "GA": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 14.9301,
+     "anchored_proportional_pct": 16.6115,
+     "mechanical_fixed_pct": 10.1264,
+     "mechanical_proportional_pct": 11.8078
+    },
+    "2027": {
+     "anchored_fixed_pct": 14.4478,
+     "anchored_proportional_pct": 18.2744,
+     "mechanical_fixed_pct": 9.6441,
+     "mechanical_proportional_pct": 13.4708
+    }
+   },
+   "fy2024_mechanical_pct": 10.4063,
+   "official_fy2025_pct": 15.21
+  },
+  "MD": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 13.4076,
+     "anchored_proportional_pct": 14.6319,
+     "mechanical_fixed_pct": 9.2366,
+     "mechanical_proportional_pct": 10.461
+    },
+    "2027": {
+     "anchored_fixed_pct": 13.3039,
+     "anchored_proportional_pct": 16.2935,
+     "mechanical_fixed_pct": 9.133,
+     "mechanical_proportional_pct": 12.1226
+    }
+   },
+   "fy2024_mechanical_pct": 8.9091,
+   "official_fy2025_pct": 13.08
+  },
+  "NY": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 13.0707,
+     "anchored_proportional_pct": 14.0084,
+     "mechanical_fixed_pct": 7.7276,
+     "mechanical_proportional_pct": 8.6653
+    },
+    "2027": {
+     "anchored_fixed_pct": 12.6345,
+     "anchored_proportional_pct": 14.4246,
+     "mechanical_fixed_pct": 7.2914,
+     "mechanical_proportional_pct": 9.0815
+    }
+   },
+   "fy2024_mechanical_pct": 7.8369,
+   "official_fy2025_pct": 13.18
+  },
+  "TX": {
+   "bands": {
+    "2026": {
+     "anchored_fixed_pct": 9.0846,
+     "anchored_proportional_pct": 10.1863,
+     "mechanical_fixed_pct": 6.046,
+     "mechanical_proportional_pct": 7.1478
+    },
+    "2027": {
+     "anchored_fixed_pct": 8.7383,
+     "anchored_proportional_pct": 11.0717,
+     "mechanical_fixed_pct": 5.6997,
+     "mechanical_proportional_pct": 8.0331
+    }
+   },
+   "fy2024_mechanical_pct": 6.3014,
+   "official_fy2025_pct": 9.34
+  }
+ },
+ "thresholds": {
+  "2026": {
+   "reference_family_monthly_cost": "994.40",
+   "reference_month": "2025-06",
+   "status": "PUBLISHED_DERIVED",
+   "threshold_dollars_strictly_greater_than": 58
+  },
+  "2027": {
+   "limitation": "NOT_PUBLISHED_AS_OF_AUDIT_DATE",
+   "reference_family_monthly_cost": "1018.20",
+   "reference_month": "2026-05",
+   "status": "ESTIMATE",
+   "threshold_dollars_strictly_greater_than": 59
+  }
+ }
+}

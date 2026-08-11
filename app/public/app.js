@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260811a"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260811b"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -47,6 +47,7 @@ function mulberry32(seed) {
 }
 
 let DATA = null;
+let FY27 = null;
 const $ = (id) => document.getElementById(id);
 const tooltip = document.createElement("div");
 tooltip.className = "tooltip";
@@ -54,6 +55,30 @@ tooltip.hidden = true;
 document.body.appendChild(tooltip);
 
 // ---- Observed-resample engine (no scenario) ------------------------------
+
+// Optional process-drift band (off by default): adds N(0, tau^2) to each
+// draw from a dedicated seeded stream, common across engines so
+// scenario-vs-baseline deltas stay unpolluted. tau is the robust
+// method-of-moments estimate from the single realized FY2024->FY2025
+// transition (analysis/fy2025_movement.json) — a candidate calibration,
+// not a validated forecast band.
+function driftDraws(tau, seed = 1107) {
+  const rng = mulberry32(seed);
+  const out = new Float64Array(DRAWS);
+  for (let d = 0; d < DRAWS; d++) {
+    const u1 = Math.max(rng(), 1e-12);
+    const u2 = rng();
+    out[d] = tau * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  return out;
+}
+
+function addDrift(rates, drift) {
+  if (!drift) return rates;
+  const out = new Float64Array(rates.length);
+  for (let d = 0; d < rates.length; d++) out[d] = rates[d] + drift[d];
+  return out;
+}
 
 function simulate(st, { extra = 0, seed = 11, anchor } = {}) {
   const n = st.w.length;
@@ -346,6 +371,7 @@ function readUrl() {
   const st = p.get("state");
   if (st && DATA.states[st]) $("state").value = st;
   if (p.get("audits")) $("audits").value = Math.min(1000, Math.max(0, +p.get("audits") || 0));
+  if (p.get("drift") === "1") $("lever-drift").checked = true;
   // Legacy accounting-lever params (levers, eff, mode) are ignored: those
   // scenarios suppressed observed error dollars by finding category, which
   // is an accounting bound, not a prediction, and were removed 2026-08-07.
@@ -357,6 +383,7 @@ function writeUrl() {
   p.set("state", $("state").value);
   if (+$("audits").value) p.set("audits", $("audits").value);
   if ($("lever-smd").checked) p.set("smd", "1");
+  if ($("lever-drift").checked) p.set("drift", "1");
   if ($("engine-mode").checked) p.set("engine", "1");
   history.replaceState(null, "", "?" + p.toString());
   if (FRAMED) {
@@ -600,10 +627,83 @@ function syncScenarioControl() {
     `An association from burden features adding +0.006 ROC AUC — not a causal estimate.`;
 }
 
-function mechanismLine(scenarioOn) {
-  return scenarioOn
+function mechanismLine(scenarioOn, driftOn) {
+  const engine = scenarioOn
     ? "Sampling engine: model-based — each draw samples cases and draws each case's deviation from its fitted distribution (baseline) or its SMD-flipped distribution (scenario); levels anchored to the official rate."
     : "Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.";
+  return driftOn
+    ? engine +
+        " Drift band on: each draw adds year-over-year process movement, N(0, 1.07pp²), calibrated to the single realized FY 2024→2025 transition."
+    : engine;
+}
+
+// ---- FY 2027 measurement-year panel --------------------------------------
+// Static repriced bands from the committed FY2027-mode payload: the
+// mechanical rate under future-year parameters and composition, re-anchored
+// at the official FY 2025 level, bracketed by the two deviation-carry
+// accounting conventions. Verified states only; no case-level repricing
+// exists for the other 46.
+
+function fy2027BandSvg(st27) {
+  const lo = 4, hi = 16, W = 920, H = 128, L = 42, R = 12, T = 8, B = 26;
+  const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
+  const ink = cssVar("--muted-foreground") || "#475569";
+  const border = cssVar("--border") || "#E2E8F0";
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
+  for (const [a, b, t] of bands) {
+    s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
+    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
+  }
+  const dth = x(DELAY_THRESHOLD);
+  s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
+  const rows = [
+    ["FY 2026", st27.bands["2026"], 46],
+    ["FY 2027", st27.bands["2027"], 78],
+  ];
+  for (const [label, band, y] of rows) {
+    const a = x(band.anchored_fixed_pct), b = x(band.anchored_proportional_pct);
+    s += `<text x="2" y="${y + 4}" font-size="11" fill="${ink}">${label}</text>`;
+    s += `<line x1="${Math.min(a, b)}" x2="${Math.max(a, b)}" y1="${y}" y2="${y}" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>`;
+    for (const [px, anchor] of [[a, "end"], [b, "start"]]) {
+      s += `<circle cx="${px}" cy="${y}" r="4" fill="var(--primary)"/>`;
+    }
+    s += `<text x="${Math.min(a, b) - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="${ink}">${Math.min(band.anchored_fixed_pct, band.anchored_proportional_pct).toFixed(1)}%</text>`;
+    s += `<text x="${Math.max(a, b) + 6}" y="${y + 4}" font-size="10" fill="${ink}">${Math.max(band.anchored_fixed_pct, band.anchored_proportional_pct).toFixed(1)}%</text>`;
+  }
+  const off = x(st27.official_fy2025_pct);
+  s += `<line x1="${off}" x2="${off}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  s += `<text x="${off + 4}" y="${H - B - 4}" font-size="10" fill="${ink}">FY25 official ${st27.official_fy2025_pct.toFixed(2)}%</text>`;
+  for (let v = lo; v <= hi; v += 2) {
+    s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
+  }
+  s += `<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="${border}"/>`;
+  return s + "</svg>";
+}
+
+function renderFy2027(code) {
+  const el = $("fy2027-body");
+  if (!FY27) { el.textContent = "FY 2027 payload unavailable."; return; }
+  const st27 = FY27.states[code];
+  const t27 = FY27.thresholds["2027"];
+  const facts =
+    `<p class="sub">FY 2027 is the first measurement year states can still shape with policy and sampling plans — it sets the FY 2030 bill. ` +
+    `Sampling-plan changes go to the regional office before the review period, 60 days ahead for major changes and 30 for minor ones. ` +
+    `Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U (projected 48-state four-person maximum: $${FY27.fy2027_max_allotment_4p_48dc.dollars.toLocaleString()}, ${FY27.fy2027_max_allotment_4p_48dc.status}), ` +
+    `and the QC tolerance threshold projects to $${t27.threshold_dollars_strictly_greater_than} (${t27.status}; hardens when USDA publishes the June 2026 food-plan cost).</p>`;
+  if (!st27) {
+    el.innerHTML =
+      facts +
+      `<p class="sub">Repriced projections require verified encodings; this state's rules are not yet independently verified, so no case-level repricing exists for it. Parameter-scaling inputs ship in the committed artifacts.</p>`;
+    return;
+  }
+  const b27 = st27.bands["2027"];
+  const loP = Math.min(b27.anchored_fixed_pct, b27.anchored_proportional_pct);
+  const hiP = Math.max(b27.anchored_fixed_pct, b27.anchored_proportional_pct);
+  el.innerHTML =
+    facts +
+    `<p class="sub">Repricing this state's FY 2024 cases under FY 2027 parameters and forward composition, re-anchored at the official FY 2025 level, puts its mechanical FY 2027 rate between <strong>${loP.toFixed(1)}%</strong> and <strong>${hiP.toFixed(1)}%</strong> — the band is the gap between the two deviation-carry accounting conventions (fixed dollars vs proportional), not a confidence interval, and neither end is a behavioral prediction.</p>` +
+    `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers">${fy2027BandSvg(st27)}</div>`;
 }
 
 // ---- Axiom rules-engine comparison mode ----------------------------------
@@ -746,6 +846,9 @@ function render() {
   syncScenarioControl();
   const scenarioOn = $("lever-smd").checked && SCEN && !scenarioInfo(code)?.gated;
 
+  const driftOn = $("lever-drift").checked && FY27;
+  const drift = driftOn ? driftDraws(FY27.drift_tau_pp.robust) : null;
+
   let base, scen;
   const issuance = st.issuance;
   if (scenarioOn) {
@@ -756,11 +859,16 @@ function render() {
     base = simulate(st, {});
     scen = extra ? simulate(st, { extra }) : base;
   }
-  const observed = scenarioOn ? simulate(st, {}) : base;
+  // One common drift stream across engines: scenario-vs-baseline deltas
+  // stay clean, while election and delay odds widen with process movement.
+  const scenIsBase = scen === base;
+  base = addDrift(base, drift);
+  scen = scenIsBase ? base : addDrift(scen, drift);
+  const observed = scenarioOn ? addDrift(simulate(st, {}), drift) : base;
   const elec = electionStats(st, observed);
   const elecB = electionStats(st, base);
   const elecS = electionStats(st, scen);
-  $("mechanism").textContent = mechanismLine(scenarioOn);
+  $("mechanism").textContent = mechanismLine(scenarioOn, driftOn);
   const sb = summarize(base, issuance);
   const ss = summarize(scen, issuance);
 
@@ -801,6 +909,7 @@ function render() {
     (100 * elec.pDelay26).toFixed(0) +
     "% chance the simulated FY 2026 rate meets it — that pushes the start to " +
     "FY 2030 and zeroes both FY 2028 and FY 2029";
+  renderFy2027(code);
   writeUrl();
   renderEnginePanel();
   document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
@@ -822,6 +931,11 @@ function render() {
 async function main() {
   if (FRAMED) document.documentElement.classList.add("framed");
   DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
+  try {
+    FY27 = await (await fetch("fy2027_data.json?v=" + ASSET_V)).json();
+  } catch {
+    FY27 = null; // panel degrades to its unavailable message
+  }
   const sel = $("state");
   for (const [code, st] of Object.entries(DATA.states)) {
     const o = document.createElement("option");
@@ -838,6 +952,7 @@ async function main() {
   let pending = 0;
   const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
   sel.addEventListener("change", queue);
+  $("lever-drift").addEventListener("change", queue);
   $("audits").addEventListener("input", queue);
   $("lever-smd").addEventListener("change", async () => {
     if ($("lever-smd").checked && !SCEN) {
