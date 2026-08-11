@@ -7,10 +7,12 @@ format:
     toc: true
     toc-depth: 3
     theme: cosmo
+    link-citations: true
   pdf:
     toc: false
     number-sections: true
     colorlinks: true
+    link-citations: true
     header-includes:
       - \usepackage{tgpagella}
       - \usepackage[scaled=0.94]{helvet}

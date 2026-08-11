@@ -292,12 +292,21 @@ def _self_employment_columns(
     return found
 
 
-def load_year(year: int, *, include_source_row_index: bool = False) -> pd.DataFrame:
+def load_year(
+    year: int,
+    *,
+    include_source_row_index: bool = False,
+    additional_columns: Collection[str] = (),
+) -> pd.DataFrame:
     """Load and enforce the official ``CASE == 1`` QC universe for one year.
 
     ``include_source_row_index`` preserves the zero-based SAV row number used
     by the certified engine artifacts' case identifiers. It is metadata only
     and never enters the predictive feature set.
+
+    ``additional_columns`` lets bounded analyses retain public-use fields that
+    are not model features while continuing to share this loader's schema,
+    universe, State mapping, and source-row identity checks.
     """
     if year not in THRESHOLD:
         raise ValueError(f"No official payment-error threshold configured for FY{year}")
@@ -306,11 +315,18 @@ def load_year(year: int, *, include_source_row_index: bool = False) -> pd.DataFr
     df.columns = [c.upper() for c in df.columns]
     if include_source_row_index:
         df["source_row_index"] = np.arange(len(df), dtype=np.int64)
-    assert_required_columns(df, REQUIRED_COLS, context=f"FY{year} SAV")
+    extra_cols = sorted(
+        {str(column).upper() for column in additional_columns}
+        - set(REQUIRED_COLS)
+        - {"SOURCE_ROW_INDEX"}
+    )
+    assert_required_columns(
+        df, REQUIRED_COLS + extra_cols, context=f"FY{year} SAV"
+    )
     se_cols = _self_employment_columns(
         df.columns, expected_count=PERSON_SLOTS_BY_YEAR[year]
     )
-    selected = REQUIRED_COLS + se_cols
+    selected = REQUIRED_COLS + extra_cols + se_cols
     if include_source_row_index:
         selected = selected + ["source_row_index"]
     df = df[selected].copy()
