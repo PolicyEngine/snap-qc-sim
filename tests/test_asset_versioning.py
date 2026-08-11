@@ -18,6 +18,11 @@ def test_index_script_version_matches_app_constant():
 
 def test_all_data_fetches_are_versioned():
     js = (PUBLIC / "app.js").read_text()
-    for name in ("data.json", "model_data.json", "model_scenarios.json"):
+    for name in (
+        "data.json",
+        "model_data.json",
+        "model_scenarios.json",
+        "engine_data.json",
+    ):
         assert f'fetch("{name}?v=" + ASSET_V)' in js, f"{name} fetch must carry ASSET_V"
         assert f'fetch("{name}")' not in js, f"unversioned {name} fetch remains"

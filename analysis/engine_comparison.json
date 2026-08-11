@@ -1,0 +1,648 @@
+{
+ "schema": "snap_qc_sim.engine_comparison.v1",
+ "conventions": "Stage parity re-derives the committed axiom-oracles comparison reports; the divergence catalog partitions FSBEN != BENFIX cases by fields the public file records (ALLADJ, AMTERR, SSI_CAP, FSMINBEN). Accounting conventions, not causal attributions.",
+ "provenance": {
+  "oracle_repo": "TheAxiomFoundation/axiom-oracles",
+  "oracle_commit": "f30f9a1014ec957d26dcffd33af4356a48b9f174",
+  "suite_reports": {
+   "axiom-snapqc-co-snap.json": "ba1ec300ff474f23321f800fe46a94d4a01d25966b1e54a0b9799705cfd77457",
+   "axiom-snapqc-ny-snap.json": "c0affcec779becada5cd5cf44f0f87533693b0bc9bb18961d8f8d0cc07a39e4b",
+   "axiom-snapqc-ca-snap.json": "6b98401db17f4d3eac869aa30a396b1da9c296be01124ffbea0c8774645fc96c",
+   "axiom-snapqc-az-snap.json": "3e2785a774ecfe82114b2349dbfac25edef614edfae60abf93c9f3759176700d",
+   "axiom-snapqc-ga-snap.json": "1fd3180621ba02995010e1966af59ac6010c18d857f6e5851fe76e3314811808",
+   "axiom-snapqc-md-snap.json": "53a6114d5850262912e3caaa89eb0fd67a71013ff59c3d7fc95eee2863625ee8",
+   "axiom-snapqc-tx-snap.json": "889a73431b9a4dac7e2f19342660aec0786e4dd78d79097fac12374b488a34ee"
+  },
+  "qc_archive_pin": {
+   "archive_member": "qc_pub_fy2024.csv",
+   "fiscal_year": 2024,
+   "sha256": "0f3230a4318307d3088382546095eebfde03e781da6f65c9eac7f077bd4263f4",
+   "url": "https://snapqcdata.net/sites/default/files/2026-05/qcfy2024_csv.zip"
+  },
+  "qc_csv_sha256": "45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9",
+  "certified_toolchain": {
+   "scope": "Colorado certification probe (paper/snapshot/cert/CERT_REPORT.md)",
+   "engine_commit": "de0efdc73b469132ee268e1c832e8f7148b91431",
+   "engine_binary_sha256": "bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee",
+   "rulespec_us_commit": "b53ce208771085030939db4b9691762506b6bca2",
+   "harness_commit": "d30566266932dbd0b6f62e69dcea8ca3c8801690"
+  },
+  "national_concordance_source": "analysis/hurdle_results.json"
+ },
+ "national": {
+  "n": 44800,
+  "concordance_weighted": {
+   "benfix": 0.9999688802738583,
+   "fsben": 0.8364471979542242
+  }
+ },
+ "totals": {
+  "universe": 6194,
+  "compared": 6081,
+  "matched": 6081,
+  "excluded": 113,
+  "stage_cells": 36486,
+  "divergent": 881,
+  "excluded_reasons": {
+   "ssi_cap": 113
+  }
+ },
+ "states": {
+  "CO": {
+   "parity": {
+    "suite": "co-snap-qc",
+    "loaded": 856,
+    "excluded": 0,
+    "excluded_reasons": {},
+    "compared": 856,
+    "matched": 856,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:regulations/7-cfr/273/10#snap_total_gross_income",
+      "n": 856,
+      "matched": 856
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 856,
+      "matched": 856
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us:regulations/7-cfr/273/10#snap_excess_shelter_deduction_for_net_income",
+      "n": 856,
+      "matched": 856
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 856,
+      "matched": 856
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 856,
+      "matched": 856
+     },
+     {
+      "label": "benefit",
+      "concept": "us-co:regulations/10-ccr-2506-1/4.207.2#snap_allotment",
+      "n": 856,
+      "matched": 856
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 856,
+    "universe_weight": 3663355.0092172,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8747504418628962
+    },
+    "divergent": 113,
+    "divergent_weighted_share": 0.13171201761548745,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 22,
+      "weighted_share_of_universe": 0.026084453470404695,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 122.5,
+      "prorated_n": 22,
+      "other_adjustment_n": 0,
+      "no_error_n": 13,
+      "amount_reconciles_n": 14
+     },
+     "error_correction_arithmetic": {
+      "n": 56,
+      "weighted_share_of_universe": 0.06322825983905804,
+      "within_rounding_band_n": 33,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 35,
+      "weighted_share_of_universe": 0.042399304306024704,
+      "within_rounding_band_n": 15,
+      "median_abs_gap_dollars": 11.0,
+      "ssi_cap_coded_n": 0,
+      "minimum_benefit_n": 0
+     }
+    }
+   }
+  },
+  "NY": {
+   "parity": {
+    "suite": "ny-snap-qc",
+    "loaded": 847,
+    "excluded": 38,
+    "excluded_reasons": {
+     "ssi_cap": 38
+    },
+    "compared": 847,
+    "matched": 847,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_gross_monthly_income",
+      "n": 847,
+      "matched": 847
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 847,
+      "matched": 847
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us:regulations/7-cfr/273/10#snap_excess_shelter_deduction_for_net_income",
+      "n": 847,
+      "matched": 847
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 847,
+      "matched": 847
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 847,
+      "matched": 847
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 847,
+      "matched": 847
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 885,
+    "universe_weight": 19518714.9323865,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8747970024457239
+    },
+    "divergent": 116,
+    "divergent_weighted_share": 0.1284015156381389,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 19,
+      "weighted_share_of_universe": 0.0219464449298981,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 77.0,
+      "prorated_n": 17,
+      "other_adjustment_n": 2,
+      "no_error_n": 17,
+      "amount_reconciles_n": 9
+     },
+     "error_correction_arithmetic": {
+      "n": 73,
+      "weighted_share_of_universe": 0.07859060244519098,
+      "within_rounding_band_n": 35,
+      "median_abs_gap_dollars": 4.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 24,
+      "weighted_share_of_universe": 0.027864468263049808,
+      "within_rounding_band_n": 5,
+      "median_abs_gap_dollars": 88.0,
+      "ssi_cap_coded_n": 1,
+      "minimum_benefit_n": 2
+     }
+    }
+   }
+  },
+  "CA": {
+   "parity": {
+    "suite": "ca-snap-qc",
+    "loaded": 883,
+    "excluded": 0,
+    "excluded_reasons": {},
+    "compared": 883,
+    "matched": 883,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:regulations/7-cfr/273/10#snap_total_gross_income",
+      "n": 883,
+      "matched": 883
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 883,
+      "matched": 883
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us-ca:policies/cdss/snap/fy-2026-benefit-calculation#snap_excess_shelter_deduction",
+      "n": 883,
+      "matched": 883
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 883,
+      "matched": 883
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 883,
+      "matched": 883
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 883,
+      "matched": 883
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 883,
+    "universe_weight": 37088283.9126895,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8015786557183323
+    },
+    "divergent": 173,
+    "divergent_weighted_share": 0.19842134428166772,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 25,
+      "weighted_share_of_universe": 0.02875602292814903,
+      "within_rounding_band_n": 2,
+      "median_abs_gap_dollars": 94.0,
+      "prorated_n": 12,
+      "other_adjustment_n": 13,
+      "no_error_n": 21,
+      "amount_reconciles_n": 18
+     },
+     "error_correction_arithmetic": {
+      "n": 94,
+      "weighted_share_of_universe": 0.10837604735798417,
+      "within_rounding_band_n": 69,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 54,
+      "weighted_share_of_universe": 0.06128927399553448,
+      "within_rounding_band_n": 29,
+      "median_abs_gap_dollars": 1.0,
+      "ssi_cap_coded_n": 0,
+      "minimum_benefit_n": 1
+     }
+    }
+   }
+  },
+  "AZ": {
+   "parity": {
+    "suite": "az-snap-qc",
+    "loaded": 922,
+    "excluded": 3,
+    "excluded_reasons": {
+     "ssi_cap": 3
+    },
+    "compared": 922,
+    "matched": 922,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_gross_monthly_income",
+      "n": 922,
+      "matched": 922
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 922,
+      "matched": 922
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us:regulations/7-cfr/273/10#snap_excess_shelter_deduction_for_net_income",
+      "n": 922,
+      "matched": 922
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 922,
+      "matched": 922
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 922,
+      "matched": 922
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 922,
+      "matched": 922
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 925,
+    "universe_weight": 5308412.0323688,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8685843020609116
+    },
+    "divergent": 122,
+    "divergent_weighted_share": 0.13398724484659322,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 30,
+      "weighted_share_of_universe": 0.030188477466827218,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 130.0,
+      "prorated_n": 30,
+      "other_adjustment_n": 0,
+      "no_error_n": 27,
+      "amount_reconciles_n": 25
+     },
+     "error_correction_arithmetic": {
+      "n": 51,
+      "weighted_share_of_universe": 0.05799323726022557,
+      "within_rounding_band_n": 39,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 41,
+      "weighted_share_of_universe": 0.04580553011954046,
+      "within_rounding_band_n": 19,
+      "median_abs_gap_dollars": 14.0,
+      "ssi_cap_coded_n": 0,
+      "minimum_benefit_n": 1
+     }
+    }
+   }
+  },
+  "GA": {
+   "parity": {
+    "suite": "ga-snap-qc",
+    "loaded": 945,
+    "excluded": 0,
+    "excluded_reasons": {},
+    "compared": 945,
+    "matched": 945,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_gross_monthly_income",
+      "n": 945,
+      "matched": 945
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 945,
+      "matched": 945
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us-ga:policies/dfcs/snap/fy-2026-benefit-calculation#snap_excess_shelter_deduction",
+      "n": 945,
+      "matched": 945
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 945,
+      "matched": 945
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 945,
+      "matched": 945
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 945,
+      "matched": 945
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 945,
+    "universe_weight": 8017645.0471169995,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.9147164162050336
+    },
+    "divergent": 84,
+    "divergent_weighted_share": 0.08878712107891,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 22,
+      "weighted_share_of_universe": 0.02277672837664039,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 126.5,
+      "prorated_n": 22,
+      "other_adjustment_n": 0,
+      "no_error_n": 15,
+      "amount_reconciles_n": 14
+     },
+     "error_correction_arithmetic": {
+      "n": 55,
+      "weighted_share_of_universe": 0.057314987225137774,
+      "within_rounding_band_n": 46,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 7,
+      "weighted_share_of_universe": 0.008695405477131823,
+      "within_rounding_band_n": 5,
+      "median_abs_gap_dollars": 1.0,
+      "ssi_cap_coded_n": 0,
+      "minimum_benefit_n": 1
+     }
+    }
+   }
+  },
+  "MD": {
+   "parity": {
+    "suite": "md-snap-qc",
+    "loaded": 722,
+    "excluded": 23,
+    "excluded_reasons": {
+     "ssi_cap": 23
+    },
+    "compared": 722,
+    "matched": 722,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_gross_monthly_income",
+      "n": 722,
+      "matched": 722
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 722,
+      "matched": 722
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us-md:policies/dhs/fia/snap/fy-2026-benefit-calculation#snap_excess_shelter_deduction",
+      "n": 722,
+      "matched": 722
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 722,
+      "matched": 722
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 722,
+      "matched": 722
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 722,
+      "matched": 722
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 745,
+    "universe_weight": 4397313.998079711,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8875674312961949
+    },
+    "divergent": 85,
+    "divergent_weighted_share": 0.11243256870380487,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 8,
+      "weighted_share_of_universe": 0.010469870421876895,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 145.5,
+      "prorated_n": 8,
+      "other_adjustment_n": 0,
+      "no_error_n": 2,
+      "amount_reconciles_n": 2
+     },
+     "error_correction_arithmetic": {
+      "n": 48,
+      "weighted_share_of_universe": 0.06230176459532737,
+      "within_rounding_band_n": 27,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 29,
+      "weighted_share_of_universe": 0.03966093368660061,
+      "within_rounding_band_n": 9,
+      "median_abs_gap_dollars": 22.0,
+      "ssi_cap_coded_n": 0,
+      "minimum_benefit_n": 0
+     }
+    }
+   }
+  },
+  "TX": {
+   "parity": {
+    "suite": "tx-snap-qc",
+    "loaded": 906,
+    "excluded": 49,
+    "excluded_reasons": {
+     "ssi_cap": 49
+    },
+    "compared": 906,
+    "matched": 906,
+    "stages": [
+     {
+      "label": "gross income",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_gross_monthly_income",
+      "n": 906,
+      "matched": 906
+     },
+     {
+      "label": "standard deduction",
+      "concept": "us:policies/usda/snap/fy-2024-cola/deductions#snap_standard_deduction",
+      "n": 906,
+      "matched": 906
+     },
+     {
+      "label": "shelter deduction",
+      "concept": "us-tx:policies/hhs/texas-works-handbook/fy-2026-benefit-calculation#snap_excess_shelter_deduction",
+      "n": 906,
+      "matched": 906
+     },
+     {
+      "label": "net income",
+      "concept": "us:regulations/7-cfr/273/10#snap_net_monthly_income",
+      "n": 906,
+      "matched": 906
+     },
+     {
+      "label": "maximum allotment",
+      "concept": "us:policies/usda/snap/fy-2024-cola/maximum-allotments#snap_maximum_allotment",
+      "n": 906,
+      "matched": 906
+     },
+     {
+      "label": "benefit",
+      "concept": "us:policies/usda/snap/state-plan-composition#snap_benefit",
+      "n": 906,
+      "matched": 906
+     }
+    ]
+   },
+   "catalog": {
+    "universe": 955,
+    "universe_weight": 17302146.2339902,
+    "concordance_weighted": {
+     "benfix": 1.0,
+     "fsben": 0.8078494622251392
+    },
+    "divergent": 188,
+    "divergent_weighted_share": 0.1936537554901351,
+    "classes": {
+     "allotment_adjustment": {
+      "n": 38,
+      "weighted_share_of_universe": 0.04107389394813866,
+      "within_rounding_band_n": 0,
+      "median_abs_gap_dollars": 148.5,
+      "prorated_n": 37,
+      "other_adjustment_n": 1,
+      "no_error_n": 23,
+      "amount_reconciles_n": 29
+     },
+     "error_correction_arithmetic": {
+      "n": 80,
+      "weighted_share_of_universe": 0.07762583737415664,
+      "within_rounding_band_n": 57,
+      "median_abs_gap_dollars": 1.0
+     },
+     "recorded_correct_nonformula": {
+      "n": 70,
+      "weighted_share_of_universe": 0.0749540241678398,
+      "within_rounding_band_n": 28,
+      "median_abs_gap_dollars": 89.0,
+      "ssi_cap_coded_n": 25,
+      "minimum_benefit_n": 0
+     }
+    }
+   }
+  }
+ }
+}

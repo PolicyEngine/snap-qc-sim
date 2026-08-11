@@ -143,6 +143,25 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
 .control.off, .levers.off { opacity: 0.45; }
 .control.off input, .levers.off input { cursor: not-allowed; }
 
+.engine-panel { border-left: 4px solid var(--primary); }
+.engine-panel h3 { font-size: 0.92rem; margin: 14px 0 4px; }
+.engine-panel p { font-size: 0.88rem; margin: 8px 0; }
+.stage-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+.stage-chip {
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px;
+  font-size: 0.75rem; color: var(--muted-foreground); background: var(--secondary);
+}
+.stage-chip .n {
+  display: block; font-weight: 700; font-size: 0.88rem; color: var(--ok);
+  font-variant-numeric: tabular-nums;
+}
+.catalog-list { padding-left: 18px; margin: 6px 0; font-size: 0.85rem; }
+.catalog-list li { margin: 5px 0; }
+.engine-prov {
+  font-size: 0.72rem; color: var(--muted-foreground);
+  border-top: 1px solid var(--border); padding-top: 8px; margin-top: 12px;
+}
+
 @media print {
   .controls input, .site-footer, #nat-note { display: none; }
   .chart-card, .tiles, .verify-cta { break-inside: avoid; }

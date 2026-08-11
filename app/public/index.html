@@ -70,8 +70,19 @@
       <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
       <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
     </div>
+    <div class="control levers">
+      <span class="label">Benefit recomputation</span>
+      <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
+      <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's FNA Minimodel benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
+    </div>
   </section>
   <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
+
+  <section class="chart-card engine-panel" id="engine-panel" hidden>
+    <h2>Axiom rules engine vs the FNA QC Minimodel</h2>
+    <p class="sub">The QC file's formula benefit (FSBEN) is recomputed by the QC Minimodel used by the Food and Nutrition Administration (formerly FNS) — a closed model. The Axiom rules engine replays the same reviews through open, per-provision-cited RuleSpec encodings — compared stage by stage below against the file's own recorded values.</p>
+    <div id="engine-body"></div>
+  </section>
 
   <section class="tiles" aria-label="Headline results">
     <div class="tile"><div class="k" id="t-official">–</div><div class="l">Official FY 2025 payment error rate (locked election year)</div><div class="d" id="t-official-24"></div></div>
@@ -135,6 +146,7 @@
         <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
         <li>When the scenario is on, both baseline and scenario draw each case's payment deviation from distributions fitted on FY 2017–19 and 2022 QC data (pandemic years excluded), with levels anchored to the official rate; with it off, the simulator resamples observed QC error dollars. Model output is disabled for seven jurisdictions (AK, HI, ID, MN, SD, VI, WY) whose factor-adjusted FY 2024 model-to-observed dollar-rate ratio falls outside [0.7, 1.4]. Validation results — including quantile under-coverage at most levels and under-dispersion of simulated rates — and the adversarial review history are in the <a href="https://github.com/PolicyEngine/snap-qc-sim">repository</a>.</li>
         <li>The delay clause is modeled: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(ii)–(iii). Expected-bill figures zero delayed years; the FY 2029 bill keys to the FY 2026 rate (the third preceding year). A start pushed to FY 2030 keys to the FY 2027 rate, which this simulator does not model — those draws contribute $0 to the shown FY 2028 and FY 2029 expectations.</li>
+        <li>The Axiom rules engine verification view displays precomputed artifacts only: stage-by-stage parity from the committed <a href="https://github.com/TheAxiomFoundation/axiom-oracles">axiom-oracles</a> comparison reports (byte-identical, SHA-256-pinned copies in <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/oracle-suites">paper/snapshot/oracle-suites</a>) and the formula-benefit divergence catalog from <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/ENGINE_COMPARISON.md">analysis/engine_comparison.py</a>. The browser verifies the artifact's SHA-256 against a committed pin before displaying it. Engine runs never execute in the browser, and this view does not alter the simulation.</li>
         <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
       </ul>
     </details>
@@ -154,6 +166,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20260809e"></script>
+<script type="module" src="app.js?v=20260811a"></script>
 </body>
 </html>
