@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-09
+date: 2026-08-10
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -26,8 +26,12 @@ abstract: |
   verified engine explains 78.4% of Colorado's above-threshold official
   error cases — and 91.4% of sub-threshold deviations — as correct
   arithmetic on wrong facts. I also fit and validate a distributional
-  model of case-level payment deviations, and report its validation
-  failures alongside its results. The central finding, from an open Monte
+  model of case-level payment deviations, reporting its validation
+  failures alongside its results, and serve one policy counterfactual
+  from it in the deployed simulator: a standard medical deduction
+  scenario computed on engine-recomputed case parameters, whose
+  model-implied Colorado effect opposes the naive accounting bound in
+  sign. The central finding, from an open Monte
   Carlo simulator resampling each state's own QC cases, is about
   measurement: at regulatory sample sizes, several states face nearly
   even odds — 46 to 50 percent — of being assigned a different cost tier
@@ -108,45 +112,55 @@ versus wrong facts correctly processed (@sec-decompose).
 Third, as training and validation data for a case-level model of the
 error process (@sec-model) and the basis for a distributional simulator
 of measured rates under the cost-sharing formula (@sec-simulate), public
-at snap-qc-sim.vercel.app. The simulator's central output is a
-measurement result: near tier boundaries, sampling noise alone gives
-several states nearly even odds of a different cost tier than their point
-rate implies.
+at policyengine.org/us/snap-payment-error-simulator. The simulator's
+central output is a measurement result: near tier boundaries, sampling
+noise alone gives several states nearly even odds of a different cost
+tier than their point rate implies.
 
 The analysis pipeline, simulator, and this manuscript live in one public
 repository; a fact catalog maps every quantitative claim to a committed
-artifact (@sec-availability). Because the claims depend on it, the
-project's verification discipline applies to itself: the pipeline is
-deterministic (independent clean-room reruns reproduce every
-analysis-pipeline artifact byte-for-byte, most recently on
-2026-08-07, and the headline simulation artifact was independently
-reproduced from the raw file to four decimals), and this revision
-incorporates four rounds of adversarial review — nineteen referee
-reports, archived unedited in the repository — whose findings included
-two direction-of-effect errors in an earlier draft of this manuscript
-and a data-definition defect in the deployed simulator. An author
-verification pass between the second and third rounds additionally
-caught validation claims that had gone stale when the model pipeline
-was refit after publication; the third round then found two further
-stale siblings from the same refit. All are corrected here, with the
-superseded figures preserved in the fact catalog.
+artifact (@sec-availability). The pipeline is deterministic —
+independent clean-room reruns reproduce every analysis artifact
+byte-for-byte, and the headline simulation artifact was independently
+reproduced from the raw file to four decimals — and the manuscript has
+been through four rounds of adversarial review, archived unedited in
+the repository.
 
 ## The QC system and the money attached to it {#sec-qc}
 
 QC reviews produce, for each sampled active case, the issued allotment
-(`RAWBEN`), a corrected allotment constructed from the reviewer's
-findings (`BENFIX`), and — when they differ by more than a tolerance
-threshold ($56 in fiscal 2024, indexed from a $37 statutory base under
-7 U.S.C. § 2025(c); the published sequence $48, $54, $56, $57, $58 for
-fiscal 2022–26 is uniquely reproduced by flooring the indexed value,
-which puts the fiscal 2027 threshold at an estimated $59 — $59.58
+and a corrected allotment constructed from the reviewer's findings; when
+they differ by more than a tolerance threshold ($56 in fiscal 2024,
+indexed from a $37 statutory base under 7 U.S.C. § 2025(c)),[^fy2027]
+the case is a payment error, and findings are coded for sub-threshold
+deviations as well. @tbl-codebook lists the public-use file variables
+this paper works with; variable names in the text refer to these
+columns. The official state rate combines over- and underpayment rates
+[@fns2024per]: Colorado's 9.97% is 7.91 over plus 2.06 under, and
+Maryland's 13.64 includes the nation's highest underpayment rate, 4.79
+— so cost sharing partly bills states for underpaying their own
+residents.
+
+| Variable | What the file records |
+|---|---|
+| `RAWBEN` | the allotment the state actually issued |
+| `BENFIX` | the allotment corrected for the reviewer's findings |
+| `AMTERR` | the recorded error amount |
+| `FSBEN` | the formula benefit recomputed by the FNS QC Minimodel from the case's edited inputs |
+| `STATUS` | the review disposition (correct, overpayment, underpayment) |
+| `ELEMENT1-9`, `E_FINDG1-9`, `AMOUNT1-9` | up to nine coded error findings: the element in error, the nature of the finding, and its dollar amount |
+| `HWGT` | the case weight |
+| `FSGRINC`, `FSSTDDED`, `FSNETINC` and companions | the recorded benefit-computation chain: gross income, deductions, net income, maximum allotment |
+
+: Public-use QC file variables used in this paper (fiscal 2024
+technical documentation). {#tbl-codebook}
+
+[^fy2027]: The published thresholds — $48, $54, $56, $57, $58 for
+fiscal 2022–26 — are uniquely reproduced by flooring the indexed value,
+which puts the fiscal 2027 threshold at an estimated $59: $59.58
 unrounded on the May 2026 Thrifty Food Plan cost of $1,018.20, with $60
-requiring a June figure of at least $1,025.40) — a payment error;
-findings are coded for sub-threshold deviations as well. The official
-state rate combines over- and underpayment rates [@fns2024per]: Colorado's
-9.97% is 7.91 over plus 2.06 under, and Maryland's 13.64 includes the
-nation's highest underpayment rate, 4.79 — so cost sharing partly bills
-states for underpaying their own residents.
+requiring a June figure of at least $1,025.40. The estimate hardens
+when the June figure publishes.
 
 Four features of the system frame everything that follows.
 
@@ -190,11 +204,18 @@ incentive properties.
 **Precision was contractually waived.** A state electing the reduced
 sampling schedule agrees not to dispute later error-rate findings on
 the basis of the precision of the estimates [@fns2024techdoc]. All 53
-jurisdictions had so elected as of fiscal 2024 — before precision
-determined tier placement worth tens of millions of dollars. Whether
-states revert to the standard schedule, regaining both precision and
-dispute rights, is a live sampling-plan question that @sec-simulate
-prices.
+jurisdictions had so elected as of fiscal 2024 — a defensible economy
+when QC reviews were an administrative cost with no tier attached, and
+a striking one now that precision determines tier placement worth tens
+of millions of dollars. The cost calculus has since moved *against*
+precision even as its value rose: OBBBA cut the federal share of SNAP
+administrative costs — QC review staffing included — from 50% to 25%
+beginning fiscal 2027 (Pub. L. No. 119-21 § 10106), so each additional
+review now costs a state three dollars where it used to cost two.
+Whether states revert to the standard
+schedule — regaining precision and dispute rights at that higher
+marginal price — is a live sampling-plan question, and exactly the one
+@sec-simulate prices with its additional-reviews lever.
 
 ## The QC file as a verification oracle {#sec-oracle}
 
@@ -212,8 +233,9 @@ inputs and the agency's own computed outputs.
 
 I tested encodings of federal SNAP law and seven states' policy manuals
 (Arizona, California, Colorado, Georgia, Maryland, New York, Texas),
-maintained in the public rulespec-us repository and executed by a
-deterministic rules engine, against the fiscal 2024 QC file. The file
+maintained by The Axiom Foundation in its public rulespec-us repository
+and executed by its deterministic rules engine, against the fiscal 2024
+QC file. The file
 contains 6,194 cases in the official universe for those states; 6,081 are
 in scope for replay — all 113 exclusions (1.8%) are SSI-CAP (Combined
 Application Project) standardized-benefit units, whose allotments follow
@@ -221,7 +243,17 @@ a demonstration schedule outside the computed chain, logged per case by
 the harness. @tbl-verify reports the counts. For each in-scope case the
 harness asserts six values — gross income, standard deduction, excess
 shelter deduction, net income, maximum allotment, and benefit — against
-the file's recorded values at zero dollar tolerance.
+the file's recorded values at zero dollar tolerance. These six are the
+stage outputs the public file records for the computed chain;
+adjudication-dependent amounts the reviewer establishes as facts —
+claimed medical expenses, utility allowances, child-support obligations,
+eligibility findings — enter as inputs rather than assertions. The
+assertion surface can widen as encodings and file coverage allow (the
+earned-income deduction, for instance, is mechanical given earnings),
+and the excluded SSI-CAP units are themselves encodable: their
+demonstration benefit schedules are published in the technical
+documentation, so bringing them in scope — for both verification and
+simulation — is an encoding task, not a data gap.
 
 All 6,081 in-scope cases match on all six asserted values — 36,486 exact
 cell comparisons, no mismatches.
@@ -319,16 +351,21 @@ construction of the file, that ineligible-case error.
 
 | Layer | Definition | Computation-side share | Universe and units |
 |---|---|---|---|
-| 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change) | 7.3% strict; 10.5% adding policy-misapplied, budgeted-wrong, computer-user | Colorado error dollars; nationally 3.9% strict ($320M/yr), 18.4% broad ($1.5B of $8.1B) |
+| 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change), any-presence across a case's nine cause slots, share of official error dollars (HWGT × `AMTERR`) | 7.4% strict ($6.9M/yr); 10.6% ($10.0M/yr) adding policy-misapplied, budgeted-wrong, computer-user | Colorado; nationally 3.5% strict ($232M/yr), 19.3% broad ($1.27B of $6.59B) |
 | 2. Finding natures | Nature codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed), cause-disambiguated | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado error dollars |
 | 3. Engine replay | Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts | Above-threshold official errors: 21.6% of cases unexplained (upper bound), 78.4% explained as correct arithmetic on wrong facts. Sub-threshold deviations: 8.6% unexplained, 91.4% explained. Blended: 13.1% / 86.9% | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
 : Three nested decompositions of Colorado fiscal 2024 measured error.
-Layers 1–2 are shares of weighted error dollars; layer 3 is a share of
-filtered cases. Cause and nature coding reflect state reviewer judgment
-under handbook guidance [@fns310handbook] and carry cross-state coding
-variation; fiscal 2024 also brought minor revisions to the finding-code
-sets. {#tbl-decompose}
+Layer 1 quotes the committed cause-share artifact
+(`analysis/cause_shares.json`, all 53 jurisdictions, conventions
+serialized in the file); layer 2 is a share of Colorado's weighted
+deviation dollars from the archived replay-lab tabulation; layer 3 is a
+share of filtered cases. Any-presence attribution counts a case's
+dollars toward every cause class present in its slots, so layer-1
+classes overlap. Cause and nature coding reflect state reviewer
+judgment under handbook guidance [@fns310handbook] and carry
+cross-state coding variation; fiscal 2024 also brought minor revisions
+to the finding-code sets. {#tbl-decompose}
 
 The strictest layer reconstructs each error case's pre-edit original
 values using the public reconstruction solver of @giannella_snapqc —
@@ -383,28 +420,31 @@ informed pipeline development across the audit-and-correction rounds and
 is not a pristine holdout; a frozen-pipeline confirmation on fiscal 2025
 is committed as the next test.
 
-Targets come from the file's adjudication fields. The official error
-label is reviewer status (over- or underpayment) with an error amount
-above the year's threshold. The signed deviation is
-$D = \texttt{RAWBEN} - \texttt{BENFIX}$, which reconciles with the
-recorded error amount for 99.997% of weighted fiscal 2024 cases; the
-recomputed formula benefit `FSBEN` — an earlier, incorrect target choice
-that an adversarial audit caught — matches only 83.64%, because it
-conflates legitimate adjustments such as proration with error.
+The modeled object is the per-case distribution of what the state
+issued relative to what the review concluded it should have: the signed
+deviation $D = \texttt{RAWBEN} - \texttt{BENFIX}$, whose distribution —
+given the corrected benefit — is the distribution of issuance itself.
+$D$ reconciles with the file's recorded error amount for 99.997% of
+weighted fiscal 2024 cases. The recomputed formula benefit `FSBEN` is
+not a usable target — $|\texttt{RAWBEN} - \texttt{FSBEN}|$ matches the
+recorded error amount for only 83.64%, because it conflates legitimate
+adjustments such as proration with error — but it serves as a model
+feature, anchoring each case's formula benefit. The official error
+label (reviewer status with an amount above the year's threshold)
+defines the binary outcome used for discrimination checks.
 
-**Discrimination.** A gradient-boosted classifier on household
-covariates plus a formula-benefit anchor reaches a weighted area under the receiver operating characteristic curve (ROC
-AUC) of 0.761
-on fiscal 2024; adding policy-burden intermediates extracted from the
-file (medical-expense claiming and documentation-requirement proxies,
-self-employment records, utility-claim structure, deduction counts)
-moves it to 0.767 (+0.006 AUC, +0.003 PR-AUC). Burden intermediates add
-little discrimination on this label. Operationally the model is
-nonetheless useful: at a 5% weighted review budget it reaches 47.8%
-precision against a 13.4% weighted base rate — case targeting at three
-and a half times chance, though QC-sampled cases are not the operational
-targeting population and the estimate carries no design-based standard
-error.
+**Discrimination.** A gradient-boosted classifier of the official error
+label on household covariates plus the formula-benefit anchor reaches a
+weighted area under the receiver operating characteristic curve (ROC
+AUC) of 0.761 on fiscal 2024; adding policy-burden intermediates
+extracted from the file (medical-expense claiming and
+documentation-requirement proxies, self-employment records,
+utility-claim structure, deduction counts) moves it to 0.767 (+0.006
+AUC, +0.003 PR-AUC). At a 5% weighted review budget the classifier
+reaches 47.8% precision against a 13.4% weighted base rate — case
+targeting at three and a half times chance, though QC-sampled cases are
+not the operational targeting population and the estimate carries no
+design-based standard error.
 
 **The deviation distribution.** For simulation I estimate a per-case
 distribution of the signed deviation with a hurdle structure: a
@@ -417,52 +457,33 @@ quantiles of $\log|D|$ fitted by quantile-loss gradient boosting
 [@chernozhukov2010rearrange]; and an exponential tail in logs beyond the
 99th percentile. Conditional magnitudes retransform with an out-of-fold
 Duan smear of 1.173 [@duan1983smearing]; predicted mean conditional
-magnitude is $186 against $189 observed. Model figures throughout this
-section quote the current committed artifacts, regenerated when the
-seventeen additive features described at the end of this section
-entered every stage; the pre-feature values (sign AUC 0.686, tail log
-scale 0.271, the earlier calibration table) are preserved in
-`analysis/FEATURES_REPORT.md` with the full before/after roll.
+magnitude is $186 against $189 observed. The tail is fitted at the
+depth where it attaches (log scale 0.252), each case's magnitude is
+capped at a physical maximum, and state dollar-rate factors are fit on
+out-of-sample fiscal 2023 predictions and frozen.
 
-**Validation, including failures.** @tbl-validate summarizes. An
-adversarial statistical review of the first deployed model found the
-tail fitted at one depth but attached at another (overstating
-extreme-tail mass) and cross-state level gaps propagating into simulated
-spreads. The fix round repaired both — refitting the tail at its
-attachment depth (log scale 0.252 in the current artifact, from 0.467
-pre-fix), capping each case's
-magnitude at a physical maximum, and freezing fiscal-2023-fit state
-dollar factors — and also moved the coverage evaluation to the
-configuration that actually ships: the frozen model trained through
-fiscal 2022 (62,984 training deviators, against the through-2023
-primary model's 79,919), with fiscal 2023 held out for factor
-fitting. That
-evaluation-frame change, not the three fixes — none of which enters the
-coverage computation, which compares observed log-magnitudes with the
-raw conditional quantiles — is what moved the coverage figures. An
-earlier version of this section reported the through-2023 primary
-model's coverage: within 3 points of nominal at seven of nine levels,
-gaps −0.3 to −3.5 points; the fact catalog's E3 row records the
-supersession. The shipped frozen configuration does not attain it:
-within 3 points at only two of nine levels, all nine gaps negative
+**Validation, including failures.** @tbl-validate summarizes, for the
+configuration that ships: the frozen model trained through fiscal 2022
+(62,984 training deviators), with fiscal 2023 held out for factor
+fitting and fiscal 2024 for evaluation. Coverage of the conditional
+quantiles fails: within 3 points of nominal at only two of nine levels,
+all nine gaps negative
 (−0.38 to −7.30 points, worst at the 75th–90th percentiles). This is
 one-sided *under*-coverage — predicted quantiles sit too low,
 understating mid-to-upper magnitudes, coherent with the
-$186-versus-$189 comparison. A benchmark against a quantile regression
-forest on the identical protocol, with the decision rule fixed in the
-protocol code before results existed, shows the failure is not specific
-to the gradient-boosted quantile stack: run against the pre-feature
-stack (the expanded feature set has not been re-benchmarked), the
-forest improves mean absolute coverage (4.10 against the pre-feature
-4.38 points) but shifts under-coverage from the tail to the central
-levels with a worse maximum gap, degrades
-probability-integral-transform calibration, and loses the
-factor-adjusted state dollar-rate comparison (0.951 against 0.928
-points — a different object from @tbl-validate's official-error-rate
-MAE), so the gradient-boosted stack is retained; causes the two
-estimators share — the feature set, the tree-ensemble family, the
-temporal gap from the frozen training window to fiscal 2024 — remain
-candidates. The deployed
+$186-versus-$189 comparison. The under-coverage is not specific to the
+gradient-boosted quantile stack: under a pre-specified decision rule, a
+quantile regression forest on the identical protocol (benchmarked
+against the model without the three certification/BBCE/premium feature
+families) improves mean absolute coverage (4.10 against 4.38 points)
+but shifts under-coverage from the tail to the central levels with a
+worse maximum gap, degrades probability-integral-transform calibration,
+and loses the factor-adjusted state dollar-rate comparison (0.951
+against 0.928 points — a different object from @tbl-validate's
+official-error-rate MAE), so the gradient-boosted stack is retained;
+causes the two estimators share — the feature set, the tree-ensemble
+family, the temporal gap from the frozen training window to fiscal
+2024 — remain candidates. The deployed
 simulator serves this model in exactly one place — a
 standard-medical-deduction scenario whose flipped per-case parameters,
 paired-bootstrap intervals, and level gate ship in an export pinned to
@@ -477,11 +498,9 @@ simulation result in this paper uses model draws.
 | Cross-state correlation (equal-weighted) | 0.56 | 0.91 |
 
 : Fiscal 2024 state-level calibration of predicted official-error rates,
-matched frozen-model comparisons, from the current committed artifact
-(post-feature-round; the pre-feature table — 1.81/1.65pp unfactored,
-0.885/0.785pp factored — is preserved in `analysis/FEATURES_REPORT.md`).
-Factors are fit on out-of-sample fiscal 2023 predictions and frozen
-before touching fiscal 2024. {#tbl-validate}
+matched frozen-model comparisons. Factors are fit on out-of-sample
+fiscal 2023 predictions and frozen before touching fiscal 2024.
+{#tbl-validate}
 
 State-level calibration uses a strictly temporal protocol: models fit
 through 2022 predict 2023 out of sample; state observed-to-predicted
@@ -515,27 +534,26 @@ utility-allowance offsets for cost neutrality, so these are contrasts of
 policy bundles. Causal identification awaits engine-computed
 counterfactuals (@sec-roadmap).
 
-A subsequent feature round, prompted by practitioner review, added
-seventeen case-level features in three families: certification timing
-(months since certification and period length from the file's
-`LASTCERT` and `CERTMTH`, a final-two-months indicator, and its
-interaction with elderly/disabled composition), state broad-based
-categorical eligibility from the FNS State Options Reports (44 adopting
-agencies in fiscal 2024, mapped to each training year's report edition;
-the file's own `CAT_ELIG` stays excluded because its codes conflate
-BBCE with traditional categorical eligibility), and Medicare Part B
-premium bands — reconstructing gross medical expense as the file's
-excess amount plus the $35 deduction floor and comparing it with the
-sampled month's published premium. The additive gains are modest and
-reported as such: classifier ROC AUC 0.7666 to 0.7679, hurdle stage-1
-AUC 0.8356 to 0.8397, equal-state calibration MAE 1.83 to 1.71
-percentage points, while distributional coverage worsens slightly (mean
-absolute gap 4.38 to 4.64 points) and is retained. The band feature's
-descriptive validation is exact where it should be: all 36 elderly
-Colorado cases censored at the state's $165 standard medical deduction
-map, after the floor reconstruction, to $200 gross — inside the
-just-above-premium band a practitioner predicted would matter — where a
-naive comparison on the excess scale misclassifies six of them.
+Three further feature families enter every model stage as seventeen
+case-level features: certification timing (months since certification
+and period length from the file's `LASTCERT` and `CERTMTH`, a
+final-two-months indicator, and its interaction with elderly/disabled
+composition), state broad-based categorical eligibility from the FNS
+State Options Reports (44 adopting agencies in fiscal 2024, mapped to
+each training year's report edition; the file's own `CAT_ELIG` is
+excluded because its codes conflate BBCE with traditional categorical
+eligibility), and Medicare Part B premium bands — reconstructing gross
+medical expense as the file's excess amount plus the $35 deduction
+floor and comparing it with the sampled month's published premium.
+Their marginal contribution, holding the protocol fixed: classifier ROC
+AUC 0.7666 to 0.7679, hurdle stage-1 AUC 0.8356 to 0.8397, equal-state
+calibration MAE 1.83 to 1.71 percentage points, distributional
+coverage's mean absolute gap 4.38 to 4.64 points (worse). The band
+construction validates exactly where it should: all 36 elderly Colorado
+cases censored at the state's $165 standard medical deduction map,
+after the floor reconstruction, to $200 gross — inside the
+just-above-premium band — where a naive comparison on the excess scale
+misclassifies six of them.
 
 ## Simulating measured rates under cost sharing {#sec-simulate}
 
@@ -642,16 +660,18 @@ cleared that bar (Delaware, Florida, Hawaii, Illinois, Kentucky,
 Minnesota, North Carolina, New Jersey, Ohio, and West Virginia) — but
 only seven of those ten changed tiers, so 11 of the 18 tier changes sit
 inside the noise band; the median jurisdiction moved 1.38 standard
-deviations. Movement figures quote the committed artifact
-(`analysis/fy2025_movement.json`, deterministic at seed 11); the
-tier-step and election dollars below come from the deployed simulator's
-committed inputs (`app/public/data.json`) and its election engine.
+deviations. Movement figures come from the committed movement artifact
+(deterministic, seed 11; @sec-availability); tier-step and election
+dollars come from the deployed simulator's committed inputs and its
+election engine, and price shares at fiscal 2024 issuance levels —
+no caseload or allotment growth to the billed year is projected.
 
 The two tails of that distribution make the point more sharply than the
 counts. Colorado moved from 9.97% to 10.09% — 0.12 percentage points,
 0.13 standard deviations, indistinguishable from re-measuring the same
 program — and that move crossed the 10% boundary into the 15% tier,
-repricing its FY2028 exposure by roughly $63M a year. Real movement
+repricing its FY2028 exposure by roughly $63M a year at fiscal 2024
+issuance levels. Real movement
 exists alongside it: Hawaii went from 6.68% to 10.92% (11.2 standard
 deviations, two tiers up), New Jersey from 14.33% to 6.86% (−11.2, from
 the top tier to the 5% tier), Kentucky from 9.11% to 4.70% (−7.2, into
@@ -784,10 +804,7 @@ information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
 assignment for boundary states. The modeling bar cannot be exact, and
 this paper went through four rounds of adversarial review, archived
-unedited in the repository, which found — among other things — two
-direction-of-effect errors, one wrong external figure, and one
-misdescribed epistemic status (a realized-year check first framed as a
-committed prediction) in earlier drafts. The system this points toward is one in
+unedited in the repository. The system this points toward is one in
 which the rules that compute benefits, the requirements they impose on
 households, and the errors they produce are executable, testable, and
 priced from the same verified source.
@@ -815,11 +832,14 @@ commands are in the repository README.
 ## Disclosure
 
 The author leads PolicyEngine, which builds the simulator described
-here, and contributed to the axiom-oracles verification harness and the
-rulespec-us encodings whose parity this paper reports. The adversarial
-review protocol — seventeen independent reviews across three rounds,
-archived unedited in the repository — is the mitigation offered for
-that entanglement.
+here, and The Axiom Foundation, which builds the rulespec-us encodings
+and the axiom-oracles verification harness whose parity this paper
+reports — the paper is an evaluation of systems its author is
+responsible for. The mitigations are structural: every parity claim
+replays against the government's own recorded values at zero tolerance
+from committed, hash-pinned artifacts any reader can rerun, and the
+manuscript's four rounds of adversarial review are archived unedited in
+the repository.
 
 ## Acknowledgments
 
