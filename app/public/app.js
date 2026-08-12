@@ -975,11 +975,26 @@ function renderAdoption(code, st, elec, drift) {
       `Deferral is not forgiveness — a lower measured rate starts billing sooner at a lower rate, while deferral keys the first ` +
       `bill to a later, unsimulated year.</p>`;
   } else {
-    const save = (x) => fmtM(Math.max(0, elec.elect28 - x.el.elect28));
+    const dS = elec.elect28 - s.el.elect28;
+    const dB = elec.elect28 - b.el.elect28;
+    const head =
+      `<p class="sub">Through the FY 2026 election, the expected FY 2028 bill moves from <strong>${fmtM(elec.elect28)}/yr</strong> ` +
+      `to <strong>${fmtM(b.el.elect28)}</strong> (broad) – <strong>${fmtM(s.el.elect28)}</strong> (strict)/yr`;
+    // The election keys FY 2028 to min(draw, FY 2025), so a lower measured
+    // rate can only reduce the billed tier; the one channel that can raise
+    // the expected bill is the delay clause — fewer draws crossing 13.33%
+    // means fewer deferrals to later, unsimulated years.
+    const tail =
+      dS >= 0 && dB >= 0
+        ? ` — an expected saving of ${fmtM(Math.min(dS, dB))} to ${fmtM(Math.max(dS, dB))}/yr.</p>`
+        : `. A bound above the baseline is the delay clause, not a higher tier: at baseline ` +
+          `${(100 * elec.pDelay26).toFixed(0)}% of simulated FY 2026 measurements cross the 13.33% delay test and defer ` +
+          `the bill to later, unsimulated years; adoption removes most of that deferral chance ` +
+          `(${(100 * s.el.pDelay26).toFixed(0)}% strict / ${(100 * b.el.pDelay26).toFixed(0)}% broad still cross), so the ` +
+          `near-term expected bill can rise even as the measured rate falls. Deferral is not forgiveness.</p>`;
     dollars =
-      `<p class="sub">Through the FY 2026 election, the expected FY 2028 bill falls from <strong>${fmtM(elec.elect28)}/yr</strong> ` +
-      `to <strong>${fmtM(b.el.elect28)}</strong> (broad) – <strong>${fmtM(s.el.elect28)}</strong> (strict)/yr — ` +
-      `an expected saving of ${save(s)} to ${save(b)}/yr. The chance the FY 2026 measurement beats the locked FY 2025 rate ` +
+      head + tail +
+      `<p class="sub">The chance the FY 2026 measurement beats the locked FY 2025 rate ` +
       `moves from ${(100 * elec.pWin).toFixed(0)}% to ${(100 * s.el.pWin).toFixed(0)}–${(100 * b.el.pWin).toFixed(0)}%; ` +
       `the FY 2029 bill (keyed to FY 2026) moves from ${fmtM(elec.bill29)}/yr to ${fmtM(b.el.bill29)}–${fmtM(s.el.bill29)}/yr.</p>`;
   }
