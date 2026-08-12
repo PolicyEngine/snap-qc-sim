@@ -739,21 +739,26 @@ zeroing FY2029 as well.
 
 The same clock defines what can still be registered. Fiscal 2026 is the
 first measurement year the statute exposes end to end — it opened after
-enactment and closes September 30, 2026 — and its rates do not yet
-exist. The repository therefore now carries a pre-registration for them:
-the disclosure above (a check of input independence, not a registered
-forecast) holds for fiscal 2025, and the fiscal 2026 design closes that
-gap prospectively. `analysis/PREREGISTRATION_OBBBA_BOUNDARY.md` commits
-the boundary quasi-experiment in advance — running-variable windows at
-the 6/8/10 tier cuts and the 13.33% delay test, estimators and decision
-rules fixed to seeds, per-state no-response null predictions from this
-same observed-resample engine, the outcome list (measured rates, the
+the July 4, 2025 enactment (per the GPO record for Public Law 119-21,
+as the registration documents) and closes September 30, 2026 — and no
+official fiscal 2026 rate yet exists. The repository therefore now
+carries a pre-registration for them: the disclosure above (a check of
+input independence, not a registered forecast) holds for fiscal 2025,
+and the fiscal 2026 design closes that gap prospectively.
+`analysis/PREREGISTRATION_OBBBA_BOUNDARY.md` commits the boundary
+quasi-experiment in advance — running-variable windows at the 6/8/10
+tier cuts and the 13.33% delay test, estimators and decision rules fixed
+to seeds, per-state no-response null predictions from this same
+observed-resample engine, the outcome list (measured rates, the
 sampling-plan election that carries the precision waiver, cause-mix
-shifts), and falsification tests — with the machine-readable predictions
-SHA-256-pinned and their regeneration byte-locked in CI. The public
-commit history is the registration record; whatever fiscal 2026 shows,
-the claims this repository can make about it were fixed while the year
-was still in the field, before any of its outcomes existed.
+shifts), and falsification tests, one of which — the fiscal 2024
+pre-period placebo — is executed and locked at registration — with the
+machine-readable predictions SHA-256-pinned and their regeneration
+byte-locked in CI. The public commit history is the registration record
+and the registering pull request's merge is the registration event:
+whatever fiscal 2026 shows, the analyses this repository will run on it
+were fixed while the year was still in the field, before its official
+outcomes exist, and anything beyond them will be labeled post hoc.
 
 ### Pricing engine adoption through the formula {#sec-adoption}
 

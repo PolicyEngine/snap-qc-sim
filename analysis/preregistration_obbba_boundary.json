@@ -26,7 +26,7 @@
     "pit": "PIT: u_s = (#{null draws < r26} + 0.5 * #{null draws == r26}) / 4000, against regenerated full-precision baseline draws.",
     "primary": "PRIMARY: T = mean(u_s | above) - mean(u_s | below), pooled across the three tier windows (assigned partition). H1 one-sided: T < 0. alpha = 0.05. Null: 20,000 MC replications, seed 20260930 \u2014 independently per window state draw u ~ discrete uniform {(k+0.5)/4000 : k=0..3999}; p = fraction of null T <= realized T."
    },
-   "power_replicates": "Each power replicate draws, per window state independently and with replacement, one of the state's 4,000 regenerated baseline rates via mc_index_transform; the percentage-point shift applies in rate space BEFORE the PIT; the shifted value is midranked against the UNCHANGED baseline draws; the same index matrix serves every delta (common random numbers).",
+   "power_replicates": "Each power replicate draws, per window state independently and with replacement, one of the state's 4,000 regenerated baseline rates via mc_index_transform; the percentage-point shift applies in rate space BEFORE the PIT; the shifted value is midranked against the UNCHANGED baseline draws; the same index matrix serves every delta (common random numbers). Drift-world rows (primary_/delay_ prefixed variants) draw the realized rates from the drift-widened banks instead, with the same indices and the same sampling-only test: their delta = 0 row is the size distortion of the registered test under that world.",
    "quantiles": {
     "convention": "numpy.quantile method='linear' (the NumPy default linear interpolation convention), computed before rounding",
     "levels": [
@@ -56,6 +56,7 @@
     "simulation_seed_each_state_and_variant": 11
    },
    "rounding": "Before hashing and serialization: rates, quantiles, percentage-point quantities, and probabilities are rounded to 4 decimal places with Python round (ties to even); dollar expectations are rounded to whole dollars with the same rule. National totals are summed at full precision before rounding.",
+   "rtm_shrunken_sensitivity": "Registered regression-to-the-mean sensitivity: re-center each window state's null at m + lambda_s * (fy25_s - m), where m is the unweighted mean of the 53 published FY2025 rates, lambda_s = var_true / (var_true + sd_s^2), and var_true = max(0, cross-state variance of published rates (ddof=1) - mean squared baseline sampling SD); windows, sides, and assignment unchanged; MC seed 20260937. Implemented as rtm_shrunken_sensitivity_test().",
    "serialization": "Wrapper is {payload, payload_sha256}; the self-pin hashes compact json.dumps(payload, sort_keys=True, separators=(',', ':')) bytes. The file uses indent=1, sort_keys=True, ensure_ascii=True, and a trailing newline.",
    "simulation": "For each state and variant, sample case indices row-major with a fresh seed-11 Mulberry32 stream; m=n, n+300, or n+500; compute official_fy2025 + resampled weighted rate - file point rate. All reported draw SDs use the population denominator (ddof=0).",
    "tiers": "Strict upper cuts: rate <6 -> 0%, <8 -> 5%, <10 -> 10%, otherwise 15%; a draw exactly at a cut is in the upper tier.",
@@ -441,6 +442,54 @@
     "shift_direction": "upward",
     "shifted_states": "every state in the delay probability window"
    },
+   "delay_drift_classical_method_of_moments": {
+    "alpha": 0.05,
+    "common_random_numbers_across_deltas": true,
+    "deltas_pp": [
+     0.0,
+     0.25,
+     0.5,
+     1.0
+    ],
+    "null_p_value_rule": "inclusive empirical tail; reject when p <= alpha",
+    "null_replications": 20000,
+    "null_seed": 20260931,
+    "rejection_rates_by_delta_pp": {
+     "0.0": 0.1115,
+     "0.25": 0.1985,
+     "0.5": 0.3085,
+     "1.0": 0.595
+    },
+    "replications": 2000,
+    "seed": 20270602,
+    "shift_direction": "upward",
+    "shifted_states": "every state in the delay probability window",
+    "world": "realized rates drawn from the drift-widened banks while the test keeps its registered sampling-only reference: the delta = 0 row is the size distortion under that world, and the delta > 0 rows are power there"
+   },
+   "delay_drift_robust_median_mad": {
+    "alpha": 0.05,
+    "common_random_numbers_across_deltas": true,
+    "deltas_pp": [
+     0.0,
+     0.25,
+     0.5,
+     1.0
+    ],
+    "null_p_value_rule": "inclusive empirical tail; reject when p <= alpha",
+    "null_replications": 20000,
+    "null_seed": 20260931,
+    "rejection_rates_by_delta_pp": {
+     "0.0": 0.0915,
+     "0.25": 0.1905,
+     "0.5": 0.3625,
+     "1.0": 0.7305
+    },
+    "replications": 2000,
+    "seed": 20270602,
+    "shift_direction": "upward",
+    "shifted_states": "every state in the delay probability window",
+    "world": "realized rates drawn from the drift-widened banks while the test keeps its registered sampling-only reference: the delta = 0 row is the size distortion under that world, and the delta > 0 rows are power there"
+   },
    "primary": {
     "alpha": 0.05,
     "common_random_numbers_across_deltas": true,
@@ -463,6 +512,54 @@
     "seed": 20270601,
     "shift_direction": "downward",
     "shifted_states": "assigned above-group states only"
+   },
+   "primary_drift_classical_method_of_moments": {
+    "alpha": 0.05,
+    "common_random_numbers_across_deltas": true,
+    "deltas_pp": [
+     0.0,
+     0.25,
+     0.5,
+     1.0
+    ],
+    "null_p_value_rule": "inclusive empirical tail; reject when p <= alpha",
+    "null_replications": 20000,
+    "null_seed": 20260930,
+    "rejection_rates_by_delta_pp": {
+     "0.0": 0.114,
+     "0.25": 0.203,
+     "0.5": 0.3005,
+     "1.0": 0.534
+    },
+    "replications": 2000,
+    "seed": 20270601,
+    "shift_direction": "downward",
+    "shifted_states": "assigned above-group states only",
+    "world": "realized rates drawn from the drift-widened banks while the test keeps its registered sampling-only reference: the delta = 0 row is the size distortion under that world, and the delta > 0 rows are power there"
+   },
+   "primary_drift_robust_median_mad": {
+    "alpha": 0.05,
+    "common_random_numbers_across_deltas": true,
+    "deltas_pp": [
+     0.0,
+     0.25,
+     0.5,
+     1.0
+    ],
+    "null_p_value_rule": "inclusive empirical tail; reject when p <= alpha",
+    "null_replications": 20000,
+    "null_seed": 20260930,
+    "rejection_rates_by_delta_pp": {
+     "0.0": 0.105,
+     "0.25": 0.2085,
+     "0.5": 0.3565,
+     "1.0": 0.6935
+    },
+    "replications": 2000,
+    "seed": 20270601,
+    "shift_direction": "downward",
+    "shifted_states": "assigned above-group states only",
+    "world": "realized rates drawn from the drift-widened banks while the test keeps its registered sampling-only reference: the delta = 0 row is the size distortion under that world, and the delta > 0 rows are power there"
    }
   },
   "predictions": {
@@ -15768,5 +15865,5 @@
   },
   "schema": "snap_qc_sim.preregistration_obbba_boundary.v1"
  },
- "payload_sha256": "5ccbcf19821257e2bce143bae4035de9aa13f36047a625b2ba337395a7fe13ef"
+ "payload_sha256": "dd212c78b43f2c6ce00c261a8c7aad986627b65bbadb84ae5835262f9417fad2"
 }

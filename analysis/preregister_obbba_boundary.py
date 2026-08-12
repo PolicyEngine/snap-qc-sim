@@ -32,6 +32,10 @@ DELAY_NULL_SEED = 20_260_931
 NULL_REPLICATIONS = 20_000
 PRIMARY_POWER_SEED = 20_270_601
 DELAY_POWER_SEED = 20_270_602
+PRE_PERIOD_PLACEBO_SEED = 20_260_935
+PLACEBO_CUTS = (7.0, 9.0)
+PLACEBO_CUTS_SEED = 20_260_936
+RTM_SENSITIVITY_SEED = 20_260_937
 POWER_REPLICATIONS = 2_000
 ALPHA = 0.05
 POWER_DELTAS = (0.0, 0.25, 0.5, 1.0)
@@ -323,77 +327,104 @@ def _generate_baseline_draws(
     return {code: simulate(data["states"][code]) for code in codes}
 
 
-def _build_rosters(
-    data: Mapping[str, Any], baseline_draws: Mapping[str, np.ndarray]
+def _tier_windows(
+    data: Mapping[str, Any],
+    draws: Mapping[str, np.ndarray],
+    cuts: tuple[float, ...],
+    rate_key: str,
 ) -> dict[str, Any]:
-    codes = sorted(baseline_draws)
+    """Probability windows, sides, and nearest-cut assignment for any cuts.
+
+    ``rate_key`` names the published running-variable field in data.json
+    states ("official_fy2025" for the registered design, "official" for
+    the FY2024-anchored pre-period placebo).
+    """
+    codes = sorted(draws)
     raw: dict[str, Any] = {}
     qualifying_cuts: dict[str, list[float]] = {code: [] for code in codes}
 
-    for cut in TIER_CUTS:
+    for cut in cuts:
         key = _number_key(cut)
         qualifiers = [
             code
             for code in codes
-            if 0.10 <= float(np.mean(baseline_draws[code] < cut)) <= 0.90
+            if 0.10 <= float(np.mean(draws[code] < cut)) <= 0.90
         ]
         for code in qualifiers:
             qualifying_cuts[code].append(cut)
         raw[key] = {
             "qualifiers": qualifiers,
             "above": [
-                code
-                for code in qualifiers
-                if data["states"][code]["official_fy2025"] >= cut
+                code for code in qualifiers if data["states"][code][rate_key] >= cut
             ],
             "below": [
-                code
-                for code in qualifiers
-                if data["states"][code]["official_fy2025"] < cut
+                code for code in qualifiers if data["states"][code][rate_key] < cut
             ],
         }
 
-    assigned_codes: dict[float, list[str]] = {cut: [] for cut in TIER_CUTS}
+    assigned_codes: dict[float, list[str]] = {cut: [] for cut in cuts}
     multi_window_reassignments = []
     for code in codes:
-        cuts = qualifying_cuts[code]
-        if not cuts:
+        state_cuts = qualifying_cuts[code]
+        if not state_cuts:
             continue
-        fy25 = float(data["states"][code]["official_fy2025"])
-        assigned_cut = min(cuts, key=lambda cut: (abs(fy25 - cut), cut))
+        rate = float(data["states"][code][rate_key])
+        assigned_cut = min(state_cuts, key=lambda cut: (abs(rate - cut), cut))
         assigned_codes[assigned_cut].append(code)
-        if len(cuts) > 1:
+        if len(state_cuts) > 1:
             multi_window_reassignments.append(
                 {
                     "state": code,
-                    "raw_qualifying_cuts_pp": [_round4(cut) for cut in cuts],
+                    "raw_qualifying_cuts_pp": [_round4(cut) for cut in state_cuts],
                     "assigned_cut_pp": _round4(assigned_cut),
                     "reassigned_from_cuts_pp": [
-                        _round4(cut) for cut in cuts if cut != assigned_cut
+                        _round4(cut) for cut in state_cuts if cut != assigned_cut
                     ],
                     "distances_pp": {
-                        _number_key(cut): _round4(abs(fy25 - cut)) for cut in cuts
+                        _number_key(cut): _round4(abs(rate - cut))
+                        for cut in state_cuts
                     },
                 }
             )
 
     assigned: dict[str, Any] = {}
-    for cut in TIER_CUTS:
+    for cut in cuts:
         key = _number_key(cut)
         qualifiers = assigned_codes[cut]
         assigned[key] = {
             "qualifiers": qualifiers,
             "above": [
-                code
-                for code in qualifiers
-                if data["states"][code]["official_fy2025"] >= cut
+                code for code in qualifiers if data["states"][code][rate_key] >= cut
             ],
             "below": [
-                code
-                for code in qualifiers
-                if data["states"][code]["official_fy2025"] < cut
+                code for code in qualifiers if data["states"][code][rate_key] < cut
             ],
         }
+
+    return {
+        "raw": raw,
+        "assigned": assigned,
+        "multi_window_reassignments": multi_window_reassignments,
+    }
+
+
+def _pooled_sides(
+    assigned: Mapping[str, Any], cuts: tuple[float, ...]
+) -> tuple[list[str], list[str]]:
+    above = sorted(
+        code for cut in map(_number_key, cuts) for code in assigned[cut]["above"]
+    )
+    below = sorted(
+        code for cut in map(_number_key, cuts) for code in assigned[cut]["below"]
+    )
+    return above, below
+
+
+def _build_rosters(
+    data: Mapping[str, Any], baseline_draws: Mapping[str, np.ndarray]
+) -> dict[str, Any]:
+    codes = sorted(baseline_draws)
+    tier_windows = _tier_windows(data, baseline_draws, TIER_CUTS, "official_fy2025")
 
     delay_qualifiers = [
         code
@@ -427,25 +458,16 @@ def _build_rosters(
         }
 
     return {
-        "tier_probability_windows": {
-            "raw": raw,
-            "assigned": assigned,
-            "multi_window_reassignments": multi_window_reassignments,
-        },
+        "tier_probability_windows": tier_windows,
         "delay_probability_window": delay_window,
         "fixed_width_windows": fixed,
     }
 
 
 def _assigned_groups(rosters: Mapping[str, Any]) -> tuple[list[str], list[str]]:
-    assigned = rosters["tier_probability_windows"]["assigned"]
-    above = sorted(
-        code for cut in map(_number_key, TIER_CUTS) for code in assigned[cut]["above"]
+    return _pooled_sides(
+        rosters["tier_probability_windows"]["assigned"], TIER_CUTS
     )
-    below = sorted(
-        code for cut in map(_number_key, TIER_CUTS) for code in assigned[cut]["below"]
-    )
-    return above, below
 
 
 def _pit_from_draws(realized_rate: float, null_draws: np.ndarray) -> float:
@@ -485,11 +507,13 @@ def pit_values(realized_rates: Mapping[str, float]) -> dict[str, float]:
     }
 
 
-def _primary_null_statistics(above: list[str], below: list[str]) -> np.ndarray:
+def _primary_null_statistics(
+    above: list[str], below: list[str], seed: int = PRIMARY_NULL_SEED
+) -> np.ndarray:
     codes = sorted(above + below)
     above_set = set(above)
     above_mask = np.array([code in above_set for code in codes], dtype=bool)
-    rng = np.random.Generator(np.random.PCG64(PRIMARY_NULL_SEED))
+    rng = np.random.Generator(np.random.PCG64(seed))
     ranks = rng.integers(
         0,
         DRAWS,
@@ -513,17 +537,42 @@ def _delay_null_statistics(state_count: int) -> np.ndarray:
     return np.mean((ranks + 0.5) / DRAWS, axis=1)
 
 
-def primary_test(realized_rates: Mapping[str, float]) -> dict[str, Any]:
+def _reduce_roster(
+    codes: list[str],
+    realized_rates: Mapping[str, float],
+    missing_ok: bool,
+) -> tuple[list[str], list[str]]:
+    """Registered missing-jurisdiction rule: rosters stay as registered; a
+    jurisdiction absent from the publication drops from every statistic,
+    with the reduced roster reported. The null is rebuilt for the reduced
+    roster under the registered seed."""
+    if not missing_ok:
+        _validate_realized_rates(realized_rates, codes)
+        return codes, []
+    present = [code for code in codes if code in realized_rates]
+    missing = sorted(set(codes) - set(present))
+    _validate_realized_rates(realized_rates, present)
+    return present, missing
+
+
+def primary_test(
+    realized_rates: Mapping[str, float], missing_ok: bool = False
+) -> dict[str, Any]:
     """Run the preregistered pooled tier-window test on realized FY2026 rates."""
     data, _ = _load_inputs()
     draws = _generate_baseline_draws(data)
     rosters = _build_rosters(data, draws)
     above, below = _assigned_groups(rosters)
-    required = sorted(above + below)
-    _validate_realized_rates(realized_rates, required)
+    present, missing = _reduce_roster(
+        sorted(above + below), realized_rates, missing_ok
+    )
+    above = [code for code in above if code in present]
+    below = [code for code in below if code in present]
+    if not above or not below:
+        raise ValueError("both sides of the pooled window must be non-empty")
     pits = {
         code: _pit_from_draws(float(realized_rates[code]), draws[code])
-        for code in required
+        for code in present
     }
     statistic = float(np.mean([pits[c] for c in above])) - float(
         np.mean([pits[c] for c in below])
@@ -538,17 +587,22 @@ def primary_test(realized_rates: Mapping[str, float]) -> dict[str, Any]:
         "alternative": "T < 0",
         "above": above,
         "below": below,
+        "missing": missing,
         "pit": pits,
     }
 
 
-def delay_secondary_test(realized_rates: Mapping[str, float]) -> dict[str, Any]:
+def delay_secondary_test(
+    realized_rates: Mapping[str, float], missing_ok: bool = False
+) -> dict[str, Any]:
     """Run the preregistered upper-tail mean-PIT delay-window test."""
     data, _ = _load_inputs()
     draws = _generate_baseline_draws(data)
     rosters = _build_rosters(data, draws)
-    codes = sorted(rosters["delay_probability_window"]["qualifiers"])
-    _validate_realized_rates(realized_rates, codes)
+    roster = sorted(rosters["delay_probability_window"]["qualifiers"])
+    codes, missing = _reduce_roster(roster, realized_rates, missing_ok)
+    if not codes:
+        raise ValueError("the delay window must be non-empty")
     pits = {
         code: _pit_from_draws(float(realized_rates[code]), draws[code])
         for code in codes
@@ -563,8 +617,224 @@ def delay_secondary_test(realized_rates: Mapping[str, float]) -> dict[str, Any]:
         "alpha": ALPHA,
         "alternative": "U > 0.5",
         "states": codes,
+        "missing": missing,
         "pit": pits,
     }
+
+
+def pre_period_placebo_test() -> dict[str, Any]:
+    """Registered falsification: the FY2024-anchored pre-period placebo.
+
+    Identical machinery to the primary with fiscal 2024 as the running
+    variable: draws anchored at the published FY2024 rate (data.json
+    "official"), windows and sides from those draws and the FY2024 rates,
+    outcome = the published FY2025 rates already committed in data.json.
+    The outcome predates registration, so this diagnostic is computable
+    now and its result is locked in the tests; a nonrejection speaks only
+    to the absence of the tested directional pretrend.
+    """
+    data, _ = _load_inputs()
+    codes = sorted(data["states"])
+    draws = {
+        code: simulate(
+            data["states"][code],
+            anchor=float(data["states"][code]["official"]),
+        )
+        for code in codes
+    }
+    windows = _tier_windows(data, draws, TIER_CUTS, "official")
+    above, below = _pooled_sides(windows["assigned"], TIER_CUTS)
+    pits = {
+        code: _pit_from_draws(
+            float(data["states"][code]["official_fy2025"]), draws[code]
+        )
+        for code in above + below
+    }
+    statistic = float(np.mean([pits[c] for c in above])) - float(
+        np.mean([pits[c] for c in below])
+    )
+    null_statistics = _primary_null_statistics(
+        above, below, seed=PRE_PERIOD_PLACEBO_SEED
+    )
+    p_value = float(np.mean(null_statistics <= statistic))
+    return {
+        "statistic": statistic,
+        "p_value": p_value,
+        "alpha": ALPHA,
+        "alternative": (
+            "T < 0 (tested direction only; the FY2025 outcome predates "
+            "registration)"
+        ),
+        "above": above,
+        "below": below,
+        "windows": windows,
+        "pit": pits,
+    }
+
+
+def placebo_cut_rosters() -> dict[str, Any]:
+    """The 7/9 placebo-cut windows on the registered FY2025-anchored draws."""
+    data, _ = _load_inputs()
+    draws = _generate_baseline_draws(data)
+    return _tier_windows(data, draws, PLACEBO_CUTS, "official_fy2025")
+
+
+def placebo_cuts_test(
+    realized_rates: Mapping[str, float], missing_ok: bool = False
+) -> dict[str, Any]:
+    """Registered falsification: the primary machinery at the 7/9 cuts."""
+    data, _ = _load_inputs()
+    draws = _generate_baseline_draws(data)
+    windows = _tier_windows(data, draws, PLACEBO_CUTS, "official_fy2025")
+    above, below = _pooled_sides(windows["assigned"], PLACEBO_CUTS)
+    present, missing = _reduce_roster(
+        sorted(above + below), realized_rates, missing_ok
+    )
+    above = [code for code in above if code in present]
+    below = [code for code in below if code in present]
+    if not above or not below:
+        raise ValueError("both sides of the placebo window must be non-empty")
+    pits = {
+        code: _pit_from_draws(float(realized_rates[code]), draws[code])
+        for code in present
+    }
+    statistic = float(np.mean([pits[c] for c in above])) - float(
+        np.mean([pits[c] for c in below])
+    )
+    null_statistics = _primary_null_statistics(
+        above, below, seed=PLACEBO_CUTS_SEED
+    )
+    p_value = float(np.mean(null_statistics <= statistic))
+    return {
+        "statistic": statistic,
+        "p_value": p_value,
+        "alpha": ALPHA,
+        "alternative": "T < 0 (no statutory step exists at these cuts)",
+        "above": above,
+        "below": below,
+        "missing": missing,
+        "pit": pits,
+    }
+
+
+def rtm_shrinkage_parameters() -> dict[str, Any]:
+    """Global-Gaussian empirical-Bayes shrinkage from committed quantities.
+
+    m = unweighted mean of the 53 published FY2025 rates; var_true =
+    max(0, cross-state variance of those rates (ddof=1) - mean squared
+    baseline sampling SD); lambda_s = var_true / (var_true + sd_s^2);
+    shrunken center = m + lambda_s * (fy25_s - m). SDs are the
+    full-precision baseline-draw population SDs.
+    """
+    data, _ = _load_inputs()
+    codes = sorted(data["states"])
+    rates = np.array(
+        [float(data["states"][code]["official_fy2025"]) for code in codes]
+    )
+    draws = _generate_baseline_draws(data)
+    sds = np.array([float(np.std(draws[code])) for code in codes])
+    mean_rate = float(np.mean(rates))
+    var_true = max(0.0, float(np.var(rates, ddof=1)) - float(np.mean(sds**2)))
+    lambdas = var_true / (var_true + sds**2)
+    anchors = mean_rate + lambdas * (rates - mean_rate)
+    return {
+        "mean_rate": mean_rate,
+        "var_true": var_true,
+        "states": {
+            code: {
+                "lambda": float(lam),
+                "shrunken_center": float(anchor),
+                "shift_pp": float(anchor - rate),
+            }
+            for code, lam, anchor, rate in zip(
+                codes, lambdas, anchors, rates, strict=True
+            )
+        },
+    }
+
+
+def rtm_shrunken_sensitivity_test(
+    realized_rates: Mapping[str, float], missing_ok: bool = False
+) -> dict[str, Any]:
+    """Registered regression-to-the-mean sensitivity for the primary test.
+
+    Re-centers each window state's null at its empirical-Bayes shrunken
+    FY2025 rate (rtm_shrinkage_parameters) and reruns the primary PIT
+    contrast against those re-centered draws. Windows, sides, and
+    assignment stay exactly as registered; only the null centers move.
+    MC seed 20260937.
+    """
+    data, _ = _load_inputs()
+    baseline = _generate_baseline_draws(data)
+    rosters = _build_rosters(data, baseline)
+    above, below = _assigned_groups(rosters)
+    present, missing = _reduce_roster(
+        sorted(above + below), realized_rates, missing_ok
+    )
+    above = [code for code in above if code in present]
+    below = [code for code in below if code in present]
+    if not above or not below:
+        raise ValueError("both sides of the pooled window must be non-empty")
+    shrinkage = rtm_shrinkage_parameters()
+    shrunken_draws = {
+        code: simulate(
+            data["states"][code],
+            anchor=shrinkage["states"][code]["shrunken_center"],
+        )
+        for code in present
+    }
+    pits = {
+        code: _pit_from_draws(float(realized_rates[code]), shrunken_draws[code])
+        for code in present
+    }
+    statistic = float(np.mean([pits[c] for c in above])) - float(
+        np.mean([pits[c] for c in below])
+    )
+    null_statistics = _primary_null_statistics(
+        above, below, seed=RTM_SENSITIVITY_SEED
+    )
+    p_value = float(np.mean(null_statistics <= statistic))
+    return {
+        "statistic": statistic,
+        "p_value": p_value,
+        "alpha": ALPHA,
+        "alternative": "T < 0 (null centers shrunken toward the cross-state mean)",
+        "above": above,
+        "below": below,
+        "missing": missing,
+        "shrinkage": {
+            code: shrinkage["states"][code] for code in present
+        },
+        "pit": pits,
+    }
+
+
+def fixed_width_partition(width: float) -> dict[str, Any]:
+    """Assigned partition for a fixed-width window (registered micro-rule).
+
+    Fixed-width qualifier lists in the artifact overlap for wide windows;
+    the registered analysis assigns each qualifying state to its nearest
+    boundary among the four (tie -> lower), sides by the published FY2025
+    rate with equality above.
+    """
+    data, _ = _load_inputs()
+    partition: dict[str, dict[str, list[str]]] = {
+        _number_key(boundary): {"above": [], "below": []}
+        for boundary in ALL_BOUNDARIES
+    }
+    for code in sorted(data["states"]):
+        rate = float(data["states"][code]["official_fy2025"])
+        qualifying = [
+            boundary
+            for boundary in ALL_BOUNDARIES
+            if abs(rate - boundary) <= width
+        ]
+        if not qualifying:
+            continue
+        boundary = min(qualifying, key=lambda b: (abs(rate - b), b))
+        side = "above" if rate >= boundary else "below"
+        partition[_number_key(boundary)][side].append(code)
+    return partition
 
 
 def _pit_matrix(
@@ -601,44 +871,59 @@ def _sample_realized_rates(
     return rates
 
 
-def _power_table(
-    baseline_draws: Mapping[str, np.ndarray], rosters: Mapping[str, Any]
-) -> dict[str, Any]:
-    above, below = _assigned_groups(rosters)
+def _rejection_rates_primary(
+    realized_banks: Mapping[str, np.ndarray],
+    baseline_draws: Mapping[str, np.ndarray],
+    above: list[str],
+    below: list[str],
+    seed: int,
+) -> dict[str, float]:
     primary_codes = sorted(above + below)
     above_set = set(above)
     above_mask = np.array([code in above_set for code in primary_codes], dtype=bool)
-    primary_rates = _sample_realized_rates(
-        primary_codes, baseline_draws, PRIMARY_POWER_SEED
-    )
-    primary_null = np.sort(_primary_null_statistics(above, below))
-    primary_power: dict[str, float] = {}
+    rates = _sample_realized_rates(primary_codes, realized_banks, seed)
+    null = np.sort(_primary_null_statistics(above, below))
+    rejection: dict[str, float] = {}
     for delta in POWER_DELTAS:
         shifts = {code: -delta for code in above}
-        pits = _pit_matrix(primary_rates, primary_codes, baseline_draws, shifts)
+        pits = _pit_matrix(rates, primary_codes, baseline_draws, shifts)
         statistics = np.mean(pits[:, above_mask], axis=1) - np.mean(
             pits[:, ~above_mask], axis=1
         )
-        p_values = np.searchsorted(
-            primary_null, statistics, side="right"
-        ) / NULL_REPLICATIONS
-        primary_power[_delta_key(delta)] = _round4(np.mean(p_values <= ALPHA))
+        p_values = np.searchsorted(null, statistics, side="right") / (
+            NULL_REPLICATIONS
+        )
+        rejection[_delta_key(delta)] = _round4(np.mean(p_values <= ALPHA))
+    return rejection
 
-    delay_codes = sorted(rosters["delay_probability_window"]["qualifiers"])
-    delay_rates = _sample_realized_rates(
-        delay_codes, baseline_draws, DELAY_POWER_SEED
-    )
-    delay_null = np.sort(_delay_null_statistics(len(delay_codes)))
-    delay_power: dict[str, float] = {}
+
+def _rejection_rates_delay(
+    realized_banks: Mapping[str, np.ndarray],
+    baseline_draws: Mapping[str, np.ndarray],
+    delay_codes: list[str],
+    seed: int,
+) -> dict[str, float]:
+    rates = _sample_realized_rates(delay_codes, realized_banks, seed)
+    null = np.sort(_delay_null_statistics(len(delay_codes)))
+    rejection: dict[str, float] = {}
     for delta in POWER_DELTAS:
         shifts = {code: delta for code in delay_codes}
-        pits = _pit_matrix(delay_rates, delay_codes, baseline_draws, shifts)
+        pits = _pit_matrix(rates, delay_codes, baseline_draws, shifts)
         statistics = np.mean(pits, axis=1)
         p_values = (
-            NULL_REPLICATIONS
-            - np.searchsorted(delay_null, statistics, side="left")
+            NULL_REPLICATIONS - np.searchsorted(null, statistics, side="left")
         ) / NULL_REPLICATIONS
-        delay_power[_delta_key(delta)] = _round4(np.mean(p_values <= ALPHA))
+        rejection[_delta_key(delta)] = _round4(np.mean(p_values <= ALPHA))
+    return rejection
+
+
+def _power_table(
+    baseline_draws: Mapping[str, np.ndarray],
+    rosters: Mapping[str, Any],
+    drifted_banks: Mapping[str, Mapping[str, np.ndarray]],
+) -> dict[str, Any]:
+    above, below = _assigned_groups(rosters)
+    delay_codes = sorted(rosters["delay_probability_window"]["qualifiers"])
 
     common = {
         "alpha": ALPHA,
@@ -648,14 +933,22 @@ def _power_table(
         "null_p_value_rule": "inclusive empirical tail; reject when p <= alpha",
         "common_random_numbers_across_deltas": True,
     }
-    return {
+    drift_note = (
+        "realized rates drawn from the drift-widened banks while the test "
+        "keeps its registered sampling-only reference: the delta = 0 row is "
+        "the size distortion under that world, and the delta > 0 rows are "
+        "power there"
+    )
+    table: dict[str, Any] = {
         "primary": {
             **common,
             "seed": PRIMARY_POWER_SEED,
             "null_seed": PRIMARY_NULL_SEED,
             "shift_direction": "downward",
             "shifted_states": "assigned above-group states only",
-            "rejection_rates_by_delta_pp": primary_power,
+            "rejection_rates_by_delta_pp": _rejection_rates_primary(
+                baseline_draws, baseline_draws, above, below, PRIMARY_POWER_SEED
+            ),
         },
         "delay": {
             **common,
@@ -663,9 +956,35 @@ def _power_table(
             "null_seed": DELAY_NULL_SEED,
             "shift_direction": "upward",
             "shifted_states": "every state in the delay probability window",
-            "rejection_rates_by_delta_pp": delay_power,
+            "rejection_rates_by_delta_pp": _rejection_rates_delay(
+                baseline_draws, baseline_draws, delay_codes, DELAY_POWER_SEED
+            ),
         },
     }
+    for variant, banks in drifted_banks.items():
+        table[f"primary_{variant}"] = {
+            **common,
+            "seed": PRIMARY_POWER_SEED,
+            "null_seed": PRIMARY_NULL_SEED,
+            "shift_direction": "downward",
+            "shifted_states": "assigned above-group states only",
+            "world": drift_note,
+            "rejection_rates_by_delta_pp": _rejection_rates_primary(
+                banks, baseline_draws, above, below, PRIMARY_POWER_SEED
+            ),
+        }
+        table[f"delay_{variant}"] = {
+            **common,
+            "seed": DELAY_POWER_SEED,
+            "null_seed": DELAY_NULL_SEED,
+            "shift_direction": "upward",
+            "shifted_states": "every state in the delay probability window",
+            "world": drift_note,
+            "rejection_rates_by_delta_pp": _rejection_rates_delay(
+                banks, baseline_draws, delay_codes, DELAY_POWER_SEED
+            ),
+        }
+    return table
 
 
 def _definitions(movement: Mapping[str, Any]) -> dict[str, Any]:
@@ -752,7 +1071,21 @@ def _definitions(movement: Mapping[str, Any]) -> dict[str, Any]:
             "rates via mc_index_transform; the percentage-point shift applies "
             "in rate space BEFORE the PIT; the shifted value is midranked "
             "against the UNCHANGED baseline draws; the same index matrix "
-            "serves every delta (common random numbers)."
+            "serves every delta (common random numbers). Drift-world rows "
+            "(primary_/delay_ prefixed variants) draw the realized rates "
+            "from the drift-widened banks instead, with the same indices and "
+            "the same sampling-only test: their delta = 0 row is the size "
+            "distortion of the registered test under that world."
+        ),
+        "rtm_shrunken_sensitivity": (
+            "Registered regression-to-the-mean sensitivity: re-center each "
+            "window state's null at m + lambda_s * (fy25_s - m), where m is "
+            "the unweighted mean of the 53 published FY2025 rates, "
+            "lambda_s = var_true / (var_true + sd_s^2), and var_true = "
+            "max(0, cross-state variance of published rates (ddof=1) - mean "
+            "squared baseline sampling SD); windows, sides, and assignment "
+            "unchanged; MC seed 20260937. Implemented as "
+            "rtm_shrunken_sensitivity_test()."
         ),
         "windows": (
             "Probability windows include endpoints 0.10 and 0.90, and their "
@@ -828,6 +1161,9 @@ def build_payload() -> dict[str, Any]:
     }
 
     baseline_draws: dict[str, np.ndarray] = {}
+    drifted_banks: dict[str, dict[str, np.ndarray]] = {
+        variant: {} for variant in drift_taus
+    }
     state_predictions: dict[str, Any] = {}
     national_raw = {variant: 0.0 for variant in EXTRA_SAMPLES}
     tier_counts = {str(share): 0 for share in (0, 5, 10, 15)}
@@ -851,6 +1187,7 @@ def build_payload() -> dict[str, Any]:
             drifted = baseline_draws[code] + drift_draws(
                 tau, seed=DRIFT_SEED_BASE + state_index
             )
+            drifted_banks[variant][code] = drifted
             variants[variant], _ = _variant_prediction(state, drifted)
 
         fy25 = float(state["official_fy2025"])
@@ -871,7 +1208,7 @@ def build_payload() -> dict[str, Any]:
         }
 
     rosters = _build_rosters(data, baseline_draws)
-    power = _power_table(baseline_draws, rosters)
+    power = _power_table(baseline_draws, rosters, drifted_banks)
     national = {
         "state_count": len(codes),
         "sum_elect28_baseline": _whole_dollars(national_raw["baseline"]),
