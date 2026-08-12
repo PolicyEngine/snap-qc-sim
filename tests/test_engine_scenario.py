@@ -19,6 +19,13 @@ CAUSE_PATH = ROOT / "analysis/cause_shares.json"
 EXPORT_PATH = ROOT / "app/public/engine_scenario_data.json"
 APP_JS = ROOT / "app/public/app.js"
 
+# The source CSV is a local research artifact (not shipped to CI); tests that
+# regenerate from it are local gates, run before committing the export, while
+# the committed-artifact reconciliation tests below always run.
+needs_source_csv = pytest.mark.skipif(
+    not CSV.exists(), reason=f"source QC CSV not present at {CSV}"
+)
+
 
 @pytest.fixture(scope="module")
 def artifacts() -> tuple[dict, dict, dict]:
@@ -28,6 +35,7 @@ def artifacts() -> tuple[dict, dict, dict]:
     )
 
 
+@needs_source_csv
 def test_data_json_case_order_exactly_reproduces_load_cases(artifacts) -> None:
     """Lock flags to the public data arrays' source-row ordering invariant."""
     data, _, _ = artifacts
@@ -91,6 +99,7 @@ def test_rounded_public_arrays_stay_within_serialization_bound(artifacts) -> Non
     )
 
 
+@needs_source_csv
 def test_builder_is_byte_deterministic(tmp_path: Path) -> None:
     """Two complete builds serialize byte-identically."""
     outputs = [tmp_path / "first.json", tmp_path / "second.json"]
