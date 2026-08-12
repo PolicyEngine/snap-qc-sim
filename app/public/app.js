@@ -996,7 +996,7 @@ function renderAdoption(code, st, elec, drift) {
       head + tail +
       `<p class="sub">The chance the FY 2026 measurement beats the locked FY 2025 rate ` +
       `moves from ${(100 * elec.pWin).toFixed(0)}% to ${(100 * s.el.pWin).toFixed(0)}–${(100 * b.el.pWin).toFixed(0)}%; ` +
-      `the FY 2029 bill (keyed to FY 2026) moves from ${fmtM(elec.bill29)}/yr to ${fmtM(b.el.bill29)}–${fmtM(s.el.bill29)}/yr.</p>`;
+      `the FY 2029 bill (keyed to FY 2026) moves from ${fmtM(elec.bill29)}/yr to ${fmtM(b.el.bill29)} (broad) – ${fmtM(s.el.bill29)} (strict)/yr.</p>`;
   }
   const verifiedNote = st.verified
     ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit chain case-exactly (verification view above) — adoption means running determinations through the engine, not only verifying them.`
