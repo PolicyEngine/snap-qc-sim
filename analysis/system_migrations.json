@@ -1,0 +1,130 @@
+{
+  "schema": "snap_qc_sim.system_migrations.v1",
+  "purpose": "Treatment-event registry for QUASI_EXPERIMENTS.md design 1 (eligibility-system migration event studies). Dates are recorded at the precision the cited public sources support; nothing here is inferred from memory.",
+  "confidence_levels": {
+    "verified_multi_source": "date corroborated by two or more independent public sources",
+    "verified_single_source": "date from one credible public source; corroboration pending",
+    "candidate_unverified": "event known to exist; dates not yet verified from public records"
+  },
+  "panel_note": "The unblocked outcome panel runs FY2017-FY2024 (analysis/coding_consistency.json). panel_position classifies each event's go-live relative to it; edge events have post-periods in-panel but pre-periods requiring FY2016-or-earlier file acquisition.",
+  "events": [
+    {
+      "state": "RI",
+      "system": "UHIP (Unified Health Infrastructure Project, later RIBridges)",
+      "vendor": "Deloitte",
+      "go_live": "2016-09",
+      "date_precision": "month",
+      "confidence": "verified_multi_source",
+      "panel_position": "edge",
+      "notes": "Statewide single-cutover go-live after a one-year delay from the original July 2015 plan; application backlog reached ~15,000 at the crisis peak; FNS billed the state $37,343,809.68 for SNAP overpayments covering September 2016 through December 2019 — a federally documented error-consequence window matching the event.",
+      "sources": [
+        "https://transparency.ri.gov/uhip/",
+        "https://www.wpri.com/target-12/we-are-very-sorry-deloitte-apologizes-to-ri-about-uhip/",
+        "https://turnto10.com/news/local/rhode-island-department-of-human-services-appeals-federal-government-snap-overpayments-37-million-dollars-uhip-ribridges-usda-food-and-nutrition-service",
+        "https://www.rimonthly.com/unified-health-infrastructure-project/"
+      ]
+    },
+    {
+      "state": "KY",
+      "system": "Benefind",
+      "vendor": "Deloitte",
+      "go_live": "2016-02-29",
+      "date_precision": "day",
+      "confidence": "verified_multi_source",
+      "panel_position": "edge",
+      "notes": "Integrated SNAP/Medicaid platform (~$101.5M); ~25,000 erroneous cancellation notices and a ~50,000-case backlog after launch; state extended SNAP recertification from six to twelve months as a mitigation — itself an error-process-relevant policy response.",
+      "sources": [
+        "https://www.lpm.org/news/2016-07-21/state-officials-say-theyre-still-fixing-benefind",
+        "https://nkytribune.com/2016/04/one-stop-shop-benefind-isnt-causes-loss-of-benefits-and-confusion-for-thousands-of-kentuckians/",
+        "https://www.wkyufm.org/politics/2016-04-28/state-dedicates-workers-to-cut-benefind-backlog"
+      ]
+    },
+    {
+      "state": "GA",
+      "system": "Georgia Gateway",
+      "vendor": null,
+      "go_live": "2017-02-06",
+      "date_precision": "day",
+      "confidence": "verified_single_source",
+      "panel_position": "in_panel",
+      "notes": "Pilot began February 6, 2017 in Henry County with all programs; statewide rollout was phased through 2017 — the statewide completion date is NEEDS_VERIFICATION, and the event-study treatment date should use the phased schedule once verified rather than the pilot date alone.",
+      "sources": [
+        "https://dhs.georgia.gov/document/document/georgia-gateway-integrated-eligibility-system/download",
+        "https://dhs.georgia.gov/georgia-gateway"
+      ]
+    },
+    {
+      "state": "OR",
+      "system": "ONE Eligibility (expansion to SNAP and other benefit programs)",
+      "vendor": null,
+      "go_live": "2021-02",
+      "date_precision": "month",
+      "confidence": "verified_single_source",
+      "panel_position": "in_panel",
+      "notes": "The ONE system originated for Oregon Health Plan eligibility and expanded to other benefit programs in February 2021 — a mid-panel event with full pre- and post-periods in the FY2017-24 window.",
+      "sources": [
+        "https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx"
+      ]
+    },
+    {
+      "state": "NC",
+      "system": "NC FAST (Food and Nutrition Services module)",
+      "vendor": null,
+      "go_live": "2012-05",
+      "date_precision": "month",
+      "confidence": "verified_multi_source",
+      "panel_position": "pre_panel",
+      "notes": "County-level FNS rollout ran May 2012 through March 2013; a July 2013 technical failure slowed processing for over a month and drove a benefits backlog. Pre-panel unless the total-rate panel is extended below FY2017.",
+      "sources": [
+        "https://www.wral.com/nc-fast-rollout-continues-amid-myriad-of-challenges/13864953/",
+        "https://webservices.ncleg.gov/ViewDocSiteFile/19790"
+      ]
+    },
+    {
+      "state": "FL",
+      "system": "ACCESS modernization (legacy eligibility mainframe replacement)",
+      "vendor": null,
+      "go_live": null,
+      "date_precision": null,
+      "confidence": "candidate_unverified",
+      "panel_position": "in_panel",
+      "notes": "A ~$205M modernization reported as beginning in 2022 with replacement of the ~30-year-old eligibility mainframe; phase go-live dates not yet verified from primary sources.",
+      "sources": [
+        "https://www.pew.org/en/research-and-analysis/articles/2026/01/14/as-snap-changes-shift-food-assistance-costs-states-face-new-choices"
+      ]
+    },
+    {
+      "state": "NM",
+      "system": "ASPEN",
+      "vendor": null,
+      "go_live": null,
+      "date_precision": null,
+      "confidence": "candidate_unverified",
+      "panel_position": "pre_panel",
+      "notes": "Reported mid-2010s integrated eligibility replacement; dates not yet verified.",
+      "sources": []
+    },
+    {
+      "state": "IN",
+      "system": "FSSA eligibility modernization (IBM contract, later canceled)",
+      "vendor": "IBM",
+      "go_live": null,
+      "date_precision": null,
+      "confidence": "candidate_unverified",
+      "panel_position": "pre_panel",
+      "notes": "2007-2009 privatized modernization canceled by the state; litigation followed. Pre-panel context only.",
+      "sources": []
+    },
+    {
+      "state": "CO",
+      "system": "CBMS",
+      "vendor": null,
+      "go_live": null,
+      "date_precision": null,
+      "confidence": "candidate_unverified",
+      "panel_position": "pre_panel",
+      "notes": "2004 go-live widely reported as troubled; pre-panel context only. Relevant because Colorado is the deepest-verified state in this repository.",
+      "sources": []
+    }
+  ]
+}
