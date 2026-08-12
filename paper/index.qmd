@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-10
+date: 2026-08-12
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -25,7 +25,14 @@ abstract: |
   documentation. Replaying reconstructed pre-edit case facts through the
   verified engine explains 78.4% of Colorado's above-threshold official
   error cases — and 91.4% of sub-threshold deviations — as correct
-  arithmetic on wrong facts. I also fit and validate a distributional
+  arithmetic on wrong facts. Pricing that decomposition through the
+  formula's tiers, elections, and delay clause — removing the error
+  dollars the file's cause codes assign to the computing apparatus, an
+  accounting bound rather than a causal estimate — moves summed
+  expected fiscal 2028 bills from $7.7B to between $7.5B and $6.2B a
+  year, and not monotonically: a state just under the statute's delay
+  threshold sees its near-term expected bill rise as its measured rate
+  falls. I also fit and validate a distributional
   model of case-level payment deviations, reporting its validation
   failures alongside its results, and serve one policy counterfactual
   from it in the deployed simulator: a standard medical deduction
@@ -403,7 +410,9 @@ error dollars by layers 1–2, and bounded above by the replay's 21.6%
 case share among official errors — plus whatever share of information
 failures better tooling
 prevents indirectly through verification prompts and
-documentation-requirement computation at intake. Ineligibility errors,
+documentation-requirement computation at intake; @sec-adoption prices
+the direct shares through the formula's tiers, elections, and delay
+clause. Ineligibility errors,
 excluded from the file, are predominantly facts-driven, which would push
 the information-failure share higher still; that inference, unlike the
 in-file shares, is not directly computed here. The indirect channel is
@@ -728,6 +737,62 @@ delay clause as it binds: delayed years enter expected bills as zero,
 and a fiscal 2026 draw that crosses 13.33% pushes the start to FY2030,
 zeroing FY2029 as well.
 
+### Pricing engine adoption through the formula {#sec-adoption}
+
+The decomposition of @sec-decompose says what share of error dollars
+the computing apparatus carries; the cost-sharing formula decides what
+those shares are worth. The deployed simulator composes the two: for
+each jurisdiction, zero the error dollars of every case whose recorded
+cause slots include a computing-apparatus code, re-anchor the
+measured-rate distribution at the official rate scaled by one minus the
+class share, and reprice the fiscal 2026 election and delay machinery
+on the adjusted draws. The fiscal 2025 rate stays locked history —
+adoption enters only through the simulated fiscal 2026 measurement,
+which is the counterfactual's shape: a state adopting now changes the
+year being measured, not the year already published. The per-case class
+flags are committed with the artifact and reconcile exactly (at
+$10^{-9}$, on the unrounded weight path) with the cause-share values
+behind @tbl-decompose, with the serialization difference of the
+published rounded arrays bounded at $2 \times 10^{-6}$ and the case
+ordering locked to those arrays by test. The strict and broad classes
+are the bound's two ends, and neither is a causal adoption estimate:
+cause codes are reviewer judgments, the broad class includes policy
+misapplication an engine removes only where it drives the determination
+end to end, and the fiscal 2024 cause mix is assumed for fiscal 2026.
+
+Summed over all 53 jurisdictions, expected FY2028 bills move from
+$7.67B a year to $7.52B under the strict bound and $6.23B under the
+broad one. The strict class carries $232M a year in error dollars
+(@tbl-decompose) but removes only about $155M in expected bills: the
+schedule prices tiers, not points, and a rate reduction that crosses no
+boundary bills identically. Colorado, measured 0.09 points above the
+10% boundary, is the opposite case — its 7.4% strict share moves the
+simulated center to 9.35% and its 10.6% broad share to 9.02%, worth
+$22M to $31M a year in expected FY2028 bills ($159M baseline), with the
+election-win probability rising from 52% to 80–88%.
+
+The formula does not price error reduction monotonically, and the delay
+clause is why. New York, at 13.18%, sits just under the 13.33%
+threshold: at baseline, 42% of simulated fiscal 2026 measurements cross
+it and defer the first bill, holding the expected FY2028 bill to $630M
+against a $1.08B locked tier value. The broad bound moves New York's
+center to 10.88% — still the 15% tier — and cuts the deferral odds
+below 1%: the expected FY2028 bill *rises* to $1.02B. Georgia, at
+15.21%, shows the same mechanics from above the threshold: 98% of
+baseline draws defer again (expected FY2029 bill $9M), while the bounds
+cut deferral to 74% and 1% and raise the expected FY2029 bill to $122M
+and $452M. Within the simulator's FY2028–29 horizon a deferred bill
+prices as zero, because it keys to fiscal 2027, a year the simulation
+does not draw — deferral is not forgiveness, and the horizon accounting
+is disclosed rather than netted. New York's strict share is exactly
+zero — its file codes no strict-class dollars — so its strict bound
+equals its baseline. The construct differs in kind from the retired
+accounting levers of @sec-roadmap: those subtracted finding-category
+dollars to stand in for a policy option's behavioral effect, and a real
+case showed the substitution reversing the model's sign; here the
+subtraction is the question itself — what the file's own coding assigns
+to the apparatus a verified engine replaces.
+
 ## Toward engine-computed counterfactuals {#sec-roadmap}
 
 The counterfactual gap has begun to close. For one state and one
@@ -765,7 +830,11 @@ an upper-bound identity scaling observed error dollars by finding
 category, the other a model-implied association of re-adjudication
 risk with the flipped feature — and their divergence on a real case
 shows the substitution was never innocuous. The simulator now serves
-only the model scenario, level-gated and labeled as an association. What remains open is breadth: engine legs for the
+only the model scenario as a policy lever, level-gated and labeled as
+an association; the engine-adoption bounds of @sec-adoption are
+accounting constructs by design, kept because there the
+computing-apparatus classes are the question rather than a proxy for a
+behavioral response. What remains open is breadth: engine legs for the
 remaining options (self-employment is not identified from public data,
 which records net rather than gross income) and the other verified
 states, feeding the harness raw facts instead of file-derived
