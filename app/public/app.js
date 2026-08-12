@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260811b"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260812"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -15,6 +15,12 @@ const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // that does not hash to this pin.
 const ENGINE_DATA_SHA256 =
   "2517d26e151cbeb8f9808d16750e531d7fc078fc8e15e4c1869d14c10d30c599";
+const ADOPT_SCHEMA = "snap_qc_sim.engine_scenario.v1";
+// SHA-256 of app/public/engine_scenario_data.json, written by
+// analysis/build_engine_scenario.py and locked by tests/test_engine_scenario.py;
+// the browser refuses a payload that does not hash to this pin.
+const ADOPT_DATA_SHA256 =
+  "d7cef992d40ab7d1ee5f59887515e64a4cff74b339f1a5e56a1b9f5e4248bda0";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,
@@ -296,6 +302,7 @@ function computeNational() {
       const sm = summarize(draws, st.issuance);
       const el = electionStats(st, draws);
       const tier = tierOf(st.official_fy2025);
+      const adopt = adoptStats(st, code, null);
       NAT.set(code, {
         code,
         official: st.official,
@@ -306,6 +313,8 @@ function computeNational() {
         eShare: el.elect28,
         bill29: el.bill29,
         sd: el.sd28,
+        adoptStrict28: adopt ? adopt.strict.el.elect28 : null,
+        adoptBroad28: adopt ? adopt.broad.el.elect28 : null,
         verified: !!st.verified,
       });
     }
@@ -321,12 +330,21 @@ function renderNatTakeaway() {
   const flip = rows.filter((r) => r.pmis >= 0.4).length;
   const delayed = rows.filter((r) => r.delay25).length;
   const totalE = rows.reduce((a, r) => a + r.eShare, 0);
+  const withAdopt = rows.filter((r) => r.adoptStrict28 !== null);
+  const adoptLine =
+    withAdopt.length === rows.length
+      ? ` If every jurisdiction adopted a verified rules engine, the same sum falls to ` +
+        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptBroad28, 0))}–` +
+        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))}/yr under the broad-to-strict ` +
+        `accounting bounds in the adoption panel above.`
+      : "";
   $("nat-takeaway").textContent =
     `At FY 2025 official rates and FY 2024 sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
     `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Summed expected FY 2028 ` +
     `bills across all jurisdictions — each electing its better year, net of delayed starts: ${fmtM(totalE)}/yr. ${delayed} jurisdictions ` +
     `above the 13.33% delay threshold owe $0 in FY 2028 and are first billed in FY 2029, keyed to the FY 2026 rate. Between FY 2024 and ` +
-    `FY 2025, 18 jurisdictions changed tiers while only 10 moved beyond two-year sampling noise.`;
+    `FY 2025, 18 jurisdictions changed tiers while only 10 moved beyond two-year sampling noise.` +
+    adoptLine;
 }
 
 function renderNatTable() {
@@ -836,6 +854,147 @@ function renderEnginePanel() {
   body.innerHTML = enginePanelBody($("state").value);
 }
 
+// ---- Rules-engine adoption panel -----------------------------------------
+// Answers "what is adopting a verified rules engine worth" as an accounting
+// bound: per case, zero out the error dollars whose recorded QC cause codes
+// sit in a computing-apparatus class (any-presence credits the whole case),
+// re-anchor at official × (1 − class share of official error dollars), and
+// re-run the same Monte Carlo through the FY 2026 election and delay math.
+// FY 2025 stays locked history, so adoption flows only through the simulated
+// FY 2026 measurement — exactly the counterfactual's shape. The strict and
+// broad classes bracket the bound; neither is a causal adoption estimate.
+
+let ADOPT = null;
+let ADOPT_ERROR = null;
+
+async function loadAdoptArtifact() {
+  const res = await fetch("engine_scenario_data.json?v=" + ASSET_V);
+  if (!res.ok) throw new Error("adoption artifact fetch failed");
+  const bytes = await res.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const hex = [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  if (hex !== ADOPT_DATA_SHA256)
+    throw new Error(
+      `engine_scenario_data.json sha256 ${hex.slice(0, 12)}… does not match the committed pin ${ADOPT_DATA_SHA256.slice(0, 12)}…`
+    );
+  const payload = JSON.parse(new TextDecoder().decode(bytes));
+  if (payload.schema !== ADOPT_SCHEMA)
+    throw new Error(`unexpected adoption schema ${payload.schema}`);
+  ADOPT = payload;
+}
+
+function adoptDraws(st, flags, share, drift) {
+  const err = st.err.map((e, i) => (flags[i] ? 0 : e));
+  const anchor = st.official_fy2025 * (1 - share);
+  return addDrift(simulate({ ...st, err }, { anchor }), drift);
+}
+
+function adoptStats(st, code, drift) {
+  const ad = ADOPT?.states[code];
+  if (!ad || ad.any_strict.length !== st.err.length) return null;
+  const out = {};
+  for (const [key, flags] of [["strict", ad.any_strict], ["broad", ad.any_broad]]) {
+    const share = ad.shares["any_" + key];
+    out[key] = {
+      share,
+      center: st.official_fy2025 * (1 - share),
+      el: electionStats(st, adoptDraws(st, flags, share, drift)),
+    };
+  }
+  return out;
+}
+
+function adoptionBandSvg(official, strict, broad) {
+  const lo = 0, hi = Math.max(16, Math.ceil(official) + 1);
+  const W = 920, H = 96, L = 42, R = 12, T = 8, B = 26;
+  const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
+  const ink = cssVar("--muted-foreground") || "#475569";
+  const border = cssVar("--border") || "#E2E8F0";
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
+  for (const [a, b, t] of bands) {
+    s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
+    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
+  }
+  const y = 58;
+  const a = x(broad), b = x(strict);
+  s += `<text x="2" y="${y + 4}" font-size="11" fill="${ink}">FY 2026</text>`;
+  s += `<line x1="${Math.min(a, b)}" x2="${Math.max(a, b)}" y1="${y}" y2="${y}" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>`;
+  s += `<circle cx="${a}" cy="${y}" r="4" fill="var(--primary)"/><circle cx="${b}" cy="${y}" r="4" fill="var(--primary)"/>`;
+  s += `<text x="${Math.min(a, b) - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="${ink}">broad ${broad.toFixed(1)}%</text>`;
+  s += `<text x="${Math.max(a, b) + 6}" y="${y + 4}" font-size="10" fill="${ink}">strict ${strict.toFixed(1)}%</text>`;
+  const off = x(official);
+  s += `<line x1="${off}" x2="${off}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  s += `<text x="${off + 4}" y="${H - B - 4}" font-size="10" fill="${ink}">FY25 official ${official.toFixed(2)}%</text>`;
+  for (let v = lo; v <= hi; v += 2) {
+    s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
+  }
+  s += `<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="${border}"/>`;
+  return s + "</svg>";
+}
+
+function renderAdoption(code, st, elec, drift) {
+  const el = $("adoption-body");
+  if (ADOPT_ERROR) {
+    el.innerHTML = `<p>The adoption artifact failed its integrity check and this panel is unavailable: ${ADOPT_ERROR.message}</p>`;
+    return;
+  }
+  if (!ADOPT) {
+    el.textContent = "Adoption scenario artifact unavailable.";
+    return;
+  }
+  const a = adoptStats(st, code, drift);
+  if (!a) {
+    el.textContent = "No case-aligned cause coding is available for this jurisdiction.";
+    return;
+  }
+  const s = a.strict, b = a.broad;
+  const pctShare = (v) => (100 * v).toFixed(1) + "%";
+  const strictZero = s.share === 0;
+  const shares =
+    `<p class="sub">QC reviewers code up to nine causes per error. The <strong>strict</strong> class — computer programming, ` +
+    `computer-generated mass change, arithmetic computation — carries <strong>${pctShare(s.share)}</strong> of this state's ` +
+    `FY 2024 official error dollars; adding policy misapplication, computer-user error, and incorrect budgeting ` +
+    `(<strong>broad</strong>) carries <strong>${pctShare(b.share)}</strong>. Removing those dollars centers a simulated ` +
+    `FY 2026 measurement at <strong>${s.center.toFixed(2)}%</strong> (strict) to <strong>${b.center.toFixed(2)}%</strong> (broad), ` +
+    `against the ${st.official_fy2025.toFixed(2)}% official FY 2025 level.` +
+    (strictZero ? " This state's file codes no strict-class dollars, so the strict bound equals the baseline." : "") +
+    `</p>`;
+  const band = `<div class="chart" role="img" aria-label="Simulated FY 2026 rate under rules-engine adoption, broad to strict accounting bounds across cost-share tiers">${adoptionBandSvg(st.official_fy2025, s.center, b.center)}</div>`;
+  let dollars;
+  if (elec.delay25) {
+    dollars =
+      `<p class="sub">This state's FY 2025 rate already meets the delay clause — $0 in FY 2028 — and at baseline ` +
+      `${(100 * elec.pDelay26).toFixed(0)}% of simulated FY 2026 measurements cross the same test, deferring the first bill ` +
+      `again to FY 2030, keyed to the FY 2027 rate this simulation does not price (see the FY 2027 panel). Expected FY 2029 ` +
+      `bill at baseline: ${fmtM(elec.bill29)}/yr. Under adoption, fewer simulated FY 2026 measurements cross ` +
+      `(${(100 * s.el.pDelay26).toFixed(0)}% strict / ${(100 * b.el.pDelay26).toFixed(0)}% broad), so billing more often starts ` +
+      `in FY 2029, keyed to that lower FY 2026 rate: ${fmtM(s.el.bill29)} (strict) to ${fmtM(b.el.bill29)} (broad)/yr expected. ` +
+      `Deferral is not forgiveness — a lower measured rate starts billing sooner at a lower rate, while deferral keys the first ` +
+      `bill to a later, unsimulated year.</p>`;
+  } else {
+    const save = (x) => fmtM(Math.max(0, elec.elect28 - x.el.elect28));
+    dollars =
+      `<p class="sub">Through the FY 2026 election, the expected FY 2028 bill falls from <strong>${fmtM(elec.elect28)}/yr</strong> ` +
+      `to <strong>${fmtM(b.el.elect28)}</strong> (broad) – <strong>${fmtM(s.el.elect28)}</strong> (strict)/yr — ` +
+      `an expected saving of ${save(s)} to ${save(b)}/yr. The chance the FY 2026 measurement beats the locked FY 2025 rate ` +
+      `moves from ${(100 * elec.pWin).toFixed(0)}% to ${(100 * s.el.pWin).toFixed(0)}–${(100 * b.el.pWin).toFixed(0)}%; ` +
+      `the FY 2029 bill (keyed to FY 2026) moves from ${fmtM(elec.bill29)}/yr to ${fmtM(b.el.bill29)}–${fmtM(s.el.bill29)}/yr.</p>`;
+  }
+  const verifiedNote = st.verified
+    ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit chain case-exactly (verification view above) — adoption means running determinations through the engine, not only verifying them.`
+    : `This state's encoded rules are not yet independently verified; the bound above uses its own file's cause coding, and verification is the first step toward claiming it.`;
+  const hint =
+    `<p class="hint">An accounting bound under the file's own cause coding, not a causal adoption estimate: causes are ` +
+    `reviewer judgments, the broad class includes policy misapplication an engine removes only where it drives the ` +
+    `determination end-to-end, adoption could shift the error mix, and the FY 2024 cause mix is assumed for FY 2026. ` +
+    verifiedNote +
+    `</p>`;
+  el.innerHTML = shares + band + dollars + hint;
+}
+
 // ---- Render --------------------------------------------------------------
 
 function render() {
@@ -910,6 +1069,7 @@ function render() {
     "% chance the simulated FY 2026 rate meets it — that pushes the start to " +
     "FY 2030 and zeroes both FY 2028 and FY 2029";
   renderFy2027(code);
+  renderAdoption(code, st, elec, drift);
   writeUrl();
   renderEnginePanel();
   document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
@@ -935,6 +1095,11 @@ async function main() {
     FY27 = await (await fetch("fy2027_data.json?v=" + ASSET_V)).json();
   } catch {
     FY27 = null; // panel degrades to its unavailable message
+  }
+  try {
+    await loadAdoptArtifact();
+  } catch (err) {
+    ADOPT_ERROR = err; // renderAdoption surfaces the message; never a silent fallback
   }
   const sel = $("state");
   for (const [code, st] of Object.entries(DATA.states)) {

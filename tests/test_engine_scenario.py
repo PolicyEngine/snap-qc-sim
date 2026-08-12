@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ CSV = builder.DEFAULT_CSV
 DATA_PATH = ROOT / "app/public/data.json"
 CAUSE_PATH = ROOT / "analysis/cause_shares.json"
 EXPORT_PATH = ROOT / "app/public/engine_scenario_data.json"
+APP_JS = ROOT / "app/public/app.js"
 
 
 @pytest.fixture(scope="module")
@@ -96,3 +98,11 @@ def test_builder_is_byte_deterministic(tmp_path: Path) -> None:
         builder.write_payload(builder.build_payload(), output)
     assert outputs[0].read_bytes() == outputs[1].read_bytes()
     assert outputs[0].read_bytes() == EXPORT_PATH.read_bytes()
+
+
+def test_app_js_pins_the_scenario_payload_sha256() -> None:
+    """The browser refuses a payload that does not hash to the committed pin."""
+    js = APP_JS.read_text()
+    pin = re.search(r'const ADOPT_DATA_SHA256 =\s*"([0-9a-f]{64})"', js)
+    assert pin, "app.js must pin engine_scenario_data.json by SHA-256"
+    assert pin.group(1) == builder.sha256(EXPORT_PATH)
