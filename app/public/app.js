@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260812"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260812b"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -885,22 +885,45 @@ async function loadAdoptArtifact() {
   ADOPT = payload;
 }
 
-function adoptDraws(st, flags, share, drift) {
+// The file-sample weighted rate for an error vector — simulate()'s `point`.
+function pointRate(st, err) {
+  let e = 0, s = 0;
+  for (let i = 0; i < err.length; i++) {
+    e += st.w[i] * err[i];
+    s += st.w[i] * st.iss[i];
+  }
+  return (100 * e) / s;
+}
+
+// Additive anchor convention: the official rate exceeds the file rate by a
+// federal re-review layer the app everywhere treats as a FIXED offset
+// (simulate() centers as official + draw − point). Removing the flagged
+// dollars lowers the file rate by (point0 − point1) percentage points, and
+// the anchor shifts by exactly that — never scaled onto the adjustment
+// layer, which the file's cause coding says nothing about.
+function adoptDraws(st, flags, drift) {
   const err = st.err.map((e, i) => (flags[i] ? 0 : e));
-  const anchor = st.official_fy2025 * (1 - share);
-  return addDrift(simulate({ ...st, err }, { anchor }), drift);
+  const anchor =
+    st.official_fy2025 - (pointRate(st, st.err) - pointRate(st, err));
+  return { draws: addDrift(simulate({ ...st, err }, { anchor }), drift), anchor };
 }
 
 function adoptStats(st, code, drift) {
   const ad = ADOPT?.states[code];
-  if (!ad || ad.any_strict.length !== st.err.length) return null;
+  if (
+    !ad ||
+    ad.any_strict.length !== st.err.length ||
+    ad.any_broad.length !== st.err.length
+  )
+    return null;
   const out = {};
   for (const [key, flags] of [["strict", ad.any_strict], ["broad", ad.any_broad]]) {
     const share = ad.shares["any_" + key];
+    const { draws, anchor } = adoptDraws(st, flags, drift);
     out[key] = {
       share,
-      center: st.official_fy2025 * (1 - share),
-      el: electionStats(st, adoptDraws(st, flags, share, drift)),
+      center: anchor,
+      el: electionStats(st, draws),
     };
   }
   return out;
@@ -918,6 +941,11 @@ function adoptionBandSvg(official, strict, broad) {
     s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
     s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
   }
+  // The delay threshold drives the panel's nonmonotonicity — draw it like
+  // the FY 2027 band chart so crossings are visible at a glance.
+  const dth = x(DELAY_THRESHOLD);
+  s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
+  s += `<text x="${dth + 3}" y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">delay 13.33%</text>`;
   const y = 58;
   const a = x(broad), b = x(strict);
   s += `<text x="2" y="${y + 4}" font-size="11" fill="${ink}">FY 2026</text>`;
@@ -1005,6 +1033,8 @@ function renderAdoption(code, st, elec, drift) {
     `<p class="hint">An accounting bound under the file's own cause coding, not a causal adoption estimate: causes are ` +
     `reviewer judgments, the broad class includes policy misapplication an engine removes only where it drives the ` +
     `determination end-to-end, adoption could shift the error mix, and the FY 2024 cause mix is assumed for FY 2026. ` +
+    `The anchor shifts by the file-rate reduction from the removed dollars; the official rate's federal re-review ` +
+    `layer is held fixed, matching the simulator's treatment of it everywhere. ` +
     verifiedNote +
     `</p>`;
   el.innerHTML = shares + band + dollars + hint;
