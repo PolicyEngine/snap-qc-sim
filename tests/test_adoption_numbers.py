@@ -102,6 +102,26 @@ def run_state(code: str) -> dict:
     return out
 
 
+def test_wedge_disclosure_stats_match_the_app_and_paper() -> None:
+    """The official-minus-file wedge quoted in the app and FACTS row O.
+
+    The wedge (federal re-review integration plus ineligible-case error the
+    file never records) is what anchoring carries as a fixed layer; these
+    stats lock the disclosed numbers to the committed arrays.
+    """
+    shares = {}
+    for code, st in DATA["states"].items():
+        point = point_rate(st, np.asarray(st["err"], dtype=float))
+        shares[code] = (st["official"] - point) / st["official"]
+    assert float(np.median(list(shares.values()))) == pytest.approx(0.31, abs=0.005)
+    assert min(shares.values()) == pytest.approx(-0.034, abs=0.005)
+    assert max(shares.values()) == pytest.approx(0.81, abs=0.005)
+    assert shares["CO"] == pytest.approx(0.256, abs=0.005)
+    assert shares["NY"] == pytest.approx(0.444, abs=0.005)
+    negative = sorted(code for code, s in shares.items() if s < 0)
+    assert negative == ["MN", "NV"]
+
+
 def test_strict_flags_are_a_subset_of_broad_everywhere() -> None:
     """{17,19,20} ⊂ {10,17,19,20,21,22} must survive into every state's flags."""
     for code, ad in ADOPT["states"].items():
