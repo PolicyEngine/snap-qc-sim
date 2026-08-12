@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260812d"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260812e"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -1171,6 +1171,22 @@ async function main() {
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
   setMode();
+  // The footer build stamp renders from ASSET_V itself, so it can never
+  // drift from the deployed build.
+  const stampDate = ASSET_V.match(/^(\d{4})(\d{2})(\d{2})/);
+  if (stampDate) {
+    const when = new Date(
+      Date.UTC(+stampDate[1], +stampDate[2] - 1, +stampDate[3])
+    ).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+    $("build-stamp").innerHTML =
+      `<a href="https://github.com/PolicyEngine/snap-qc-sim/commits/main" ` +
+      `title="Build ${ASSET_V}">updated ${when}</a> · `;
+  }
   let pending = 0;
   const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
   sel.addEventListener("change", queue);
