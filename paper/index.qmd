@@ -737,6 +737,24 @@ delay clause as it binds: delayed years enter expected bills as zero,
 and a fiscal 2026 draw that crosses 13.33% pushes the start to FY2030,
 zeroing FY2029 as well.
 
+The same clock defines what can still be registered. Fiscal 2026 is the
+first measurement year the statute exposes end to end — it opened after
+enactment and closes September 30, 2026 — and its rates do not yet
+exist. The repository therefore now carries a pre-registration for them:
+the disclosure above (a check of input independence, not a registered
+forecast) holds for fiscal 2025, and the fiscal 2026 design closes that
+gap prospectively. `analysis/PREREGISTRATION_OBBBA_BOUNDARY.md` commits
+the boundary quasi-experiment in advance — running-variable windows at
+the 6/8/10 tier cuts and the 13.33% delay test, estimators and decision
+rules fixed to seeds, per-state no-response null predictions from this
+same observed-resample engine, the outcome list (measured rates, the
+sampling-plan election that carries the precision waiver, cause-mix
+shifts), and falsification tests — with the machine-readable predictions
+SHA-256-pinned and their regeneration byte-locked in CI. The public
+commit history is the registration record; whatever fiscal 2026 shows,
+the claims this repository can make about it were fixed while the year
+was still in the field, before any of its outcomes existed.
+
 ### Pricing engine adoption through the formula {#sec-adoption}
 
 The decomposition of @sec-decompose says what share of error dollars
@@ -950,7 +968,9 @@ layer-1 and layer-2 classification outputs, and the reconstruction
 scripts), the seventeen
 adversarial review reports and round-1 editorial synthesis under
 `paper/reviews/`, the fact catalog
-(`paper/FACTS.md`), and this manuscript. The verification harness and
+(`paper/FACTS.md`), the fiscal 2026 pre-registration
+(`analysis/PREREGISTRATION_OBBBA_BOUNDARY.md`, with its hash-pinned
+predictions artifact and deterministic generator), and this manuscript. The verification harness and
 per-case suite reports are public in `TheAxiomFoundation/axiom-oracles`;
 the encodings in `TheAxiomFoundation/rulespec-us`; the engine in
 `TheAxiomFoundation/axiom-rules-engine`. QC public-use files are

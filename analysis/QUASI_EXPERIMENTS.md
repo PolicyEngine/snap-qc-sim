@@ -79,6 +79,10 @@ pre-trends are the test); option bundles adopted together
 
 ### 3. The OBBBA regime itself, pre-registered (prospective)
 
+**Registered 2026-08-12**: see `PREREGISTRATION_OBBBA_BOUNDARY.md` and
+the hash-pinned `preregistration_obbba_boundary.json` (windows,
+estimators, per-state null predictions, outcomes, falsifications).
+
 **Question:** does cost-sharing exposure causally change measurement
 and program behavior — sampling plans, review practice, measured
 rates?
