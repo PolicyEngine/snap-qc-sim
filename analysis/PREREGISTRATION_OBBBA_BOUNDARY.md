@@ -14,10 +14,10 @@ detectable.
 - Machine-readable predictions artifact:
   `analysis/preregistration_obbba_boundary.json`
 - Artifact file SHA-256:
-  `8ebb03e081fafe11960912057b38c554eda0ec0e4d1224785a638b9a49ef540f`
+  `d69dff182a1512ec749fe5bfc51e6b4451110c61e4973f1fd349084edbd65ece`
 - Payload self-pin (SHA-256 of the canonical payload serialization,
   recorded inside the file):
-  `7149e951a023af58b97de39c8eb7923ac63b55ba0e10b9da751b130b84f751b1`
+  `5ccbcf19821257e2bce143bae4035de9aa13f36047a625b2ba337395a7fe13ef`
 - Generator (deterministic; regeneration is byte-identical and
   test-locked): `analysis/preregister_obbba_boundary.py`;
   locks in `tests/test_preregistration.py`

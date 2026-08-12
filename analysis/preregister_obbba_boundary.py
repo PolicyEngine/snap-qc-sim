@@ -235,7 +235,6 @@ def election_stats(state_data: Mapping[str, Any], draws: np.ndarray) -> dict[str
         _tier_shares(draws) / 100.0 * issuance,
     )
     elect28 = float(np.mean(elect28_values))
-    elect28_sq = float(np.mean(np.square(elect28_values)))
 
     return {
         "fy25": fy25,
@@ -244,7 +243,11 @@ def election_stats(state_data: Mapping[str, Any], draws: np.ndarray) -> dict[str
         "lockTierCost": lock_tier_cost,
         "lock28": float(np.mean(lock28_values)),
         "elect28": elect28,
-        "sd28": math.sqrt(max(0.0, elect28_sq - elect28 * elect28)),
+        # Mean-centered population SD (numpy std): app.js's single-pass
+        # moment accumulation differs only by floating-point cancellation,
+        # which matters exactly when the true SD is zero (a constant bill
+        # across all draws yields spurious nonzero dollars there).
+        "sd28": float(np.std(elect28_values)),
         "bill29": float(np.mean(bill29_values)),
         "pWin": float(np.mean(draws < fy25)),
         "pDelay26": float(np.mean(crossed)),
@@ -684,6 +687,13 @@ def _definitions(movement: Mapping[str, Any]) -> dict[str, Any]:
             "simulation_draw_order": "C-order (row-major), draw then sample slot",
             "mc_generator": "numpy.random.Generator(PCG64(seed))",
             "mc_matrix_order": "sorted state-code columns, C-order rows",
+            "mc_index_transform": (
+                "Generator.integers(0, 4000, dtype=int64) draws the "
+                "discrete-uniform ranks and indices directly; NOT "
+                "floor(Generator.random() * 4000), which consumes the "
+                "PCG64 stream differently and changes every Monte Carlo "
+                "number"
+            ),
         },
         "variants": {
             "baseline": "observed resample with m=n",
@@ -729,16 +739,30 @@ def _definitions(movement: Mapping[str, Any]) -> dict[str, Any]:
         "election": (
             "FY2028 is zero if FY2025 or FY2026 meets delay; otherwise it uses "
             "the tier of min(FY2025,FY2026). FY2029 is zero only if FY2026 "
-            "meets delay and otherwise uses the FY2026 tier. sd28 is a "
-            "population SD. pWin uses the strict FY2026 < FY2025 comparison."
+            "meets delay and otherwise uses the FY2026 tier. sd28 is the "
+            "population SD of the per-draw elected FY2028 bills, computed "
+            "mean-centered (numpy std, ddof=0): app.js's single-pass moment "
+            "accumulation differs only by floating-point cancellation, which "
+            "matters exactly when the true SD is zero. pWin uses the strict "
+            "FY2026 < FY2025 comparison."
+        ),
+        "power_replicates": (
+            "Each power replicate draws, per window state independently and "
+            "with replacement, one of the state's 4,000 regenerated baseline "
+            "rates via mc_index_transform; the percentage-point shift applies "
+            "in rate space BEFORE the PIT; the shifted value is midranked "
+            "against the UNCHANGED baseline draws; the same index matrix "
+            "serves every delta (common random numbers)."
         ),
         "windows": (
-            "Probability windows include endpoints 0.10 and 0.90. Published "
-            "two-decimal FY2025 rates define sides; equality is above. A state "
-            "qualifying at multiple tier cuts is assigned to minimum "
-            "(|FY2025-cut|, cut), so an exact distance tie goes to the lower cut. "
-            "nearest_boundary uses the four exact statutory boundaries and the "
-            "same lower-boundary tie rule."
+            "Probability windows include endpoints 0.10 and 0.90, and their "
+            "eligibility probabilities are computed from the BASELINE "
+            "variant's seed-11 draws (never the extra-sample or drift "
+            "variants). Published two-decimal FY2025 rates define sides; "
+            "equality is above. A state qualifying at multiple tier cuts is "
+            "assigned to minimum (|FY2025-cut|, cut), so an exact distance "
+            "tie goes to the lower cut. nearest_boundary uses the four exact "
+            "statutory boundaries and the same lower-boundary tie rule."
         ),
         "drift": {
             "tau_source": (

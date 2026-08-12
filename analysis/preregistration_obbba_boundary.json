@@ -19,13 +19,14 @@
     },
     "tau_source": "analysis/fy2025_movement.json drift_estimate.point_estimates"
    },
-   "election": "FY2028 is zero if FY2025 or FY2026 meets delay; otherwise it uses the tier of min(FY2025,FY2026). FY2029 is zero only if FY2026 meets delay and otherwise uses the FY2026 tier. sd28 is a population SD. pWin uses the strict FY2026 < FY2025 comparison.",
+   "election": "FY2028 is zero if FY2025 or FY2026 meets delay; otherwise it uses the tier of min(FY2025,FY2026). FY2029 is zero only if FY2026 meets delay and otherwise uses the FY2026 tier. sd28 is the population SD of the per-draw elected FY2028 bills, computed mean-centered (numpy std, ddof=0): app.js's single-pass moment accumulation differs only by floating-point cancellation, which matters exactly when the true SD is zero. pWin uses the strict FY2026 < FY2025 comparison.",
    "inference": {
     "delay_secondary": "DELAY SECONDARY: U = mean(u_s) over the delay window; H1 one-sided: U > 1/2; alpha 0.05; same MC machinery, same seed stream discipline (separate seed 20260931).",
     "implementation_pins": "PCG64; sorted state-code columns; row-major replication matrices; no Monte Carlo +1 correction; inclusive empirical tails; reject when p <= alpha. Extra realized-rate mapping keys are ignored by each roster-specific callable.",
     "pit": "PIT: u_s = (#{null draws < r26} + 0.5 * #{null draws == r26}) / 4000, against regenerated full-precision baseline draws.",
     "primary": "PRIMARY: T = mean(u_s | above) - mean(u_s | below), pooled across the three tier windows (assigned partition). H1 one-sided: T < 0. alpha = 0.05. Null: 20,000 MC replications, seed 20260930 \u2014 independently per window state draw u ~ discrete uniform {(k+0.5)/4000 : k=0..3999}; p = fraction of null T <= realized T."
    },
+   "power_replicates": "Each power replicate draws, per window state independently and with replacement, one of the state's 4,000 regenerated baseline rates via mc_index_transform; the percentage-point shift applies in rate space BEFORE the PIT; the shifted value is midranked against the UNCHANGED baseline draws; the same index matrix serves every delta (common random numbers).",
    "quantiles": {
     "convention": "numpy.quantile method='linear' (the NumPy default linear interpolation convention), computed before rounding",
     "levels": [
@@ -49,6 +50,7 @@
    "random_streams": {
     "algorithm": "bit-faithful Mulberry32; vectorized Weyl state a_k = (seed + k * 0x6D2B79F5) mod 2^32 for k=1..N",
     "mc_generator": "numpy.random.Generator(PCG64(seed))",
+    "mc_index_transform": "Generator.integers(0, 4000, dtype=int64) draws the discrete-uniform ranks and indices directly; NOT floor(Generator.random() * 4000), which consumes the PCG64 stream differently and changes every Monte Carlo number",
     "mc_matrix_order": "sorted state-code columns, C-order rows",
     "simulation_draw_order": "C-order (row-major), draw then sample slot",
     "simulation_seed_each_state_and_variant": 11
@@ -64,7 +66,7 @@
     "extra_sample_300": "observed resample with m=n+300",
     "extra_sample_500": "observed resample with m=n+500"
    },
-   "windows": "Probability windows include endpoints 0.10 and 0.90. Published two-decimal FY2025 rates define sides; equality is above. A state qualifying at multiple tier cuts is assigned to minimum (|FY2025-cut|, cut), so an exact distance tie goes to the lower cut. nearest_boundary uses the four exact statutory boundaries and the same lower-boundary tie rule."
+   "windows": "Probability windows include endpoints 0.10 and 0.90, and their eligibility probabilities are computed from the BASELINE variant's seed-11 draws (never the extra-sample or drift variants). Published two-decimal FY2025 rates define sides; equality is above. A state qualifying at multiple tier cuts is assigned to minimum (|FY2025-cut|, cut), so an exact distance tie goes to the lower cut. nearest_boundary uses the four exact statutory boundaries and the same lower-boundary tie rule."
   },
   "design": {
    "boundaries_pp": {
@@ -4186,7 +4188,7 @@
         "lockTierCost": 106011856,
         "pDelay26": 0.0,
         "pWin": 0.5185,
-        "sd28": 2
+        "sd28": 0
        },
        "mean": 10.9169,
        "p_below_10": 0.0,
@@ -5338,7 +5340,7 @@
         "lockTierCost": 140079225,
         "pDelay26": 0.0,
         "pWin": 0.4965,
-        "sd28": 2
+        "sd28": 0
        },
        "mean": 9.7782,
        "p_below_10": 0.6885,
@@ -5571,7 +5573,7 @@
         "lockTierCost": 37976781,
         "pDelay26": 0.0,
         "pWin": 0.5108,
-        "sd28": 1
+        "sd28": 0
        },
        "mean": 9.4425,
        "p_below_10": 0.9095,
@@ -5626,7 +5628,7 @@
         "lockTierCost": 37976781,
         "pDelay26": 0.0,
         "pWin": 0.5012,
-        "sd28": 1
+        "sd28": 0
        },
        "mean": 9.4443,
        "p_below_10": 0.9235,
@@ -15766,5 +15768,5 @@
   },
   "schema": "snap_qc_sim.preregistration_obbba_boundary.v1"
  },
- "payload_sha256": "7149e951a023af58b97de39c8eb7923ac63b55ba0e10b9da751b130b84f751b1"
+ "payload_sha256": "5ccbcf19821257e2bce143bae4035de9aa13f36047a625b2ba337395a7fe13ef"
 }
