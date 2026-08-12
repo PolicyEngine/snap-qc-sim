@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260812b"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260812c"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -1029,12 +1029,24 @@ function renderAdoption(code, st, elec, drift) {
   const verifiedNote = st.verified
     ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit chain case-exactly (verification view above) — adoption means running determinations through the engine, not only verifying them.`
     : `This state's encoded rules are not yet independently verified; the bound above uses its own file's cause coding, and verification is the first step toward claiming it.`;
+  // Quantify the fixed layer for THIS state so the reach of every scenario
+  // is legible: the FY 2024 file-computable rate vs the FY 2024 official.
+  const filePoint = pointRate(st, st.err);
+  const wedge = st.official - filePoint;
+  const wedgeLine =
+    wedge >= 0
+      ? `In FY 2024 this state's file-computable rate was ${filePoint.toFixed(2)}% against the ${st.official.toFixed(2)}% official — ` +
+        `the ${wedge.toFixed(2)}pp remainder (federal re-review integration and ineligible-case error the file never records) ` +
+        `is that fixed layer, ${((100 * wedge) / st.official).toFixed(0)}% of the official rate, beyond the reach of any scenario here. `
+      : `In FY 2024 this state's file-computable rate (${filePoint.toFixed(2)}%) exceeded the ${st.official.toFixed(2)}% official — ` +
+        `the re-review integration adjusted downward here, and that fixed layer is beyond the reach of any scenario. `;
   const hint =
     `<p class="hint">An accounting bound under the file's own cause coding, not a causal adoption estimate: causes are ` +
     `reviewer judgments, the broad class includes policy misapplication an engine removes only where it drives the ` +
     `determination end-to-end, adoption could shift the error mix, and the FY 2024 cause mix is assumed for FY 2026. ` +
     `The anchor shifts by the file-rate reduction from the removed dollars; the official rate's federal re-review ` +
     `layer is held fixed, matching the simulator's treatment of it everywhere. ` +
+    wedgeLine +
     verifiedNote +
     `</p>`;
   el.innerHTML = shares + band + dollars + hint;
