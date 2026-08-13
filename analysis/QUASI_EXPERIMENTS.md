@@ -126,3 +126,27 @@ ingest prior-year QC public files and earlier State Options Report
 editions, with the same hash-registry discipline as
 `params/sources/official_hashes.json`; verify how far back cause and
 element coding is consistent before committing to a panel start year.
+
+## Coding-consistency audit results (2026-08-12)
+
+The audit (`analysis/coding_consistency.json`, over the local FY2017–24
+files) answers the panel-start question:
+
+- **Design 1 is unblocked back to FY2017.** The strict
+  computing-apparatus cause codes {17, 19, 20} are observed in every
+  year, so the system-migration outcome tracks across the full panel.
+  The broad class is not backward-comparable: code 22 (incorrect
+  budgeting) first appears in FY2023 — use strict plus total-rate
+  outcomes historically, broad only FY2023+.
+- **Total-rate panel from FY2017** under a fixed real threshold, with
+  FY2020 handled as its reconciling two-period pandemic file, FY2021
+  treated as pandemic-partial (9,832 rows, sensitivity-only), and the
+  FY2017–19 nominal thresholds still NEEDS_ACQUISITION (FY2020–24
+  verified from local techdocs: $37/$39/$48/$54/$56).
+- **Design 2 stays gated.** Element and nature inventories shift at the
+  FY2024 boundary (causes 23–25, natures 14/33/56/57/58/312/314,
+  elements 165/362/540/542 appear; nature 24 and element 166
+  disappear), and pre-FY2021 codebooks are not local — element-targeted
+  outcomes are defensible from FY2024 only until earlier codebooks are
+  acquired and a semantic bridge (meanings, not numeric presence) is
+  validated.

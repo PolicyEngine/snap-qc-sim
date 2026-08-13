@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260812b"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260813"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
@@ -336,7 +336,7 @@ function renderNatTakeaway() {
       ? ` If every jurisdiction adopted a verified rules engine, the same sum falls to ` +
         `${fmtM(withAdopt.reduce((a, r) => a + r.adoptBroad28, 0))}–` +
         `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))}/yr under the broad-to-strict ` +
-        `accounting bounds in the adoption panel above.`
+        `accounting scenarios in the adoption panel above.`
       : "";
   $("nat-takeaway").textContent =
     `At FY 2025 official rates and FY 2024 sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
@@ -705,9 +705,9 @@ function renderFy2027(code) {
   const st27 = FY27.states[code];
   const t27 = FY27.thresholds["2027"];
   const facts =
-    `<p class="sub">FY 2027 is the first measurement year states can still shape with policy and sampling plans — it sets the FY 2030 bill. ` +
+    `<p class="sub">FY 2027 is the first measurement year still open to policy and sampling-plan choices — it sets the FY 2030 bill. ` +
     `Sampling-plan changes go to the regional office before the review period, 60 days ahead for major changes and 30 for minor ones. ` +
-    `Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U (projected 48-state four-person maximum: $${FY27.fy2027_max_allotment_4p_48dc.dollars.toLocaleString()}, ${FY27.fy2027_max_allotment_4p_48dc.status}), ` +
+    `Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U — computed from the published June 2026 index, the 48-state four-person maximum is $${FY27.fy2027_max_allotment_4p_48dc.dollars.toLocaleString()} (${FY27.fy2027_max_allotment_4p_48dc.status} until FNA's official notice) — ` +
     `and the QC tolerance threshold projects to $${t27.threshold_dollars_strictly_greater_than} (${t27.status}; hardens when USDA publishes the June 2026 food-plan cost).</p>`;
   if (!st27) {
     el.innerHTML =
@@ -855,8 +855,8 @@ function renderEnginePanel() {
 }
 
 // ---- Rules-engine adoption panel -----------------------------------------
-// Answers "what is adopting a verified rules engine worth" as an accounting
-// bound: per case, zero out the error dollars whose recorded QC cause codes
+// Answers "what is adopting a verified rules engine worth" as accounting
+// scenarios: per case, zero out the error dollars whose recorded QC cause codes
 // sit in a computing-apparatus class (any-presence credits the whole case),
 // re-anchor at official × (1 − class share of official error dollars), and
 // re-run the same Monte Carlo through the FY 2026 election and delay math.
@@ -990,7 +990,7 @@ function renderAdoption(code, st, elec, drift) {
     `against the ${st.official_fy2025.toFixed(2)}% official FY 2025 level.` +
     (strictZero ? " This state's file codes no strict-class dollars, so the strict bound equals the baseline." : "") +
     `</p>`;
-  const band = `<div class="chart" role="img" aria-label="Simulated FY 2026 rate under rules-engine adoption, broad to strict accounting bounds across cost-share tiers">${adoptionBandSvg(st.official_fy2025, s.center, b.center)}</div>`;
+  const band = `<div class="chart" role="img" aria-label="Simulated FY 2026 rate under rules-engine adoption, broad and strict accounting scenarios across cost-share tiers">${adoptionBandSvg(st.official_fy2025, s.center, b.center)}</div>`;
   let dollars;
   if (elec.delay25) {
     dollars =
@@ -1015,7 +1015,7 @@ function renderAdoption(code, st, elec, drift) {
     const tail =
       dS >= 0 && dB >= 0
         ? ` — an expected saving of ${fmtM(Math.min(dS, dB))} to ${fmtM(Math.max(dS, dB))}/yr.</p>`
-        : `. A bound above the baseline is the delay clause, not a higher tier: at baseline ` +
+        : `. A scenario above the baseline is the delay clause, not a higher tier: at baseline ` +
           `${(100 * elec.pDelay26).toFixed(0)}% of simulated FY 2026 measurements cross the 13.33% delay test and defer ` +
           `the bill to later, unsimulated years; adoption removes most of that deferral chance ` +
           `(${(100 * s.el.pDelay26).toFixed(0)}% strict / ${(100 * b.el.pDelay26).toFixed(0)}% broad still cross), so the ` +
@@ -1028,13 +1028,25 @@ function renderAdoption(code, st, elec, drift) {
   }
   const verifiedNote = st.verified
     ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit chain case-exactly (verification view above) — adoption means running determinations through the engine, not only verifying them.`
-    : `This state's encoded rules are not yet independently verified; the bound above uses its own file's cause coding, and verification is the first step toward claiming it.`;
+    : `This state's encoded rules are not yet independently verified; the scenario above uses its own file's cause coding, and verification is the first step toward claiming it.`;
+  // Quantify the fixed layer for THIS state so the reach of every scenario
+  // is legible: the FY 2024 file-computable rate vs the FY 2024 official.
+  const filePoint = pointRate(st, st.err);
+  const wedge = st.official - filePoint;
+  const wedgeLine =
+    wedge >= 0
+      ? `In FY 2024 this state's file-computable rate was ${filePoint.toFixed(2)}% against the ${st.official.toFixed(2)}% official — ` +
+        `the ${wedge.toFixed(2)}pp remainder (federal re-review integration and ineligible-case error the file never records) ` +
+        `is that fixed layer, ${((100 * wedge) / st.official).toFixed(0)}% of the official rate, beyond the reach of any scenario here. `
+      : `In FY 2024 this state's file-computable rate (${filePoint.toFixed(2)}%) exceeded the ${st.official.toFixed(2)}% official — ` +
+        `the re-review integration adjusted downward here, and that fixed layer is beyond the reach of any scenario. `;
   const hint =
-    `<p class="hint">An accounting bound under the file's own cause coding, not a causal adoption estimate: causes are ` +
+    `<p class="hint">Accounting scenarios under the file's own cause coding, not causal adoption estimates or bounds on intermediate conventions: causes are ` +
     `reviewer judgments, the broad class includes policy misapplication an engine removes only where it drives the ` +
     `determination end-to-end, adoption could shift the error mix, and the FY 2024 cause mix is assumed for FY 2026. ` +
-    `The anchor shifts by the file-rate reduction from the removed dollars; the official rate's federal re-review ` +
+    `The anchor shifts by the file-rate reduction from the removed dollars; the official rate's re-review-and-ineligible ` +
     `layer is held fixed, matching the simulator's treatment of it everywhere. ` +
+    wedgeLine +
     verifiedNote +
     `</p>`;
   el.innerHTML = shares + band + dollars + hint;
@@ -1159,6 +1171,22 @@ async function main() {
   const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
   dark.addEventListener("change", () => { setMode(); render(); });
   setMode();
+  // The footer build stamp renders from ASSET_V itself, so it can never
+  // drift from the deployed build.
+  const stampDate = ASSET_V.match(/^(\d{4})(\d{2})(\d{2})/);
+  if (stampDate) {
+    const when = new Date(
+      Date.UTC(+stampDate[1], +stampDate[2] - 1, +stampDate[3])
+    ).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+    $("build-stamp").innerHTML =
+      `<a href="https://github.com/PolicyEngine/snap-qc-sim/commits/main" ` +
+      `title="Build ${ASSET_V}">updated ${when}</a> · `;
+  }
   let pending = 0;
   const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
   sel.addEventListener("change", queue);

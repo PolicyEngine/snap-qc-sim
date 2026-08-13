@@ -26,3 +26,16 @@ def test_all_data_fetches_are_versioned():
     ):
         assert f'fetch("{name}?v=" + ASSET_V)' in js, f"{name} fetch must carry ASSET_V"
         assert f'fetch("{name}")' not in js, f"unversioned {name} fetch remains"
+
+
+def test_footer_build_stamp_renders_from_asset_v():
+    """The visible build stamp derives from ASSET_V — one source of truth."""
+    html = (PUBLIC / "index.html").read_text()
+    js = (PUBLIC / "app.js").read_text()
+    assert 'id="build-stamp"' in html, "footer must carry the build-stamp span"
+    assert '$("build-stamp")' in js, "app.js must populate the build stamp"
+    assert "snap-qc-sim/commits/main" in js, "stamp must link to the commit history"
+    v = re.search(r'const ASSET_V = "([A-Za-z0-9._-]+)"', js).group(1)
+    assert re.match(r"^\d{8}[a-z]?$", v), (
+        "ASSET_V must stay date-parseable (YYYYMMDD[x])"
+    )

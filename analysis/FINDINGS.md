@@ -305,6 +305,52 @@ All 53 jurisdictions use 8 seeds × 4,000 draws. The model reads the serialized 
 
 The self-contained frozen FY2024 export contains 44,800 CASE == 1 records across 53 jurisdictions, including per-case caps and per-state factors/level flags but excluding unused `p_pos`. Its final size is 3.111 MB raw and 0.795 MB under deterministic gzip. Quantile logs use 2 decimal places because the four-significant-figure draft exceeded 2.5 MB. The SMD-only scenario sibling adds 0.183 MB raw and 0.050 MB under deterministic gzip.
 
+## Coverage-repair experiment (2026-08-12): dispersion is the wrong axis
+
+A protocol-first experiment (analysis/COVERAGE_REPAIR_PROTOCOL.md,
+committed before results) tested three post-hoc dispersion repairs of
+the distributional model's coverage failure: a conformal remap of
+nominal quantile levels fit on leave-one-year-out training folds,
+per-state spread inflation in log-deviation space, and both. The
+mechanical winner (conformal remap) improves the mean absolute FY2024
+coverage gap from 4.644pp to 4.082pp with the MAE and hurdle guards
+passing — and adoption is declined (post-results decision recorded in
+analysis/COVERAGE_REPAIR_ADOPTION.md, kept outside the byte-frozen protocol). The remap buys its upper-tail gains by collapsing the
+lower tail: q05 coverage falls from 4.6% to 0.02%. More important, all
+nine gaps stay negative under every mechanism, and the baseline's worst
+misses sit at the middle levels — the predicted quantiles sit
+systematically low. The coverage failure is a location problem, not a
+width problem, consistent with the documented cross-state level
+underprediction; post-hoc dispersion surgery redistributes the miss
+without clearing it. Named next experiment: location repair on the
+quantile path, with partner-state administrative data the strongest
+unlock. Full per-level and per-state tables:
+analysis/coverage_repair_results.json.
+
+## Location-repair experiment (2026-08-12, protocol v2): every level improves; the hole remains
+
+The follow-up the coverage diagnostic named, run under a v2 protocol
+with pre-registered PER-LEVEL guards (no level may worsen more than
+0.5pp, no new over-3pp flags, a q05 coverage floor). Three location
+mechanisms fit on leave-one-year-out training folds: a global additive
+shift in log-deviation space, per-state shifts with a global fallback,
+and a per-level location profile with isotonic repair. The per-level
+guards ruled out the two flexible mechanisms — both posted lower means
+than the winner while worsening individual levels — and `global_shift`
+(+0.038 log dollars) wins clean: FY2024 mean absolute coverage gap
+4.644pp to 3.801pp with EVERY level improving (q50 −7.11 to −5.62pp,
+max 7.30 to 6.23pp), factored equal-state MAE slightly better, hurdle
+untouched. All nine gaps remain negative: a uniform location shift
+closes part of the hole but the middle-level miss (~−6pp) persists, so
+the model stays data-limited — richer cross-state signal, with
+partner-state administrative data first in line, remains the unlock.
+Adoption sequencing: `global_shift` is committed and guard-eligible,
+and it stays OUT of the scoring path until after the FY2025 frozen
+confirmation runs — the freeze manifest hashes the unrepaired modules,
+and the one-shot test binds to them; any adopted calibration after
+that is a separately labeled variant. Full tables:
+analysis/location_repair_results.json.
+
 ## Interpretation boundary
 
 These are diagnostic and descriptive results. FY2024 informed pipeline development across the audit-and-correct rounds and is not a pristine holdout. This repository implements a signed conditional deviation process and exports its magnitude/rate configuration with a q99 tail refit, physical caps, frozen state dollar factors, and matched dollar-rate validation. The browser scenario consumer is live: `app.js` serves the SMD model scenario as its single policy lever from `model_scenarios.json` (adoption endpoints, paired-bootstrap intervals, level-gate metadata), verifies the base-model SHA-256 pin, and disables the seven level-gated jurisdictions; the accounting-bound levers are removed. Self-employment, heat-and-eat, and BBCE scenarios are excluded because their fitted features do not support defensible policy flips. Not yet implemented: a computation-failure mixture, an input-noise tier, an event-study design, and engine recomputation under alternative policies. See `docs/v2-error-model.md` for the implementation-status table.

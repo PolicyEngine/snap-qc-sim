@@ -1,6 +1,8 @@
 # Pre-registration: the OBBBA boundary quasi-experiment
 
-Status: registered design, 2026-08-12. This document and its
+Status: registered design — drafted 2026-08-12, adversarial
+verification rounds 2026-08-12/13, effective at the merge of pull
+request #49. This document and its
 machine-readable companion commit the design, the running-variable
 windows, the estimators and their decision rules, per-state no-response
 null predictions, the outcome list, and the falsification battery for
@@ -114,7 +116,8 @@ variable is itself a finding."
 
 The null is the deployed simulator's observed-resample engine, exactly
 as committed and CI-mirrored (`app/public/app.js` `simulate()`;
-bit-faithful Python mirror in `tests/test_adoption_numbers.py`): for
+bit-faithful Python mirror in `analysis/adoption_mirror.py`, exercised
+by `tests/test_adoption_numbers.py`): for
 each of the 53 jurisdictions, resample the fiscal 2024 QC case file
 (m = n draws with replacement), center the resampled weighted rate on
 the locked fiscal 2025 official rate, seed 11, 4,000 replications. This

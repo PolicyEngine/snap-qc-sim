@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from analysis.adoption_mirror import election as adoption_election
 from analysis.preregister_obbba_boundary import (
     ALL_BOUNDARIES,
     DATA_JSON,
@@ -32,7 +33,6 @@ from analysis.preregister_obbba_boundary import (
     rtm_shrunken_sensitivity_test,
     simulate,
 )
-from tests.test_adoption_numbers import election as adoption_election
 
 ROOT = Path(__file__).resolve().parents[1]
 
