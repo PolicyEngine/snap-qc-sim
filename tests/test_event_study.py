@@ -63,14 +63,29 @@ def test_verdict_follows_frozen_rule() -> None:
     assert decision["adoption_gate"] is False
 
 
-def test_fixture_is_byte_deterministic() -> None:
+def test_fixture_is_deterministic_and_recovers_the_planted_effect() -> None:
+    """Same-process byte determinism plus tolerance checks on the fixture.
+
+    No cross-platform byte hash here: the synthetic-control weights come
+    from an optimizer whose last-bit floats differ between macOS
+    Accelerate and Linux OpenBLAS, so a fixture hash pins the platform,
+    not the science. The committed-artifact test below still pins exact
+    bytes; the raw-SAV regeneration test reproduces them on the machine
+    that built them.
+    """
     first = event_study.serialize_results(event_study.build_results(_fixture_panel()))
     second = event_study.serialize_results(event_study.build_results(_fixture_panel()))
     assert first == second
-    assert (
-        hashlib.sha256(first).hexdigest()
-        == "34b9a386255826595511636a08bc140427b173379dc0a99af3e45beeb1d534ff"
-    )
+    result = json.loads(first)
+    path = result["specifications"]["primary_drop_fy2021"]["outcomes"][
+        "strict_computing_dollars_per_case_month"
+    ]["path"]
+    # The fixture plants its +2.0 shift from 2022 (event time 1 onward);
+    # event time 0 (FY2021) carries no planted effect.
+    shifted = [row["gap"] for row in path if row["event_time"] >= 1]
+    unshifted = [row["gap"] for row in path if row["event_time"] <= 0]
+    assert all(abs(g) < 0.05 for g in unshifted), unshifted
+    assert all(abs(g - 2.0) < 0.05 for g in shifted), shifted
 
 
 def test_committed_result_schema_and_sha() -> None:
