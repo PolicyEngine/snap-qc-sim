@@ -326,9 +326,21 @@ def run(
     manifest_path: Path = MANIFEST_PATH,
     results_path: Path = RESULTS_PATH,
 ) -> dict[str, Any]:
-    """Record an input, verify the freeze, score it, and write confirmation JSON."""
+    """Verify the freeze, record the input, score it, and write confirmation JSON.
+
+    The freeze check runs before the manifest mutates, and an existing
+    results file refuses to be overwritten: the one-shot discipline means
+    a rerun must move the first result aside deliberately and label its
+    own output post hoc.
+    """
+    if results_path.exists():
+        raise FileExistsError(
+            f"{results_path} already exists — the confirmation is one shot. "
+            "Move the existing result aside deliberately and label any rerun "
+            "post hoc."
+        )
+    verify_freeze(_read_json(manifest_path))
     manifest = record_input(qc_path, manifest_path)
-    verify_freeze(manifest)
     with _evaluation_year(year, qc_path):
         classifier_metrics = _classifier_metrics(year)
         hurdle_result = hurdle.main(results_path.with_suffix(".hurdle.tmp"))
