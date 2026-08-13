@@ -1,0 +1,101 @@
+{
+  "feature_registry_sha256": {
+    "medicare_part_b_premiums.csv": "b8f192092823e5158737fe412c63a1cad19c768d040fe5b5bc2aa229afb00afa",
+    "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca",
+    "state_bbce.csv": "47c0255266f8fd62c6408697fc53b465c49f19004de8bf99c5c7d4f1def70b22"
+  },
+  "freeze_name": "FY2025 frozen-pipeline confirmation",
+  "frozen_modules_sha256": {
+    "analysis/distributional_deviation_model.py": "fd7e19f7de803fe5106c9d7ae2a3d63451e421d9d9f67561f6e6de6077ba9fb4",
+    "analysis/hurdle_deviation_model.py": "f73dee2a8c2eb0aeb761445a308cf53260eabe74c94ded83da488fe50e6d55d3",
+    "analysis/predictive_process.py": "ea1cb6bb471b2b56a0991c7060e67dcbbd91ea21e927e02d3ab0bbba6a8e31c5",
+    "analysis/train_error_model.py": "8d8891fd7b2d0d39bcc4492d26d384c41bd39487e38ec857b0d93ab8e832732b"
+  },
+  "fy2024_reference_values": {
+    "classifier": {
+      "pr_auc": 0.3553041682372305,
+      "roc_auc": 0.7666262908275983
+    },
+    "coverage_gaps_pp": [
+      -0.3798081156025035,
+      -1.6670808117486737,
+      -4.3291622059140975,
+      -7.108022079911091,
+      -7.300744576105556,
+      -7.268350038561266,
+      -5.774448945018729,
+      -4.41857509264233,
+      -3.5482765465492228
+    ],
+    "factored_equal_state_dollar_rate_mae_pp": 0.9311800033868244,
+    "hurdle": {
+      "stage1_pr_auc": 0.7429348436943566,
+      "stage1_roc_auc": 0.8395507552268109,
+      "stage2_pr_auc": 0.5682566002100535,
+      "stage2_roc_auc": 0.7247420753909933,
+      "stage3_observed_mean": 189.30241981489877,
+      "stage3_predicted_mean": 185.7150385110317
+    },
+    "sign_roc_auc": 0.6997568121541028
+  },
+  "fy2025_schema": {
+    "person_self_employment_slots": 18,
+    "smd_and_bbce_policy": "carry forward frozen FY2024 registry cells",
+    "threshold_dollars": 57
+  },
+  "input_files": {},
+  "metric_definitions": {
+    "classifier_auc_pr_auc": "analysis/train_error_model.py:938",
+    "equal_state_mae": "analysis/hurdle_deviation_model.py:734",
+    "hurdle_probability_metrics": "analysis/hurdle_deviation_model.py:259",
+    "quantile_coverage_gaps": "analysis/distributional_deviation_model.py:426",
+    "sign_auc": "analysis/hurdle_deviation_model.py:259"
+  },
+  "model_hyperparameters": {
+    "classifier": {
+      "learning_rate": 0.08,
+      "max_iter": 300,
+      "max_leaf_nodes": 63,
+      "random_state": 7
+    },
+    "distributional_quantiles": [
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      0.9,
+      0.95,
+      0.975,
+      0.99
+    ],
+    "distributional_sign_seed": 37,
+    "distributional_tail_seed": 47,
+    "folds": 5,
+    "hurdle_and_distributional": {
+      "learning_rate": 0.08,
+      "max_iter": 300,
+      "max_leaf_nodes": 63,
+      "random_state": 7
+    }
+  },
+  "schema_version": 1,
+  "train_years": {
+    "classifier_and_primary_hurdle": [
+      2017,
+      2018,
+      2019,
+      2022,
+      2023
+    ],
+    "frozen_factored_distributional": [
+      2017,
+      2018,
+      2019,
+      2022
+    ],
+    "state_factor_fit": [
+      2023
+    ]
+  }
+}
