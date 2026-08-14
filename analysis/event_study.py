@@ -486,7 +486,7 @@ def build_results(panel: pd.DataFrame) -> dict[str, Any]:
         },
         "outcome_definitions": {
             "fixed_real_threshold_2024_dollars": 56.0,
-            "cpi_u_annual_average": {str(year): value for year, value in CPI_U.items()},
+            "cpi_u_annual_average": {str(year): CPI_U[year] for year in YEARS},
             "strict_codes": sorted(STRICT_CODES),
             "client_codes": sorted(_client_codes()),
         },
