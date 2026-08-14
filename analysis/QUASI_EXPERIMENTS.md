@@ -127,26 +127,30 @@ editions, with the same hash-registry discipline as
 `params/sources/official_hashes.json`; verify how far back cause and
 element coding is consistent before committing to a panel start year.
 
-## Coding-consistency audit results (2026-08-12)
+## Coding-consistency audit results (2026-08-14)
 
-The audit (`analysis/coding_consistency.json`, over the local FY2017–24
-files) answers the panel-start question:
+The extended audit (`analysis/coding_consistency.json`, FY2012–24) provides
+evidence and a recommendation, not a design decision:
 
-- **Design 1 is unblocked back to FY2017.** The strict
-  computing-apparatus cause codes {17, 19, 20} are observed in every
-  year, so the system-migration outcome tracks across the full panel.
-  The broad class is not backward-comparable: code 22 (incorrect
-  budgeting) first appears in FY2023 — use strict plus total-rate
-  outcomes historically, broad only FY2023+.
-- **Total-rate panel from FY2017** under a fixed real threshold, with
-  FY2020 handled as its reconciling two-period pandemic file, FY2021
-  treated as pandemic-partial (9,832 rows, sensitivity-only), and the
-  FY2017–19 nominal thresholds still NEEDS_ACQUISITION (FY2020–24
-  verified from local techdocs: $37/$39/$48/$54/$56).
-- **Design 2 stays gated.** Element and nature inventories shift at the
-  FY2024 boundary (causes 23–25, natures 14/33/56/57/58/312/314,
-  elements 165/362/540/542 appear; nature 24 and element 166
-  disappear), and pre-FY2021 codebooks are not local — element-targeted
-  outcomes are defensible from FY2024 only until earlier codebooks are
-  acquired and a semantic bridge (meanings, not numeric presence) is
-  validated.
+- **RI and KY gain five pre-period years.** All nine AGENCY slots and each
+  strict computing-apparatus cause code {17, 19, 20} are observed in every
+  FY2012–24 file. The inventory therefore supports strict-class sensitivity
+  panels spanning the Kentucky (2016-02-29) and Rhode Island (2016-09)
+  go-lives. Numeric presence does not establish unchanged semantics, and the
+  FY2024 techdoc reports minor AGENCY revisions, so those facts bound causal
+  interpretation. The broad class remains unsuitable as the primary historical
+  outcome because code 22 first appears in FY2023.
+- **Total-rate sensitivity panels can start in FY2012** under a fixed real
+  AMTERR threshold. CASE, HWGT, RAWBEN, AMTERR, STATUS, and all nine cause and
+  finding slots are present throughout; HWGT implies plausible national-scale
+  monthly caseloads. Local techdocs verify nominal tolerances of $50/$50/$37/
+  $38/$38/$38 for FY2012–17 and $37/$39/$48/$54/$56 for FY2020–24. FY2018–19
+  remain NEEDS_ACQUISITION, FY2020 is the reconciled two-period pandemic file,
+  and FY2021 is pandemic-partial (9,832 rows), so the recommendation is strict
+  plus total-rate FY2012–24 sensitivity outcomes with those bounds explicit.
+- **Finding-targeted outcomes remain gated.** Pre-period NATURE and ELEMENT
+  inventories vary across years, and FY2014 alone contains alphabetic E_FINDG
+  code `A`; observed inventories match FY2024 exactly only in FY2024. A semantic
+  bridge is still required before treating those targeted outcomes as stable.
+  The independently acquired FY2017 CSV and existing SAV reconcile exactly on
+  45,530 rows and all AGENCY/NATURE/E_FINDG/ELEMENT observed-code inventories.
