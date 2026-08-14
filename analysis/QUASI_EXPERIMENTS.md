@@ -155,3 +155,29 @@ evidence and a recommendation, not a design decision:
   bridge is still required before treating those targeted outcomes as stable.
   The independently acquired FY2017 CSV and existing SAV reconcile exactly on
   45,530 rows and all AGENCY/NATURE/E_FINDG/ELEMENT observed-code inventories.
+
+## Design 1 results (2026-08-14): Oregon, Rhode Island, Kentucky
+
+Three events estimated under frozen protocols (Oregon:
+analysis/EVENT_STUDY_PROTOCOL.md; RI/KY:
+analysis/RIKY_EVENT_STUDY_PROTOCOL.md), each committed before results.
+
+- **Rhode Island (UHIP, 2016-09): signal.** Strict computing-apparatus
+  dollars per case-month rise +2.90 against the synthetic donor
+  (permutation p = 0.023; client placebo p = 0.233, null). The
+  elevation concentrates where the federal record says it should:
+  +4.95 mean gap across FY2017-19 — the window FNS billed Rhode Island
+  $37.3M for SNAP overpayments — against +1.48 in the later post-years.
+  The billing record played no role in estimation.
+- **Kentucky (Benefind, 2016-02-29): no protocol-defined signal**
+  (effect −0.58, p = 0.302). Reported flat.
+- **Pooled two-unit statistic: signal** (p = 0.093; placebo p = 1.0).
+- **Oregon (ONE expansion, 2021-02): no protocol-defined signal**, with
+  the client placebo firing — the pandemic-window confound the design
+  cannot separate (analysis/event_study_results.json).
+
+Language discipline: these estimate bundled system replacements as
+implemented — a failed migration raising computing-apparatus-coded
+error, not "the effect of rules engines." The contrast with the
+adoption scenarios is the point: the accounting scenarios price the
+same cause class the failed migration causally moved.
