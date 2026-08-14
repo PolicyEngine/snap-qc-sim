@@ -70,13 +70,15 @@ def test_fixture_is_deterministic_and_recovers_the_planted_effect() -> None:
     No cross-platform byte hash here: the synthetic-control weights come
     from an optimizer whose last-bit floats differ between macOS
     Accelerate and Linux OpenBLAS, so a fixture hash pins the platform,
-    not the science. The same class bites within one machine: a
-    2026-08-14 rerun of the raw regeneration moved last-ulp float bytes
-    while a value-level walk found zero differences at rel=1e-9. The
-    committed-artifact test below therefore pins exact bytes, while raw
-    regeneration is value-locked, not byte-locked: identical structure,
-    key order, and non-float values, floats at rel=1e-9 with a 1e-12
-    absolute floor at near-zero leaves (see conftest).
+    not the science. Byte equality also made regeneration failures
+    unreadable: a 2026-08-14 byte failure was attributed to float noise
+    until the value lock localized it to a real regression (#59 widened
+    CPI_U and silently changed this artifact's regeneration; the
+    emission is now scoped to the panel years). The committed-artifact
+    test below therefore pins exact bytes, while raw regeneration is
+    value-locked, not byte-locked: identical structure, key order, and
+    non-float values, floats at rel=1e-9 with a 1e-12 absolute floor at
+    near-zero leaves (see conftest).
     """
     first = event_study.serialize_results(event_study.build_results(_fixture_panel()))
     second = event_study.serialize_results(event_study.build_results(_fixture_panel()))
@@ -181,13 +183,15 @@ def test_raw_sav_regeneration_matches_committed_artifact(
 ) -> None:
     """Regeneration reproduces the committed artifact value-for-value.
 
-    Value-locked, not byte-locked: this regeneration byte-flaked on one
-    machine on 2026-08-14 — last-ulp floats, zero value-level
-    differences at rel=1e-9 — so byte equality here pins noise, not
-    science. Structure, key order, and non-float values must match
-    exactly; floats at rel=1e-9 with a 1e-12 absolute floor (see
-    conftest). The committed bytes themselves stay pinned by the
-    SHA-256 test above, and the serializer by its round-trip test.
+    Value-locked, not byte-locked: optimizer floats move in the last
+    ulp across BLAS implementations and reruns, so byte-equality
+    failures here were unreadable — indistinguishable from noise. That
+    masked a real regression until the first value-locked run named the
+    exact path (the #59 CPI_U widening, since scoped). Structure, key
+    order, and non-float values must match exactly; floats at rel=1e-9
+    with a 1e-12 absolute floor (see conftest). The committed bytes
+    stay pinned by the SHA-256 test above, and the serializer by its
+    round-trip test.
     """
     regenerated = event_study.serialize_results(
         event_study.build_results(event_study.build_panel())
