@@ -18,8 +18,10 @@ import pyreadstat
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = Path(__file__).with_name("coding_consistency.json")
 SOURCE_ROOT = Path.home() / ".cache/axiom-oracles/snap_qc_repo/qc_data"
+HISTORICAL_ROOT = Path.home() / ".cache/axiom-oracles/snap-qc/historical"
+HISTORICAL_HASHES = HISTORICAL_ROOT / "SHA256SUMS.txt"
 REFERENCE_PATH = Path(__file__).with_name("cause_shares.json")
-YEARS = tuple(range(2017, 2025))
+YEARS = tuple(range(2012, 2025))
 CORE_FIELDS = ("CASE", "HWGT", "RAWBEN", "AMTERR", "STATUS")
 FINDING_ROOTS = ("NATURE", "E_FINDG", "ELEMENT")
 STRICT_CODES = frozenset({17, 19, 20})
@@ -28,14 +30,51 @@ K3_NATURE_CODES = frozenset(
     {36, 42, 43, 52, 53, 54, 56, 57, 64, 65, 75, 79, 80, 98, 123}
 )
 K3_ELEMENT_CODES = frozenset({520})
-SCHEMA = "snap-qc-coding-consistency-v1"
+SCHEMA = "snap-qc-coding-consistency-v2"
+SCHEMA_VERSION = 2
 
-# All citations below are to local documents. The earlier-year values are
-# intentionally not filled from repository narrative or memory.
+# All citations below are to local documents.
 THRESHOLDS: dict[int, dict[str, Any]] = {
-    2017: {"status": "NEEDS_ACQUISITION", "dollars": None, "citation": None},
-    2018: {"status": "NEEDS_ACQUISITION", "dollars": None, "citation": None},
-    2019: {"status": "NEEDS_ACQUISITION", "dollars": None, "citation": None},
+    2012: {
+        "status": "verified_local_techdoc",
+        "dollars": 50,
+        "citation": "FY2012_Tech_Doc.pdf p. 128 ($50 tolerance threshold)",
+    },
+    2013: {
+        "status": "verified_local_techdoc",
+        "dollars": 50,
+        "citation": "FY2013_Tech_Doc.pdf p. 126 ($50 in FY2012 and FY2013)",
+    },
+    2014: {
+        "status": "verified_local_techdoc",
+        "dollars": 37,
+        "citation": "FY2014_Tech_Doc.pdf p. 10, footnote 5 ($37)",
+    },
+    2015: {
+        "status": "verified_local_techdoc",
+        "dollars": 38,
+        "citation": "FY2015_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+    },
+    2016: {
+        "status": "verified_local_techdoc",
+        "dollars": 38,
+        "citation": "FY2016_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+    },
+    2017: {
+        "status": "verified_local_techdoc",
+        "dollars": 38,
+        "citation": "FY2017_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+    },
+    2018: {
+        "status": "verified_local_techdoc",
+        "dollars": 37,
+        "citation": "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)",
+    },
+    2019: {
+        "status": "verified_local_techdoc",
+        "dollars": 37,
+        "citation": "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)",
+    },
     2020: {
         "status": "verified_local_techdoc",
         "dollars": 37,
@@ -70,6 +109,29 @@ def sha256(path: Path) -> str:
         return hashlib.file_digest(source, "sha256").hexdigest()
 
 
+def source_path(year: int) -> Path:
+    """Return the canonical local input for a fiscal year."""
+    if year in (2012, 2013):
+        return HISTORICAL_ROOT / f"qcfy{year}_sas9" / f"qc_pub_fy{year}.sas7bdat"
+    if year in (2014, 2015, 2016):
+        return HISTORICAL_ROOT / f"qcfy{year}_csv" / f"qc_pub_fy{year}.csv"
+    return SOURCE_ROOT / f"qc_pub_fy{year}.sav"
+
+
+def read_frame(path: Path) -> pd.DataFrame:
+    """Read a supported QC public-use source into a data frame."""
+    if path.suffix == ".csv":
+        return pd.read_csv(path, low_memory=False)
+    if path.suffix == ".sas7bdat":
+        return pyreadstat.read_sas7bdat(str(path))[0]
+    return pyreadstat.read_sav(str(path))[0]
+
+
+def display_path(path: Path) -> str:
+    """Return a stable home-relative provenance path."""
+    return f"~/{path.relative_to(Path.home())}"
+
+
 def _slots(columns: pd.Index, root: str) -> list[str]:
     """Return numbered finding columns in numeric suffix order."""
     pattern = re.compile(rf"^{root}([1-9])$")
@@ -79,12 +141,32 @@ def _slots(columns: pd.Index, root: str) -> list[str]:
     )
 
 
-def _codes(frame: pd.DataFrame, columns: list[str]) -> list[int]:
-    """Return sorted observed integer codes across a group of columns."""
+def _code_sort_key(value: int | str) -> tuple[int, int | str]:
+    """Sort numeric codes before alphabetic codes deterministically."""
+    return (0, value) if isinstance(value, int) else (1, value)
+
+
+def _sorted_codes(values: set[int | str]) -> list[int | str]:
+    """Sort a possibly mixed numeric and alphabetic code inventory."""
+    return sorted(values, key=_code_sort_key)
+
+
+def _codes(frame: pd.DataFrame, columns: list[str]) -> list[int | str]:
+    """Return sorted observed codes across a group of columns."""
     if not columns:
         return []
     values = pd.unique(frame[columns].to_numpy().ravel())
-    return sorted(int(value) for value in values if pd.notna(value))
+    normalized: set[int | str] = set()
+    for value in values:
+        if pd.isna(value):
+            continue
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            normalized.add(str(value))
+        else:
+            normalized.add(int(numeric) if numeric.is_integer() else str(value))
+    return _sorted_codes(normalized)
 
 
 def _distribution(series: pd.Series) -> dict[str, int]:
@@ -147,8 +229,8 @@ def _scenario_share(
 
 
 def audit_file(path: Path, year: int, reference_causes: set[int]) -> dict[str, Any]:
-    """Build one fiscal-year audit block from a SAV."""
-    frame, _ = pyreadstat.read_sav(str(path))
+    """Build one fiscal-year audit block from a supported public-use file."""
+    frame = read_frame(path)
     active = frame.loc[frame["CASE"].eq(1)].copy()
     agency_columns = _slots(frame.columns, "AGENCY")
     observed_causes = _codes(active, agency_columns)
@@ -167,7 +249,7 @@ def audit_file(path: Path, year: int, reference_causes: set[int]) -> dict[str, A
     return {
         "fiscal_year": year,
         "source": {
-            "path": f"~/.cache/axiom-oracles/snap_qc_repo/qc_data/{path.name}",
+            "path": display_path(path),
             "bytes": path.stat().st_size,
             "sha256": sha256(path),
         },
@@ -232,9 +314,7 @@ def build() -> dict[str, Any]:
     reference = json.loads(REFERENCE_PATH.read_text())
     reference_causes = {int(code) for code in reference["cause_codes"]}
     years = {
-        str(year): audit_file(
-            SOURCE_ROOT / f"qc_pub_fy{year}.sav", year, reference_causes
-        )
+        str(year): audit_file(source_path(year), year, reference_causes)
         for year in YEARS
     }
     fy2024 = years["2024"]
@@ -243,10 +323,10 @@ def build() -> dict[str, Any]:
             finding = block["findings"][root.lower()]
             reference_codes = fy2024["findings"][root.lower()]["observed_codes"]
             finding["vs_fy2024_observed"] = {
-                "appeared_by_fy2024": sorted(
+                "appeared_by_fy2024": _sorted_codes(
                     set(reference_codes) - set(finding["observed_codes"])
                 ),
-                "absent_by_fy2024": sorted(
+                "absent_by_fy2024": _sorted_codes(
                     set(finding["observed_codes"]) - set(reference_codes)
                 ),
                 "exact_match": finding["observed_codes"] == reference_codes,
@@ -268,8 +348,8 @@ def build() -> dict[str, Any]:
             for key in path:
                 old, new = old[key], new[key]
             consecutive_changes[str(year)][name] = {
-                "appeared": sorted(set(new) - set(old)),
-                "disappeared": sorted(set(old) - set(new)),
+                "appeared": _sorted_codes(set(new) - set(old)),
+                "disappeared": _sorted_codes(set(old) - set(new)),
             }
 
     split_paths = [SOURCE_ROOT / f"qc_pub_fy2020_per{period}.sav" for period in (1, 2)]
@@ -282,8 +362,27 @@ def build() -> dict[str, Any]:
             {"path": path.name, "rows": metadata.number_rows, "sha256": sha256(path)}
         )
 
+    fy2017_csv_path = HISTORICAL_ROOT / "qcfy2017_csv" / "qc_pub_fy2017.csv"
+    fy2017_csv = read_frame(fy2017_csv_path)
+    fy2017_sav = read_frame(source_path(2017))
+    inventory_comparison = {}
+    for root in ("AGENCY", *FINDING_ROOTS):
+        csv_codes = _codes(fy2017_csv, _slots(fy2017_csv.columns, root))
+        sav_codes = _codes(fy2017_sav, _slots(fy2017_sav.columns, root))
+        inventory_comparison[root.lower()] = {
+            "csv_observed_codes": csv_codes,
+            "sav_observed_codes": sav_codes,
+            "exact_match": csv_codes == sav_codes,
+        }
+
+    acquisition_hashes = {}
+    for line in HISTORICAL_HASHES.read_text().splitlines():
+        digest, filename = line.split(maxsplit=1)
+        acquisition_hashes[filename] = digest
+
     return {
         "schema": SCHEMA,
+        "schema_version": SCHEMA_VERSION,
         "scope_note": "Inventory/accounting only; no causal claims.",
         "reference_conventions": {
             "cause_codes": sorted(reference_causes),
@@ -347,40 +446,78 @@ def build() -> dict[str, Any]:
                 ),
             },
         },
+        "source_cross_checks": {
+            "fy2017_csv_vs_sav": {
+                "csv_source": {
+                    "path": display_path(fy2017_csv_path),
+                    "rows": len(fy2017_csv),
+                    "sha256": sha256(fy2017_csv_path),
+                },
+                "sav_source": {
+                    "path": display_path(source_path(2017)),
+                    "rows": len(fy2017_sav),
+                    "sha256": sha256(source_path(2017)),
+                },
+                "row_count_difference_csv_minus_sav": len(fy2017_csv) - len(fy2017_sav),
+                "cause_slot_inventories": inventory_comparison,
+                "reconciles": len(fy2017_csv) == len(fy2017_sav)
+                and all(
+                    comparison["exact_match"]
+                    for comparison in inventory_comparison.values()
+                ),
+                "canonical_source_note": (
+                    "The existing SAV remains canonical to preserve the FY2017 audit "
+                    "block; the independently acquired CSV is reported as a cross-check."
+                ),
+            }
+        },
         "panel_recommendation": {
             "total_rate_fixed_real_threshold": {
-                "earliest_defensible_start_year": 2017,
+                "earliest_defensible_start_year": 2012,
                 "evidence": (
                     "CASE, HWGT, RAWBEN, AMTERR, and STATUS plus all nine cause and "
-                    "finding slots are present from FY2017, so a researcher-chosen "
+                    "finding slots are present from FY2012, so a researcher-chosen "
                     "fixed real AMTERR threshold does not depend on unavailable "
                     "official historical tolerances."
                 ),
                 "bounds_and_special_handling": [
-                    "FY2017-FY2019 official nominal thresholds remain NEEDS_ACQUISITION.",
+                    "FY2018-FY2019 official nominal thresholds remain NEEDS_ACQUISITION.",
                     "FY2020 is a combined two-period pandemic file.",
                     "FY2021 is pandemic-partial and requires sensitivity treatment.",
                 ],
             },
-            "element_targeted_outcomes": {
-                "earliest_defensible_start_year": 2024,
+            "strict_class_outcomes": {
+                "target_events": {
+                    "Kentucky": "2016-02-29 go-live",
+                    "Rhode Island": "2016-09 go-live",
+                },
+                "earliest_inventory_supported_start_year": 2012,
                 "evidence": (
-                    "The FY2024 techdoc explicitly reports minor AGENCY, ELEMENT, "
-                    "and NATURE revisions, and the observed inventories change at "
-                    "that boundary. Earlier techdocs are unavailable before FY2021, "
-                    "so semantic equivalence cannot be established for FY2017-FY2020."
+                    "All nine AGENCY slots and the FY2024 strict cause codes "
+                    "{17, 19, 20} are present in every year from FY2012 through FY2024."
                 ),
                 "bounds_and_special_handling": [
-                    "Acquire FY2017-FY2020 codebooks before moving the start earlier.",
-                    "Validate 2023-to-2024 code meanings, not only numeric presence.",
+                    "Observed numeric-code presence does not prove unchanged semantics.",
+                    "The FY2024 techdoc reports minor AGENCY code revisions.",
+                    "The broad class is not historically stable and is not recommended as the primary class outcome.",
                     "FY2021 is pandemic-partial even if a targeted coding bridge is built.",
                 ],
+                "recommendation": (
+                    "Use strict-class and total-rate outcomes for FY2012-FY2024 RI/KY "
+                    "event-study sensitivity panels, while bounding interpretation by "
+                    "the named coding and pandemic inconsistencies."
+                ),
             },
             "status": "evidence_and_recommendation_not_a_design_decision",
         },
         "provenance": {
             "generator": "analysis/build_coding_consistency.py",
             "reference_artifact_sha256": sha256(REFERENCE_PATH),
+            "historical_acquisition_hash_registry": {
+                "path": display_path(HISTORICAL_HASHES),
+                "sha256": sha256(HISTORICAL_HASHES),
+                "entries": acquisition_hashes,
+            },
             "determinism": "sorted keys, stable ordering, no timestamps or absolute paths",
         },
     }

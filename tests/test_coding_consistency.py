@@ -15,25 +15,25 @@ REFERENCE = ROOT / "analysis/cause_shares.json"
 PAYLOAD = json.loads(ARTIFACT.read_text())
 CAUSE_SHARES = json.loads(REFERENCE.read_text())
 needs_raw_sources = pytest.mark.skipif(
-    not all(
-        (builder.SOURCE_ROOT / f"qc_pub_fy{year}.sav").exists()
-        for year in builder.YEARS
-    )
+    not all(builder.source_path(year).exists() for year in builder.YEARS)
     or not all(
         (builder.SOURCE_ROOT / f"qc_pub_fy2020_per{period}.sav").exists()
         for period in (1, 2)
-    ),
-    reason="local historical QC SAV sources are not all present",
+    )
+    or not (builder.HISTORICAL_ROOT / "qcfy2017_csv" / "qc_pub_fy2017.csv").exists()
+    or not builder.HISTORICAL_HASHES.exists(),
+    reason="local historical QC raw sources are not all present",
 )
 
 
 def test_committed_artifact_schema_and_years() -> None:
     """Lock the top-level schema and complete ordered fiscal-year panel."""
     assert PAYLOAD["schema"] == builder.SCHEMA
+    assert PAYLOAD["schema_version"] == builder.SCHEMA_VERSION == 2
     assert list(PAYLOAD["years"]) == [str(year) for year in builder.YEARS]
     assert PAYLOAD["scope_note"] == "Inventory/accounting only; no causal claims."
     assert set(PAYLOAD["panel_recommendation"]) == {
-        "element_targeted_outcomes",
+        "strict_class_outcomes",
         "status",
         "total_rate_fixed_real_threshold",
     }
@@ -59,17 +59,51 @@ def test_per_year_presence_flags(year: int) -> None:
 
 def test_threshold_acquisition_boundary_is_explicit() -> None:
     """Unavailable earlier documentation must never silently become a value."""
-    for year in (2017, 2018, 2019):
+    assert [
+        PAYLOAD["years"][str(year)]["threshold"]["dollars"]
+        for year in range(2012, 2018)
+    ] == [50, 50, 37, 38, 38, 38]
+    assert all(
+        PAYLOAD["years"][str(year)]["threshold"]["status"] == "verified_local_techdoc"
+        for year in range(2012, 2018)
+    )
+    for year, cite in (
+        (2018, "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)"),
+        (2019, "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)"),
+    ):
         threshold = PAYLOAD["years"][str(year)]["threshold"]
         assert threshold == {
-            "citation": None,
-            "dollars": None,
-            "status": "NEEDS_ACQUISITION",
+            "citation": cite,
+            "dollars": 37,
+            "status": "verified_local_techdoc",
         }
     assert [
         PAYLOAD["years"][str(year)]["threshold"]["dollars"]
         for year in range(2020, 2025)
     ] == [37, 39, 48, 54, 56]
+
+
+def test_preperiod_strict_class_and_fy2017_cross_check_are_locked() -> None:
+    """Lock the RI/KY pre-period evidence and independent FY2017 reconciliation."""
+    for year in range(2012, 2017):
+        cause_slots = PAYLOAD["years"][str(year)]["cause_slots"]
+        strict = cause_slots["strict_computing_apparatus"]
+        assert builder.STRICT_CODES <= set(cause_slots["observed_codes"])
+        assert strict["present"] is True
+        assert strict["active_cases_any"] > 0
+    cross_check = PAYLOAD["source_cross_checks"]["fy2017_csv_vs_sav"]
+    assert cross_check["row_count_difference_csv_minus_sav"] == 0
+    assert cross_check["reconciles"] is True
+    assert all(
+        inventory["exact_match"]
+        for inventory in cross_check["cause_slot_inventories"].values()
+    )
+    assert PAYLOAD["years"]["2014"]["findings"]["e_findg"]["observed_codes"] == [
+        2,
+        3,
+        4,
+        "A",
+    ]
 
 
 def test_fy2024_reconciles_with_cause_shares_inventories() -> None:

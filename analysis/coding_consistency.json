@@ -1,6 +1,151 @@
 {
   "cross_year_summary": {
     "consecutive_observed_code_changes": {
+      "2013": {
+        "cause_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "e_findg_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "element_codes": {
+          "appeared": [],
+          "disappeared": [
+            166,
+            211,
+            221,
+            222
+          ]
+        },
+        "nature_codes": {
+          "appeared": [
+            14,
+            28,
+            302,
+            303
+          ],
+          "disappeared": [
+            29,
+            30
+          ]
+        }
+      },
+      "2014": {
+        "cause_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "e_findg_codes": {
+          "appeared": [
+            "A"
+          ],
+          "disappeared": []
+        },
+        "element_codes": {
+          "appeared": [
+            211,
+            221
+          ],
+          "disappeared": [
+            165,
+            212
+          ]
+        },
+        "nature_codes": {
+          "appeared": [
+            29
+          ],
+          "disappeared": [
+            302,
+            303
+          ]
+        }
+      },
+      "2015": {
+        "cause_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "e_findg_codes": {
+          "appeared": [],
+          "disappeared": [
+            "A"
+          ]
+        },
+        "element_codes": {
+          "appeared": [
+            165
+          ],
+          "disappeared": [
+            211,
+            810
+          ]
+        },
+        "nature_codes": {
+          "appeared": [],
+          "disappeared": [
+            46
+          ]
+        }
+      },
+      "2016": {
+        "cause_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "e_findg_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "element_codes": {
+          "appeared": [],
+          "disappeared": [
+            170,
+            221
+          ]
+        },
+        "nature_codes": {
+          "appeared": [
+            46,
+            302
+          ],
+          "disappeared": [
+            77
+          ]
+        }
+      },
+      "2017": {
+        "cause_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "e_findg_codes": {
+          "appeared": [],
+          "disappeared": []
+        },
+        "element_codes": {
+          "appeared": [
+            166,
+            170,
+            211,
+            225,
+            810
+          ],
+          "disappeared": []
+        },
+        "nature_codes": {
+          "appeared": [
+            30,
+            77,
+            309
+          ],
+          "disappeared": [
+            306
+          ]
+        }
+      },
       "2018": {
         "cause_codes": {
           "appeared": [],
@@ -242,7 +387,7 @@
       "criterion_note": "Code conventions use exact equality of observed active-case inventories to FY2024; threshold basis uses the first year whose official threshold is verifiable from a local techdoc.",
       "elements": 2024,
       "nature_codes": 2024,
-      "threshold_basis": 2020
+      "threshold_basis": 2012
     },
     "fy2024_minor_revisions_evidence": {
       "interpretation_limit": "Observed appearances/disappearances can reflect sampling as well as codebook revisions; they are not alone proof of a definition change.",
@@ -314,29 +459,55 @@
     }
   },
   "panel_recommendation": {
-    "element_targeted_outcomes": {
+    "status": "evidence_and_recommendation_not_a_design_decision",
+    "strict_class_outcomes": {
       "bounds_and_special_handling": [
-        "Acquire FY2017-FY2020 codebooks before moving the start earlier.",
-        "Validate 2023-to-2024 code meanings, not only numeric presence.",
+        "Observed numeric-code presence does not prove unchanged semantics.",
+        "The FY2024 techdoc reports minor AGENCY code revisions.",
+        "The broad class is not historically stable and is not recommended as the primary class outcome.",
         "FY2021 is pandemic-partial even if a targeted coding bridge is built."
       ],
-      "earliest_defensible_start_year": 2024,
-      "evidence": "The FY2024 techdoc explicitly reports minor AGENCY, ELEMENT, and NATURE revisions, and the observed inventories change at that boundary. Earlier techdocs are unavailable before FY2021, so semantic equivalence cannot be established for FY2017-FY2020."
+      "earliest_inventory_supported_start_year": 2012,
+      "evidence": "All nine AGENCY slots and the FY2024 strict cause codes {17, 19, 20} are present in every year from FY2012 through FY2024.",
+      "recommendation": "Use strict-class and total-rate outcomes for FY2012-FY2024 RI/KY event-study sensitivity panels, while bounding interpretation by the named coding and pandemic inconsistencies.",
+      "target_events": {
+        "Kentucky": "2016-02-29 go-live",
+        "Rhode Island": "2016-09 go-live"
+      }
     },
-    "status": "evidence_and_recommendation_not_a_design_decision",
     "total_rate_fixed_real_threshold": {
       "bounds_and_special_handling": [
-        "FY2017-FY2019 official nominal thresholds remain NEEDS_ACQUISITION.",
+        "FY2018-FY2019 official nominal thresholds remain NEEDS_ACQUISITION.",
         "FY2020 is a combined two-period pandemic file.",
         "FY2021 is pandemic-partial and requires sensitivity treatment."
       ],
-      "earliest_defensible_start_year": 2017,
-      "evidence": "CASE, HWGT, RAWBEN, AMTERR, and STATUS plus all nine cause and finding slots are present from FY2017, so a researcher-chosen fixed real AMTERR threshold does not depend on unavailable official historical tolerances."
+      "earliest_defensible_start_year": 2012,
+      "evidence": "CASE, HWGT, RAWBEN, AMTERR, and STATUS plus all nine cause and finding slots are present from FY2012, so a researcher-chosen fixed real AMTERR threshold does not depend on unavailable official historical tolerances."
     }
   },
   "provenance": {
     "determinism": "sorted keys, stable ordering, no timestamps or absolute paths",
     "generator": "analysis/build_coding_consistency.py",
+    "historical_acquisition_hash_registry": {
+      "entries": {
+        "FY2012_Tech_Doc.pdf": "fe7b1fe544705f3ac98a056097b4035b065af6d041b3c996ca3bfb2ce194e71a",
+        "FY2013_Tech_Doc.pdf": "e2496ceea2c7da4b301b6f7cff9ed157ab3ed9964d8a7d05e17d8c7459ea1aaa",
+        "FY2014_Tech_Doc.pdf": "f2c2215592a0a261a6ab7a2bbbd10a711c7551275eeda6f4e54f8903c4f14769",
+        "FY2015_Tech_Doc.pdf": "4614a883d89094b3008c222565435196e7565e4feb426698d158b533f8a63165",
+        "FY2016_Tech_Doc.pdf": "07f613c8f47f0e8001a4770c809379a9205745e23158e3ac6686cadd4d010bf4",
+        "FY2017_Tech_Doc.pdf": "6161973f387f41893d6f4e1652e05553770c6909dad5176f2d27ccfdf0934de9",
+        "FY2018_Tech_Doc.pdf": "a27a7fb6b9583684946ec9be45a620d35b5d4b630da72c1ca484567c2548414e",
+        "FY2019_Tech_Doc.pdf": "0c8bd65b1a2caa92e12384dc7bdd9ec894359cf20b4182dd92b6c2ff9eda6f48",
+        "qcfy2012_sas9.zip": "9a20a2f16f2c051220093439f85e12685d574ad4628c9e0a66eebe2871708cfd",
+        "qcfy2013_sas9.zip": "4493ea8f0eaf1b1e156c8e935059669fcee1776d6ebddb822c38d8f2a276a692",
+        "qcfy2014_csv.zip": "4c1d9f8c0e340e7e1d1297e49a1d1bd8203740a9b58be0923851a32296517062",
+        "qcfy2015_csv.zip": "53db298e707ed1c0739b1a1339aa175933dee24dd348443294d44654ec640558",
+        "qcfy2016_csv.zip": "83e7cb63a370d1a7af2499adc5e6c67fb72a5ae3d075266c78b69aa012d928d6",
+        "qcfy2017_csv.zip": "a956ad10a41ebada4ccd321a493560f06145f7accdff217c8c9aacdf43bc0a79"
+      },
+      "path": "~/.cache/axiom-oracles/snap-qc/historical/SHA256SUMS.txt",
+      "sha256": "815d5ed796a206a242d649f3f598f3af6d413c25d980f23f31d209b4748f1559"
+    },
     "reference_artifact_sha256": "c5b16617b982ce6e00f70142652cd2bcc9fc145a33ad7fce341de84b8eff61bb"
   },
   "reference_conventions": {
@@ -399,9 +570,1753 @@
       20
     ]
   },
-  "schema": "snap-qc-coding-consistency-v1",
+  "schema": "snap-qc-coding-consistency-v2",
+  "schema_version": 2,
   "scope_note": "Inventory/accounting only; no causal claims.",
+  "source_cross_checks": {
+    "fy2017_csv_vs_sav": {
+      "canonical_source_note": "The existing SAV remains canonical to preserve the FY2017 audit block; the independently acquired CSV is reported as a cross-check.",
+      "cause_slot_inventories": {
+        "agency": {
+          "csv_observed_codes": [
+            1,
+            2,
+            3,
+            4,
+            7,
+            8,
+            10,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            99
+          ],
+          "exact_match": true,
+          "sav_observed_codes": [
+            1,
+            2,
+            3,
+            4,
+            7,
+            8,
+            10,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            99
+          ]
+        },
+        "e_findg": {
+          "csv_observed_codes": [
+            2,
+            3,
+            4
+          ],
+          "exact_match": true,
+          "sav_observed_codes": [
+            2,
+            3,
+            4
+          ]
+        },
+        "element": {
+          "csv_observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            166,
+            170,
+            211,
+            225,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            810,
+            820
+          ],
+          "exact_match": true,
+          "sav_observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            166,
+            170,
+            211,
+            225,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            810,
+            820
+          ]
+        },
+        "nature": {
+          "csv_observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            29,
+            30,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            302,
+            305,
+            309
+          ],
+          "exact_match": true,
+          "sav_observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            29,
+            30,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            302,
+            305,
+            309
+          ]
+        }
+      },
+      "csv_source": {
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2017_csv/qc_pub_fy2017.csv",
+        "rows": 45530,
+        "sha256": "5be37ac8b68dec729bbbf53533e9c41628c2f9504eb297af53cefe8276fc9fce"
+      },
+      "reconciles": true,
+      "row_count_difference_csv_minus_sav": 0,
+      "sav_source": {
+        "path": "~/.cache/axiom-oracles/snap_qc_repo/qc_data/qc_pub_fy2017.sav",
+        "rows": 45530,
+        "sha256": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9"
+      }
+    }
+  },
   "years": {
+    "2012": {
+      "cause_slots": {
+        "all_nine_present": true,
+        "broad_computing_apparatus": {
+          "active_case_share_any": 0.043348669734,
+          "active_cases_any": 2167,
+          "codes": [
+            10,
+            17,
+            19,
+            20,
+            21,
+            22
+          ],
+          "deviation_dollar_share_any": 0.156781146383,
+          "present": true
+        },
+        "codes_absent_from_fy2024_map": [],
+        "columns": [
+          "AGENCY1",
+          "AGENCY2",
+          "AGENCY3",
+          "AGENCY4",
+          "AGENCY5",
+          "AGENCY6",
+          "AGENCY7",
+          "AGENCY8",
+          "AGENCY9"
+        ],
+        "observed_codes": [
+          1,
+          2,
+          3,
+          4,
+          7,
+          8,
+          10,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          99
+        ],
+        "strict_computing_apparatus": {
+          "active_case_share_any": 0.014022804561,
+          "active_cases_any": 701,
+          "codes": [
+            17,
+            19,
+            20
+          ],
+          "deviation_dollar_share_any": 0.027112982346,
+          "present": true
+        }
+      },
+      "findings": {
+        "e_findg": {
+          "all_nine_present": true,
+          "columns": [
+            "E_FINDG1",
+            "E_FINDG2",
+            "E_FINDG3",
+            "E_FINDG4",
+            "E_FINDG5",
+            "E_FINDG6",
+            "E_FINDG7",
+            "E_FINDG8",
+            "E_FINDG9"
+          ],
+          "observed_codes": [
+            2,
+            3,
+            4
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [],
+            "exact_match": true
+          }
+        },
+        "element": {
+          "all_nine_present": true,
+          "columns": [
+            "ELEMENT1",
+            "ELEMENT2",
+            "ELEMENT3",
+            "ELEMENT4",
+            "ELEMENT5",
+            "ELEMENT6",
+            "ELEMENT7",
+            "ELEMENT8",
+            "ELEMENT9"
+          ],
+          "observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            166,
+            170,
+            211,
+            212,
+            221,
+            222,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            810,
+            820
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [
+              166,
+              222
+            ],
+            "appeared_by_fy2024": [
+              362,
+              540,
+              542
+            ],
+            "exact_match": false
+          }
+        },
+        "nature": {
+          "all_nine_present": true,
+          "columns": [
+            "NATURE1",
+            "NATURE2",
+            "NATURE3",
+            "NATURE4",
+            "NATURE5",
+            "NATURE6",
+            "NATURE7",
+            "NATURE8",
+            "NATURE9"
+          ],
+          "observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            15,
+            16,
+            29,
+            30,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            305,
+            306
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              14,
+              28,
+              33,
+              56,
+              57,
+              58,
+              312,
+              314
+            ],
+            "exact_match": false
+          }
+        }
+      },
+      "fiscal_year": 2012,
+      "row_universe": {
+        "active_case_count": 49990,
+        "active_case_definition": "CASE == 1",
+        "case_distribution": {
+          "1": 49990,
+          "2": 9,
+          "3": 28
+        },
+        "fields": {
+          "AMTERR": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "CASE": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "HWGT": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "RAWBEN": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "STATUS": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          }
+        },
+        "total_rows": 50027
+      },
+      "source": {
+        "bytes": 65028096,
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2012_sas9/qc_pub_fy2012.sas7bdat",
+        "sha256": "90968f8f612507a88e1a4e7767f6bc55dba0cb7cffb61766b3de1827c81eb4c0"
+      },
+      "threshold": {
+        "citation": "FY2012_Tech_Doc.pdf p. 128 ($50 tolerance threshold)",
+        "dollars": 50,
+        "status": "verified_local_techdoc"
+      },
+      "weights": {
+        "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
+        "hwgt_sum_case_months": 264506960.342829,
+        "implied_average_monthly_caseload": 22042246.695236,
+        "scale_sanity": "plausible_national_magnitude",
+        "weighted_raw_benefit_annual_flow_dollars": 72638026956.8
+      }
+    },
+    "2013": {
+      "cause_slots": {
+        "all_nine_present": true,
+        "broad_computing_apparatus": {
+          "active_case_share_any": 0.040610877986,
+          "active_cases_any": 2013,
+          "codes": [
+            10,
+            17,
+            19,
+            20,
+            21,
+            22
+          ],
+          "deviation_dollar_share_any": 0.151758683363,
+          "present": true
+        },
+        "codes_absent_from_fy2024_map": [],
+        "columns": [
+          "AGENCY1",
+          "AGENCY2",
+          "AGENCY3",
+          "AGENCY4",
+          "AGENCY5",
+          "AGENCY6",
+          "AGENCY7",
+          "AGENCY8",
+          "AGENCY9"
+        ],
+        "observed_codes": [
+          1,
+          2,
+          3,
+          4,
+          7,
+          8,
+          10,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          99
+        ],
+        "strict_computing_apparatus": {
+          "active_case_share_any": 0.012911555842,
+          "active_cases_any": 640,
+          "codes": [
+            17,
+            19,
+            20
+          ],
+          "deviation_dollar_share_any": 0.029998616299,
+          "present": true
+        }
+      },
+      "findings": {
+        "e_findg": {
+          "all_nine_present": true,
+          "columns": [
+            "E_FINDG1",
+            "E_FINDG2",
+            "E_FINDG3",
+            "E_FINDG4",
+            "E_FINDG5",
+            "E_FINDG6",
+            "E_FINDG7",
+            "E_FINDG8",
+            "E_FINDG9"
+          ],
+          "observed_codes": [
+            2,
+            3,
+            4
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [],
+            "exact_match": true
+          }
+        },
+        "element": {
+          "all_nine_present": true,
+          "columns": [
+            "ELEMENT1",
+            "ELEMENT2",
+            "ELEMENT3",
+            "ELEMENT4",
+            "ELEMENT5",
+            "ELEMENT6",
+            "ELEMENT7",
+            "ELEMENT8",
+            "ELEMENT9"
+          ],
+          "observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            170,
+            212,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            810,
+            820
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              211,
+              221,
+              362,
+              540,
+              542
+            ],
+            "exact_match": false
+          }
+        },
+        "nature": {
+          "all_nine_present": true,
+          "columns": [
+            "NATURE1",
+            "NATURE2",
+            "NATURE3",
+            "NATURE4",
+            "NATURE5",
+            "NATURE6",
+            "NATURE7",
+            "NATURE8",
+            "NATURE9"
+          ],
+          "observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            302,
+            303,
+            305,
+            306
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [
+              302,
+              303
+            ],
+            "appeared_by_fy2024": [
+              29,
+              30,
+              33,
+              56,
+              57,
+              58,
+              312,
+              314
+            ],
+            "exact_match": false
+          }
+        }
+      },
+      "fiscal_year": 2013,
+      "row_universe": {
+        "active_case_count": 49568,
+        "active_case_definition": "CASE == 1",
+        "case_distribution": {
+          "1": 49568,
+          "3": 1
+        },
+        "fields": {
+          "AMTERR": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "CASE": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "HWGT": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "RAWBEN": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "STATUS": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          }
+        },
+        "total_rows": 49569
+      },
+      "source": {
+        "bytes": 67781632,
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2013_sas9/qc_pub_fy2013.sas7bdat",
+        "sha256": "a2341cb547aed989ca64deb18f79095c0001266c61310f6aded1f0d45cbb4e22"
+      },
+      "threshold": {
+        "citation": "FY2013_Tech_Doc.pdf p. 126 ($50 in FY2012 and FY2013)",
+        "dollars": 50,
+        "status": "verified_local_techdoc"
+      },
+      "weights": {
+        "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
+        "hwgt_sum_case_months": 273621813.343353,
+        "implied_average_monthly_caseload": 22801817.778613,
+        "scale_sanity": "plausible_national_magnitude",
+        "weighted_raw_benefit_annual_flow_dollars": 74312529479.11
+      }
+    },
+    "2014": {
+      "cause_slots": {
+        "all_nine_present": true,
+        "broad_computing_apparatus": {
+          "active_case_share_any": 0.044062176166,
+          "active_cases_any": 2126,
+          "codes": [
+            10,
+            17,
+            19,
+            20,
+            21,
+            22
+          ],
+          "deviation_dollar_share_any": 0.178060461842,
+          "present": true
+        },
+        "codes_absent_from_fy2024_map": [],
+        "columns": [
+          "AGENCY1",
+          "AGENCY2",
+          "AGENCY3",
+          "AGENCY4",
+          "AGENCY5",
+          "AGENCY6",
+          "AGENCY7",
+          "AGENCY8",
+          "AGENCY9"
+        ],
+        "observed_codes": [
+          1,
+          2,
+          3,
+          4,
+          7,
+          8,
+          10,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          99
+        ],
+        "strict_computing_apparatus": {
+          "active_case_share_any": 0.017409326425,
+          "active_cases_any": 840,
+          "codes": [
+            17,
+            19,
+            20
+          ],
+          "deviation_dollar_share_any": 0.031256678229,
+          "present": true
+        }
+      },
+      "findings": {
+        "e_findg": {
+          "all_nine_present": true,
+          "columns": [
+            "E_FINDG1",
+            "E_FINDG2",
+            "E_FINDG3",
+            "E_FINDG4",
+            "E_FINDG5",
+            "E_FINDG6",
+            "E_FINDG7",
+            "E_FINDG8",
+            "E_FINDG9"
+          ],
+          "observed_codes": [
+            2,
+            3,
+            4,
+            "A"
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [
+              "A"
+            ],
+            "appeared_by_fy2024": [],
+            "exact_match": false
+          }
+        },
+        "element": {
+          "all_nine_present": true,
+          "columns": [
+            "ELEMENT1",
+            "ELEMENT2",
+            "ELEMENT3",
+            "ELEMENT4",
+            "ELEMENT5",
+            "ELEMENT6",
+            "ELEMENT7",
+            "ELEMENT8",
+            "ELEMENT9"
+          ],
+          "observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            170,
+            211,
+            221,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            810,
+            820
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              165,
+              212,
+              362,
+              540,
+              542
+            ],
+            "exact_match": false
+          }
+        },
+        "nature": {
+          "all_nine_present": true,
+          "columns": [
+            "NATURE1",
+            "NATURE2",
+            "NATURE3",
+            "NATURE4",
+            "NATURE5",
+            "NATURE6",
+            "NATURE7",
+            "NATURE8",
+            "NATURE9"
+          ],
+          "observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            29,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            305,
+            306
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              30,
+              33,
+              56,
+              57,
+              58,
+              312,
+              314
+            ],
+            "exact_match": false
+          }
+        }
+      },
+      "fiscal_year": 2014,
+      "row_universe": {
+        "active_case_count": 48250,
+        "active_case_definition": "CASE == 1",
+        "case_distribution": {
+          "1": 48250
+        },
+        "fields": {
+          "AMTERR": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "CASE": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "HWGT": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "RAWBEN": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "STATUS": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          }
+        },
+        "total_rows": 48250
+      },
+      "source": {
+        "bytes": 67987391,
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2014_csv/qc_pub_fy2014.csv",
+        "sha256": "947f290d05c4d949d92f885f43d0fc7c508f288f4ec62737819a47fffc51e9b8"
+      },
+      "threshold": {
+        "citation": "FY2014_Tech_Doc.pdf p. 10, footnote 5 ($37)",
+        "dollars": 37,
+        "status": "verified_local_techdoc"
+      },
+      "weights": {
+        "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
+        "hwgt_sum_case_months": 269339751.904549,
+        "implied_average_monthly_caseload": 22444979.325379,
+        "scale_sanity": "plausible_national_magnitude",
+        "weighted_raw_benefit_annual_flow_dollars": 68435484768.7
+      }
+    },
+    "2015": {
+      "cause_slots": {
+        "all_nine_present": true,
+        "broad_computing_apparatus": {
+          "active_case_share_any": 0.04558612216,
+          "active_cases_any": 2189,
+          "codes": [
+            10,
+            17,
+            19,
+            20,
+            21,
+            22
+          ],
+          "deviation_dollar_share_any": 0.18965254505,
+          "present": true
+        },
+        "codes_absent_from_fy2024_map": [],
+        "columns": [
+          "AGENCY1",
+          "AGENCY2",
+          "AGENCY3",
+          "AGENCY4",
+          "AGENCY5",
+          "AGENCY6",
+          "AGENCY7",
+          "AGENCY8",
+          "AGENCY9"
+        ],
+        "observed_codes": [
+          1,
+          2,
+          3,
+          4,
+          7,
+          8,
+          10,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          99
+        ],
+        "strict_computing_apparatus": {
+          "active_case_share_any": 0.017638851288,
+          "active_cases_any": 847,
+          "codes": [
+            17,
+            19,
+            20
+          ],
+          "deviation_dollar_share_any": 0.040594094642,
+          "present": true
+        }
+      },
+      "findings": {
+        "e_findg": {
+          "all_nine_present": true,
+          "columns": [
+            "E_FINDG1",
+            "E_FINDG2",
+            "E_FINDG3",
+            "E_FINDG4",
+            "E_FINDG5",
+            "E_FINDG6",
+            "E_FINDG7",
+            "E_FINDG8",
+            "E_FINDG9"
+          ],
+          "observed_codes": [
+            2,
+            3,
+            4
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [],
+            "exact_match": true
+          }
+        },
+        "element": {
+          "all_nine_present": true,
+          "columns": [
+            "ELEMENT1",
+            "ELEMENT2",
+            "ELEMENT3",
+            "ELEMENT4",
+            "ELEMENT5",
+            "ELEMENT6",
+            "ELEMENT7",
+            "ELEMENT8",
+            "ELEMENT9"
+          ],
+          "observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            170,
+            221,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            820
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              211,
+              212,
+              362,
+              540,
+              542,
+              810
+            ],
+            "exact_match": false
+          }
+        },
+        "nature": {
+          "all_nine_present": true,
+          "columns": [
+            "NATURE1",
+            "NATURE2",
+            "NATURE3",
+            "NATURE4",
+            "NATURE5",
+            "NATURE6",
+            "NATURE7",
+            "NATURE8",
+            "NATURE9"
+          ],
+          "observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            29,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            77,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            305,
+            306
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              30,
+              33,
+              46,
+              56,
+              57,
+              58,
+              312,
+              314
+            ],
+            "exact_match": false
+          }
+        }
+      },
+      "fiscal_year": 2015,
+      "row_universe": {
+        "active_case_count": 48019,
+        "active_case_definition": "CASE == 1",
+        "case_distribution": {
+          "1": 48019,
+          "2": 2,
+          "3": 1
+        },
+        "fields": {
+          "AMTERR": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "CASE": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "HWGT": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "RAWBEN": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "STATUS": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          }
+        },
+        "total_rows": 48022
+      },
+      "source": {
+        "bytes": 92541002,
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2015_csv/qc_pub_fy2015.csv",
+        "sha256": "2b2f922eca3188810da93fbcdd0190c198e6d9ecb3efa71c219e0d6023e8a4e3"
+      },
+      "threshold": {
+        "citation": "FY2015_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+        "dollars": 38,
+        "status": "verified_local_techdoc"
+      },
+      "weights": {
+        "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
+        "hwgt_sum_case_months": 267510217.238751,
+        "implied_average_monthly_caseload": 22292518.103229,
+        "scale_sanity": "plausible_national_magnitude",
+        "weighted_raw_benefit_annual_flow_dollars": 68245506429.99
+      }
+    },
+    "2016": {
+      "cause_slots": {
+        "all_nine_present": true,
+        "broad_computing_apparatus": {
+          "active_case_share_any": 0.043901077669,
+          "active_cases_any": 2045,
+          "codes": [
+            10,
+            17,
+            19,
+            20,
+            21,
+            22
+          ],
+          "deviation_dollar_share_any": 0.189719590905,
+          "present": true
+        },
+        "codes_absent_from_fy2024_map": [],
+        "columns": [
+          "AGENCY1",
+          "AGENCY2",
+          "AGENCY3",
+          "AGENCY4",
+          "AGENCY5",
+          "AGENCY6",
+          "AGENCY7",
+          "AGENCY8",
+          "AGENCY9"
+        ],
+        "observed_codes": [
+          1,
+          2,
+          3,
+          4,
+          7,
+          8,
+          10,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          99
+        ],
+        "strict_computing_apparatus": {
+          "active_case_share_any": 0.014662315916,
+          "active_cases_any": 683,
+          "codes": [
+            17,
+            19,
+            20
+          ],
+          "deviation_dollar_share_any": 0.03449621975,
+          "present": true
+        }
+      },
+      "findings": {
+        "e_findg": {
+          "all_nine_present": true,
+          "columns": [
+            "E_FINDG1",
+            "E_FINDG2",
+            "E_FINDG3",
+            "E_FINDG4",
+            "E_FINDG5",
+            "E_FINDG6",
+            "E_FINDG7",
+            "E_FINDG8",
+            "E_FINDG9"
+          ],
+          "observed_codes": [
+            2,
+            3,
+            4
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [],
+            "exact_match": true
+          }
+        },
+        "element": {
+          "all_nine_present": true,
+          "columns": [
+            "ELEMENT1",
+            "ELEMENT2",
+            "ELEMENT3",
+            "ELEMENT4",
+            "ELEMENT5",
+            "ELEMENT6",
+            "ELEMENT7",
+            "ELEMENT8",
+            "ELEMENT9"
+          ],
+          "observed_codes": [
+            111,
+            130,
+            140,
+            150,
+            151,
+            160,
+            161,
+            162,
+            163,
+            165,
+            311,
+            312,
+            314,
+            321,
+            323,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            342,
+            343,
+            344,
+            345,
+            346,
+            350,
+            361,
+            363,
+            364,
+            365,
+            366,
+            371,
+            372,
+            520,
+            530,
+            560,
+            820
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [],
+            "appeared_by_fy2024": [
+              170,
+              211,
+              212,
+              221,
+              362,
+              540,
+              542,
+              810
+            ],
+            "exact_match": false
+          }
+        },
+        "nature": {
+          "all_nine_present": true,
+          "columns": [
+            "NATURE1",
+            "NATURE2",
+            "NATURE3",
+            "NATURE4",
+            "NATURE5",
+            "NATURE6",
+            "NATURE7",
+            "NATURE8",
+            "NATURE9"
+          ],
+          "observed_codes": [
+            6,
+            7,
+            12,
+            13,
+            14,
+            15,
+            16,
+            28,
+            29,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            52,
+            53,
+            54,
+            64,
+            65,
+            75,
+            79,
+            80,
+            97,
+            98,
+            99,
+            111,
+            112,
+            120,
+            123,
+            124,
+            127,
+            200,
+            201,
+            302,
+            305,
+            306
+          ],
+          "vs_fy2024_observed": {
+            "absent_by_fy2024": [
+              302
+            ],
+            "appeared_by_fy2024": [
+              30,
+              33,
+              56,
+              57,
+              58,
+              77,
+              312,
+              314
+            ],
+            "exact_match": false
+          }
+        }
+      },
+      "fiscal_year": 2016,
+      "row_universe": {
+        "active_case_count": 46582,
+        "active_case_definition": "CASE == 1",
+        "case_distribution": {
+          "1": 46582,
+          "2": 5,
+          "3": 8
+        },
+        "fields": {
+          "AMTERR": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "CASE": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "HWGT": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "RAWBEN": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          },
+          "STATUS": {
+            "active_missing_rows": 0,
+            "active_missing_share": 0.0,
+            "missing_rows": 0,
+            "missing_share": 0.0,
+            "present": true
+          }
+        },
+        "total_rows": 46595
+      },
+      "source": {
+        "bytes": 67953112,
+        "path": "~/.cache/axiom-oracles/snap-qc/historical/qcfy2016_csv/qc_pub_fy2016.csv",
+        "sha256": "d5e91c7510456a4e9e14861a7579d80aff6c10687d45095179c87d94c5bcdf00"
+      },
+      "threshold": {
+        "citation": "FY2016_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+        "dollars": 38,
+        "status": "verified_local_techdoc"
+      },
+      "weights": {
+        "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
+        "hwgt_sum_case_months": 258104015.863076,
+        "implied_average_monthly_caseload": 21508667.98859,
+        "scale_sanity": "plausible_national_magnitude",
+        "weighted_raw_benefit_annual_flow_dollars": 64960054719.93
+      }
+    },
     "2017": {
       "cause_slots": {
         "all_nine_present": true,
@@ -693,9 +2608,9 @@
         "sha256": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9"
       },
       "threshold": {
-        "citation": null,
-        "dollars": null,
-        "status": "NEEDS_ACQUISITION"
+        "citation": "FY2017_Tech_Doc.pdf p. 10, footnote 5 ($38)",
+        "dollars": 38,
+        "status": "verified_local_techdoc"
       },
       "weights": {
         "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
@@ -995,9 +2910,9 @@
         "sha256": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82"
       },
       "threshold": {
-        "citation": null,
-        "dollars": null,
-        "status": "NEEDS_ACQUISITION"
+        "citation": "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)",
+        "dollars": 37,
+        "status": "verified_local_techdoc"
       },
       "weights": {
         "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
@@ -1296,9 +3211,9 @@
         "sha256": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846"
       },
       "threshold": {
-        "citation": null,
-        "dollars": null,
-        "status": "NEEDS_ACQUISITION"
+        "citation": "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)",
+        "dollars": 37,
+        "status": "verified_local_techdoc"
       },
       "weights": {
         "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
