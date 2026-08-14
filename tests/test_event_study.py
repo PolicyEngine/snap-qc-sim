@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 
 import pandas as pd
 import pytest
@@ -69,9 +70,12 @@ def test_fixture_is_deterministic_and_recovers_the_planted_effect() -> None:
     No cross-platform byte hash here: the synthetic-control weights come
     from an optimizer whose last-bit floats differ between macOS
     Accelerate and Linux OpenBLAS, so a fixture hash pins the platform,
-    not the science. The committed-artifact test below still pins exact
-    bytes; the raw-SAV regeneration test reproduces them on the machine
-    that built them.
+    not the science. The same class bites within one machine: a
+    2026-08-14 rerun of the raw regeneration moved last-ulp float bytes
+    while a value-level walk found zero differences at rel=1e-9. The
+    committed-artifact test below therefore pins exact bytes, while raw
+    regeneration is value-locked, not byte-locked: identical structure,
+    key order, and non-float values, floats at rel=1e-9.
     """
     first = event_study.serialize_results(event_study.build_results(_fixture_panel()))
     second = event_study.serialize_results(event_study.build_results(_fixture_panel()))
@@ -99,11 +103,56 @@ def test_committed_result_schema_and_sha() -> None:
     )
 
 
+def test_value_lock_detects_planted_drift(assert_artifact_values_match) -> None:
+    """The value lock fails on planted drift and tolerates last-ulp noise.
+
+    Adversarial guard on the comparator itself: a relative 1e-6 float
+    mutation, a non-float change, and a dropped key must each fail,
+    while a one-ulp float nudge (the byte-flake class the lock exists
+    to absorb) must pass.
+    """
+    committed = json.loads(event_study.OUT.read_bytes())
+
+    drifted = json.loads(event_study.OUT.read_bytes())
+    drifted["decision"]["strict_p_value"] *= 1 + 1e-6
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(drifted, committed)
+
+    relabeled = json.loads(event_study.OUT.read_bytes())
+    relabeled["decision"]["verdict"] = "signal"
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(relabeled, committed)
+
+    thinned = json.loads(event_study.OUT.read_bytes())
+    del thinned["decision"]["strict_p_value"]
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(thinned, committed)
+
+    nudged = json.loads(event_study.OUT.read_bytes())
+    nudged["decision"]["strict_p_value"] = math.nextafter(
+        nudged["decision"]["strict_p_value"], math.inf
+    )
+    assert_artifact_values_match(nudged, committed)
+
+
 @pytest.mark.skipif(
     not event_study.raw_inputs_available(), reason="audited raw SAV cache unavailable"
 )
-def test_raw_sav_regeneration_matches_committed_artifact() -> None:
+def test_raw_sav_regeneration_matches_committed_artifact(
+    assert_artifact_values_match,
+) -> None:
+    """Regeneration reproduces the committed artifact value-for-value.
+
+    Value-locked, not byte-locked: optimizer floats are not bit-stable
+    across reruns even on one machine (2026-08-14: byte flake, zero
+    value-level differences at rel=1e-9), so byte equality here pins
+    noise, not science. Structure, key order, and non-float values must
+    match exactly; floats at rel=1e-9. The committed bytes themselves
+    stay pinned by the SHA-256 test above.
+    """
     regenerated = event_study.serialize_results(
         event_study.build_results(event_study.build_panel())
     )
-    assert regenerated == event_study.OUT.read_bytes()
+    assert_artifact_values_match(
+        json.loads(regenerated), json.loads(event_study.OUT.read_bytes())
+    )
