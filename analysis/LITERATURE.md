@@ -41,17 +41,21 @@ treatment forces:
 | Abadie, "Using Synthetic Controls: Feasibility, Data Requirements, and Methodological Aspects", *Journal of Economic Literature* 59(2): 391–425 (2021) | The methodological survey: where synthetic controls are reliable and where they fail | The formal citation behind the event-study machinery; its reliability conditions are the checklist our Oregon run and the coming RI/KY runs must be argued against. https://www.aeaweb.org/articles?id=10.1257%2Fjel.20191450 |
 | Abadie, Diamond & Hainmueller, "Synthetic Control Methods for Comparative Case Studies: Estimating the Effect of California's Tobacco Control Program", *JASA* 105(490): 493–505 (2010) | The canonical single-treated-unit method with placebo-in-space permutation inference | The direct methodological ancestor of the design-1 estimator; permutation inference as implemented is theirs. |
 
+| GAO, *Federal and State Liability for Inaccurate Payments of Food Stamp, AFDC, and SSI Program Benefits* (RCED-84-155, 1984) | Documents the first sanction regime: food stamp error-rate thresholds of 9% (FY1983), 7% (FY1984), 5% (FY1985); state liability tied to federally reimbursed administrative costs; waiver and reinvestment machinery | The direct precedent for cost sharing keyed to noisy error rates — thresholds stepping down while measurement noise stayed put; the NRC 1987 panel is its institutional response, and the paper's OBBBA analysis inherits this lineage. https://gao.justia.com/social-security-administration/1984/4/federal-and-state-liability-for-inaccurate-payments-of-food-stamp-afdc-and-ssi-program-benefits-rced-84-155 |
+| DOJ False Claims Act settlements over SNAP QC manipulation (2016–2021): Virginia, Wisconsin, Alaska, Texas ($15M+), Mississippi, Louisiana, Florida ($17.5M), Tennessee ($6.85M); Osnes Consulting ($751,571); $67M+ recovered | A USDA-OIG nationwide audit found third-party consultants advised states to diminish identified QC errors (2008–2013); states and the consultant settled FCA liability | The paper's "documented manipulation history" now cites named federal records rather than a gloss; the bunching design (design 4) has its motivating episode — discretion demonstrably responded to the measurement system. https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims · https://justice.gov/opa/pr/florida-department-children-and-families-agrees-pay-175-million-resolve-false-claims-act · https://www.justice.gov/usao-edwa/pr/consultant-agrees-pay-751571-settle-false-claims-act-liability-alleged-falsification |
+| CRS, *Errors and Fraud in the Supplemental Nutrition Assistance Program* (R45147) | The Congressional Research Service synthesis of the error-measurement and manipulation episode | The neutral secondary source tying the QC system, the OIG audit, and the sanction history together for a policy audience. https://www.everycrsreport.com/reports/R45147.html |
+
 ## Field map and TO-VERIFY queues
 
 Nothing below may be cited until verified and promoted to the table.
 
-1. **SNAP QC measurement and its history.** Queue: the CNSTAT panel's
+1. **SNAP QC measurement and its history.** Verified: GAO RCED-84-155
+   (the first sanction regime), the DOJ FCA settlement cluster and
+   Osnes consultant settlement (the manipulation episode's primary
+   sources), CRS R45147 (synthesis). Queue: the CNSTAT panel's
    companion volumes; the 2002 Farm Bill sanction redesign's
-   legislative analyses; state-vs-USDA QC litigation of the 1980s-90s;
-   ERS/FNS-commissioned error-rate studies; the 2010s payment-accuracy
-   controversy (states' QC vendor practices and the resulting OIG
-   work — likely the paper's "documented manipulation history" has
-   OIG/DOJ primary sources worth citing directly).
+   legislative analyses; the underlying USDA-OIG audit reports
+   themselves; ERS/FNS-commissioned error-rate studies.
 2. **Accountability measurement under noise.** Verified adjacent:
    Kane–Staiger (already cited in the paper). Queue: hospital
    report-card and school value-added ranking-stability literature;
