@@ -16,12 +16,14 @@ def _fixture_panel() -> pd.DataFrame:
     """Return a fixture suitable for tolerance, not platform hash, assertions.
 
     The optimizer can differ in last-bit floats across BLAS implementations,
-    and reruns on one machine have moved last-ulp float bytes (2026-08-14).
-    Tests therefore require same-process byte determinism and recover planted
+    and the Oregon study's raw regeneration byte-flaked on one machine on
+    2026-08-14 (both studies share the fit_weights optimizer). Tests
+    therefore require same-process byte determinism and recover planted
     effects within tolerance; they never hash optimizer output across runs.
     Raw regeneration is value-locked (structure, key order, and non-float
-    values exact; floats at rel=1e-9), not byte-locked; only the committed
-    artifact itself gets an exact-byte pin.
+    values exact; floats at rel=1e-9 with a 1e-12 absolute floor — see
+    conftest), not byte-locked; only the committed artifact itself gets an
+    exact-byte pin.
     """
     rows = []
     states = ["AL", "CA", "FL", "GA", "KY", "NM", "OR", "RI", "TX"]
@@ -158,13 +160,24 @@ def test_committed_riky_artifact_locks_paper_quoted_numbers() -> None:
     assert profile["changes_verdict"] is False
 
 
+def test_riky_serializer_reproduces_committed_bytes() -> None:
+    """serialize_results must rebuild the committed bytes from parsed values.
+
+    The raw regeneration test is value-locked, so it can no longer catch
+    a serializer formatting change (indent, trailing newline, escaping);
+    this round-trip does, cache-free, in CI.
+    """
+    raw = event_study.RIKY_OUT.read_bytes()
+    assert event_study.serialize_results(json.loads(raw)) == raw
+
+
 def test_riky_value_lock_detects_planted_drift(assert_artifact_values_match) -> None:
     """The value lock fails on planted drift and tolerates last-ulp noise.
 
     Adversarial guard on the comparator itself: a relative 1e-6 float
     mutation, an int retyped to float, and a key reorder must each
-    fail, while a one-ulp float nudge (the byte-flake class the lock
-    exists to absorb) must pass.
+    fail, while a one-ulp nudge of a nonzero leaf (the byte-flake class
+    the lock exists to absorb) must pass.
     """
     committed = json.loads(event_study.RIKY_OUT.read_bytes())
 
@@ -203,12 +216,15 @@ def test_raw_riky_regeneration_matches_committed_artifact(
 ) -> None:
     """Regeneration reproduces the committed artifact value-for-value.
 
-    Value-locked, not byte-locked: optimizer floats are not bit-stable
-    across reruns even on one machine (2026-08-14: byte flake, zero
-    value-level differences at rel=1e-9), so byte equality here pins
-    noise, not science. Structure, key order, and non-float values must
-    match exactly; floats at rel=1e-9. The committed bytes themselves
-    stay pinned by the SHA-256 assertion in the contract test above.
+    Value-locked, not byte-locked: the Oregon study's regeneration
+    byte-flaked on one machine on 2026-08-14 — last-ulp floats, zero
+    value-level differences at rel=1e-9 — and both studies share the
+    fit_weights optimizer, so byte equality here pins noise, not
+    science. Structure, key order, and non-float values must match
+    exactly; floats at rel=1e-9 with a 1e-12 absolute floor (see
+    conftest). The committed bytes themselves stay pinned by the
+    SHA-256 assertion in the contract test above, and the serializer by
+    its round-trip test.
     """
     regenerated = event_study.serialize_results(
         event_study.build_riky_results(event_study.build_riky_panel())

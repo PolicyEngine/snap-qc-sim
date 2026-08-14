@@ -75,7 +75,8 @@ def test_fixture_is_deterministic_and_recovers_the_planted_effect() -> None:
     while a value-level walk found zero differences at rel=1e-9. The
     committed-artifact test below therefore pins exact bytes, while raw
     regeneration is value-locked, not byte-locked: identical structure,
-    key order, and non-float values, floats at rel=1e-9.
+    key order, and non-float values, floats at rel=1e-9 with a 1e-12
+    absolute floor at near-zero leaves (see conftest).
     """
     first = event_study.serialize_results(event_study.build_results(_fixture_panel()))
     second = event_study.serialize_results(event_study.build_results(_fixture_panel()))
@@ -103,13 +104,43 @@ def test_committed_result_schema_and_sha() -> None:
     )
 
 
+def test_serializer_reproduces_committed_bytes() -> None:
+    """serialize_results must rebuild the committed bytes from parsed values.
+
+    The raw regeneration test is value-locked, so it can no longer catch
+    a serializer formatting change (indent, trailing newline, escaping);
+    this round-trip does, cache-free, in CI. Optimizer nondeterminism is
+    not involved: parsed committed floats re-serialize exactly by repr
+    round-trip.
+    """
+    raw = event_study.OUT.read_bytes()
+    assert event_study.serialize_results(json.loads(raw)) == raw
+
+
+def test_value_lock_tolerance_contract(assert_artifact_values_match) -> None:
+    """Executably pin the tolerance function: max(1e-9 * |expected|, 1e-12).
+
+    The absolute floor exists for exact-zero leaves (optimizer-clipped
+    donor weights), where the relative term vanishes and regeneration
+    may emit sub-1e-12 boundary noise. It is far larger than one ulp at
+    zero, which is why the policy is pinned here rather than assumed.
+    """
+    assert_artifact_values_match(9.0e-13, 0.0)
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(2.0e-12, 0.0)
+    assert_artifact_values_match(1.0 + 5.0e-10, 1.0)
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(1.0 + 2.0e-9, 1.0)
+
+
 def test_value_lock_detects_planted_drift(assert_artifact_values_match) -> None:
     """The value lock fails on planted drift and tolerates last-ulp noise.
 
     Adversarial guard on the comparator itself: a relative 1e-6 float
-    mutation, a non-float change, and a dropped key must each fail,
-    while a one-ulp float nudge (the byte-flake class the lock exists
-    to absorb) must pass.
+    mutation, a non-float change, a dropped key, and a 2e-12 lift of an
+    exact-zero donor weight must each fail, while a one-ulp nudge of a
+    nonzero leaf (the byte-flake class the lock exists to absorb) must
+    pass.
     """
     committed = json.loads(event_study.OUT.read_bytes())
 
@@ -128,6 +159,13 @@ def test_value_lock_detects_planted_drift(assert_artifact_values_match) -> None:
     with pytest.raises(AssertionError):
         assert_artifact_values_match(thinned, committed)
 
+    lifted = json.loads(event_study.OUT.read_bytes())
+    weights = lifted["specifications"]["drop_fy2020_and_fy2021"]["donor_weights"]
+    assert weights["AL"] == 0.0, "expected an exact-zero clipped donor weight"
+    weights["AL"] = 2.0e-12
+    with pytest.raises(AssertionError):
+        assert_artifact_values_match(lifted, committed)
+
     nudged = json.loads(event_study.OUT.read_bytes())
     nudged["decision"]["strict_p_value"] = math.nextafter(
         nudged["decision"]["strict_p_value"], math.inf
@@ -143,12 +181,13 @@ def test_raw_sav_regeneration_matches_committed_artifact(
 ) -> None:
     """Regeneration reproduces the committed artifact value-for-value.
 
-    Value-locked, not byte-locked: optimizer floats are not bit-stable
-    across reruns even on one machine (2026-08-14: byte flake, zero
-    value-level differences at rel=1e-9), so byte equality here pins
-    noise, not science. Structure, key order, and non-float values must
-    match exactly; floats at rel=1e-9. The committed bytes themselves
-    stay pinned by the SHA-256 test above.
+    Value-locked, not byte-locked: this regeneration byte-flaked on one
+    machine on 2026-08-14 — last-ulp floats, zero value-level
+    differences at rel=1e-9 — so byte equality here pins noise, not
+    science. Structure, key order, and non-float values must match
+    exactly; floats at rel=1e-9 with a 1e-12 absolute floor (see
+    conftest). The committed bytes themselves stay pinned by the
+    SHA-256 test above, and the serializer by its round-trip test.
     """
     regenerated = event_study.serialize_results(
         event_study.build_results(event_study.build_panel())

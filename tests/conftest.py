@@ -12,8 +12,14 @@ def _assert_values_match(actual: Any, expected: Any, *, path: str = "$") -> None
 
     Structure is strict: dicts need identical key lists (same keys, same
     order), lists identical lengths, and every non-float leaf must match
-    exactly, type included. Floats compare at rel=1e-9 so last-ulp
-    optimizer noise passes while real drift fails.
+    exactly, type included. Floats tolerate max(1e-9 * |expected|, 1e-12):
+    rel=1e-9 absorbs last-ulp optimizer noise on nonzero leaves, and the
+    explicit 1e-12 absolute floor is load-bearing at exact-zero leaves
+    (optimizer-clipped donor weights), where the relative term vanishes
+    and regeneration may emit sub-1e-12 boundary noise. In the committed
+    artifacts every nonzero float exceeds 1e-3 in magnitude (2026-08-14
+    audit), so the relative term governs all nonzero leaves. Real drift
+    fails either way; test_value_lock_tolerance_contract pins this.
     """
     if isinstance(expected, dict):
         assert isinstance(actual, dict), f"{path}: {type(actual).__name__} is not dict"
@@ -29,7 +35,7 @@ def _assert_values_match(actual: Any, expected: Any, *, path: str = "$") -> None
         assert isinstance(actual, float), (
             f"{path}: {type(actual).__name__} is not float"
         )
-        assert actual == pytest.approx(expected, rel=1e-9), path
+        assert actual == pytest.approx(expected, rel=1e-9, abs=1e-12), path
     else:
         assert type(actual) is type(expected), (
             f"{path}: {type(actual).__name__} is not {type(expected).__name__}"
