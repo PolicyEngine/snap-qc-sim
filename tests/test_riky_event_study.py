@@ -121,6 +121,32 @@ def test_committed_riky_artifact_contract() -> None:
     )
 
 
+def test_committed_riky_artifact_locks_paper_quoted_numbers() -> None:
+    """Every number @sec-events quotes must be pinned to the committed artifact."""
+    result = json.loads(event_study.RIKY_OUT.read_bytes())
+    ri = result["units"]["RI"]["decision"]
+    ky = result["units"]["KY"]["decision"]
+    pooled = result["pooled"]["decision"]
+    assert ri["strict_p_value"] == pytest.approx(0.023255813953488372)
+    assert ri["client_placebo_p_value"] == pytest.approx(0.23255813953488372)
+    assert ky["strict_p_value"] == pytest.approx(0.3023255813953488)
+    assert ky["client_placebo_p_value"] == pytest.approx(0.11627906976744186)
+    assert pooled["strict_p_value"] == pytest.approx(0.09302325581395349)
+    assert pooled["client_placebo_p_value"] == pytest.approx(1.0)
+    pooled_stat = result["pooled"]["statistics"][
+        "strict_computing_dollars_per_case_month"
+    ]
+    assert pooled_stat["effect"] == pytest.approx(1.156230589263076)
+    assert pooled_stat["per_unit_effects"]["RI"] == pytest.approx(2.89676409242692)
+    assert pooled_stat["per_unit_effects"]["KY"] == pytest.approx(-0.5843029139007678)
+    profile = result["rhode_island_consequence_window_profile"]
+    assert profile["outcome"] == "strict_computing_dollars_per_case_month"
+    assert profile["consequence_window_mean_gap"] == pytest.approx(4.950350949271175)
+    assert profile["later_post_mean_gap"] == pytest.approx(1.4827104665997337)
+    assert profile["consequence_minus_later"] == pytest.approx(3.467640482671441)
+    assert profile["changes_verdict"] is False
+
+
 @pytest.mark.skipif(
     not event_study.riky_raw_inputs_available(),
     reason="complete hash-audited mixed-format cache unavailable",
