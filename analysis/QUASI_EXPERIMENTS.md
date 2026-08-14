@@ -143,9 +143,10 @@ evidence and a recommendation, not a design decision:
 - **Total-rate sensitivity panels can start in FY2012** under a fixed real
   AMTERR threshold. CASE, HWGT, RAWBEN, AMTERR, STATUS, and all nine cause and
   finding slots are present throughout; HWGT implies plausible national-scale
-  monthly caseloads. Local techdocs verify nominal tolerances of $50/$50/$37/
-  $38/$38/$38 for FY2012–17 and $37/$39/$48/$54/$56 for FY2020–24. FY2018–19
-  remain NEEDS_ACQUISITION, FY2020 is the reconciled two-period pandemic file,
+  monthly caseloads. Local techdocs verify the complete nominal tolerance
+  series: $50/$50/$37/$38/$38/$38 for FY2012–17, $37/$37 for FY2018–19,
+  and $37/$39/$48/$54/$56 for FY2020–24 — no acquisition gaps remain.
+  FY2020 is the reconciled two-period pandemic file,
   and FY2021 is pandemic-partial (9,832 rows), so the recommendation is strict
   plus total-rate FY2012–24 sensitivity outcomes with those bounds explicit.
 - **Finding-targeted outcomes remain gated.** Pre-period NATURE and ELEMENT

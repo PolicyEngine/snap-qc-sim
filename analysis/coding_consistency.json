@@ -496,6 +496,8 @@
         "FY2015_Tech_Doc.pdf": "4614a883d89094b3008c222565435196e7565e4feb426698d158b533f8a63165",
         "FY2016_Tech_Doc.pdf": "07f613c8f47f0e8001a4770c809379a9205745e23158e3ac6686cadd4d010bf4",
         "FY2017_Tech_Doc.pdf": "6161973f387f41893d6f4e1652e05553770c6909dad5176f2d27ccfdf0934de9",
+        "FY2018_Tech_Doc.pdf": "a27a7fb6b9583684946ec9be45a620d35b5d4b630da72c1ca484567c2548414e",
+        "FY2019_Tech_Doc.pdf": "0c8bd65b1a2caa92e12384dc7bdd9ec894359cf20b4182dd92b6c2ff9eda6f48",
         "qcfy2012_sas9.zip": "9a20a2f16f2c051220093439f85e12685d574ad4628c9e0a66eebe2871708cfd",
         "qcfy2013_sas9.zip": "4493ea8f0eaf1b1e156c8e935059669fcee1776d6ebddb822c38d8f2a276a692",
         "qcfy2014_csv.zip": "4c1d9f8c0e340e7e1d1297e49a1d1bd8203740a9b58be0923851a32296517062",
@@ -504,7 +506,7 @@
         "qcfy2017_csv.zip": "a956ad10a41ebada4ccd321a493560f06145f7accdff217c8c9aacdf43bc0a79"
       },
       "path": "~/.cache/axiom-oracles/snap-qc/historical/SHA256SUMS.txt",
-      "sha256": "2e460c7dcabfa5f16a8c6f76b3a57b7fcf1056f823499bb09497ff2c5b9bd5a3"
+      "sha256": "815d5ed796a206a242d649f3f598f3af6d413c25d980f23f31d209b4748f1559"
     },
     "reference_artifact_sha256": "c5b16617b982ce6e00f70142652cd2bcc9fc145a33ad7fce341de84b8eff61bb"
   },
@@ -2908,9 +2910,9 @@
         "sha256": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82"
       },
       "threshold": {
-        "citation": null,
-        "dollars": null,
-        "status": "NEEDS_ACQUISITION"
+        "citation": "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)",
+        "dollars": 37,
+        "status": "verified_local_techdoc"
       },
       "weights": {
         "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",
@@ -3209,9 +3211,9 @@
         "sha256": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846"
       },
       "threshold": {
-        "citation": null,
-        "dollars": null,
-        "status": "NEEDS_ACQUISITION"
+        "citation": "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)",
+        "dollars": 37,
+        "status": "verified_local_techdoc"
       },
       "weights": {
         "annualization_note": "HWGT is a monthly sample weight; summing the 12 monthly samples gives case-months and annual benefit flow.",

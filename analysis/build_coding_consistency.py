@@ -65,8 +65,16 @@ THRESHOLDS: dict[int, dict[str, Any]] = {
         "dollars": 38,
         "citation": "FY2017_Tech_Doc.pdf p. 10, footnote 5 ($38)",
     },
-    2018: {"status": "NEEDS_ACQUISITION", "dollars": None, "citation": None},
-    2019: {"status": "NEEDS_ACQUISITION", "dollars": None, "citation": None},
+    2018: {
+        "status": "verified_local_techdoc",
+        "dollars": 37,
+        "citation": "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)",
+    },
+    2019: {
+        "status": "verified_local_techdoc",
+        "dollars": 37,
+        "citation": "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)",
+    },
     2020: {
         "status": "verified_local_techdoc",
         "dollars": 37,

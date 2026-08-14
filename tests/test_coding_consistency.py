@@ -67,12 +67,15 @@ def test_threshold_acquisition_boundary_is_explicit() -> None:
         PAYLOAD["years"][str(year)]["threshold"]["status"] == "verified_local_techdoc"
         for year in range(2012, 2018)
     )
-    for year in (2018, 2019):
+    for year, cite in (
+        (2018, "FY2018_Tech_Doc.pdf p. 14 ($37, a decrease of $1 from FY2017)"),
+        (2019, "FY2019_Tech_Doc.pdf p. 10 ($37, unchanged from FY2018)"),
+    ):
         threshold = PAYLOAD["years"][str(year)]["threshold"]
         assert threshold == {
-            "citation": None,
-            "dollars": None,
-            "status": "NEEDS_ACQUISITION",
+            "citation": cite,
+            "dollars": 37,
+            "status": "verified_local_techdoc",
         }
     assert [
         PAYLOAD["years"][str(year)]["threshold"]["dollars"]
