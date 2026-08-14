@@ -180,4 +180,6 @@ Language discipline: these estimate bundled system replacements as
 implemented — a failed migration raising computing-apparatus-coded
 error, not "the effect of rules engines." The contrast with the
 adoption scenarios is the point: the accounting scenarios price the
-same cause class the failed migration causally moved.
+same cause class that rose after the failed migration, with the rise
+concentrated in the federally billed window (a descriptive consistency
+check the protocol designates verdict-inert).

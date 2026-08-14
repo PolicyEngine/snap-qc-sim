@@ -16,3 +16,6 @@ FACTS-preview.html
 .vercel
 .env*
 .DS_Store
+
+# Lane working notes (deliberately untracked; see PROMPT-* conventions)
+/*_REPORT.md

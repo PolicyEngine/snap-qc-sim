@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-13
+date: 2026-08-14
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -131,8 +131,67 @@ artifact (@sec-availability). The pipeline is deterministic —
 independent clean-room reruns reproduce every analysis artifact
 byte-for-byte, and the headline simulation artifact was independently
 reproduced from the raw file to four decimals — and the manuscript has
-been through five rounds of adversarial review, archived unedited in
+been through six rounds of adversarial review, archived unedited in
 the repository.
+
+## Related work {#sec-related}
+
+Cost sharing keyed to noisy error rates is not a new experiment; it is
+a return. The first sanction regime tied state liability to food stamp
+error rates against thresholds that stepped from 9% to 7% to 5% across
+fiscal 1983–85, with waiver machinery absorbing the disputes that
+followed [@gao1984liability]. A National Research Council panel
+convened to rethink that system concluded it needed replacing
+[@nrc1987rethinking], and the 2002 Farm Bill narrowed liability to
+persistently high-error states: where the prior rule had sanctioned
+roughly half of states each year for exceeding the national average,
+the new one required a 95 percent statistical probability that a
+state's rate exceeded 105 percent of the national average for two
+consecutive years [@gao2007errors]. That redesign wrote sampling
+uncertainty into the liability rule itself; the 2025 statute reverses
+the narrowing at larger scale and prices point estimates. This paper
+runs the measurement analysis that difference demands: case-level
+noise quantification against the tiers the money now hangs on.
+
+The measurement system also has a documented behavioral record. After
+a nationwide USDA Inspector General audit, the Department of Justice
+brought False Claims Act cases alleging that states, working with
+outside quality-control consultants, improperly diminished identified
+errors; eight states and a consulting firm paid more than \$67 million
+to resolve those allegations [@doj2021snapqc; @crs2018errors],
+including Texas's \$15.3 million settlement over performance bonuses
+the government alleged were claimed on biased error data
+[@doj2019texas]. That history motivates two choices
+here: the error models predict an adjudicated label, a property of the
+measurement system rather than of households, and the strategic
+response of measurement to incentives is a registered design target
+(the fiscal 2026 pre-registration, @sec-fy2025) rather than a
+footnote.
+
+Measurement noise in accountability systems has a standard reference
+point: school ratings reward and punish schools for sampling variation
+[@kane2002volatility]. The cost-sharing formula raises the stakes of
+that observation — the draw prices directly, in nine-figure annual
+bills — and the case files permit what ratings literatures usually
+lack, a decomposition of the measured quantity into computation,
+information, and adjudication layers.
+
+On the error process itself, the administrative-burden literature
+supplies the strongest identified result: randomly assigned
+recertification interview timing changes SNAP participation by over 20
+percent among affected cases [@homonoff2021recertification], grounding
+the churn channel this paper's models treat as feature material — and
+grounding a reading of Kentucky's post-migration extension of
+recertification periods as an error-relevant intervention, not only a
+workload one. The event-study machinery follows the synthetic-control
+canon [@abadie2010synthetic; @abadie2021using], and the committed
+prediction artifact follows the forecasting-before-results line
+[@dellavigna2018predicting; @dellavigna2020forecasting] with a different object: model-derived,
+hash-pinned predictions for a policy regime rather than elicited expert
+forecasts for experiments. The verification oracle framing extends
+rules-as-code correctness work [@merigoux2021catala] by holding
+encodings to an external administrative record rather than to internal
+consistency.
 
 ## The QC system and the money attached to it {#sec-qc}
 
@@ -919,6 +978,55 @@ per-state values. States without verified encodings get the parameter
 inputs and no projection: a repriced rate without a verified
 computation would be an unsupported number, so none is shown.
 
+### System replacements in the record: event studies {#sec-events}
+
+The accounting scenarios of @sec-adoption price a cause class; whether
+that class responds to real changes in the computing apparatus is a
+causal question, and the record contains experiments no one would run
+on purpose. Three state eligibility-system replacements were estimated
+against synthetic donors built from never-treated states, with
+permutation inference in space and protocols frozen before results
+[@abadie2010synthetic; @abadie2021using]; treatment dates come from a
+source-verified registry, outcomes use a fixed real tolerance threshold
+over fiscal 2012–2024, the fiscal 2016 go-live year is excluded as a
+transition period for the two events inside it, and the primary
+specification drops the pandemic-partial fiscal 2021 file from the
+post-period (retaining fiscal 2020), with both pandemic-handling
+variants reported as sensitivities.
+
+Rhode Island's UHIP launch (September 2016) fires the pre-registered
+rule: strict computing-apparatus error dollars rise \$2.90 per weighted
+case-month against the synthetic donor (permutation p = 0.023) while
+the client-caused placebo stays null (p = 0.233). The elevation
+concentrates in fiscal 2017–19 — a +\$4.95 mean gap against +\$1.48
+in the later post-years — which is the window for which the Food and
+Nutrition Service billed the state \$37.3 million in SNAP
+overpayments; the billing record played no role in the estimation. Kentucky's Benefind launch (February 2016)
+shows no protocol-defined signal (−\$0.58, p = 0.302), and the pooled
+two-unit statistic reaches p = 0.093 with its placebo at 1.0. Oregon's
+2021 eligibility-system expansion, estimated first, returned a refused
+signal: its client placebo fired while the strict outcome did not,
+which is what a design should do when a treatment date sits inside the
+pandemic window it cannot see past.
+
+The three verdicts span the design's range — a signal, a null, and a
+refusal. The null is not evidence that Kentucky's migration went well:
+the registry documents a troubled launch there too, and a null under
+this design is the absence of a protocol-defined signal, which power,
+donor fit, or offsetting changes can each produce. The estimand
+everywhere is a bundled system replacement as implemented — staffing,
+process, and software together — never "the effect of a rules engine."
+The connection to @sec-adoption is narrow: the cause class those
+scenarios price by accounting convention is the same class that rose
+after Rhode Island's migration, and the rise concentrates in the years
+the federal billing record independently identifies. The window
+profile is a descriptive consistency check specified in the frozen
+protocol as verdict-inert — it confirms neither the accounting
+convention nor the estimate; it shows they point at the same object.
+Full paths, donor weights, and sensitivities are committed
+(analysis/event_study_results.json;
+analysis/riky_event_study_results.json).
+
 ## Toward engine-computed counterfactuals {#sec-roadmap}
 
 The counterfactual gap has begun to close. For one state and one
@@ -1013,7 +1121,7 @@ dataset showing that most measured error among eligible cases is
 information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
 assignment for boundary states. The modeling bar cannot be exact, and
-this paper went through five rounds of adversarial review, archived
+this paper went through six rounds of adversarial review, archived
 unedited in the repository. The system this points toward is one in
 which the rules that compute benefits, the requirements they impose on
 households, and the errors they produce are executable, testable, and
@@ -1028,7 +1136,7 @@ recorded in `.python-version` and each artifact's provenance block), the simulat
 simulation, decomposition, and certification artifacts under
 `paper/snapshot/` (including the complete per-case replay output, the
 layer-1 and layer-2 classification outputs, and the reconstruction
-scripts), the archived adversarial review reports — five rounds — and the
+scripts), the archived adversarial review reports — six rounds — and the
 round-1 editorial synthesis under
 `paper/reviews/`, the fact catalog
 (`paper/FACTS.md`), the fiscal 2026 pre-registration
@@ -1050,7 +1158,7 @@ reports — the paper is an evaluation of systems its author is
 responsible for. The mitigations are structural: every parity claim
 replays against the government's own recorded values at zero tolerance
 from committed, hash-pinned artifacts any reader can rerun, and the
-manuscript's five rounds of adversarial review are archived unedited in
+manuscript's six rounds of adversarial review are archived unedited in
 the repository.
 
 ## Acknowledgments
