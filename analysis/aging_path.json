@@ -1,0 +1,623 @@
+{
+  "cells": [
+    {
+      "aged_center_pct": 10.607858699124883,
+      "base_pct": 6.544904751847632,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.24017817545480646,
+      "delta_reweight_pp": 0.08937071647855177,
+      "delta_threshold_pp": -0.04133384189886424,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.19214130087511805,
+      "joint_pct": 6.352763450972513,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "AZ"
+    },
+    {
+      "aged_center_pct": 12.438673599043248,
+      "base_pct": 6.544904751847632,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.6031462747326168,
+      "delta_reweight_pp": 0.07686116620949335,
+      "delta_threshold_pp": -0.04133384189886424,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 1.6386735990432477,
+      "joint_pct": 8.183578350890878,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "AZ"
+    },
+    {
+      "aged_center_pct": 10.12776580062905,
+      "base_pct": 6.544904751847632,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.5434308321443604,
+      "delta_reweight_pp": -0.08746952532772756,
+      "delta_threshold_pp": -0.04133384189886424,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -0.6722341993709513,
+      "joint_pct": 5.87267055247668,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "AZ"
+    },
+    {
+      "aged_center_pct": 13.951676631367214,
+      "base_pct": 6.544904751847632,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 3.348991723672248,
+      "delta_reweight_pp": -0.15598125040617106,
+      "delta_threshold_pp": -0.04133384189886424,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 3.151676631367213,
+      "joint_pct": 9.696581383214845,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "AZ"
+    },
+    {
+      "aged_center_pct": 10.433025788729658,
+      "base_pct": 7.952735975737926,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.3369552150699828,
+      "delta_reweight_pp": -0.08395656845481003,
+      "delta_threshold_pp": -0.07606242774554861,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.49697421127034147,
+      "joint_pct": 7.455761764467584,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "CA"
+    },
+    {
+      "aged_center_pct": 11.461264489024689,
+      "base_pct": 7.952735975737926,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 0.6975130349901626,
+      "delta_reweight_pp": -0.09018611821992373,
+      "delta_threshold_pp": -0.07606242774554861,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 0.5312644890246894,
+      "joint_pct": 8.484000464762616,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "CA"
+    },
+    {
+      "aged_center_pct": 9.91262184121154,
+      "base_pct": 7.952735975737926,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.7100688923403204,
+      "delta_reweight_pp": -0.21305519166583853,
+      "delta_threshold_pp": -0.09425407478230063,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -1.0173781587884605,
+      "joint_pct": 6.935357816949466,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "CA"
+    },
+    {
+      "aged_center_pct": 11.911100631664016,
+      "base_pct": 7.952735975737926,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.325141658521967,
+      "delta_reweight_pp": -0.24978695207564883,
+      "delta_threshold_pp": -0.09425407478230063,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 0.9811006316640167,
+      "joint_pct": 8.933836607401943,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "CA"
+    },
+    {
+      "aged_center_pct": 9.74658818855924,
+      "base_pct": 7.420781870291635,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.2910561273971144,
+      "delta_reweight_pp": -0.014337516512221704,
+      "delta_threshold_pp": -0.038018167531424396,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.3434118114407596,
+      "joint_pct": 7.077370058850875,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "CO"
+    },
+    {
+      "aged_center_pct": 10.694943276194053,
+      "base_pct": 7.420781870291635,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 0.6361916401769756,
+      "delta_reweight_pp": 0.0067698035485008745,
+      "delta_threshold_pp": -0.038018167531424396,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 0.604943276194053,
+      "joint_pct": 8.025725146485687,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "CO"
+    },
+    {
+      "aged_center_pct": 9.375703260249537,
+      "base_pct": 7.420781870291635,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.6359872475121398,
+      "delta_reweight_pp": -0.018781293547261768,
+      "delta_threshold_pp": -0.05952819869106296,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -0.7142967397504627,
+      "joint_pct": 6.706485130541171,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "CO"
+    },
+    {
+      "aged_center_pct": 11.294019937172546,
+      "base_pct": 7.420781870291635,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.2506967770676365,
+      "delta_reweight_pp": 0.01285135879597199,
+      "delta_threshold_pp": -0.05952819869106296,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 1.2040199371725464,
+      "joint_pct": 8.62480180746418,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "CO"
+    },
+    {
+      "aged_center_pct": 14.930073678793716,
+      "base_pct": 10.406335344327085,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.3928110401679614,
+      "delta_reweight_pp": 0.11288471896167707,
+      "delta_threshold_pp": 0.0,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.27992632120628436,
+      "joint_pct": 10.1264090231208,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "GA"
+    },
+    {
+      "aged_center_pct": 16.61148963169026,
+      "base_pct": 10.406335344327085,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.167407285368725,
+      "delta_reweight_pp": 0.23408234632153757,
+      "delta_threshold_pp": 0.0,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 1.4014896316902608,
+      "joint_pct": 11.807824976017347,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "GA"
+    },
+    {
+      "aged_center_pct": 14.447768212013044,
+      "base_pct": 10.406335344327085,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.8619542379719629,
+      "delta_reweight_pp": 0.12939945368748695,
+      "delta_threshold_pp": -0.02967700370247961,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -0.7622317879869573,
+      "joint_pct": 9.644103556340129,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "GA"
+    },
+    {
+      "aged_center_pct": 18.27442223682153,
+      "base_pct": 10.406335344327085,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 2.6334085316339007,
+      "delta_reweight_pp": 0.4606907088901071,
+      "delta_threshold_pp": -0.02967700370247961,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 3.064422236821528,
+      "joint_pct": 13.470757581148613,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "GA"
+    },
+    {
+      "aged_center_pct": 13.407562677263975,
+      "base_pct": 8.909072131868129,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.35857591306836767,
+      "delta_reweight_pp": 0.7629746501452122,
+      "delta_threshold_pp": -0.07683605981286767,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 0.32756267726397503,
+      "joint_pct": 9.236634809132106,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "MD"
+    },
+    {
+      "aged_center_pct": 14.631906054320169,
+      "base_pct": 8.909072131868129,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 0.7790931379261625,
+      "delta_reweight_pp": 0.8496489762068755,
+      "delta_threshold_pp": -0.07683605981286767,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 1.5519060543201686,
+      "joint_pct": 10.4609781861883,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "MD"
+    },
+    {
+      "aged_center_pct": 13.303892369653994,
+      "base_pct": 8.909072131868129,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.7828442897531325,
+      "delta_reweight_pp": 1.0835727192199922,
+      "delta_threshold_pp": -0.07683605981286767,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 0.22389236965399384,
+      "joint_pct": 9.132964501522121,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "MD"
+    },
+    {
+      "aged_center_pct": 16.293510829355586,
+      "base_pct": 8.909072131868129,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.8386435977175282,
+      "delta_reweight_pp": 1.4517032914509258,
+      "delta_threshold_pp": -0.07683605981286767,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 3.2135108293555863,
+      "joint_pct": 12.122582961223715,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "MD"
+    },
+    {
+      "aged_center_pct": 13.070682939619811,
+      "base_pct": 7.836904246766006,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.040286621510292164,
+      "delta_reweight_pp": -0.013293179662949406,
+      "delta_threshold_pp": -0.05573725920694539,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.10931706038018874,
+      "joint_pct": 7.727587186385819,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "NY"
+    },
+    {
+      "aged_center_pct": 14.008427639865499,
+      "base_pct": 7.836904246766006,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 0.9223229484165074,
+      "delta_reweight_pp": -0.03815804934406053,
+      "delta_threshold_pp": -0.05573725920694539,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 0.8284276398654988,
+      "joint_pct": 8.665331886631508,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "NY"
+    },
+    {
+      "aged_center_pct": 12.634470029608678,
+      "base_pct": 7.836904246766006,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.37274788963142846,
+      "delta_reweight_pp": -0.11704482155294649,
+      "delta_threshold_pp": -0.05573725920694539,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -0.5455299703913212,
+      "joint_pct": 7.291374276374686,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "NY"
+    },
+    {
+      "aged_center_pct": 14.42458428099754,
+      "base_pct": 7.836904246766006,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.4761676836589022,
+      "delta_reweight_pp": -0.17584614345441452,
+      "delta_threshold_pp": -0.05573725920694539,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 1.2445842809975396,
+      "joint_pct": 9.081488527763549,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "NY"
+    },
+    {
+      "aged_center_pct": 9.084606388317475,
+      "base_pct": 6.301421926058992,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.19497633970478656,
+      "delta_reweight_pp": 0.01196555573079916,
+      "delta_threshold_pp": -0.07238282770853743,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": -0.25539361168252483,
+      "joint_pct": 6.046028314376467,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "TX"
+    },
+    {
+      "aged_center_pct": 10.186336941031001,
+      "base_pct": 6.301421926058992,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 0.9007689829785761,
+      "delta_reweight_pp": 0.017950785760962873,
+      "delta_threshold_pp": -0.07238282770853743,
+      "fiscal_year": 2026,
+      "flat_center_delta_pp": 0.8463369410310015,
+      "joint_pct": 7.147758867089993,
+      "parameter_status": "PUBLISHED",
+      "qc_threshold_dollars": 58,
+      "state": "TX"
+    },
+    {
+      "aged_center_pct": 8.73830413116088,
+      "base_pct": 6.301421926058992,
+      "convention": "D-fixed",
+      "delta_reprice_pp": -0.49778644355563983,
+      "delta_reweight_pp": -0.016581785317277387,
+      "delta_threshold_pp": -0.08732763996620019,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": -0.6016958688391192,
+      "joint_pct": 5.699726057219874,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "TX"
+    },
+    {
+      "aged_center_pct": 11.071652822890215,
+      "base_pct": 6.301421926058992,
+      "convention": "D-proportional",
+      "delta_reprice_pp": 1.8263584429376465,
+      "delta_reweight_pp": -0.007377980081228586,
+      "delta_threshold_pp": -0.08732763996620019,
+      "fiscal_year": 2027,
+      "flat_center_delta_pp": 1.731652822890215,
+      "joint_pct": 8.03307474894921,
+      "parameter_status": "ESTIMATE",
+      "qc_threshold_dollars": 59,
+      "state": "TX"
+    }
+  ],
+  "definitions": {
+    "aged_center_pct": "FY2025 official rate plus joint_pct minus base_pct, following the app payload's anchoring convention.",
+    "base_pct": "FY2024 mechanical rate using FY2024 weights, FY2024 prices, and the strict $56 threshold.",
+    "canonical_order_caveat": "The canonical ladder is threshold, reprice, then reweight; contributions are order-dependent residuals even though their sum and the joint endpoint are fixed.",
+    "delta_reprice_pp": "Residual from the FY2024-weight grid rate, which already embeds the new threshold, after subtracting the threshold-only rate.",
+    "delta_reweight_pp": "C3-weight grid rate minus the matching FY2024-weight grid rate.",
+    "delta_threshold_pp": "Change from replacing the strict $56 threshold with the fiscal-year threshold while holding FY2024 weights and prices fixed.",
+    "error_semantics": "data.json err is rounded AMTERR only for CASE=1, positive-weight, STATUS 2/3 cases with AMTERR strictly above $56; zero represents either no adjudicated error or an excluded amount.",
+    "flat_center_delta_pp": "Aged center minus the FY2025 official rate, which is the movement hidden by the current pinned mean.",
+    "joint_pct": "Measured rate in the verified C3 grid row after threshold, repricing, and reweighting."
+  },
+  "disclosed_held_fixed": [
+    "Composition beyond the committed C3 reweight.",
+    "Behavioral response, which is the FY2026 pre-registration's subject rather than this artifact's.",
+    "The official-vs-file wedge layer carried by the anchoring convention.",
+    "National scope: 368 grid rows are NOT_APPLICABLE_NO_CASE_LEVEL_REPRICING, so no national aged path is reported without verified repricing."
+  ],
+  "input_hashes": {
+    "analysis/fy2027_parameters.json": "339f9cbfd36afa735dce8b8bfe8a097c3affd585a737682a0192b56a7cd85043",
+    "app/public/data.json": "2fb60670d79d93a107c60b08e6fbbac9e3953df0da3b15c9edad5620e675d953",
+    "app/public/fy2027_data.json": "33cadfd2dfc979f5cbbb7b37b202cb885130d626c28ece8eaa90261eed99a31d",
+    "scripts_build_data.py": "364d68b5f05d8b6a932bd4698cc06a4efdf2ae472b65803210f6036165cf8cd8",
+    "snap-fy27-margins/reprice/manifest.json": "8d44e576948b1ed56720e7b2ef6e596dfb9c0f82e26349c9394b913b31f13473",
+    "snap-fy27-margins/reprice/state_rate_implications.json": "1dbc0c3cc33a898863155c3097f71a9487b9f0a286ebfcbb71de82383ff1126f",
+    "snap_qc_sim/data.py": "f8e6228d6e6a97dcf06b60bbf19f528c1f8662acdcec857518d2d40160a0b801"
+  },
+  "inputs_vendored": {
+    "grid_rates": [
+      {
+        "c3_measured_rate_pct": 6.352763450972513,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 6.263392734493961,
+        "state": "AZ"
+      },
+      {
+        "c3_measured_rate_pct": 8.183578350890878,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 8.106717184681385,
+        "state": "AZ"
+      },
+      {
+        "c3_measured_rate_pct": 5.87267055247668,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 5.960140077804407,
+        "state": "AZ"
+      },
+      {
+        "c3_measured_rate_pct": 9.696581383214845,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 9.852562633621016,
+        "state": "AZ"
+      },
+      {
+        "c3_measured_rate_pct": 7.455761764467584,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 7.539718332922394,
+        "state": "CA"
+      },
+      {
+        "c3_measured_rate_pct": 8.484000464762616,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 8.57418658298254,
+        "state": "CA"
+      },
+      {
+        "c3_measured_rate_pct": 6.935357816949466,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 7.148413008615305,
+        "state": "CA"
+      },
+      {
+        "c3_measured_rate_pct": 8.933836607401943,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 9.183623559477592,
+        "state": "CA"
+      },
+      {
+        "c3_measured_rate_pct": 7.077370058850875,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 7.091707575363096,
+        "state": "CO"
+      },
+      {
+        "c3_measured_rate_pct": 8.025725146485687,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 8.018955342937186,
+        "state": "CO"
+      },
+      {
+        "c3_measured_rate_pct": 6.706485130541171,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 6.725266424088432,
+        "state": "CO"
+      },
+      {
+        "c3_measured_rate_pct": 8.62480180746418,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 8.611950448668209,
+        "state": "CO"
+      },
+      {
+        "c3_measured_rate_pct": 10.1264090231208,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 10.013524304159123,
+        "state": "GA"
+      },
+      {
+        "c3_measured_rate_pct": 11.807824976017347,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 11.57374262969581,
+        "state": "GA"
+      },
+      {
+        "c3_measured_rate_pct": 9.644103556340129,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 9.514704102652642,
+        "state": "GA"
+      },
+      {
+        "c3_measured_rate_pct": 13.470757581148613,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 13.010066872258506,
+        "state": "GA"
+      },
+      {
+        "c3_measured_rate_pct": 9.236634809132106,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 8.473660158986894,
+        "state": "MD"
+      },
+      {
+        "c3_measured_rate_pct": 10.4609781861883,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 9.611329209981424,
+        "state": "MD"
+      },
+      {
+        "c3_measured_rate_pct": 9.132964501522121,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 8.049391782302129,
+        "state": "MD"
+      },
+      {
+        "c3_measured_rate_pct": 12.122582961223715,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 10.67087966977279,
+        "state": "MD"
+      },
+      {
+        "c3_measured_rate_pct": 7.727587186385819,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 7.740880366048769,
+        "state": "NY"
+      },
+      {
+        "c3_measured_rate_pct": 8.665331886631508,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 8.703489935975568,
+        "state": "NY"
+      },
+      {
+        "c3_measured_rate_pct": 7.291374276374686,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 7.4084190979276325,
+        "state": "NY"
+      },
+      {
+        "c3_measured_rate_pct": 9.081488527763549,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 9.257334671217963,
+        "state": "NY"
+      },
+      {
+        "c3_measured_rate_pct": 6.046028314376467,
+        "convention": "D-fixed",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 6.034062758645668,
+        "state": "TX"
+      },
+      {
+        "c3_measured_rate_pct": 7.147758867089993,
+        "convention": "D-proportional",
+        "fiscal_year": 2026,
+        "fy2024_hwgt_measured_rate_pct": 7.12980808132903,
+        "state": "TX"
+      },
+      {
+        "c3_measured_rate_pct": 5.699726057219874,
+        "convention": "D-fixed",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 5.716307842537152,
+        "state": "TX"
+      },
+      {
+        "c3_measured_rate_pct": 8.03307474894921,
+        "convention": "D-proportional",
+        "fiscal_year": 2027,
+        "fy2024_hwgt_measured_rate_pct": 8.040452729030438,
+        "state": "TX"
+      }
+    ]
+  },
+  "schema_version": 1
+}
