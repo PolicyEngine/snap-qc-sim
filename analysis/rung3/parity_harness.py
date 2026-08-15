@@ -7,6 +7,7 @@ must be run with the pre-provisioned rung-3 environment described in PARITY.md.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import importlib.metadata
 import importlib.util
@@ -23,6 +24,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 QC_CSV = Path.home() / ".cache/axiom-oracles/snap-qc/qc_pub_fy2024.csv"
 RESULTS = ROOT / "analysis/rung3/parity_results.json"
+ROUND2_RESULTS = ROOT / "analysis/rung3/parity_round2_results.json"
+ROUND2_REPORT = ROOT / "PARITY_R2_REPORT.md"
 MEMO = ROOT / "analysis/rung3/PARITY.md"
 
 STATES = {4: "AZ", 6: "CA", 8: "CO", 13: "GA", 24: "MD", 36: "NY", 48: "TX"}
@@ -49,6 +52,16 @@ INTERMEDIATES = {
     "gross_income": "FSGRINC",
     "earned_income_deduction": "FSERNDED",
     "standard_deduction": "FSSTDDED",
+    "excess_shelter": "FSSLTDED",
+    "net_income": "FSNETINC",
+}
+ROUND2_INTERMEDIATES = {
+    "gross_income": "FSGRINC",
+    "earned_income_deduction": "FSERNDED",
+    "standard_deduction": "FSSTDDED",
+    "medical_deduction": "FSMEDDED",
+    "dependent_care_deduction": "FSDEPDED",
+    "child_support_deduction": "FSCSDED",
     "excess_shelter": "FSSLTDED",
     "net_income": "FSNETINC",
 }
@@ -92,7 +105,9 @@ def _values(frame: pd.DataFrame, column: str) -> np.ndarray:
     return frame[column].fillna(0).to_numpy()
 
 
-def run_month_batch(frame: pd.DataFrame, period: str) -> dict[str, np.ndarray]:
+def run_month_batch(
+    frame: pd.DataFrame, period: str, *, annualize_housing_cost: bool = False
+) -> dict[str, np.ndarray]:
     """Run one recorded month as a vectorized PolicyEngine-US simulation."""
     from policyengine_core.simulations.simulation_builder import SimulationBuilder
     from policyengine_us import Microsimulation
@@ -124,7 +139,6 @@ def run_month_batch(frame: pd.DataFrame, period: str) -> dict[str, np.ndarray]:
         "snap_excess_medical_expense_deduction": _values(frame, "FSMEDDED"),
         "snap_dependent_care_deduction": _values(frame, "FSDEPDED"),
         "snap_child_support_deduction": _values(frame, "FSCSDED"),
-        "housing_cost": _values(frame, "RENT"),
         "snap_utility_allowance": _values(frame, "UTIL"),
         # The QC scope contains certified positive-benefit cases. Eligibility
         # is held true so missing assets/immigration/work-status data and BBCE
@@ -134,6 +148,13 @@ def run_month_batch(frame: pd.DataFrame, period: str) -> dict[str, np.ndarray]:
     for variable, values in monthly.items():
         microsim.set_input(variable, period, values)
     year = period[:4]
+    # housing_cost is a YEAR variable. Round 1 deliberately retains its
+    # original monthly-period assignment in baseline mode; round 2 maps the
+    # recorded monthly RENT amount to an annual flow before setting it.
+    if annualize_housing_cost:
+        microsim.set_input("housing_cost", year, _values(frame, "RENT") * 12)
+    else:
+        microsim.set_input("housing_cost", period, _values(frame, "RENT"))
     microsim.set_input(
         "has_usda_elderly_disabled",
         year,
@@ -147,20 +168,37 @@ def run_month_batch(frame: pd.DataFrame, period: str) -> dict[str, np.ndarray]:
         "gross_income": "snap_gross_income",
         "earned_income_deduction": "snap_earned_income_deduction",
         "standard_deduction": "snap_standard_deduction",
+        "medical_deduction": "snap_excess_medical_expense_deduction",
+        "dependent_care_deduction": "snap_dependent_care_deduction",
+        "child_support_deduction": "snap_child_support_deduction",
         "excess_shelter": "snap_excess_shelter_expense_deduction",
         "net_income": "snap_net_income",
+        "maximum_allotment": "snap_max_allotment",
+        "minimum_allotment": "snap_min_allotment",
+        "housing_cost_monthly": "housing_cost",
+        "utility_allowance": "snap_utility_allowance",
     }
-    return {
+    result = {
         output: np.asarray(microsim.calculate(variable, period=period))
         for output, variable in variables.items()
     }
+    shelter = microsim.tax_benefit_system.parameters(
+        period
+    ).gov.usda.snap.income.deductions.excess_shelter_expense
+    result["shelter_cap"] = np.full(size, float(shelter.cap["CONTIGUOUS_US"]))
+    result["homeless_deduction"] = np.full(size, float(shelter.homeless.deduction))
+    return result
 
 
-def engine_results(frame: pd.DataFrame) -> pd.DataFrame:
+def engine_results(
+    frame: pd.DataFrame, *, annualize_housing_cost: bool = False
+) -> pd.DataFrame:
     chunks = []
     for yrmonth, group in frame.groupby("YRMONTH", sort=True):
         period = f"{int(yrmonth) // 100:04d}-{int(yrmonth) % 100:02d}"
-        calculated = run_month_batch(group, period)
+        calculated = run_month_batch(
+            group, period, annualize_housing_cost=annualize_housing_cost
+        )
         chunk = group[["case_id"]].copy()
         for name, values in calculated.items():
             chunk[name] = values
@@ -429,14 +467,298 @@ This run used policyengine {payload["environment"]["policyengine"]} and policyen
 """
 
 
+def administrative_results(frame: pd.DataFrame) -> pd.DataFrame:
+    """Apply the certified administrative whole-dollar chain to PE-US values."""
+    result = frame.copy()
+    half_up = lambda values: np.floor(np.asarray(values, dtype=float) + 0.5)
+    gross = half_up(result.gross_income)
+    earned = np.floor(result.earned_income_deduction.to_numpy(dtype=float))
+    standard = half_up(result.standard_deduction)
+    medical = half_up(result.medical_deduction)
+    dependent = half_up(result.dependent_care_deduction)
+    child_support = half_up(result.child_support_deduction)
+    homeless = result.HOMEDED.fillna(0).eq(3).to_numpy()
+    homeless_deduction = half_up(result.homeless_deduction)
+    adjusted = np.maximum(
+        0,
+        gross
+        - earned
+        - standard
+        - medical
+        - dependent
+        - child_support
+        - np.where(homeless, homeless_deduction, 0),
+    )
+    uncapped_shelter = np.maximum(
+        0,
+        result.housing_cost_monthly.to_numpy(dtype=float)
+        + result.utility_allowance.to_numpy(dtype=float)
+        - 0.5 * adjusted,
+    )
+    elderly_disabled = (_values(result, "FSNELDER") + _values(result, "FSNDIS")) > 0
+    shelter = np.where(
+        elderly_disabled,
+        uncapped_shelter,
+        np.minimum(uncapped_shelter, result.shelter_cap.to_numpy(dtype=float)),
+    )
+    shelter = np.where(homeless, 0, half_up(shelter))
+    net = np.maximum(0, adjusted - shelter)
+    reduction = np.ceil(0.30 * net)
+    maximum = half_up(result.maximum_allotment)
+    minimum = np.floor(result.minimum_allotment.to_numpy(dtype=float))
+    benefit = np.maximum(minimum, np.maximum(0, maximum - reduction)).astype(int)
+    result["admin_earned_income_deduction"] = earned.astype(int)
+    result["admin_excess_shelter"] = shelter.astype(int)
+    result["admin_net_income"] = net.astype(int)
+    result["admin_formula_benefit"] = benefit
+    return result
+
+
+def _direction(delta: float) -> str:
+    if delta > 0:
+        return "pe_us_above_recorded"
+    if delta < 0:
+        return "pe_us_below_recorded"
+    return "exact"
+
+
+def _size_bin(delta: float) -> str:
+    value = abs(delta)
+    if value <= 1:
+        return "$1"
+    if value <= 5:
+        return "$2-$5"
+    if value <= 25:
+        return "$6-$25"
+    if value <= 100:
+        return "$26-$100"
+    return "$101+"
+
+
+def round2_first_divergence(row: pd.Series) -> tuple[str | None, int]:
+    for engine, recorded in ROUND2_INTERMEDIATES.items():
+        value = int(np.floor(float(row[engine]) + 0.5))
+        delta = value - int(row[recorded])
+        if delta:
+            return engine, delta
+    return None, 0
+
+
+def parity_table(frame: pd.DataFrame, benefit_column: str) -> dict[str, object]:
+    tables = {}
+    difference = frame[benefit_column].astype(int) - frame.FSBEN.astype(int)
+    for state, group in frame.assign(_difference=difference).groupby(
+        "state", sort=True
+    ):
+        exact = int(group._difference.eq(0).sum())
+        tables[state] = {
+            "in_scope_n": len(group),
+            "exact_match_n": exact,
+            "exact_match_rate": exact / len(group),
+        }
+    return tables
+
+
+def build_round2_payload(
+    legacy: pd.DataFrame, fixed: pd.DataFrame, runtime_seconds: float
+) -> dict[str, object]:
+    legacy = legacy.copy()
+    fixed = administrative_results(fixed)
+    legacy["engine_whole_dollars"] = whole_dollars(legacy.formula_benefit)
+    legacy["difference_dollars"] = legacy.engine_whole_dollars - legacy.FSBEN.astype(
+        int
+    )
+    legacy["first_divergent_intermediate"] = legacy.apply(
+        first_divergent_intermediate, axis=1
+    )
+    legacy["cause"] = legacy.apply(cause_for, axis=1)
+    cohort = legacy.loc[
+        legacy.difference_dollars.ne(0) & legacy.cause.eq("deduction_concept")
+    ].copy()
+    details = []
+    for _, old in cohort.iterrows():
+        concept, delta = round2_first_divergence(old)
+        details.append(
+            {
+                "case_id": old.case_id,
+                "state": old.state,
+                "concept": concept or "none_before_allotment",
+                "direction": _direction(delta),
+                "difference_dollars": int(delta),
+                "size_bin": _size_bin(delta),
+            }
+        )
+    detail = pd.DataFrame(details)
+    by_concept = []
+    for concept, group in detail.groupby("concept", sort=True):
+        classification = (
+            "pe_us_concept_or_formula_difference"
+            if concept == "net_income"
+            else "harness_mapping_gap"
+        )
+        by_concept.append(
+            {
+                "concept": concept,
+                "n": len(group),
+                "classification": classification,
+                "direction": group.direction.value_counts().sort_index().to_dict(),
+                "dollar_size_distribution": group.size_bin.value_counts()
+                .sort_index()
+                .to_dict(),
+                "states": group.state.value_counts().sort_index().to_dict(),
+                "exemplar_case_ids": group.case_id.head(3).tolist(),
+            }
+        )
+    legacy_table = parity_table(legacy, "engine_whole_dollars")
+    fixed["engine_whole_dollars"] = whole_dollars(fixed.formula_benefit)
+    fixed_table = parity_table(fixed, "engine_whole_dollars")
+    admin_table = parity_table(fixed, "admin_formula_benefit")
+    admin_by_id = fixed.set_index("case_id").admin_formula_benefit
+    conversions = []
+    for cause, group in legacy.loc[legacy.difference_dollars.ne(0)].groupby(
+        "cause", sort=True
+    ):
+        converted = sum(
+            int(admin_by_id.loc[row.case_id]) == int(row.FSBEN)
+            for _, row in group.iterrows()
+        )
+        conversions.append(
+            {
+                "round1_cause": cause,
+                "round1_divergent_n": len(group),
+                "admin_rounding_exact_n": converted,
+                "admin_rounding_exact_rate": converted / len(group),
+            }
+        )
+    peus = Path(importlib.util.find_spec("policyengine_us").origin).parent
+    citations = {
+        "housing_cost_period": str(
+            peus / "variables/household/expense/housing/housing_cost.py"
+        )
+        + ":4-16",
+        "earned_deduction_fractional": str(
+            peus
+            / "variables/gov/usda/snap/income/deductions/snap_earned_income_deduction.py"
+        )
+        + ":13-17",
+        "pre_shelter_stack": str(
+            peus
+            / "variables/gov/usda/snap/income/deductions/shelter/snap_net_income_pre_shelter.py"
+        )
+        + ":22-30",
+        "shelter_formula": str(
+            peus
+            / "variables/gov/usda/snap/income/deductions/shelter/snap_excess_shelter_expense_deduction.py"
+        )
+        + ":15-40",
+        "net_income": str(peus / "variables/gov/usda/snap/income/snap_net_income.py")
+        + ":13-16",
+        "expected_contribution": str(
+            peus / "variables/gov/usda/snap/snap_expected_contribution.py"
+        )
+        + ":13-19",
+    }
+    return {
+        "schema_version": "2.0.0",
+        "environment": {
+            "policyengine": importlib.metadata.version("policyengine"),
+            "policyengine_us": importlib.metadata.version("policyengine-us"),
+            "runtime_seconds": runtime_seconds,
+        },
+        "input_hashes": {str(QC_CSV): sha256(QC_CSV)},
+        "modes": {
+            "baseline_round1": legacy_table,
+            "mapping_fixed_pe_us": fixed_table,
+            "admin_rounding": admin_table,
+        },
+        "mapping_decisions": [
+            {
+                "id": "annualize_monthly_rent_for_annual_housing_cost",
+                "classification": "harness_mapping_gap",
+                "recorded_column": "RENT",
+                "pe_us_variable": "housing_cost",
+                "legacy_mapping": "monthly RENT set at the monthly period",
+                "round2_mapping": "monthly RENT multiplied by 12 and set at calendar year",
+                "uniform": True,
+                "source_citation": citations["housing_cost_period"],
+            }
+        ],
+        "deduction_concept_cohort_n": len(cohort),
+        "admin_conversion_by_round1_cause": conversions,
+        "sub_cause_histogram": by_concept,
+        "source_citations": citations,
+        "case_localizations": details,
+    }
+
+
+def render_round2_report(payload: dict[str, object]) -> str:
+    totals = {}
+    for mode, states in payload["modes"].items():
+        totals[mode] = (
+            sum(item["exact_match_n"] for item in states.values()),
+            sum(item["in_scope_n"] for item in states.values()),
+        )
+    rows = []
+    for state in EXPECTED_SCOPE:
+        baseline = payload["modes"]["baseline_round1"][state]
+        admin = payload["modes"]["admin_rounding"][state]
+        rows.append(
+            f"| {state} | {baseline['exact_match_n']:,}/{baseline['in_scope_n']:,} "
+            f"({baseline['exact_match_rate']:.2%}) | {admin['exact_match_n']:,}/"
+            f"{admin['in_scope_n']:,} ({admin['exact_match_rate']:.2%}) |"
+        )
+    causes = "\n".join(
+        f"- `{item['concept']}`: {item['n']:,} ({item['classification']})."
+        for item in payload["sub_cause_histogram"]
+    )
+    return f"""# Parity round 2 report
+
+The round-1 comparator remains {totals["baseline_round1"][0]:,}/{totals["baseline_round1"][1]:,} exact. Correcting the annual `housing_cost` mapping yields {totals["mapping_fixed_pe_us"][0]:,}/{totals["mapping_fixed_pe_us"][1]:,}; applying the uniform administrative whole-dollar sequence yields {totals["admin_rounding"][0]:,}/{totals["admin_rounding"][1]:,}.
+
+| State | Round-1 baseline | Admin rounding after mapping fix |
+|---|---:|---:|
+{chr(10).join(rows)}
+
+## Deduction-concept decomposition
+
+{causes}
+
+All mechanism citations and every case localization are recorded in `analysis/rung3/parity_round2_results.json`. Full harness runtime: {payload["environment"]["runtime_seconds"]:.2f} seconds.
+"""
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=("baseline", "round2"), default="baseline")
+    args = parser.parse_args()
     start = time.perf_counter()
     cases = load_cases()
+    if args.mode == "round2":
+        legacy = engine_results(cases)
+        fixed = engine_results(cases, annualize_housing_cost=True)
+        payload = build_round2_payload(legacy, fixed, time.perf_counter() - start)
+        ROUND2_RESULTS.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        report = render_round2_report(payload)
+        ROUND2_REPORT.write_text(report)
+        round1_memo = MEMO.read_text().split("\n## Round 2\n", maxsplit=1)[0]
+        MEMO.write_text(
+            round1_memo
+            + "\n## Round 2\n\n"
+            + report.removeprefix("# Parity round 2 report\n\n")
+        )
+        print(f"Wrote {ROUND2_RESULTS}, {ROUND2_REPORT}, and appended {MEMO}")
+        return
     calculated = engine_results(cases)
     spot = policyengine_interface_spot_check(calculated)
     payload = build_payload(calculated, time.perf_counter() - start, spot)
     RESULTS.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    MEMO.write_text(render_memo(payload))
+    existing = MEMO.read_text() if MEMO.exists() else ""
+    round2_suffix = (
+        "\n## Round 2\n" + existing.split("\n## Round 2\n", maxsplit=1)[1]
+        if "\n## Round 2\n" in existing
+        else ""
+    )
+    MEMO.write_text(render_memo(payload) + round2_suffix)
     total = sum(value["in_scope_n"] for value in payload["states"].values())
     exact = sum(value["exact_match_n"] for value in payload["states"].values())
     print(f"PolicyEngine-US parity: {exact:,}/{total:,}; wrote {RESULTS} and {MEMO}")
