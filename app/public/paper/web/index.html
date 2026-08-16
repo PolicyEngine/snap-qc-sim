@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Max Ghenis">
-<meta name="dcterms.date" content="2026-08-14">
+<meta name="dcterms.date" content="2026-08-16">
 
 <title>Administrative quality control data as an oracle: verifying encoded SNAP rules and simulating payment error under cost sharing</title>
 <style>
@@ -136,10 +136,10 @@ years of sampling noise — estimated from fiscal 2024 microdata alone
 — implies.
 ">
 <meta name="citation_author" content="Max Ghenis">
-<meta name="citation_publication_date" content="2026-08-14">
-<meta name="citation_cover_date" content="2026-08-14">
+<meta name="citation_publication_date" content="2026-08-16">
+<meta name="citation_cover_date" content="2026-08-16">
 <meta name="citation_year" content="2026">
-<meta name="citation_online_date" content="2026-08-14">
+<meta name="citation_online_date" content="2026-08-16">
 <meta name="citation_language" content="en">
 <meta name="citation_reference" content="citation_title=Technical documentation for the fiscal year 2024 supplemental nutrition assistance program quality control database and the QC minimodel;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://snapqcdata.net/datafiles;">
 <meta name="citation_reference" content="citation_title=Supplemental nutrition assistance program payment error rates, fiscal year 2024;,citation_author=U.S. Department of Agriculture, Food and Nutrition Service;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://www.fns.usda.gov/snap/qc/per;">
@@ -168,6 +168,7 @@ years of sampling noise — estimated from fiscal 2024 microdata alone
 <meta name="citation_reference" content="citation_title=Texas Health and Human Services Commission agrees to pay over $15 million to resolve False Claims Act liability for deficient SNAP quality control;,citation_author=U.S. Department of Justice;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_fulltext_html_url=https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims;">
 <meta name="citation_reference" content="citation_title=Forecasting the results of experiments: Piloting an elicitation strategy;,citation_author=Stefano DellaVigna;,citation_author=Nicholas Otis;,citation_author=Eva Vivalt;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;,citation_doi=10.1257/pandp.20201080;,citation_volume=110;,citation_journal_title=AEA Papers and Proceedings;">
 <meta name="citation_reference" content="citation_title=Food Stamp Program: Payment errors and trafficking have declined despite increased program participation;,citation_author=U.S. Government Accountability Office;,citation_publication_date=2007;,citation_cover_date=2007;,citation_year=2007;,citation_fulltext_html_url=https://www.gao.gov/products/gao-07-422t;,citation_technical_report_institution=U.S. Government Accountability Office;,citation_technical_report_number=GAO-07-422T;">
+<meta name="citation_reference" content="citation_title=What a system replacement does to measured error: Three SNAP eligibility-system migrations in the quality-control record;,citation_author=Max Ghenis;,citation_publication_date=2026;,citation_cover_date=2026;,citation_year=2026;,citation_fulltext_html_url=https://policyengine.org/us/snap-payment-error-simulator/paper-migrations;">
 </head>
 
 <body class="quarto-light">
@@ -201,7 +202,7 @@ years of sampling noise — estimated from fiscal 2024 microdata alone
                 <div>
             <div class="quarto-title-meta-heading">Published</div>
             <div class="quarto-title-meta-contents">
-              <p class="date">August 14, 2026</p>
+              <p class="date">August 16, 2026</p>
             </div>
           </div>
           
@@ -635,9 +636,8 @@ Table&nbsp;5: Boundary states under the fiscal 2028 tier schedule applied to fis
 </section>
 <section id="sec-events" class="level3">
 <h3 class="anchored" data-anchor-id="sec-events">System replacements in the record: event studies</h3>
-<p>The accounting scenarios of <a href="#sec-adoption" class="quarto-xref">Section&nbsp;7.2</a> price a cause class; whether that class responds to real changes in the computing apparatus is a causal question, and the record contains experiments no one would run on purpose. Three state eligibility-system replacements were estimated against synthetic donors built from never-treated states, with permutation inference in space and protocols frozen before results <span class="citation" data-cites="abadie2010synthetic abadie2021using">(<a href="#ref-abadie2010synthetic" role="doc-biblioref">Abadie et al. 2010</a>; <a href="#ref-abadie2021using" role="doc-biblioref">Abadie 2021</a>)</span>; treatment dates come from a source-verified registry, outcomes use a fixed real tolerance threshold over fiscal 2012–2024, the fiscal 2016 go-live year is excluded as a transition period for the two events inside it, and the primary specification drops the pandemic-partial fiscal 2021 file from the post-period (retaining fiscal 2020), with both pandemic-handling variants reported as sensitivities.</p>
-<p>Rhode Island’s UHIP launch (September 2016) fires the pre-registered rule: strict computing-apparatus error dollars rise $2.90 per weighted case-month against the synthetic donor (permutation p = 0.023) while the client-caused placebo stays null (p = 0.233). The elevation concentrates in fiscal 2017–19 — a +$4.95 mean gap against +$1.48 in the later post-years — which is the window for which the Food and Nutrition Service billed the state $37.3 million in SNAP overpayments; the billing record played no role in the estimation. Kentucky’s Benefind launch (February 2016) shows no protocol-defined signal (−$0.58, p = 0.302), and the pooled two-unit statistic reaches p = 0.093 with its placebo at 1.0. Oregon’s 2021 eligibility-system expansion, estimated first, returned a refused signal: its client placebo fired while the strict outcome did not, which is what a design should do when a treatment date sits inside the pandemic window it cannot see past.</p>
-<p>The three verdicts span the design’s range — a signal, a null, and a refusal. The null is not evidence that Kentucky’s migration went well: the registry documents a troubled launch there too, and a null under this design is the absence of a protocol-defined signal, which power, donor fit, or offsetting changes can each produce. The estimand everywhere is a bundled system replacement as implemented — staffing, process, and software together — never “the effect of a rules engine.” The connection to <a href="#sec-adoption" class="quarto-xref">Section&nbsp;7.2</a> is narrow: the cause class those scenarios price by accounting convention is the same class that rose after Rhode Island’s migration, and the rise concentrates in the years the federal billing record independently identifies. The window profile is a descriptive consistency check specified in the frozen protocol as verdict-inert — it confirms neither the accounting convention nor the estimate; it shows they point at the same object. Full paths, donor weights, and sensitivities are committed (analysis/event_study_results.json; analysis/riky_event_study_results.json).</p>
+<p>The accounting scenarios of <a href="#sec-adoption" class="quarto-xref">Section&nbsp;7.2</a> price a cause class; whether that class moves when the computing apparatus actually changes is a causal question, and a companion paper answers it as far as the record allows <span class="citation" data-cites="ghenis2026migrations">(<a href="#ref-ghenis2026migrations" role="doc-biblioref">Ghenis 2026</a>)</span>. Three state eligibility-system replacements — Rhode Island’s UHIP (September 2016), Kentucky’s Benefind (February 2016), and Oregon’s ONE expansion (February 2021) — are estimated there against synthetic controls drawn from states with no migration in a public event registry, with permutation inference and decision rules frozen before estimation. Rhode Island earns the frozen rule’s <code>signal</code>: strict computing-apparatus error dollars rise $2.90 per weighted case-month against the synthetic donor (p = 0.023) while the client-caused placebo does not fire, and the rise concentrates in fiscal 2017–19, a pre-named window inside the interval for which the Food and Nutrition Service later billed the state $37.3 million — a descriptive, verdict-inert check. Kentucky and Oregon return <code>no_protocol_defined_signal</code>, Oregon’s a refusal because its placebo fires inside the pandemic window. A second frozen protocol decomposes the Rhode Island result by cause code and finds the rise in computer-generated mass-change error under both a joint-fit and a fixed-donor estimator, with the design’s placebo dependence on the shared donor fit reported beside the result.</p>
+<p>The estimand throughout is a bundled system replacement as implemented — staffing, process, and software together — never “the effect of a rules engine.” The connection to <a href="#sec-adoption" class="quarto-xref">Section&nbsp;7.2</a> is narrow: the cause class those scenarios price by accounting convention is the class that rose after Rhode Island’s migration. Neither result checks the other. Protocols, artifacts, and both referee rounds are committed (analysis/RIKY_EVENT_STUDY_PROTOCOL.md; analysis/UHIP_DECOMPOSITION_PROTOCOL.md; analysis/FIXED_DONOR_PROTOCOL.md; paper-causal/).</p>
 </section>
 </section>
 <section id="sec-roadmap" class="level2">
@@ -691,6 +691,9 @@ Duan, Naihua. 1983. <span>“Smearing Estimate: A Nonparametric Retransformation
 </div>
 <div id="ref-efron1979bootstrap" class="csl-entry" role="listitem">
 Efron, Bradley. 1979. <span>“Bootstrap Methods: Another Look at the Jackknife.”</span> <em>The Annals of Statistics</em> 7 (1): 1–26. <a href="https://doi.org/10.1214/aos/1176344552">https://doi.org/10.1214/aos/1176344552</a>.
+</div>
+<div id="ref-ghenis2026migrations" class="csl-entry" role="listitem">
+Ghenis, Max. 2026. <span>“What a System Replacement Does to Measured Error: Three <span>SNAP</span> Eligibility-System Migrations in the Quality-Control Record.”</span> <a href="https://policyengine.org/us/snap-payment-error-simulator/paper-migrations">https://policyengine.org/us/snap-payment-error-simulator/paper-migrations</a>.
 </div>
 <div id="ref-giannella_snapqc" class="csl-entry" role="listitem">
 Giannella, Eric, and Ben Molin. 2026. <em>Snap_qc: Reconstruction and Analysis Code for the SNAP Quality Control Public-Use Files</em>. <a href="https://github.com/giannella/snap_qc">https://github.com/giannella/snap_qc</a>.
