@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-14
+date: 2026-08-16
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -981,51 +981,35 @@ computation would be an unsupported number, so none is shown.
 ### System replacements in the record: event studies {#sec-events}
 
 The accounting scenarios of @sec-adoption price a cause class; whether
-that class responds to real changes in the computing apparatus is a
-causal question, and the record contains experiments no one would run
-on purpose. Three state eligibility-system replacements were estimated
-against synthetic donors built from never-treated states, with
-permutation inference in space and protocols frozen before results
-[@abadie2010synthetic; @abadie2021using]; treatment dates come from a
-source-verified registry, outcomes use a fixed real tolerance threshold
-over fiscal 2012–2024, the fiscal 2016 go-live year is excluded as a
-transition period for the two events inside it, and the primary
-specification drops the pandemic-partial fiscal 2021 file from the
-post-period (retaining fiscal 2020), with both pandemic-handling
-variants reported as sensitivities.
+that class moves when the computing apparatus actually changes is a
+causal question, and a companion paper answers it as far as the record
+allows [@ghenis2026migrations]. Three state eligibility-system
+replacements — Rhode Island's UHIP (September 2016), Kentucky's
+Benefind (February 2016), and Oregon's ONE expansion (February 2021) —
+are estimated there against synthetic controls drawn from states with
+no migration in a public event registry, with permutation inference and
+decision rules frozen before estimation. Rhode Island earns the frozen
+rule's `signal`: strict computing-apparatus error dollars rise \$2.90 per
+weighted case-month against the synthetic donor (p = 0.023) while the
+client-caused placebo does not fire, and the rise concentrates in fiscal
+2017–19, a pre-named window inside the interval for which the Food and
+Nutrition Service later billed the state \$37.3 million — a descriptive,
+verdict-inert check. Kentucky and Oregon return
+`no_protocol_defined_signal`, Oregon's a refusal because its placebo
+fires inside the pandemic window. A second frozen protocol decomposes
+the Rhode Island result by cause code and finds the rise in
+computer-generated mass-change error under both a joint-fit and a
+fixed-donor estimator, with the design's placebo dependence on the
+shared donor fit reported beside the result.
 
-Rhode Island's UHIP launch (September 2016) fires the pre-registered
-rule: strict computing-apparatus error dollars rise \$2.90 per weighted
-case-month against the synthetic donor (permutation p = 0.023) while
-the client-caused placebo stays null (p = 0.233). The elevation
-concentrates in fiscal 2017–19 — a +\$4.95 mean gap against +\$1.48
-in the later post-years — which is the window for which the Food and
-Nutrition Service billed the state \$37.3 million in SNAP
-overpayments; the billing record played no role in the estimation. Kentucky's Benefind launch (February 2016)
-shows no protocol-defined signal (−\$0.58, p = 0.302), and the pooled
-two-unit statistic reaches p = 0.093 with its placebo at 1.0. Oregon's
-2021 eligibility-system expansion, estimated first, returned a refused
-signal: its client placebo fired while the strict outcome did not,
-which is what a design should do when a treatment date sits inside the
-pandemic window it cannot see past.
-
-The three verdicts span the design's range — a signal, a null, and a
-refusal. The null is not evidence that Kentucky's migration went well:
-the registry documents a troubled launch there too, and a null under
-this design is the absence of a protocol-defined signal, which power,
-donor fit, or offsetting changes can each produce. The estimand
-everywhere is a bundled system replacement as implemented — staffing,
-process, and software together — never "the effect of a rules engine."
-The connection to @sec-adoption is narrow: the cause class those
-scenarios price by accounting convention is the same class that rose
-after Rhode Island's migration, and the rise concentrates in the years
-the federal billing record independently identifies. The window
-profile is a descriptive consistency check specified in the frozen
-protocol as verdict-inert — it confirms neither the accounting
-convention nor the estimate; it shows they point at the same object.
-Full paths, donor weights, and sensitivities are committed
-(analysis/event_study_results.json;
-analysis/riky_event_study_results.json).
+The estimand throughout is a bundled system replacement as
+implemented — staffing, process, and software together — never "the
+effect of a rules engine." The connection to @sec-adoption is narrow:
+the cause class those scenarios price by accounting convention is the
+class that rose after Rhode Island's migration. Neither result checks
+the other. Protocols, artifacts, and both referee rounds are committed
+(analysis/RIKY_EVENT_STUDY_PROTOCOL.md; analysis/UHIP_DECOMPOSITION_PROTOCOL.md;
+analysis/FIXED_DONOR_PROTOCOL.md; paper-causal/).
 
 ## Toward engine-computed counterfactuals {#sec-roadmap}
 
