@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What a system replacement does to measured error — PolicyEngine</title>
+<meta name="description" content="Working paper: administrative quality control data as an oracle — verifying encoded SNAP rules and simulating payment error under cost sharing.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What a system replacement does to measured error — PolicyEngine">
+<meta property="og:description" content="QC files as a verification oracle (6,081 cases exact across seven states), a distributional error model with its failures reported, and the fiscal 2025 rates landing where the sampling-noise mechanism says they should.">
+<meta property="og:url" content="https://policyengine.org/us/snap-payment-error-simulator/paper/">
+<link rel="icon" href="../pe-logo-teal.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../app.css">
+<style>
+  .paper-head { padding: 26px 0 6px; }
+  .paper-head .kicker {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--muted-foreground);
+  }
+  .paper-head h1 { margin: 6px 0 10px; }
+  .paper-desc { max-width: 70ch; color: var(--muted-foreground); }
+  .paper-tag {
+    display: inline-block; margin: 10px 0 0; padding: 2px 10px;
+    border: 1px solid var(--border); border-radius: 999px;
+    font-size: 12.5px; color: var(--muted-foreground);
+  }
+  .paper-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0 14px; }
+  .paper-actions a {
+    display: inline-block; padding: 7px 16px; border-radius: 6px;
+    border: 1px solid var(--border); color: var(--foreground);
+    text-decoration: none; font-size: 14px; font-weight: 500;
+  }
+  .paper-actions a.primary { border-color: var(--primary); color: var(--primary); }
+  .paper-actions a:hover { border-color: var(--primary); }
+  .paper-frame-card {
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .paper-frame-card iframe {
+    display: block; width: 100%; border: 0; background: #fff;
+    height: calc(100vh - 16rem); min-height: 720px;
+  }
+  .paper-foot {
+    display: flex; gap: 10px; align-items: center; margin: 0 0 30px;
+    font-size: 13.5px; color: var(--muted-foreground);
+  }
+  .paper-foot a { color: var(--muted-foreground); }
+</style>
+</head>
+<body id="paper-top">
+<nav class="pe-shell-header" aria-label="PolicyEngine site header">
+  <div class="wrap pe-shell-row">
+    <a class="pe-shell-brand" href="https://policyengine.org/us">
+      <img class="logo logo-light" src="../pe-logo-teal.svg" alt="PolicyEngine" height="22">
+      <img class="logo logo-dark" src="../pe-logo-white.svg" alt="PolicyEngine" height="22">
+    </a>
+    <div class="pe-shell-links">
+      <a href="https://policyengine.org/us/research">Research</a>
+      <a href="https://policyengine.org/us/model/rules">Model</a>
+      <a href="https://policyengine.org/us/api">API</a>
+      <a href="https://policyengine.org/us/donate" class="pe-shell-donate">Donate</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <header class="paper-head">
+    <div class="kicker">Working paper</div>
+    <h1>What a system replacement does to measured error: three SNAP eligibility-system migrations in the quality-control record</h1>
+    <p class="paper-desc">
+      Verifying encoded SNAP rules and simulating payment error under cost
+      sharing. The QC files as a verification oracle — 6,081 in-scope
+      fiscal 2024 cases across seven states reproduced exactly, zero dollar
+      tolerance — a distributional error model reported with its validation
+      failures, and the fiscal 2025 rates landing where the sampling-noise
+      mechanism says realized years should: 18 of 53 jurisdictions changed
+      cost-share tiers, only 7 of those changes beyond two-year sampling
+      noise. This page embeds the revision-7 manuscript (updated 2026-08-13), which
+      carries five rounds of adversarial review, archived unedited, and adds
+      the engine-adoption accounting bounds, the official-vs-file wedge
+      decomposition, and the pre-registered model-repair experiments.
+    </p>
+    <span class="paper-tag">Revision 1 · 2026-08-16 · Max Ghenis, PolicyEngine</span>
+  </header>
+
+  <nav class="paper-actions" aria-label="Paper actions">
+    <a class="primary" href="web/index.html?v=m1-20260816">Open standalone HTML</a>
+    <a href="web/index.pdf">Download PDF</a>
+    <a href="../">Live simulator</a>
+    <a href="../paper/">Companion paper: measurement and simulation</a>
+    <a href="https://github.com/PolicyEngine/snap-qc-sim">Code and artifacts</a>
+  </nav>
+
+  <div class="paper-frame-card">
+    <iframe src="web/index.html?v=m1-20260816"
+            title="SNAP payment error working paper (embedded manuscript)"
+            loading="lazy"
+            sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+            referrerpolicy="same-origin"></iframe>
+  </div>
+
+  <p class="paper-foot">
+    <a href="#paper-top">↑ Back to top</a> ·
+    <a href="web/index.html?v=m1-20260816">Open manuscript in a new page</a>
+  </p>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <p class="foot-tool">Built by <a href="https://policyengine.org">PolicyEngine</a> · estimates are illustrative, from public data · <a href="mailto:hello@policyengine.org">hello@policyengine.org</a></p>
+  <nav class="pe-shell-footer" aria-label="PolicyEngine site footer">
+    <a href="https://policyengine.org/us/team">About us</a>
+    <a href="https://policyengine.org/us/donate">Donate</a>
+    <a href="https://policyengine.org/us/dev-tools">Developer tools</a>
+    <a href="https://policyengine.org/us/privacy">Privacy policy</a>
+    <a href="https://policyengine.org/us/terms">Terms and conditions</a>
+  </nav>
+</div></footer>
+
+<script>
+  const dark = matchMedia("(prefers-color-scheme: dark)");
+  const setMode = () => document.documentElement.classList.toggle("dark", dark.matches);
+  dark.addEventListener("change", setMode);
+  setMode();
+</script>
+</body>
+</html>
