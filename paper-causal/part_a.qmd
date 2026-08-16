@@ -1,0 +1,54 @@
+## The quality-control record as an outcome source
+
+Every case in the public-use quality-control file carries a sampling weight, a review status, the benefit paid, the dollars paid in error, and up to nine agency-cause codes [NEEDS CITATION: SNAP QC public-use data files, FY2012–FY2024]. Error dollars enter as weight times error amount (`AMTERR`) from active cases (`CASE = 1`, `HWGT` > 0) at an adjudicated error status (`STATUS` 2 or 3); the denominator is the weight of every active case, so the dollar outcomes are dollars per weighted case-month. A total error rate divides the same above-floor dollars by weighted benefits paid (`RAWBEN`), times 100.
+
+An error counts only above a floor, and the protocols fix that floor in real terms. The official tolerance, the floor of the official rate [@crs2018errors], ran \$50 in FY2012–13, \$37 or \$38 in FY2014–20, \$39 in FY2021, then \$48, \$54, and \$56 [NEEDS CITATION: FNS QC technical documentation, tolerance by year]. The Rhode Island–Kentucky protocol fixes its floor at the highest real value in that series, FY2012's \$50, or \$68.31 in FY2024 dollars; the Oregon protocol fixes \$56 in FY2024 dollars. Both floors sit at or above every official tolerance in their panels, so a changing nominal tolerance never defines the outcome.
+
+Reviewers code why each error occurred. Three codes form the strict class this paper calls the computing apparatus: computer programming error (17), computer-generated mass-change error (19), and arithmetic computation error (20). Five form the client-coded placebo (1, 2, 3, 4, 7): information the household did not report, reported wrongly, or withheld, and inaccurate collateral-contact reports, an analysis superclass since no field records a binary responsibility. The convention credits the whole case: a strict code in any slot puts the case's entire weighted error dollars into the strict outcome, and because classes overlap, one case can count in both. A cause code is a reviewer's classification. It records how the QC record classified the failures, and no field records what the system mechanically did.
+
+The strict codes support a FY2012 start and carry a semantic ceiling. All nine agency slots and all three strict codes appear in every file from FY2012 through FY2024; numeric presence does not prove the codes kept one meaning, and the FY2024 technical documentation reports minor revisions to the agency, element, and nature codes [NEEDS CITATION: FY2024 SNAP QC technical documentation]. Code 22 first appears in FY2023 and codes 23 through 25 in FY2024, so the strict class rather than the broad agency class serves as the historical outcome. The FY2020 file combines two period files, 18,319 and 8,793 rows, into 27,112; the FY2021 file holds 9,832 rows, a pandemic-partial year.
+
+## Events and registry
+
+Rhode Island cut over to UHIP, later RIBridges, statewide in September 2016, one year after the July 2015 plan; Deloitte built it.^[https://transparency.ri.gov/uhip/; https://www.wpri.com/target-12/we-are-very-sorry-deloitte-apologizes-to-ri-about-uhip/; https://turnto10.com/news/local/rhode-island-department-of-human-services-appeals-federal-government-snap-overpayments-37-million-dollars-uhip-ribridges-usda-food-and-nutrition-service; https://www.rimonthly.com/unified-health-infrastructure-project/] The application backlog reached about 15,000 at its peak, and the Food and Nutrition Service later billed the state \$37,343,809.68 for SNAP overpayments covering September 2016 through December 2019.
+
+Kentucky launched Benefind, Deloitte's integrated SNAP and Medicaid platform costing about \$101.5 million, on February 29, 2016.^[https://www.lpm.org/news/2016-07-21/state-officials-say-theyre-still-fixing-benefind; https://nkytribune.com/2016/04/one-stop-shop-benefind-isnt-causes-loss-of-benefits-and-confusion-for-thousands-of-kentuckians/; https://www.wkyufm.org/politics/2016-04-28/state-dedicates-workers-to-cut-benefind-backlog] After launch the state sent about 25,000 erroneous cancellation notices and worked a backlog of about 50,000 cases, and it extended SNAP recertification from six to twelve months, a mitigation inside the estimated bundle. The registry holds no billing record [NEEDS CITATION: Kentucky FNS billing record, if any].
+
+Oregon expanded ONE Eligibility from Oregon Health Plan eligibility to SNAP and other benefit programs in February 2021.^[https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx] One state web page dates it; the registry grades it single-source. The registry records no vendor [NEEDS CITATION: Oregon ONE vendor], no documented launch problems [NEEDS CITATION: Oregon ONE documented launch problems], and no billing record [NEEDS CITATION: Oregon FNS billing record, if any].
+
+The registry grades each entry by its dating evidence: multi-source when two or more independent public sources corroborate the date, single-source when one credible source does, and candidate when the event is known but its date remains unverified. Nine states carry an entry (@tbl-registry); every one leaves every donor pool. Four carry open gaps [NEEDS CITATION: Georgia Gateway vendor and statewide completion date] [NEEDS CITATION: NM ASPEN date, vendor, launch record, problems, billing] [NEEDS CITATION: IN modernization exact go-live and primary public record] [NEEDS CITATION: CO CBMS exact go-live, vendor, problems, billing].
+
+| State | System (vendor) | Go-live (precision) | Confidence |
+|---|---|---|---|
+| RI | UHIP (Deloitte) | September 2016 (month) | multi-source |
+| KY | Benefind (Deloitte) | February 29, 2016 (day) | multi-source |
+| OR | ONE Eligibility (unrecorded) | February 2021 (month) | single-source |
+| GA | Georgia Gateway | February 6, 2017 pilot (day); statewide completion unverified | single-source |
+| NC | NC FAST | May 2012–March 2013 county rollout (month) | multi-source |
+| FL | ACCESS modernization | reported start 2022; unverified | candidate |
+| NM | ASPEN | mid-2010s; unverified | candidate |
+| IN | FSSA modernization (IBM) | 2007–09; unverified | candidate |
+| CO | CBMS | 2004; unverified | candidate |
+
+: The migration registry; every listed state leaves every donor pool. {#tbl-registry}
+
+## Design
+
+Two frozen protocols govern the three estimates: one for Rhode Island and Kentucky, two treated units on a FY2012–24 panel, and one for Oregon alone on FY2017–24 (@tbl-protocols); each protocol was frozen before estimation. The estimand for every event is the bundled system replacement as implemented: contemporaneous process, staffing, and mitigation changes sit inside it, and the design isolates no component.
+
+For each treated state, nonnegative donor weights summing to one minimize the pretreatment squared distance jointly across three outcomes [@abadie2010synthetic; @abadie2021using]. The three are strict computing-apparatus dollars per case-month, the fixed-floor total error rate, and the client-coded placebo; the estimator scales each by its donor-state pretreatment standard deviation before the fit. The effect for each outcome is the mean post-period gap between state and synthetic donor minus the mean pre-period gap.
+
+Inference is permutation in space. The estimator refits every donor state as pseudo-treated on the remaining donors under the identical year assignment and ranks the absolute treated effect among the absolute placebo effects, ties counting against the signal. The p-value is (1 + exceedances)/(1 + placebos): 42 placebos for Rhode Island and Kentucky, so the smallest p is 1/43 = 0.023, and 34 for Oregon, 1/35 = 0.029. They are finite-sample comparisons within a pre-named pool, not large-sample standard errors. The Rhode Island–Kentucky pool holds every state and the District of Columbia less the nine registry states. The Oregon protocol also removes the jurisdictions on the FY2024 or FY2025 statutory delay rosters, a pre-named set with high recent measured error rates; because those rosters rest partly on rates measured after the launch, the Oregon estimate is conditional on the pre-named pool.
+
+A unit earns the verdict "signal" only when its strict-outcome permutation p falls below 0.10 and its client-placebo p stays at or above 0.10; otherwise the verdict is "no protocol-defined signal", and the total-rate outcome cannot change either. The pooled statistic, the equal-weight mean of the Rhode Island and Kentucky effects, ranks against pooled placebos built the same way, and its verdict does not replace the unit verdicts. Because FNS billed Rhode Island through December 2019, the protocol names FY2017–19 as the consequence window and reports the mean strict gap there against the later post-years, FY2020 and FY2022–24, a descriptive and verdict-inert check; the billing record enters no estimate.
+
+The Rhode Island–Kentucky protocol excludes FY2016 as a transition year, since Kentucky's February 29 launch leaves seven exposed months in that fiscal year and Rhode Island's September launch at most one, and it drops FY2021 as pandemic-partial. The Oregon protocol drops FY2021, where the February launch leaves four fiscal months before it and eight after. The sensitivities include FY2021 as post (treated, for Oregon), drop FY2020 and FY2021 together, and treat FY2016 as post for Kentucky and as pre for Rhode Island.
+
+| | Rhode Island and Kentucky | Oregon |
+|---|---|---|
+| Protocol | `analysis/RIKY_EVENT_STUDY_PROTOCOL.md` | `analysis/EVENT_STUDY_PROTOCOL.md` |
+| Panel; pre; post | FY2012–24; FY2012–15; FY2017–20 and FY2022–24 | FY2017–24; FY2017–20; FY2022–24 |
+| Floor, FY2024 dollars | \$68.31 | \$56 |
+| Donor pool; smallest p | 42 jurisdictions; 1/43 | 34 states; 1/35 |
+
+: The two frozen protocols; both apply the rule strict p < 0.10, client p ≥ 0.10. {#tbl-protocols}
