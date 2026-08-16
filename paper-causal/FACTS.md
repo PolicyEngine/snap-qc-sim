@@ -54,7 +54,7 @@
 - F52 | Certification vintage | pre-go-live 39 cases, $5,710,151.19, 34.4311%; on/after 77, $10,874,154.55, 65.5689%; unclassifiable 0 | `analysis/uhip_decomposition_results.json:certification_vintage_split.groups`
 - F53 | Certification-vintage method ceiling | `YRMONTH - LASTCERT`; `CERTMTH` not used; recorded vintage, not observed conversion status | `analysis/UHIP_DECOMPOSITION_DEVIATIONS.md:16-30`; `analysis/uhip_decomposition_results.json:certification_vintage_split`
 - F54 | Fixed-donor protocol | parent three-outcome fit held fixed across channels; expected parent placebo reproduction +3.964, p 0.233, rank 10/43; both estimators required | `origin/fixed-donor-protocol:analysis/FIXED_DONOR_PROTOCOL.md:13-38,63-69`
-- F55 | PROVISIONAL — fixed-donor results | no `analysis/fixed_donor_decomposition_results.json` on `origin/fixed-donor-protocol` at extraction; numerical channel results unavailable | `[UNSOURCED]` result; branch tree checked 2026-08-16
+- F55 | Fixed-donor results (MERGED to main, PR #72, 2026-08-16) | reproduction check PASS (client +3.964202, p 0.232558, rank 10/43, all four checks true); mass_change +2.1415, p 0.023256, rank 1/43, `signal` and `signal_family_adjusted`; defect_or_mass_change +2.5294, p 0.023256, rank 1/43, `signal` and family; disregard +1.3733, p 0.511628, rank 22/43, no signal; descriptive: defect +0.6137, entry +0.5673, arithmetic +0.4326, user +0.2482; every channel's consequence-window gap exceeds its later-post gap | `analysis/fixed_donor_decomposition_results.json:side_by_side.fixed_donor`, `:reproduction_check` (main @ 4aafd06)
 
 # Story beats
 
@@ -95,15 +95,15 @@
 - Channel lock | channels = QC coding-practice classification
 - Consequence-window lock | consequence-window check = descriptive and verdict-inert
 - Decomposition estimator lock | joint-fit and fixed-donor both reported; reproduction check as bridge; neither estimator privileged
-- Fixed-donor availability | PROVISIONAL protocol only until branch result artifact exists
+- Fixed-donor availability | results COMMITTED on main (PR #72); both estimators reported side by side
 - Introduction | question; three events; estimand; verdict triplet; RI design sensitivity; no state performance ranking
 - QC record | active-case universe; weights; AMTERR/RAWBEN/STATUS; fixed-real threshold; strict and client code maps; coding-semantic ceiling
 - Events | registry dates/confidence; vendors; documented launch facts; URLs; unsupported vendor/problem/billing fields marked
 - Design | synthetic weights; joint fit; post-minus-pre gap; permutation-in-space; plus-one rule; frozen protocols; transition and pandemic specifications; conditional donor pools
 - Results | RI, Kentucky, Oregon separately; exact effects/p/ranks/pre-RMSPE; pooled statistic separately; sensitivities flat
-- RI decomposition | gate; channels; overlaps; joint-fit results; fired placebo; family and parent verdicts; fixed-donor result pending/provisional
+- RI decomposition | gate; channels; overlaps; joint-fit results; fired placebo; family and parent verdicts; fixed-donor result committed; the two estimators agree on mass_change and defect_or_mass_change effect size and rank; they differ ONLY in the parent-rule verdict field, and only because the joint-fit run's own client placebo fired — the fixed-donor run, whose placebo reproduces the parent's, returns `signal`
 - RI internal layers | element case-presence composition; certification-vintage arithmetic; no comparison; no conversion-status label
 - Limitations | one treated unit/two treated units; 35/43 permutation denominators; thin channel cells; coder-classification ceiling; semantic drift; donor-fit dependence; pandemic partial file; registry incompleteness
 - Simulation-paper relation | one paragraph maximum; forward cite causal paper from adoption scenarios; back cite adoption accounting from causal paper; shared cause-class identity only; no validation claim
 - Conclusion | estimand-bounded findings; signal/non-signals; measurement/design finding; no policy position
-- Required disclosure | protocols frozen before estimation; branch-only provisional protocol; result absence; FY2021 handling; post-treatment-conditioned Oregon donor exclusions; whole-case overlapping credit; no adoption gate
+- Required disclosure | protocols frozen before estimation; both decomposition protocols frozen before their estimations; FY2021 handling; post-treatment-conditioned Oregon donor exclusions; whole-case overlapping credit; no adoption gate
