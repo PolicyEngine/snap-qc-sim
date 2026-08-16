@@ -1,0 +1,13 @@
+# Reproducibility referee report — round 2
+
+1. **major — CONFIRMED — The new section is an artifact inventory, not a complete number-to-key reproduction map.** Lines 212–232 name each artifact, generator, protocol, and test, but do not give the JSON key paths for the tables and prose. A reader still needs `FACTS.md` or exploratory traversal to locate sensitivities, profile gaps, ranks, weights, internal shares, and overlap amounts. The statement “Every number … reads from a committed artifact” is auditable, but the paper itself does not show how each number maps.
+
+2. **major — CONFIRMED — Full raw regeneration remains non-self-contained.** Lines 236–240 disclose that FY2012–24 public-use inputs are absent and tests skip without the hash-audited cache. The repository gives hashes and loaders but no complete acquisition/build recipe for the mixed SAS/CSV/SAV cache. A reader can verify committed JSON, but cannot regenerate it from public inputs using the paper alone.
+
+3. **major — CONFIRMED — The two parent artifacts still lack embedded protocol/raw/environment provenance.** `riky_event_study_results.json` and `event_study_results.json` have no protocol hash or environment/input-hash block. The paper names their protocol files and repository commit, which improves traceability, but the artifacts cannot themselves prove which protocol bytes or raw cache produced them. The decomposition artifacts do carry those pins.
+
+4. **minor — CONFIRMED — Fixed-donor reproduction requires a cross-commit lookup.** The reviewed branch has no `analysis/fixed_donor_decomposition_results.json`, generator, protocol, or test at the paths in lines 225–229. The paper clearly supplies `4aafd06`, and `_fixed_donor_results.readonly.json` is byte-identical, so the evidence is recoverable but not present at the cited branch path.
+
+5. **minor — PLAUSIBLE — “A fast test locks each quoted value” overstates direct paper-test coverage.** Exact artifact SHA pins and raw value-lock tests indirectly protect all artifact leaves, but the tests do not parse `paper-causal/index.qmd` and compare every displayed number. Some tests directly lock selected paper values; others lock the artifact as a whole. The distinction matters if manuscript text drifts without artifact drift.
+
+Verified: all four result objects match `main@4aafd06` byte-for-byte; the stated SHA prefixes are correct; serializers, schema/verdict checks, planted fixtures, and optional raw regeneration tests exist. I did not run the suite because the user required the target repository to remain read-only and the pinned environment can create repository-local state.
