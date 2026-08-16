@@ -1,0 +1,106 @@
+{
+  "calibration": {
+    "diagnostics": {
+      "converged": true,
+      "effective_sample_size": 75.5878572659757,
+      "max_relative_residual": 9.103828801926284e-14,
+    "max_weight_ratio": 1.212399163589104,
+    "degenerate": true
+    },
+    "post": {
+      "caseload": 305279.58400002774,
+      "issuance": 1267963387.6834738,
+      "overpayment_dollars": 100295903.97102836,
+      "overpayment_rate": 0.07910000000415278,
+      "total_rate": 0.09970000000523474,
+      "underpayment_dollars": 26120045.787651457,
+      "underpayment_rate": 0.020600000001081968
+    },
+    "targets": {
+      "caseload": 305279.584,
+      "issuance": 1267963387.75,
+      "overpayment_dollars": 100295903.971025,
+      "underpayment_dollars": 26120045.78765
+    }
+  },
+  "eligibility": {
+    "baseline_units": 491,
+    "baseline_weighted_caseload": 954822.6065948849,
+    "convention": "build-consistent engine is_snap_eligible",
+    "eligible_units": 751,
+    "flag_only_units": 842,
+    "flag_only_weighted_caseload": 1694242.9345870698
+  },
+  "environment": {
+    "policyengine_us": "1.764.6",
+    "python": "3.13.9",
+    "runtime_seconds": 2087.2235321250046
+  },
+  "error_model": {
+    "coverage_failure_disclosed": true,
+    "missing_value_counts": {
+      "cert_period_months": 2562,
+      "cert_period_months_missing": 2562,
+      "cert_timing_inconsistent": 2562,
+      "expedited": 2562,
+      "expedited_missing": 2562,
+      "just_above_premium": 2562,
+      "med_doc_required": 2562,
+      "medical_expense_distance_to_premium": 2562,
+      "months_since_cert": 2562,
+      "months_since_cert_missing": 2562,
+      "near_recert": 2562,
+      "near_recert_elderly_or_disabled": 2562,
+      "near_recert_missing": 2562,
+      "net_share_of_gross": 266,
+      "part_b_premium_missing": 2562,
+      "premium_only": 2562,
+      "se_records": 2562,
+      "se_records_missing": 2562
+    }
+  },
+  "fy2025": {
+    "official_change_pp": 0.12,
+    "official_total_rate": 0.1009,
+    "prototype": {
+      "caseload": 315684.29064147815,
+      "issuance": 1278883764.4568162,
+      "overpayment_dollars": 113603476.15050066,
+      "overpayment_rate": 0.08883018090291557,
+      "total_rate": 0.11028534495387601,
+      "underpayment_dollars": 27438660.968530823,
+      "underpayment_rate": 0.021455164050960426
+    },
+    "prototype_change_pp": 1.0585344948641273
+  },
+  "inputs": {
+    "frame": {
+      "path": "/Users/maxghenis/PolicyEngine/snap-qc-sim/analysis/rung3/cluster1_co_frame.parquet",
+      "sha256": "b6d9578f8d324fd2e34f20be2f2c424ba552668568865f8ab91f82fd9b3a359d"
+    },
+    "sparse_build": {
+      "path": "/private/tmp/claude-501/-Users-maxghenis/51a1b6bb-c8a6-466b-bd9b-2620f722d19d/scratchpad/populace_us_2024_current.h5",
+      "sha256": "48b9d479fb4fd1c3537f9383ce4697d130b6f618658409d74f6233c43b994c7e"
+    }
+  },
+  "schema": "snap_qc_sim.rung3_prototype.v1",
+  "task_b": {
+    "causal_claim": false,
+    "deployed_statistical_flip": {
+      "crossing_rate_delta_pp": -0.06,
+      "expected_fy2028_bill_delta_dollars": -2000000
+    },
+    "status": "not_run_wall_time_stub"
+  },
+  "uncalibrated": {
+    "caseload": 954822.6065948849,
+    "issuance": 2900210849.372895,
+    "overpayment_dollars": 1035241561.7115985,
+    "overpayment_model_target_ratio": 4.512691478296738,
+    "overpayment_rate": 0.3569538959332719,
+    "total_rate": 0.4059790378685695,
+    "underpayment_dollars": 142183248.53279606,
+    "underpayment_model_target_ratio": 2.3798612589950268,
+    "underpayment_rate": 0.049025141935297556
+  }
+}
