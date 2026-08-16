@@ -1,0 +1,3678 @@
+{
+  "certification_vintage_split": {
+    "field_definitions": {
+      "CERTMTH": "FY2017 Tech Doc pp. 55, 59: reviewer-recorded months in current certification or recertification period",
+      "LASTCERT": "FY2017 Tech Doc pp. 55, 59: constructed months since last SNAP certification",
+      "loader": "snap_qc_sim/data.py load_cases does not expose either field"
+    },
+    "groups": {
+      "not_classifiable": {
+        "case_count": 0,
+        "dollar_share": 0.0,
+        "weighted_error_dollars": 0
+      },
+      "on_or_after_2016_09_go_live": {
+        "case_count": 77,
+        "dollar_share": 0.6556894643735421,
+        "weighted_error_dollars": 10874154.549574219
+      },
+      "predates_2016_09_go_live": {
+        "case_count": 39,
+        "dollar_share": 0.34431053562645775,
+        "weighted_error_dollars": 5710151.1933334945
+      }
+    },
+    "limitation": "Month arithmetic supports a recorded-certification vintage split, not direct identification of conversion status.",
+    "method": "YRMONTH minus integer LASTCERT months; CERTMTH is period length and does not date certification"
+  },
+  "client_placebo": {
+    "absolute_rank": 1,
+    "effect": 5.637220813271588,
+    "p_value": 0.023255813953488372,
+    "path": [
+      {
+        "event_time": -4,
+        "gap": 1.3315227412887152,
+        "synthetic_donor": 1.4488171885977688,
+        "treated": 2.780339929886484,
+        "year": 2012
+      },
+      {
+        "event_time": -3,
+        "gap": 1.3687508454899282,
+        "synthetic_donor": 1.9934725290300346,
+        "treated": 3.362223374519963,
+        "year": 2013
+      },
+      {
+        "event_time": -2,
+        "gap": 1.5186264480440923,
+        "synthetic_donor": 1.4792080865172617,
+        "treated": 2.997834534561354,
+        "year": 2014
+      },
+      {
+        "event_time": -1,
+        "gap": 0.9700069050574753,
+        "synthetic_donor": 2.0311455509882195,
+        "treated": 3.001152456045695,
+        "year": 2015
+      },
+      {
+        "event_time": 0,
+        "gap": 2.5178212268910523,
+        "synthetic_donor": 2.994181868122041,
+        "treated": 5.512003095013093,
+        "year": 2016
+      },
+      {
+        "event_time": 1,
+        "gap": 4.848171465918994,
+        "synthetic_donor": 3.593368242502536,
+        "treated": 8.44153970842153,
+        "year": 2017
+      },
+      {
+        "event_time": 2,
+        "gap": 1.3484613423302467,
+        "synthetic_donor": 3.665732221714348,
+        "treated": 5.014193564044595,
+        "year": 2018
+      },
+      {
+        "event_time": 3,
+        "gap": 7.416532323788374,
+        "synthetic_donor": 4.691643742036817,
+        "treated": 12.108176065825191,
+        "year": 2019
+      },
+      {
+        "event_time": 4,
+        "gap": 5.874334117657598,
+        "synthetic_donor": 4.2839111043915095,
+        "treated": 10.158245222049107,
+        "year": 2020
+      },
+      {
+        "event_time": 5,
+        "gap": 5.913173801717994,
+        "synthetic_donor": 4.898142222799159,
+        "treated": 10.811316024517152,
+        "year": 2021
+      },
+      {
+        "event_time": 6,
+        "gap": 1.6556250562943955,
+        "synthetic_donor": 8.172774752712659,
+        "treated": 9.828399809007054,
+        "year": 2022
+      },
+      {
+        "event_time": 7,
+        "gap": 11.257716578623453,
+        "synthetic_donor": 6.8665389310924905,
+        "treated": 18.124255509715944,
+        "year": 2023
+      },
+      {
+        "event_time": 8,
+        "gap": 16.140291953078425,
+        "synthetic_donor": 8.006238402960543,
+        "treated": 24.14653035603897,
+        "year": 2024
+      }
+    ],
+    "placebo_effects": {
+      "AK": 0.47894780939208126,
+      "AL": 1.3304693569177939,
+      "AR": -4.883886557450065,
+      "AZ": 1.78589873465476,
+      "CA": -2.6948411119633358,
+      "CT": 3.576251588401523,
+      "DC": 3.9972111378275157,
+      "DE": 3.8741356427457143,
+      "HI": -1.744940080779279,
+      "IA": 3.669298336440875,
+      "ID": -4.471089014294952,
+      "IL": 5.050877204180569,
+      "KS": -0.4499614445796374,
+      "LA": -2.351040387270655,
+      "MA": 1.8820701159416289,
+      "MD": -0.9533085537266395,
+      "ME": 4.772692273575712,
+      "MI": 2.5510424455473117,
+      "MN": 0.5861568470864575,
+      "MO": 0.4157442886512771,
+      "MS": 2.1211027437494976,
+      "MT": 1.3620785836903484,
+      "ND": 2.5396617553275176,
+      "NE": 0.2703236164473438,
+      "NH": -1.5977304929897438,
+      "NJ": -3.0125608232299355,
+      "NV": -1.1361149769091532,
+      "NY": -4.908219229822896,
+      "OH": 0.13759876820236425,
+      "OK": 2.7884645477743044,
+      "PA": -0.7735156793770765,
+      "SC": -3.2148449632129843,
+      "SD": -3.2552366543998663,
+      "TN": -1.0920946191631342,
+      "TX": 1.0439439827778523,
+      "UT": -0.6289557249855371,
+      "VA": 2.716289767362272,
+      "VT": -4.873314627305369,
+      "WA": 2.4464906170354106,
+      "WI": -0.7074778349075983,
+      "WV": -1.4695553962828538,
+      "WY": -5.206200117234797
+    },
+    "pre_rmspe": 1.312780576882196,
+    "rank_denominator": 43
+  },
+  "descriptive_channels": {
+    "arithmetic": {
+      "effect": 0.309172205950682,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": 0.041496380847911934,
+          "synthetic_donor": 0.064302636176262,
+          "treated": 0.10579901702417394,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": -0.0546162928050138,
+          "synthetic_donor": 0.0546162928050138,
+          "treated": 0.0,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": 0.11722529537105897,
+          "synthetic_donor": 0.07120801339283692,
+          "treated": 0.18843330876389588,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.13215115252849824,
+          "synthetic_donor": 0.11279557323193388,
+          "treated": 0.2449467257604321,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": 0.022008285044179732,
+          "synthetic_donor": 0.2388564435487711,
+          "treated": 0.26086472859295085,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": -0.018530445210461266,
+          "synthetic_donor": 0.08180903140019324,
+          "treated": 0.06327858618973198,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 0.3431142815843736,
+          "synthetic_donor": 0.16067768573252605,
+          "treated": 0.5037919673168997,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 0.9744777416109731,
+          "synthetic_donor": 0.2608477459504935,
+          "treated": 1.2353254875614665,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 0.9605137383301653,
+          "synthetic_donor": 0.20934462288034208,
+          "treated": 1.1698583612105073,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": -0.029085497841385408,
+          "synthetic_donor": 0.029085497841385408,
+          "treated": 0.0,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": -0.14987401306449494,
+          "synthetic_donor": 0.6121899907720162,
+          "treated": 0.46231597770752125,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 0.40773815817992065,
+          "synthetic_donor": 0.3098374781962745,
+          "treated": 0.7175756363761951,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": 0.06021491812359417,
+          "synthetic_donor": 0.20476122509254605,
+          "treated": 0.2649761432161402,
+          "year": 2024
+        }
+      ],
+      "pre_rmspe": 0.09475044334022979
+    },
+    "defect": {
+      "effect": 0.906759452753491,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": -0.10894811644076398,
+          "synthetic_donor": 0.10894811644076398,
+          "treated": 0.0,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": -0.03345114375717652,
+          "synthetic_donor": 0.03345114375717652,
+          "treated": 0.0,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": -0.0219540087706698,
+          "synthetic_donor": 0.0219540087706698,
+          "treated": 0.0,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.20872722622907777,
+          "synthetic_donor": 0.17971705523558199,
+          "treated": 0.38844428146465976,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.17464099193677907,
+          "synthetic_donor": 0.17464099193677907,
+          "treated": 0.0,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 4.221943266991108,
+          "synthetic_donor": 0.3540742584066219,
+          "treated": 4.57601752539773,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 0.3354558227216926,
+          "synthetic_donor": 1.4945876542104104,
+          "treated": 1.830043476932103,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 0.813074186041886,
+          "synthetic_donor": 0.39878403743998464,
+          "treated": 1.2118582234818707,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 0.3867887411947576,
+          "synthetic_donor": 0.2374973674083453,
+          "treated": 0.6242861086031029,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 0.0,
+          "synthetic_donor": 0.0,
+          "treated": 0.0,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": 0.41213495733190675,
+          "synthetic_donor": 0.6484396514032625,
+          "treated": 1.0605746087351693,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": -0.13053295859124509,
+          "synthetic_donor": 0.2536624430170746,
+          "treated": 0.12312948442582951,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": 0.38610657879014854,
+          "synthetic_donor": 0.20733777322142985,
+          "treated": 0.5934443520115784,
+          "year": 2024
+        }
+      ],
+      "pre_rmspe": 0.11941283909722691
+    },
+    "entry": {
+      "effect": 0.6557585398035866,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": 0.07819573723577701,
+          "synthetic_donor": 0.11079667325591237,
+          "treated": 0.18899241049168938,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": -0.15507348312722563,
+          "synthetic_donor": 0.15507348312722563,
+          "treated": 0.0,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": -0.07617516253664652,
+          "synthetic_donor": 0.07617516253664652,
+          "treated": 0.0,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": -0.060558817373844546,
+          "synthetic_donor": 0.12172315813159343,
+          "treated": 0.06116434075774888,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.19262407347717328,
+          "synthetic_donor": 0.19262407347717328,
+          "treated": 0.0,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 0.2942946179578423,
+          "synthetic_donor": 0.19246566057596462,
+          "treated": 0.4867602785338069,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 0.32468923555449264,
+          "synthetic_donor": 0.2636434839510658,
+          "treated": 0.5883327195055584,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 1.9593068937073261,
+          "synthetic_donor": 0.23365966080229056,
+          "treated": 2.1929665545096166,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 0.4858841709612622,
+          "synthetic_donor": 0.11442524929961868,
+          "treated": 0.6003094202608809,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 2.1994802372003086,
+          "synthetic_donor": 0.4782175660527523,
+          "treated": 2.6776978032530607,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": 0.040452535795341804,
+          "synthetic_donor": 0.5655688076527701,
+          "treated": 0.6060213434481119,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 0.789188788542287,
+          "synthetic_donor": 0.4159303810558633,
+          "treated": 1.2051191695981502,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": 0.32267301595315995,
+          "synthetic_donor": 0.40433934802549115,
+          "treated": 0.7270123639786511,
+          "year": 2024
+        }
+      ],
+      "pre_rmspe": 0.09953941962893369
+    },
+    "recert": {
+      "observed_path": [
+        {
+          "treated": 0.0,
+          "year": 2012
+        },
+        {
+          "treated": 0.0,
+          "year": 2013
+        },
+        {
+          "treated": 0.0,
+          "year": 2014
+        },
+        {
+          "treated": 0.0,
+          "year": 2015
+        },
+        {
+          "treated": 0.0,
+          "year": 2016
+        },
+        {
+          "treated": 0.0,
+          "year": 2017
+        },
+        {
+          "treated": 0.0,
+          "year": 2018
+        },
+        {
+          "treated": 0.0,
+          "year": 2019
+        },
+        {
+          "treated": 0.0,
+          "year": 2020
+        },
+        {
+          "treated": 0.0,
+          "year": 2021
+        },
+        {
+          "treated": 0.0,
+          "year": 2022
+        },
+        {
+          "treated": 0.0,
+          "year": 2023
+        },
+        {
+          "treated": 0.0,
+          "year": 2024
+        }
+      ],
+      "status": "observed_zero_no_fit"
+    },
+    "user": {
+      "effect": 0.27386122571225213,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": 0.12536829708329764,
+          "synthetic_donor": 0.0,
+          "treated": 0.12536829708329764,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": -0.057567434270247436,
+          "synthetic_donor": 0.057567434270247436,
+          "treated": 0.0,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": 0.0,
+          "synthetic_donor": 0.0,
+          "treated": 0.0,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.07498901322682135,
+          "synthetic_donor": 0.00711878060388009,
+          "treated": 0.08210779383070144,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.011747096930797231,
+          "synthetic_donor": 0.011747096930797231,
+          "treated": 0.0,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 0.28087079066387716,
+          "synthetic_donor": 0.0,
+          "treated": 0.28087079066387716,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 0.33820244293264434,
+          "synthetic_donor": 0.06319203790939226,
+          "treated": 0.4013944808420366,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 0.938396753499355,
+          "synthetic_donor": 0.04311245992602616,
+          "treated": 0.9815092134253812,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": -0.021212840628328018,
+          "synthetic_donor": 0.021212840628328018,
+          "treated": 0.0,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 0.41886817855251174,
+          "synthetic_donor": 0.0,
+          "treated": 0.41886817855251174,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": 0.3291005498843967,
+          "synthetic_donor": 0.008193228525835872,
+          "treated": 0.33729377841023256,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 0.3864476446161723,
+          "synthetic_donor": 0.08576962349054425,
+          "treated": 0.47221726810671655,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": -0.08489447791257748,
+          "synthetic_donor": 0.08489447791257748,
+          "treated": 0.0,
+          "year": 2024
+        }
+      ],
+      "pre_rmspe": 0.07850887132477072
+    }
+  },
+  "element_mix": {
+    "absent_from_post_window_inventory": [
+      212,
+      222
+    ],
+    "absent_from_pre_window_inventory": [
+      213,
+      225
+    ],
+    "comparable_codes": [
+      111,
+      130,
+      140,
+      150,
+      151,
+      160,
+      161,
+      162,
+      163,
+      165,
+      166,
+      170,
+      211,
+      221,
+      311,
+      312,
+      314,
+      321,
+      323,
+      331,
+      332,
+      333,
+      334,
+      335,
+      336,
+      342,
+      343,
+      344,
+      345,
+      346,
+      350,
+      361,
+      363,
+      364,
+      365,
+      366,
+      371,
+      372,
+      520,
+      530,
+      560,
+      810,
+      820
+    ],
+    "unit": "strict-coded Rhode Island error cases; case-level code presence",
+    "windows": {
+      "fy2012_2015": {
+        "case_count": 15,
+        "codes": {
+          "111": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "130": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "140": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "150": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "151": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "160": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "161": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "162": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "163": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "165": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "166": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "170": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "211": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "221": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "311": {
+            "case_count": 2,
+            "case_share": 0.13333333333333333
+          },
+          "312": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "314": {
+            "case_count": 1,
+            "case_share": 0.06666666666666667
+          },
+          "321": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "323": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "331": {
+            "case_count": 7,
+            "case_share": 0.4666666666666667
+          },
+          "332": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "333": {
+            "case_count": 2,
+            "case_share": 0.13333333333333333
+          },
+          "334": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "335": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "336": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "342": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "343": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "344": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "345": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "346": {
+            "case_count": 1,
+            "case_share": 0.06666666666666667
+          },
+          "350": {
+            "case_count": 2,
+            "case_share": 0.13333333333333333
+          },
+          "361": {
+            "case_count": 1,
+            "case_share": 0.06666666666666667
+          },
+          "363": {
+            "case_count": 2,
+            "case_share": 0.13333333333333333
+          },
+          "364": {
+            "case_count": 3,
+            "case_share": 0.2
+          },
+          "365": {
+            "case_count": 5,
+            "case_share": 0.3333333333333333
+          },
+          "366": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "371": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "372": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "520": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "530": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "560": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "810": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "820": {
+            "case_count": 0,
+            "case_share": 0.0
+          }
+        }
+      },
+      "fy2017_2019": {
+        "case_count": 116,
+        "codes": {
+          "111": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "130": {
+            "case_count": 1,
+            "case_share": 0.008620689655172414
+          },
+          "140": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "150": {
+            "case_count": 7,
+            "case_share": 0.0603448275862069
+          },
+          "151": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "160": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "161": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "162": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "163": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "165": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "166": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "170": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "211": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "221": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "311": {
+            "case_count": 20,
+            "case_share": 0.1724137931034483
+          },
+          "312": {
+            "case_count": 6,
+            "case_share": 0.05172413793103448
+          },
+          "314": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "321": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "323": {
+            "case_count": 4,
+            "case_share": 0.034482758620689655
+          },
+          "331": {
+            "case_count": 54,
+            "case_share": 0.46551724137931033
+          },
+          "332": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "333": {
+            "case_count": 26,
+            "case_share": 0.22413793103448276
+          },
+          "334": {
+            "case_count": 3,
+            "case_share": 0.02586206896551724
+          },
+          "335": {
+            "case_count": 1,
+            "case_share": 0.008620689655172414
+          },
+          "336": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "342": {
+            "case_count": 1,
+            "case_share": 0.008620689655172414
+          },
+          "343": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "344": {
+            "case_count": 3,
+            "case_share": 0.02586206896551724
+          },
+          "345": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "346": {
+            "case_count": 6,
+            "case_share": 0.05172413793103448
+          },
+          "350": {
+            "case_count": 9,
+            "case_share": 0.07758620689655173
+          },
+          "361": {
+            "case_count": 14,
+            "case_share": 0.1206896551724138
+          },
+          "363": {
+            "case_count": 46,
+            "case_share": 0.39655172413793105
+          },
+          "364": {
+            "case_count": 63,
+            "case_share": 0.5431034482758621
+          },
+          "365": {
+            "case_count": 22,
+            "case_share": 0.1896551724137931
+          },
+          "366": {
+            "case_count": 2,
+            "case_share": 0.017241379310344827
+          },
+          "371": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "372": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "520": {
+            "case_count": 3,
+            "case_share": 0.02586206896551724
+          },
+          "530": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "560": {
+            "case_count": 2,
+            "case_share": 0.017241379310344827
+          },
+          "810": {
+            "case_count": 0,
+            "case_share": 0.0
+          },
+          "820": {
+            "case_count": 0,
+            "case_share": 0.0
+          }
+        }
+      }
+    }
+  },
+  "environment": {
+    "byteorder": "little",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "pyreadstat": "1.3.5",
+    "python": "3.14.4"
+  },
+  "inferential_channels": {
+    "defect_or_mass_change": {
+      "absolute_rank": 1,
+      "effect": 2.75775966828969,
+      "p_value": 0.023255813953488372,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": -0.11258715794053706,
+          "synthetic_donor": 0.24482686407923498,
+          "treated": 0.13223970613869793,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": -0.03022113549403463,
+          "synthetic_donor": 0.14658675337977078,
+          "treated": 0.11636561788573616,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": 0.08368982209211137,
+          "synthetic_donor": 0.16394340420882092,
+          "treated": 0.2476332263009323,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.3692757373947375,
+          "synthetic_donor": 0.6453465447036946,
+          "treated": 1.014622282098432,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.30091006086096994,
+          "synthetic_donor": 0.38146539804167945,
+          "treated": 0.08055533718070954,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 7.233271928842198,
+          "synthetic_donor": 0.734265437883362,
+          "treated": 7.96753736672556,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 3.2589632918183797,
+          "synthetic_donor": 1.859680900578062,
+          "treated": 5.118644192396442,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 4.465154852173518,
+          "synthetic_donor": 0.9395426387361487,
+          "treated": 5.404697490909666,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 1.4727726942135446,
+          "synthetic_donor": 0.8331830498230002,
+          "treated": 2.305955744036545,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 0.3138099651503742,
+          "synthetic_donor": 0.4930394790745489,
+          "treated": 0.8068494442249231,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": 2.260109515847512,
+          "synthetic_donor": 1.267712799206943,
+          "treated": 3.5278223150544554,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 0.9326129249666273,
+          "synthetic_donor": 1.686009024774198,
+          "treated": 2.618621949740825,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": 0.22420768575753824,
+          "synthetic_donor": 0.9326270978704839,
+          "treated": 1.1568347836280222,
+          "year": 2024
+        }
+      ],
+      "placebo_effects": {
+        "AK": 0.3013508671594983,
+        "AL": -0.47867396289296926,
+        "AR": -0.05917771419757967,
+        "AZ": -0.1288700137817214,
+        "CA": -0.24103317206185357,
+        "CT": 0.7279808469159246,
+        "DC": 0.49051710821909256,
+        "DE": 0.031826270188016204,
+        "HI": -0.3621641078116753,
+        "IA": -0.26509665360221607,
+        "ID": -0.017535398853028718,
+        "IL": 0.7528561884207783,
+        "KS": -0.25251663325950935,
+        "LA": 0.3372254055147272,
+        "MA": -0.22154778701830075,
+        "MD": -0.7784951811710243,
+        "ME": -0.011579325974860766,
+        "MI": 2.1051801085962754,
+        "MN": -0.047846711719225866,
+        "MO": 0.03140194838826361,
+        "MS": -0.250216514901007,
+        "MT": 0.4871760721077414,
+        "ND": 0.03673309439740047,
+        "NE": -0.14765981115089943,
+        "NH": -0.3733887514699987,
+        "NJ": -0.21905245875042134,
+        "NV": -0.1000155194695724,
+        "NY": -0.2451892548999787,
+        "OH": 1.2032022315513304,
+        "OK": -0.5986929011119496,
+        "PA": -0.26236307223277855,
+        "SC": -0.25766479086083444,
+        "SD": -1.299016500372193,
+        "TN": -0.18190503535198124,
+        "TX": 0.7552931692673539,
+        "UT": -0.2376346048904729,
+        "VA": 0.4021452517929007,
+        "VT": -0.4930750324118731,
+        "WA": -0.11487834061997407,
+        "WI": -0.5245774751369229,
+        "WV": -0.0008124143265534614,
+        "WY": -0.43836193300034615
+      },
+      "pre_rmspe": 0.19808946319397747,
+      "profile": {
+        "changes_verdict": false,
+        "consequence_minus_later": 3.763370985748393,
+        "consequence_window_mean_gap": 4.9857966909446985,
+        "consequence_window_years": [
+          2017,
+          2018,
+          2019
+        ],
+        "later_post_mean_gap": 1.2224257051963057,
+        "later_post_years": [
+          2020,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "rank_denominator": 43,
+      "verdict": "no_protocol_defined_signal",
+      "verdict_family_adjusted": "signal_family_adjusted"
+    },
+    "disregard": {
+      "absolute_rank": 34,
+      "effect": 0.557491940975734,
+      "p_value": 0.7906976744186046,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": 2.740223445267108,
+          "synthetic_donor": 2.207023273189404,
+          "treated": 4.947246718456512,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": 3.0332800419934354,
+          "synthetic_donor": 2.401912835320949,
+          "treated": 5.4351928773143845,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": 1.3727843453041704,
+          "synthetic_donor": 2.5256589666681375,
+          "treated": 3.898443311972308,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.681564821552223,
+          "synthetic_donor": 2.075248483434119,
+          "treated": 2.756813304986342,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.39845300626371527,
+          "synthetic_donor": 2.944190154708969,
+          "treated": 2.545737148445254,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 4.309363507559567,
+          "synthetic_donor": 3.829428162162803,
+          "treated": 8.13879166972237,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 1.3567163153633657,
+          "synthetic_donor": 3.8589190424021917,
+          "treated": 5.215635357765557,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 5.382095154408925,
+          "synthetic_donor": 4.20396324188273,
+          "treated": 9.586058396291655,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 4.094477774755521,
+          "synthetic_donor": 2.9166792763566085,
+          "treated": 7.01115705111213,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 2.241923390005674,
+          "synthetic_donor": 3.0171615702019903,
+          "treated": 5.259084960207664,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": -0.022582902030825913,
+          "synthetic_donor": 5.4594908953248735,
+          "treated": 5.436907993294048,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 2.3204008062372674,
+          "synthetic_donor": 6.676486312435675,
+          "treated": 8.996887118672943,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": 0.16071507524095985,
+          "synthetic_donor": 5.859641491348329,
+          "treated": 6.020356566589289,
+          "year": 2024
+        }
+      ],
+      "placebo_effects": {
+        "AK": 2.920099561160394,
+        "AL": -3.347154301463828,
+        "AR": -0.7140230587583235,
+        "AZ": -0.79891472835271,
+        "CA": -0.35670427226997314,
+        "CT": -0.3837155871256848,
+        "DC": 4.724075314778355,
+        "DE": -0.5411507222297844,
+        "HI": -0.08502872205928053,
+        "IA": 0.828150018242841,
+        "ID": -2.6733901592361424,
+        "IL": 2.96132000783524,
+        "KS": -0.4116954094481077,
+        "LA": 1.0960105246270562,
+        "MA": -2.320600600264349,
+        "MD": 2.016518202023505,
+        "ME": 1.4504426698180772,
+        "MI": 2.4845557046925397,
+        "MN": 0.04813483253787065,
+        "MO": 3.3879130732447282,
+        "MS": -2.1618017109462007,
+        "MT": 0.11293769899434292,
+        "ND": 3.7173018774503,
+        "NE": -0.7154380176866042,
+        "NH": -1.4629357559121756,
+        "NJ": 0.0260873478059111,
+        "NV": -2.3103407821263167,
+        "NY": 3.6912138509128036,
+        "OH": 1.4550134618499795,
+        "OK": -1.2807588363094013,
+        "PA": 1.0899036687685575,
+        "SC": -0.5182773782465194,
+        "SD": -2.481969130487519,
+        "TN": -1.474388226541341,
+        "TX": 3.6373678110092333,
+        "UT": -1.3033874622329353,
+        "VA": 3.010516554502308,
+        "VT": -1.7933262565482453,
+        "WA": -3.2414005696015873,
+        "WI": -1.8259033892101384,
+        "WV": -1.6997189192616569,
+        "WY": -4.694952834530355
+      },
+      "pre_rmspe": 2.1828123950443468,
+      "profile": {
+        "changes_verdict": false,
+        "consequence_minus_later": 2.044472303893222,
+        "consequence_window_mean_gap": 3.6827249924439527,
+        "consequence_window_years": [
+          2017,
+          2018,
+          2019
+        ],
+        "later_post_mean_gap": 1.6382526885507307,
+        "later_post_years": [
+          2020,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "rank_denominator": 43,
+      "verdict": "no_protocol_defined_signal",
+      "verdict_family_adjusted": "no_family_adjusted_signal"
+    },
+    "mass_change": {
+      "absolute_rank": 1,
+      "effect": 2.0821040632235266,
+      "p_value": 0.023255813953488372,
+      "path": [
+        {
+          "event_time": -4,
+          "gap": -0.0036390414997730935,
+          "synthetic_donor": 0.13587874763847102,
+          "treated": 0.13223970613869793,
+          "year": 2012
+        },
+        {
+          "event_time": -3,
+          "gap": 0.0032300082631418897,
+          "synthetic_donor": 0.11313560962259427,
+          "treated": 0.11636561788573616,
+          "year": 2013
+        },
+        {
+          "event_time": -2,
+          "gap": 0.10564383086278117,
+          "synthetic_donor": 0.14198939543815112,
+          "treated": 0.2476332263009323,
+          "year": 2014
+        },
+        {
+          "event_time": -1,
+          "gap": 0.16054851116565966,
+          "synthetic_donor": 0.4656294894681126,
+          "treated": 0.6261780006337723,
+          "year": 2015
+        },
+        {
+          "event_time": 0,
+          "gap": -0.12626906892419087,
+          "synthetic_donor": 0.2068244061049004,
+          "treated": 0.08055533718070954,
+          "year": 2016
+        },
+        {
+          "event_time": 1,
+          "gap": 3.8937962222104874,
+          "synthetic_donor": 0.3801911794767401,
+          "treated": 4.2739874016872275,
+          "year": 2017
+        },
+        {
+          "event_time": 2,
+          "gap": 3.4600030648005005,
+          "synthetic_donor": 0.3871024565010921,
+          "treated": 3.8471055213015926,
+          "year": 2018
+        },
+        {
+          "event_time": 3,
+          "gap": 3.850844443879711,
+          "synthetic_donor": 0.5407586012961642,
+          "treated": 4.391603045175875,
+          "year": 2019
+        },
+        {
+          "event_time": 4,
+          "gap": 1.0859839530187871,
+          "synthetic_donor": 0.5956856824146549,
+          "treated": 1.681669635433442,
+          "year": 2020
+        },
+        {
+          "event_time": 5,
+          "gap": 0.3138099651503742,
+          "synthetic_donor": 0.4930394790745489,
+          "treated": 0.8068494442249231,
+          "year": 2021
+        },
+        {
+          "event_time": 6,
+          "gap": 1.847974558515606,
+          "synthetic_donor": 0.6192731478036806,
+          "treated": 2.4672477063192866,
+          "year": 2022
+        },
+        {
+          "event_time": 7,
+          "gap": 1.0631458835578722,
+          "synthetic_donor": 1.4323465817571233,
+          "treated": 2.4954924653149955,
+          "year": 2023
+        },
+        {
+          "event_time": 8,
+          "gap": -0.1618988930326105,
+          "synthetic_donor": 0.725289324649054,
+          "treated": 0.5633904316164435,
+          "year": 2024
+        }
+      ],
+      "placebo_effects": {
+        "AK": 0.10309722675782713,
+        "AL": -0.3182507155748172,
+        "AR": -0.024633056237721232,
+        "AZ": -0.037749813282116705,
+        "CA": -0.17130454986228436,
+        "CT": 0.23149163012143192,
+        "DC": -0.16694171832629667,
+        "DE": 0.06911196013946924,
+        "HI": -0.2783198584618383,
+        "IA": -0.19362535288868077,
+        "ID": -0.09775973933418709,
+        "IL": 0.7985135291722543,
+        "KS": -0.2600822132442564,
+        "LA": 0.2793329000460347,
+        "MA": -0.028268583884863856,
+        "MD": -0.6527895211872292,
+        "ME": 0.10123204119381263,
+        "MI": 0.8884765382037062,
+        "MN": -0.07551541933165128,
+        "MO": 0.13144413658848522,
+        "MS": -0.14599812354983138,
+        "MT": 0.3287620537033081,
+        "ND": 0.06676948480398387,
+        "NE": -0.11496896651131454,
+        "NH": -0.02499121538283442,
+        "NJ": -0.14687127003259984,
+        "NV": 0.0854663847414838,
+        "NY": -0.11198329689645707,
+        "OH": 1.2701263309027093,
+        "OK": -0.19136776525786964,
+        "PA": -0.13320718898546424,
+        "SC": -0.2488188962808633,
+        "SD": -0.7946737441498324,
+        "TN": -0.08530475211539805,
+        "TX": 0.7882212940062797,
+        "UT": -0.16436041172441734,
+        "VA": 0.3739017358129874,
+        "VT": -0.25421231799503835,
+        "WA": -0.16303454923541985,
+        "WI": -0.24223295942176243,
+        "WV": 0.07240146865747125,
+        "WY": -0.2360982797573293
+      },
+      "pre_rmspe": 0.09612507348929687,
+      "profile": {
+        "changes_verdict": false,
+        "consequence_minus_later": 2.776079868115319,
+        "consequence_window_mean_gap": 3.7348812436302326,
+        "consequence_window_years": [
+          2017,
+          2018,
+          2019
+        ],
+        "later_post_mean_gap": 0.9588013755149137,
+        "later_post_years": [
+          2020,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "rank_denominator": 43,
+      "verdict": "no_protocol_defined_signal",
+      "verdict_family_adjusted": "signal_family_adjusted"
+    }
+  },
+  "input_hashes": {
+    "cause_shares": "c5b16617b982ce6e00f70142652cd2bcc9fc145a33ad7fce341de84b8eff61bb",
+    "coding_consistency": "547bd7b931c7cc31876fddb8a13c13954f2fbce907c6225b0a077b227bcb7a78",
+    "parent_protocol": "71d2cd6fd59213ae20284408878f987f0042f11954704838f971d31ae926cc03",
+    "protocol": "ffbf63b17a9241e55952e86aed5e0cead8b51133fc123e620de3a59f5f3ee57c",
+    "raw_by_fiscal_year": {
+      "2012": "90968f8f612507a88e1a4e7767f6bc55dba0cb7cffb61766b3de1827c81eb4c0",
+      "2013": "a2341cb547aed989ca64deb18f79095c0001266c61310f6aded1f0d45cbb4e22",
+      "2014": "947f290d05c4d949d92f885f43d0fc7c508f288f4ec62737819a47fffc51e9b8",
+      "2015": "2b2f922eca3188810da93fbcdd0190c198e6d9ecb3efa71c219e0d6023e8a4e3",
+      "2016": "d5e91c7510456a4e9e14861a7579d80aff6c10687d45095179c87d94c5bcdf00",
+      "2017": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9",
+      "2018": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82",
+      "2019": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846",
+      "2020": "8ac8a236e6a99d3b2039e191e6c1891235b0a5c54e3dd518bcc944b4b45ddd08",
+      "2021": "b86ed6170c995f5a2a8fbf0c4c732dba1782cba48c36838b2e59fc76c128d701",
+      "2022": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
+      "2023": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
+      "2024": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb"
+    },
+    "system_migrations": "01466bff6ec47b41624804c6ee52ddc79f4e5ea670f7665ee95b3d33a6064b6f"
+  },
+  "outcome_definitions": {
+    "channel_codes": {
+      "arithmetic": [
+        20
+      ],
+      "defect": [
+        17
+      ],
+      "defect_or_mass_change": [
+        17,
+        19
+      ],
+      "disregard": [
+        12
+      ],
+      "entry": [
+        18
+      ],
+      "mass_change": [
+        19
+      ],
+      "recert": [
+        23,
+        24,
+        25
+      ],
+      "user": [
+        21
+      ]
+    },
+    "client_codes": [
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "fixed_real_threshold_2024_dollars": 68.31384966506094
+  },
+  "overlap_accounting": [
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 265450.1985236047,
+      "sum_channel_dollars": 265450.1985236047,
+      "year": 2012
+    },
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 136897.50381099898,
+      "sum_channel_dollars": 136897.50381099898,
+      "year": 2013
+    },
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 518170.15101223,
+      "sum_channel_dollars": 518170.15101223,
+      "year": 2014
+    },
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 1512080.3215326,
+      "sum_channel_dollars": 1512080.3215326,
+      "year": 2015
+    },
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 404871.4980741,
+      "sum_channel_dollars": 404871.4980741,
+      "year": 2016
+    },
+    {
+      "duplicate_credit_dollars": 759868.2039988032,
+      "overlap_case_count": 7,
+      "overlap_weighted_case_count": 7336.227756887962,
+      "strict_outcome_dollars": 6915111.635719972,
+      "sum_channel_dollars": 7674979.839718775,
+      "year": 2017
+    },
+    {
+      "duplicate_credit_dollars": 593218.519037955,
+      "overlap_case_count": 4,
+      "overlap_weighted_case_count": 4016.678543963099,
+      "strict_outcome_dollars": 3392393.0582664115,
+      "sum_channel_dollars": 3985611.5773043665,
+      "year": 2018
+    },
+    {
+      "duplicate_credit_dollars": 187891.01976029295,
+      "overlap_case_count": 2,
+      "overlap_weighted_case_count": 2010.7427086066155,
+      "strict_outcome_dollars": 6276801.048921331,
+      "sum_channel_dollars": 6464692.068681624,
+      "year": 2019
+    },
+    {
+      "duplicate_credit_dollars": 158880.19863023562,
+      "overlap_case_count": 1,
+      "overlap_weighted_case_count": 1005.570877406555,
+      "strict_outcome_dollars": 1861614.9567045642,
+      "sum_channel_dollars": 2020495.1553347998,
+      "year": 2020
+    },
+    {
+      "duplicate_credit_dollars": 0.0,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 196718.49643535377,
+      "sum_channel_dollars": 196718.49643535377,
+      "year": 2021
+    },
+    {
+      "duplicate_credit_dollars": 4.656612873077393e-10,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 3240298.6580051556,
+      "sum_channel_dollars": 3240298.658005156,
+      "year": 2022
+    },
+    {
+      "duplicate_credit_dollars": 123199.18940677587,
+      "overlap_case_count": 1,
+      "overlap_weighted_case_count": 1502.4291391070187,
+      "strict_outcome_dollars": 3273582.959713285,
+      "sum_channel_dollars": 3396782.1491200607,
+      "year": 2023
+    },
+    {
+      "duplicate_credit_dollars": -2.3283064365386963e-10,
+      "overlap_case_count": 0,
+      "overlap_weighted_case_count": 0.0,
+      "strict_outcome_dollars": 1513049.1830288067,
+      "sum_channel_dollars": 1513049.1830288065,
+      "year": 2024
+    }
+  ],
+  "primary_specification": {
+    "donor_weights": {
+      "AK": 0.0,
+      "AL": 0.0,
+      "AR": 0.0,
+      "AZ": 0.0,
+      "CA": 0.0,
+      "CT": 0.07368699109254835,
+      "DC": 0.05690694862057076,
+      "DE": 0.0,
+      "HI": 0.0,
+      "IA": 0.0,
+      "ID": 0.0,
+      "IL": 0.0,
+      "KS": 0.0,
+      "LA": 0.0,
+      "MA": 0.0,
+      "MD": 0.13054810543354847,
+      "ME": 0.0,
+      "MI": 0.13211365262185554,
+      "MN": 0.0,
+      "MO": 0.0,
+      "MS": 0.0,
+      "MT": 0.0,
+      "ND": 0.0,
+      "NE": 0.0,
+      "NH": 0.0,
+      "NJ": 0.0,
+      "NV": 0.0,
+      "NY": 0.0,
+      "OH": 0.3060582341154739,
+      "OK": 0.0,
+      "PA": 0.0,
+      "SC": 0.0,
+      "SD": 0.30068606811600307,
+      "TN": 0.0,
+      "TX": 0.0,
+      "UT": 0.0,
+      "VA": 0.0,
+      "VT": 0.0,
+      "WA": 0.0,
+      "WI": 0.0,
+      "WV": 0.0,
+      "WY": 0.0
+    },
+    "outcomes": {
+      "arithmetic": {
+        "effect": 0.309172205950682,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": 0.041496380847911934,
+            "synthetic_donor": 0.064302636176262,
+            "treated": 0.10579901702417394,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": -0.0546162928050138,
+            "synthetic_donor": 0.0546162928050138,
+            "treated": 0.0,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 0.11722529537105897,
+            "synthetic_donor": 0.07120801339283692,
+            "treated": 0.18843330876389588,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.13215115252849824,
+            "synthetic_donor": 0.11279557323193388,
+            "treated": 0.2449467257604321,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": 0.022008285044179732,
+            "synthetic_donor": 0.2388564435487711,
+            "treated": 0.26086472859295085,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": -0.018530445210461266,
+            "synthetic_donor": 0.08180903140019324,
+            "treated": 0.06327858618973198,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 0.3431142815843736,
+            "synthetic_donor": 0.16067768573252605,
+            "treated": 0.5037919673168997,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 0.9744777416109731,
+            "synthetic_donor": 0.2608477459504935,
+            "treated": 1.2353254875614665,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 0.9605137383301653,
+            "synthetic_donor": 0.20934462288034208,
+            "treated": 1.1698583612105073,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": -0.029085497841385408,
+            "synthetic_donor": 0.029085497841385408,
+            "treated": 0.0,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": -0.14987401306449494,
+            "synthetic_donor": 0.6121899907720162,
+            "treated": 0.46231597770752125,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 0.40773815817992065,
+            "synthetic_donor": 0.3098374781962745,
+            "treated": 0.7175756363761951,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 0.06021491812359417,
+            "synthetic_donor": 0.20476122509254605,
+            "treated": 0.2649761432161402,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.09475044334022979
+      },
+      "client": {
+        "effect": 5.637220813271588,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": 1.3315227412887152,
+            "synthetic_donor": 1.4488171885977688,
+            "treated": 2.780339929886484,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": 1.3687508454899282,
+            "synthetic_donor": 1.9934725290300346,
+            "treated": 3.362223374519963,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 1.5186264480440923,
+            "synthetic_donor": 1.4792080865172617,
+            "treated": 2.997834534561354,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.9700069050574753,
+            "synthetic_donor": 2.0311455509882195,
+            "treated": 3.001152456045695,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": 2.5178212268910523,
+            "synthetic_donor": 2.994181868122041,
+            "treated": 5.512003095013093,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 4.848171465918994,
+            "synthetic_donor": 3.593368242502536,
+            "treated": 8.44153970842153,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 1.3484613423302467,
+            "synthetic_donor": 3.665732221714348,
+            "treated": 5.014193564044595,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 7.416532323788374,
+            "synthetic_donor": 4.691643742036817,
+            "treated": 12.108176065825191,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 5.874334117657598,
+            "synthetic_donor": 4.2839111043915095,
+            "treated": 10.158245222049107,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 5.913173801717994,
+            "synthetic_donor": 4.898142222799159,
+            "treated": 10.811316024517152,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 1.6556250562943955,
+            "synthetic_donor": 8.172774752712659,
+            "treated": 9.828399809007054,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 11.257716578623453,
+            "synthetic_donor": 6.8665389310924905,
+            "treated": 18.124255509715944,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 16.140291953078425,
+            "synthetic_donor": 8.006238402960543,
+            "treated": 24.14653035603897,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 1.312780576882196
+      },
+      "defect": {
+        "effect": 0.906759452753491,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": -0.10894811644076398,
+            "synthetic_donor": 0.10894811644076398,
+            "treated": 0.0,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": -0.03345114375717652,
+            "synthetic_donor": 0.03345114375717652,
+            "treated": 0.0,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": -0.0219540087706698,
+            "synthetic_donor": 0.0219540087706698,
+            "treated": 0.0,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.20872722622907777,
+            "synthetic_donor": 0.17971705523558199,
+            "treated": 0.38844428146465976,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.17464099193677907,
+            "synthetic_donor": 0.17464099193677907,
+            "treated": 0.0,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 4.221943266991108,
+            "synthetic_donor": 0.3540742584066219,
+            "treated": 4.57601752539773,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 0.3354558227216926,
+            "synthetic_donor": 1.4945876542104104,
+            "treated": 1.830043476932103,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 0.813074186041886,
+            "synthetic_donor": 0.39878403743998464,
+            "treated": 1.2118582234818707,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 0.3867887411947576,
+            "synthetic_donor": 0.2374973674083453,
+            "treated": 0.6242861086031029,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 0.0,
+            "synthetic_donor": 0.0,
+            "treated": 0.0,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 0.41213495733190675,
+            "synthetic_donor": 0.6484396514032625,
+            "treated": 1.0605746087351693,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": -0.13053295859124509,
+            "synthetic_donor": 0.2536624430170746,
+            "treated": 0.12312948442582951,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 0.38610657879014854,
+            "synthetic_donor": 0.20733777322142985,
+            "treated": 0.5934443520115784,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.11941283909722691
+      },
+      "defect_or_mass_change": {
+        "effect": 2.75775966828969,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": -0.11258715794053706,
+            "synthetic_donor": 0.24482686407923498,
+            "treated": 0.13223970613869793,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": -0.03022113549403463,
+            "synthetic_donor": 0.14658675337977078,
+            "treated": 0.11636561788573616,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 0.08368982209211137,
+            "synthetic_donor": 0.16394340420882092,
+            "treated": 0.2476332263009323,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.3692757373947375,
+            "synthetic_donor": 0.6453465447036946,
+            "treated": 1.014622282098432,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.30091006086096994,
+            "synthetic_donor": 0.38146539804167945,
+            "treated": 0.08055533718070954,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 7.233271928842198,
+            "synthetic_donor": 0.734265437883362,
+            "treated": 7.96753736672556,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 3.2589632918183797,
+            "synthetic_donor": 1.859680900578062,
+            "treated": 5.118644192396442,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 4.465154852173518,
+            "synthetic_donor": 0.9395426387361487,
+            "treated": 5.404697490909666,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 1.4727726942135446,
+            "synthetic_donor": 0.8331830498230002,
+            "treated": 2.305955744036545,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 0.3138099651503742,
+            "synthetic_donor": 0.4930394790745489,
+            "treated": 0.8068494442249231,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 2.260109515847512,
+            "synthetic_donor": 1.267712799206943,
+            "treated": 3.5278223150544554,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 0.9326129249666273,
+            "synthetic_donor": 1.686009024774198,
+            "treated": 2.618621949740825,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 0.22420768575753824,
+            "synthetic_donor": 0.9326270978704839,
+            "treated": 1.1568347836280222,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.19808946319397747
+      },
+      "disregard": {
+        "effect": 0.557491940975734,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": 2.740223445267108,
+            "synthetic_donor": 2.207023273189404,
+            "treated": 4.947246718456512,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": 3.0332800419934354,
+            "synthetic_donor": 2.401912835320949,
+            "treated": 5.4351928773143845,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 1.3727843453041704,
+            "synthetic_donor": 2.5256589666681375,
+            "treated": 3.898443311972308,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.681564821552223,
+            "synthetic_donor": 2.075248483434119,
+            "treated": 2.756813304986342,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.39845300626371527,
+            "synthetic_donor": 2.944190154708969,
+            "treated": 2.545737148445254,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 4.309363507559567,
+            "synthetic_donor": 3.829428162162803,
+            "treated": 8.13879166972237,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 1.3567163153633657,
+            "synthetic_donor": 3.8589190424021917,
+            "treated": 5.215635357765557,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 5.382095154408925,
+            "synthetic_donor": 4.20396324188273,
+            "treated": 9.586058396291655,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 4.094477774755521,
+            "synthetic_donor": 2.9166792763566085,
+            "treated": 7.01115705111213,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 2.241923390005674,
+            "synthetic_donor": 3.0171615702019903,
+            "treated": 5.259084960207664,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": -0.022582902030825913,
+            "synthetic_donor": 5.4594908953248735,
+            "treated": 5.436907993294048,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 2.3204008062372674,
+            "synthetic_donor": 6.676486312435675,
+            "treated": 8.996887118672943,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 0.16071507524095985,
+            "synthetic_donor": 5.859641491348329,
+            "treated": 6.020356566589289,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 2.1828123950443468
+      },
+      "entry": {
+        "effect": 0.6557585398035866,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": 0.07819573723577701,
+            "synthetic_donor": 0.11079667325591237,
+            "treated": 0.18899241049168938,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": -0.15507348312722563,
+            "synthetic_donor": 0.15507348312722563,
+            "treated": 0.0,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": -0.07617516253664652,
+            "synthetic_donor": 0.07617516253664652,
+            "treated": 0.0,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": -0.060558817373844546,
+            "synthetic_donor": 0.12172315813159343,
+            "treated": 0.06116434075774888,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.19262407347717328,
+            "synthetic_donor": 0.19262407347717328,
+            "treated": 0.0,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 0.2942946179578423,
+            "synthetic_donor": 0.19246566057596462,
+            "treated": 0.4867602785338069,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 0.32468923555449264,
+            "synthetic_donor": 0.2636434839510658,
+            "treated": 0.5883327195055584,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 1.9593068937073261,
+            "synthetic_donor": 0.23365966080229056,
+            "treated": 2.1929665545096166,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 0.4858841709612622,
+            "synthetic_donor": 0.11442524929961868,
+            "treated": 0.6003094202608809,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 2.1994802372003086,
+            "synthetic_donor": 0.4782175660527523,
+            "treated": 2.6776978032530607,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 0.040452535795341804,
+            "synthetic_donor": 0.5655688076527701,
+            "treated": 0.6060213434481119,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 0.789188788542287,
+            "synthetic_donor": 0.4159303810558633,
+            "treated": 1.2051191695981502,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": 0.32267301595315995,
+            "synthetic_donor": 0.40433934802549115,
+            "treated": 0.7270123639786511,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.09953941962893369
+      },
+      "mass_change": {
+        "effect": 2.0821040632235266,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": -0.0036390414997730935,
+            "synthetic_donor": 0.13587874763847102,
+            "treated": 0.13223970613869793,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": 0.0032300082631418897,
+            "synthetic_donor": 0.11313560962259427,
+            "treated": 0.11636561788573616,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 0.10564383086278117,
+            "synthetic_donor": 0.14198939543815112,
+            "treated": 0.2476332263009323,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.16054851116565966,
+            "synthetic_donor": 0.4656294894681126,
+            "treated": 0.6261780006337723,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.12626906892419087,
+            "synthetic_donor": 0.2068244061049004,
+            "treated": 0.08055533718070954,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 3.8937962222104874,
+            "synthetic_donor": 0.3801911794767401,
+            "treated": 4.2739874016872275,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 3.4600030648005005,
+            "synthetic_donor": 0.3871024565010921,
+            "treated": 3.8471055213015926,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 3.850844443879711,
+            "synthetic_donor": 0.5407586012961642,
+            "treated": 4.391603045175875,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": 1.0859839530187871,
+            "synthetic_donor": 0.5956856824146549,
+            "treated": 1.681669635433442,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 0.3138099651503742,
+            "synthetic_donor": 0.4930394790745489,
+            "treated": 0.8068494442249231,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 1.847974558515606,
+            "synthetic_donor": 0.6192731478036806,
+            "treated": 2.4672477063192866,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 1.0631458835578722,
+            "synthetic_donor": 1.4323465817571233,
+            "treated": 2.4954924653149955,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": -0.1618988930326105,
+            "synthetic_donor": 0.725289324649054,
+            "treated": 0.5633904316164435,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.09612507348929687
+      },
+      "user": {
+        "effect": 0.27386122571225213,
+        "path": [
+          {
+            "event_time": -4,
+            "gap": 0.12536829708329764,
+            "synthetic_donor": 0.0,
+            "treated": 0.12536829708329764,
+            "year": 2012
+          },
+          {
+            "event_time": -3,
+            "gap": -0.057567434270247436,
+            "synthetic_donor": 0.057567434270247436,
+            "treated": 0.0,
+            "year": 2013
+          },
+          {
+            "event_time": -2,
+            "gap": 0.0,
+            "synthetic_donor": 0.0,
+            "treated": 0.0,
+            "year": 2014
+          },
+          {
+            "event_time": -1,
+            "gap": 0.07498901322682135,
+            "synthetic_donor": 0.00711878060388009,
+            "treated": 0.08210779383070144,
+            "year": 2015
+          },
+          {
+            "event_time": 0,
+            "gap": -0.011747096930797231,
+            "synthetic_donor": 0.011747096930797231,
+            "treated": 0.0,
+            "year": 2016
+          },
+          {
+            "event_time": 1,
+            "gap": 0.28087079066387716,
+            "synthetic_donor": 0.0,
+            "treated": 0.28087079066387716,
+            "year": 2017
+          },
+          {
+            "event_time": 2,
+            "gap": 0.33820244293264434,
+            "synthetic_donor": 0.06319203790939226,
+            "treated": 0.4013944808420366,
+            "year": 2018
+          },
+          {
+            "event_time": 3,
+            "gap": 0.938396753499355,
+            "synthetic_donor": 0.04311245992602616,
+            "treated": 0.9815092134253812,
+            "year": 2019
+          },
+          {
+            "event_time": 4,
+            "gap": -0.021212840628328018,
+            "synthetic_donor": 0.021212840628328018,
+            "treated": 0.0,
+            "year": 2020
+          },
+          {
+            "event_time": 5,
+            "gap": 0.41886817855251174,
+            "synthetic_donor": 0.0,
+            "treated": 0.41886817855251174,
+            "year": 2021
+          },
+          {
+            "event_time": 6,
+            "gap": 0.3291005498843967,
+            "synthetic_donor": 0.008193228525835872,
+            "treated": 0.33729377841023256,
+            "year": 2022
+          },
+          {
+            "event_time": 7,
+            "gap": 0.3864476446161723,
+            "synthetic_donor": 0.08576962349054425,
+            "treated": 0.47221726810671655,
+            "year": 2023
+          },
+          {
+            "event_time": 8,
+            "gap": -0.08489447791257748,
+            "synthetic_donor": 0.08489447791257748,
+            "treated": 0.0,
+            "year": 2024
+          }
+        ],
+        "pre_rmspe": 0.07850887132477072
+      }
+    },
+    "post_years": [
+      2017,
+      2018,
+      2019,
+      2020,
+      2022,
+      2023,
+      2024
+    ],
+    "pre_years": [
+      2012,
+      2013,
+      2014,
+      2015
+    ]
+  },
+  "protocol_sha256": "ffbf63b17a9241e55952e86aed5e0cead8b51133fc123e620de3a59f5f3ee57c",
+  "schema": "snap_qc_sim.uhip_decomposition.v1",
+  "schema_version": 1,
+  "scope": {
+    "descriptive_channels": [
+      "defect",
+      "arithmetic",
+      "user",
+      "entry",
+      "recert"
+    ],
+    "donor_pool": [
+      "AK",
+      "AL",
+      "AR",
+      "AZ",
+      "CA",
+      "CT",
+      "DC",
+      "DE",
+      "HI",
+      "IA",
+      "ID",
+      "IL",
+      "KS",
+      "LA",
+      "MA",
+      "MD",
+      "ME",
+      "MI",
+      "MN",
+      "MO",
+      "MS",
+      "MT",
+      "ND",
+      "NE",
+      "NH",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "PA",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+      "VA",
+      "VT",
+      "WA",
+      "WI",
+      "WV",
+      "WY"
+    ],
+    "inferential_channels": [
+      "mass_change",
+      "disregard",
+      "defect_or_mass_change"
+    ],
+    "panel_years": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "treated_state": "RI"
+  },
+  "sensitivity_specifications": {
+    "drop_fy2020_and_fy2021": {
+      "donor_weights": {
+        "AK": 0.0,
+        "AL": 0.0,
+        "AR": 0.0,
+        "AZ": 0.0,
+        "CA": 0.0,
+        "CT": 0.07934950675701585,
+        "DC": 0.0,
+        "DE": 0.0,
+        "HI": 0.0,
+        "IA": 0.0,
+        "ID": 0.0,
+        "IL": 0.0,
+        "KS": 0.0,
+        "LA": 0.0,
+        "MA": 0.0,
+        "MD": 0.0,
+        "ME": 0.0,
+        "MI": 0.2372500935142676,
+        "MN": 0.0,
+        "MO": 0.0,
+        "MS": 0.0,
+        "MT": 0.0294047239405592,
+        "ND": 0.0,
+        "NE": 0.0,
+        "NH": 0.0,
+        "NJ": 0.0,
+        "NV": 0.0,
+        "NY": 0.0,
+        "OH": 0.3158409322875148,
+        "OK": 0.0,
+        "PA": 0.0,
+        "SC": 0.0,
+        "SD": 0.3381547435006425,
+        "TN": 0.0,
+        "TX": 0.0,
+        "UT": 0.0,
+        "VA": 0.0,
+        "VT": 0.0,
+        "WA": 0.0,
+        "WI": 0.0,
+        "WV": 0.0,
+        "WY": 0.0
+      },
+      "outcomes": {
+        "defect_or_mass_change": {
+          "effect": 2.8336399690199046,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": -0.1040846573681185,
+              "synthetic_donor": 0.23632436350681643,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": -0.027124133542919593,
+              "synthetic_donor": 0.14348975142865575,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.0756861725080083,
+              "synthetic_donor": 0.171947053792924,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.3553310207575401,
+              "synthetic_donor": 0.659291261340892,
+              "treated": 1.014622282098432,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.1731046638157591,
+              "synthetic_donor": 0.2536600009964686,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 7.43198681323543,
+              "synthetic_donor": 0.5355505534901303,
+              "treated": 7.96753736672556,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 2.3454720936772167,
+              "synthetic_donor": 2.773172098719225,
+              "treated": 5.118644192396442,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 4.526251370530899,
+              "synthetic_donor": 0.8784461203787672,
+              "treated": 5.404697490909666,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.4225393624932936,
+              "synthetic_donor": 0.8834163815432513,
+              "treated": 2.305955744036545,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.21793771396004058,
+              "synthetic_donor": 0.5889117302648825,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 2.3752848494483714,
+              "synthetic_donor": 1.152537465606084,
+              "treated": 3.5278223150544554,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 0.7059545949390538,
+              "synthetic_donor": 1.9126673548017714,
+              "treated": 2.618621949740825,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 0.06660269582022194,
+              "synthetic_donor": 1.0902320878078002,
+              "treated": 1.1568347836280222,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.18944515402973505
+        },
+        "disregard": {
+          "effect": 0.7802307463854881,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": 2.805674363097127,
+              "synthetic_donor": 2.141572355359385,
+              "treated": 4.947246718456512,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 3.0920131698409437,
+              "synthetic_donor": 2.343179707473441,
+              "treated": 5.4351928773143845,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 1.3122252631152556,
+              "synthetic_donor": 2.5862180488570523,
+              "treated": 3.898443311972308,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.567058222310894,
+              "synthetic_donor": 2.189755082675448,
+              "treated": 2.756813304986342,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.6048576089451871,
+              "synthetic_donor": 3.150594757390441,
+              "treated": 2.545737148445254,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 4.0676516744220725,
+              "synthetic_donor": 4.071139995300297,
+              "treated": 8.13879166972237,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 1.1401163502328453,
+              "synthetic_donor": 4.075519007532712,
+              "treated": 5.215635357765557,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 4.9935698362341245,
+              "synthetic_donor": 4.5924885600575305,
+              "treated": 9.586058396291655,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 3.9062283797697464,
+              "synthetic_donor": 3.104928671342384,
+              "treated": 7.01115705111213,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 2.657815289359947,
+              "synthetic_donor": 2.601269670847717,
+              "treated": 5.259084960207664,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 0.8988779074393198,
+              "synthetic_donor": 4.538030085854728,
+              "treated": 5.436907993294048,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 3.5591764791300804,
+              "synthetic_donor": 5.437710639542862,
+              "treated": 8.996887118672943,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 1.6874487584008158,
+              "synthetic_donor": 4.332907808188473,
+              "treated": 6.020356566589289,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 2.2065722423511653
+        },
+        "mass_change": {
+          "effect": 2.136412295604968,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": -0.007954058346419351,
+              "synthetic_donor": 0.14019376448511728,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 0.0021715543971096707,
+              "synthetic_donor": 0.11419406348862648,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.09814905501675816,
+              "synthetic_donor": 0.14948417128417413,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.0915076091911734,
+              "synthetic_donor": 0.5346703914425989,
+              "treated": 0.6261780006337723,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.13287990475216105,
+              "synthetic_donor": 0.21343524193287058,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 3.8774292796960816,
+              "synthetic_donor": 0.3965581219911457,
+              "treated": 4.2739874016872275,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 3.4557059422472407,
+              "synthetic_donor": 0.3913995790543519,
+              "treated": 3.8471055213015926,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 3.799145873823877,
+              "synthetic_donor": 0.5924571713519984,
+              "treated": 4.391603045175875,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.0428653482876298,
+              "synthetic_donor": 0.6388042871458122,
+              "treated": 1.681669635433442,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.28519014309746693,
+              "synthetic_donor": 0.5216593011274562,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 1.7044338258334295,
+              "synthetic_donor": 0.7628138804858571,
+              "treated": 2.4672477063192866,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 0.7288153190115649,
+              "synthetic_donor": 1.7666771463034305,
+              "treated": 2.4954924653149955,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": -0.4712452265944529,
+              "synthetic_donor": 1.0346356582108964,
+              "treated": 0.5633904316164435,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.0672213921182182
+        }
+      },
+      "post_years": [
+        2017,
+        2018,
+        2019,
+        2022,
+        2023,
+        2024
+      ],
+      "pre_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ]
+    },
+    "include_fy2021_as_post": {
+      "donor_weights": {
+        "AK": 0.0,
+        "AL": 0.0,
+        "AR": 0.0,
+        "AZ": 0.0,
+        "CA": 0.0,
+        "CT": 0.07934950675701585,
+        "DC": 0.0,
+        "DE": 0.0,
+        "HI": 0.0,
+        "IA": 0.0,
+        "ID": 0.0,
+        "IL": 0.0,
+        "KS": 0.0,
+        "LA": 0.0,
+        "MA": 0.0,
+        "MD": 0.0,
+        "ME": 0.0,
+        "MI": 0.2372500935142676,
+        "MN": 0.0,
+        "MO": 0.0,
+        "MS": 0.0,
+        "MT": 0.0294047239405592,
+        "ND": 0.0,
+        "NE": 0.0,
+        "NH": 0.0,
+        "NJ": 0.0,
+        "NV": 0.0,
+        "NY": 0.0,
+        "OH": 0.3158409322875148,
+        "OK": 0.0,
+        "PA": 0.0,
+        "SC": 0.0,
+        "SD": 0.3381547435006425,
+        "TN": 0.0,
+        "TX": 0.0,
+        "UT": 0.0,
+        "VA": 0.0,
+        "VT": 0.0,
+        "WA": 0.0,
+        "WI": 0.0,
+        "WV": 0.0,
+        "WY": 0.0
+      },
+      "outcomes": {
+        "defect_or_mass_change": {
+          "effect": 2.311551586174438,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": -0.1040846573681185,
+              "synthetic_donor": 0.23632436350681643,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": -0.027124133542919593,
+              "synthetic_donor": 0.14348975142865575,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.0756861725080083,
+              "synthetic_donor": 0.171947053792924,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.3553310207575401,
+              "synthetic_donor": 0.659291261340892,
+              "treated": 1.014622282098432,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.1731046638157591,
+              "synthetic_donor": 0.2536600009964686,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 7.43198681323543,
+              "synthetic_donor": 0.5355505534901303,
+              "treated": 7.96753736672556,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 2.3454720936772167,
+              "synthetic_donor": 2.773172098719225,
+              "treated": 5.118644192396442,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 4.526251370530899,
+              "synthetic_donor": 0.8784461203787672,
+              "treated": 5.404697490909666,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.4225393624932936,
+              "synthetic_donor": 0.8834163815432513,
+              "treated": 2.305955744036545,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.21793771396004058,
+              "synthetic_donor": 0.5889117302648825,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 2.3752848494483714,
+              "synthetic_donor": 1.152537465606084,
+              "treated": 3.5278223150544554,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 0.7059545949390538,
+              "synthetic_donor": 1.9126673548017714,
+              "treated": 2.618621949740825,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 0.06660269582022194,
+              "synthetic_donor": 1.0902320878078002,
+              "treated": 1.1568347836280222,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.18944515402973505
+        },
+        "disregard": {
+          "effect": 0.9196178297825637,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": 2.805674363097127,
+              "synthetic_donor": 2.141572355359385,
+              "treated": 4.947246718456512,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 3.0920131698409437,
+              "synthetic_donor": 2.343179707473441,
+              "treated": 5.4351928773143845,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 1.3122252631152556,
+              "synthetic_donor": 2.5862180488570523,
+              "treated": 3.898443311972308,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.567058222310894,
+              "synthetic_donor": 2.189755082675448,
+              "treated": 2.756813304986342,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.6048576089451871,
+              "synthetic_donor": 3.150594757390441,
+              "treated": 2.545737148445254,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 4.0676516744220725,
+              "synthetic_donor": 4.071139995300297,
+              "treated": 8.13879166972237,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 1.1401163502328453,
+              "synthetic_donor": 4.075519007532712,
+              "treated": 5.215635357765557,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 4.9935698362341245,
+              "synthetic_donor": 4.5924885600575305,
+              "treated": 9.586058396291655,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 3.9062283797697464,
+              "synthetic_donor": 3.104928671342384,
+              "treated": 7.01115705111213,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 2.657815289359947,
+              "synthetic_donor": 2.601269670847717,
+              "treated": 5.259084960207664,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 0.8988779074393198,
+              "synthetic_donor": 4.538030085854728,
+              "treated": 5.436907993294048,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 3.5591764791300804,
+              "synthetic_donor": 5.437710639542862,
+              "treated": 8.996887118672943,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 1.6874487584008158,
+              "synthetic_donor": 4.332907808188473,
+              "treated": 6.020356566589289,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 2.2065722423511653
+        },
+        "mass_change": {
+          "effect": 1.7568240231106993,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": -0.007954058346419351,
+              "synthetic_donor": 0.14019376448511728,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 0.0021715543971096707,
+              "synthetic_donor": 0.11419406348862648,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.09814905501675816,
+              "synthetic_donor": 0.14948417128417413,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.0915076091911734,
+              "synthetic_donor": 0.5346703914425989,
+              "treated": 0.6261780006337723,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.13287990475216105,
+              "synthetic_donor": 0.21343524193287058,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 3.8774292796960816,
+              "synthetic_donor": 0.3965581219911457,
+              "treated": 4.2739874016872275,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 3.4557059422472407,
+              "synthetic_donor": 0.3913995790543519,
+              "treated": 3.8471055213015926,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 3.799145873823877,
+              "synthetic_donor": 0.5924571713519984,
+              "treated": 4.391603045175875,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.0428653482876298,
+              "synthetic_donor": 0.6388042871458122,
+              "treated": 1.681669635433442,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.28519014309746693,
+              "synthetic_donor": 0.5216593011274562,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 1.7044338258334295,
+              "synthetic_donor": 0.7628138804858571,
+              "treated": 2.4672477063192866,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 0.7288153190115649,
+              "synthetic_donor": 1.7666771463034305,
+              "treated": 2.4954924653149955,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": -0.4712452265944529,
+              "synthetic_donor": 1.0346356582108964,
+              "treated": 0.5633904316164435,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.0672213921182182
+        }
+      },
+      "post_years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "pre_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ]
+    },
+    "ri_fy2016_as_pre": {
+      "donor_weights": {
+        "AK": 0.0,
+        "AL": 0.0,
+        "AR": 0.0,
+        "AZ": 0.0,
+        "CA": 0.0,
+        "CT": 0.12554633104437035,
+        "DC": 0.0,
+        "DE": 0.0,
+        "HI": 0.0,
+        "IA": 0.0,
+        "ID": 0.0,
+        "IL": 0.0,
+        "KS": 0.0,
+        "LA": 0.0,
+        "MA": 0.0,
+        "MD": 0.0,
+        "ME": 0.0,
+        "MI": 0.2034733538285018,
+        "MN": 0.0,
+        "MO": 0.0,
+        "MS": 0.0,
+        "MT": 0.08133207544932583,
+        "ND": 0.0,
+        "NE": 0.0,
+        "NH": 0.0,
+        "NJ": 0.0,
+        "NV": 0.0,
+        "NY": 0.0,
+        "OH": 0.21052290113278993,
+        "OK": 0.0,
+        "PA": 0.0,
+        "SC": 0.0,
+        "SD": 0.3791253385450119,
+        "TN": 0.0,
+        "TX": 0.0,
+        "UT": 0.0,
+        "VA": 0.0,
+        "VT": 0.0,
+        "WA": 0.0,
+        "WI": 0.0,
+        "WV": 0.0,
+        "WY": 0.0
+      },
+      "outcomes": {
+        "defect_or_mass_change": {
+          "effect": 2.8211195901595696,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": -0.04633594821496623,
+              "synthetic_donor": 0.17857565435366415,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": -0.04732286238068767,
+              "synthetic_donor": 0.16368848026642382,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.08942734977811723,
+              "synthetic_donor": 0.15820587652281506,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.35582772107602545,
+              "synthetic_donor": 0.6587945610224066,
+              "treated": 1.014622282098432,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.09620738827313324,
+              "synthetic_donor": 0.17676272545384278,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 7.542151087964069,
+              "synthetic_donor": 0.42538627876149065,
+              "treated": 7.96753736672556,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 2.725286913949342,
+              "synthetic_donor": 2.3933572784470996,
+              "treated": 5.118644192396442,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 4.683670801406492,
+              "synthetic_donor": 0.7210266895031745,
+              "treated": 5.404697490909666,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.5620125132725908,
+              "synthetic_donor": 0.743943230763954,
+              "treated": 2.305955744036545,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.23918650056004243,
+              "synthetic_donor": 0.5676629436648807,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 2.364319906569138,
+              "synthetic_donor": 1.1635024084853172,
+              "treated": 3.5278223150544554,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 1.0887386550987281,
+              "synthetic_donor": 1.529883294642097,
+              "treated": 2.618621949740825,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 0.13920167363612457,
+              "synthetic_donor": 1.0176331099918976,
+              "treated": 1.1568347836280222,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.1721934684787518
+        },
+        "disregard": {
+          "effect": 1.791816165273866,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": 2.8035801215386615,
+              "synthetic_donor": 2.1436665969178503,
+              "treated": 4.947246718456512,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 2.8809625566310233,
+              "synthetic_donor": 2.554230320683361,
+              "treated": 5.4351928773143845,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 1.309208691665841,
+              "synthetic_donor": 2.589234620306467,
+              "treated": 3.898443311972308,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.8537168889074089,
+              "synthetic_donor": 1.9030964160789332,
+              "treated": 2.756813304986342,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.3373515140694492,
+              "synthetic_donor": 2.883088662514703,
+              "treated": 2.545737148445254,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 4.467275156166065,
+              "synthetic_donor": 3.6715165135563046,
+              "treated": 8.13879166972237,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 1.3437601969164241,
+              "synthetic_donor": 3.8718751608491333,
+              "treated": 5.215635357765557,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 5.595427224578263,
+              "synthetic_donor": 3.990631171713392,
+              "treated": 9.586058396291655,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 3.921084791914118,
+              "synthetic_donor": 3.0900722591980125,
+              "treated": 7.01115705111213,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 2.796999834692397,
+              "synthetic_donor": 2.462085125515267,
+              "treated": 5.259084960207664,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 1.3349433599912501,
+              "synthetic_donor": 4.1019646333027975,
+              "treated": 5.436907993294048,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 4.383731728022285,
+              "synthetic_donor": 4.6131553906506575,
+              "treated": 8.996887118672943,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": 2.0106541418715356,
+              "synthetic_donor": 4.009702424717753,
+              "treated": 6.020356566589289,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 1.934769894296517
+        },
+        "mass_change": {
+          "effect": 2.140348445051778,
+          "path": [
+            {
+              "event_time": -4,
+              "gap": 0.036108762759665,
+              "synthetic_donor": 0.09613094337903293,
+              "treated": 0.13223970613869793,
+              "year": 2012
+            },
+            {
+              "event_time": -3,
+              "gap": 0.033707624649045434,
+              "synthetic_donor": 0.08265799323669072,
+              "treated": 0.11636561788573616,
+              "year": 2013
+            },
+            {
+              "event_time": -2,
+              "gap": 0.14178850268320914,
+              "synthetic_donor": 0.10584472361772315,
+              "treated": 0.2476332263009323,
+              "year": 2014
+            },
+            {
+              "event_time": -1,
+              "gap": 0.09747161706499119,
+              "synthetic_donor": 0.5287063835687811,
+              "treated": 0.6261780006337723,
+              "year": 2015
+            },
+            {
+              "event_time": 0,
+              "gap": -0.06170933386827157,
+              "synthetic_donor": 0.1422646710489811,
+              "treated": 0.08055533718070954,
+              "year": 2016
+            },
+            {
+              "event_time": 1,
+              "gap": 3.9940315139661893,
+              "synthetic_donor": 0.27995588772103835,
+              "treated": 4.2739874016872275,
+              "year": 2017
+            },
+            {
+              "event_time": 2,
+              "gap": 3.5744915434626092,
+              "synthetic_donor": 0.27261397783898317,
+              "treated": 3.8471055213015926,
+              "year": 2018
+            },
+            {
+              "event_time": 3,
+              "gap": 3.9684381204984316,
+              "synthetic_donor": 0.42316492467744404,
+              "treated": 4.391603045175875,
+              "year": 2019
+            },
+            {
+              "event_time": 4,
+              "gap": 1.2276430181072615,
+              "synthetic_donor": 0.45402661732618044,
+              "treated": 1.681669635433442,
+              "year": 2020
+            },
+            {
+              "event_time": 5,
+              "gap": 0.425203538224215,
+              "synthetic_donor": 0.3816459060007081,
+              "treated": 0.8068494442249231,
+              "year": 2021
+            },
+            {
+              "event_time": 6,
+              "gap": 1.8000490978465007,
+              "synthetic_donor": 0.667198608472786,
+              "treated": 2.4672477063192866,
+              "year": 2022
+            },
+            {
+              "event_time": 7,
+              "gap": 1.1313007029414452,
+              "synthetic_donor": 1.3641917623735502,
+              "treated": 2.4954924653149955,
+              "year": 2023
+            },
+            {
+              "event_time": 8,
+              "gap": -0.36720083885589583,
+              "synthetic_donor": 0.9305912704723394,
+              "treated": 0.5633904316164435,
+              "year": 2024
+            }
+          ],
+          "pre_rmspe": 0.08467914054876939
+        }
+      },
+      "post_years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2022,
+        2023,
+        2024
+      ],
+      "pre_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ]
+    }
+  }
+}
