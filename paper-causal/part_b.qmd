@@ -1,0 +1,91 @@
+## Rhode Island
+
+Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month against its synthetic donor after the September 2016 launch, and the client-caused placebo does not fire. The strict effect ranks first of 43 (p = 0.023), the smallest p-value a 42-state donor pool can return. The client placebo moves +\$3.96 and ranks tenth (p = 0.233). The frozen rule requires strict p below 0.10 and client p at or above 0.10; the verdict is `signal`. Before the launch the synthetic Rhode Island tracks the state to within \$0.34 per case-month on the strict outcome (pre-RMSPE 0.345, the pre-period root-mean-square gap). Its weights fall on West Virginia (0.358), Michigan (0.354), Connecticut (0.193), Vermont (0.055), and the District of Columbia (0.041), fit jointly on the strict, total-rate, and client outcomes.
+
+The reconstructed total error rate rises 2.56 percentage points (p = 0.233); the protocol names it verdict-inert. The strict effect keeps its sign and size in every pre-named sensitivity, from +\$2.58 with the pandemic-partial FY2021 file counted as post to +\$3.10 with FY2016, the launch year, counted as pre (@tbl-ri).
+
+The rise concentrates in the years the Food and Nutrition Service later billed. The mean strict gap runs +\$4.95 per case-month across FY2017–19 and +\$1.48 across FY2020 and FY2022–24, a difference of +\$3.47. FNS billed the state \$37,343,809.68 for SNAP overpayments from September 2016 through December 2019. The billing record played no part in the estimate, and the protocol names this consequence-window profile descriptive and verdict-inert.
+
+| Outcome, specification | Effect | Pre-RMSPE | Rank | p |
+|---|---:|---:|---:|---:|
+| Strict computing-apparatus dollars (codes 17, 19, 20), primary | +2.897 | 0.345 | 1/43 | 0.023 |
+| Client-caused dollars (codes 1, 2, 3, 4, 7), placebo | +3.964 | 0.363 | 10/43 | 0.233 |
+| Total error rate, percentage points | +2.565 | 0.918 | 10/43 | 0.233 |
+| Strict, FY2020 and FY2021 dropped | +2.967 | — | — | — |
+| Strict, FY2021 counted as post | +2.579 | — | — | — |
+| Strict, FY2016 counted as pre | +3.097 | — | — | — |
+
+: Rhode Island: primary outcomes in dollars per weighted case-month and strict-outcome sensitivities; verdict `signal`. {#tbl-ri}
+
+## Kentucky
+
+Kentucky's computing-apparatus error dollars fall \$0.58 per weighted case-month against its synthetic donor after the February 29, 2016 Benefind launch (rank 13 of 43, p = 0.302). The verdict is `no_protocol_defined_signal`, and it turns on the strict p-value alone. The client placebo moves −\$4.53 (rank 5 of 43, p = 0.116) and stays at or above the 0.10 the rule requires; the total error rate falls 3.70 percentage points (p = 0.093) and cannot change the verdict. The pre-launch fit is the tightest of the three events, pre-RMSPE 0.079, on weights led by Connecticut (0.317), the District of Columbia (0.230), Delaware (0.192), and New York (0.180). The sensitivities keep the sign and stay small, from −\$0.39 to −\$0.73 (@tbl-ky).
+
+A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at this design's resolution. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
+
+| Outcome, specification | Effect | Pre-RMSPE | Rank | p |
+|---|---:|---:|---:|---:|
+| Strict computing-apparatus dollars, primary | −0.584 | 0.079 | 13/43 | 0.302 |
+| Client-caused dollars, placebo | −4.535 | 0.491 | 5/43 | 0.116 |
+| Total error rate, percentage points | −3.695 | 0.328 | 4/43 | 0.093 |
+| Strict, FY2020 and FY2021 dropped | −0.730 | — | — | — |
+| Strict, FY2021 counted as post | −0.385 | — | — | — |
+| Strict, FY2016 treated | −0.538 | — | — | — |
+
+: Kentucky: primary outcomes and strict-outcome sensitivities; verdict `no_protocol_defined_signal`. Donor weights CT 0.317, DC 0.230, DE 0.192, NY 0.180, MI 0.044, IL 0.023, SD 0.013. {#tbl-ky}
+
+## Oregon
+
+Oregon's client-caused placebo fires, and the frozen rule refuses attribution. Against a synthetic Oregon drawn from a 34-state pool, computing-apparatus error dollars move −\$0.20 per case-month after the February 2021 ONE expansion (rank 25 of 35, p = 0.714). Client-caused error dollars rise \$10.53 (rank 1 of 35, p = 0.029, the floor of a 34-state pool), and the total error rate rises 5.76 percentage points (p = 0.029). The verdict is `no_protocol_defined_signal`. A client p below 0.10 blocks a signal whatever the strict outcome does, and here the strict outcome does not move either. Iowa carries 0.673 of the donor weight, Connecticut 0.187, Wisconsin 0.116, and Missouri 0.025; the strict pre-RMSPE is 0.550.
+
+The launch shares its calendar with the pandemic. Oregon's panel runs FY2017–24 with pre years FY2017–20 and post years FY2022–24; the primary drops FY2021, a 9,832-row pandemic-partial file whose fiscal months split four before the February launch and eight after. The two pandemic sensitivities move the strict effect to +\$0.21 and −\$0.17 and leave the client gap above \$9 in both (@tbl-or). Client-coded error dollars rose in Oregon relative to its donors across that window. Whether the expansion or the pandemic-era changes that share its dates moved them, the design cannot separate, and the rule refuses. The 34-state pool conditions the result; the protocol pre-named its delay-roster and registry exclusions.
+
+| Outcome, specification | Effect | Pre-RMSPE | Rank | p |
+|---|---:|---:|---:|---:|
+| Strict computing-apparatus dollars, primary | −0.200 | 0.550 | 25/35 | 0.714 |
+| Client-caused dollars, placebo | +10.534 | 1.225 | 1/35 | 0.029 |
+| Total error rate, percentage points | +5.757 | 0.721 | 1/35 | 0.029 |
+| Strict / client, FY2021 counted as treated | +0.208 / +9.050 | — | — | — |
+| Strict / client, FY2020 and FY2021 dropped | −0.171 / +10.175 | — | — | — |
+
+: Oregon: primary outcomes and pandemic sensitivities; verdict `no_protocol_defined_signal`, placebo fired. {#tbl-or}
+
+## Pooled inference
+
+The pooled Rhode Island–Kentucky statistic is the equal-weight mean of the two state effects: +\$1.16 per case-month on the strict outcome (rank 4 of 43, p = 0.093) and −\$0.29 on the client placebo (rank 43 of 43, p = 1.0). The unit rule, applied unchanged to the pooled strict and client statistics, returns `signal`. Three of the 42 placebo statistics match or exceed the pooled strict effect in absolute value. The pooled client effect is the smallest of all 43 because the two states' client movements, +\$3.96 and −\$4.53, nearly cancel. The total rate falls 0.57 percentage points (p = 0.744) and cannot change the verdict.
+
+The pooled verdict stands apart from the two unit verdicts. It averages a +\$2.90 `signal` with a −\$0.58 `no_protocol_defined_signal`; it neither upgrades Kentucky nor averages away Rhode Island's concentration in FY2017–19. It answers one question, whether the two 2016 launches together moved computing-apparatus error dollars against a common pool.
+
+## Decomposing the Rhode Island signal
+
+The reviewers' cause codes split the strict outcome into channels, and a second frozen protocol estimates each channel against a synthetic Rhode Island. Seven channels follow the codebook: programming defect (code 17), computer-generated mass change (19), arithmetic (20), user error (21), data entry (18), information disregarded (12), and recertification (23–25). The protocol pre-names one composite, defect-or-mass-change (17 and 19). A reviewer's classification defines every channel, so the estimates describe how the QC record classified the failures, not what the system mechanically did.
+
+A count gate fixes which channels receive inference. Rhode Island's adjudicated error cases number 325, 206, and 482 in FY2017, FY2018, and FY2019; a channel is inferential only if its code appears on at least 30 of them in each year. Mass change (139, 93, 98), information disregarded (84, 51, 137), and the composite (183, 105, 119) clear the gate. Programming defect (44, 12, 21) fails FY2018; arithmetic (7, 3, 14), user error (1, 4, 8), and data entry (5, 13, 18) fall well short. Recertification records zero presence in every Rhode Island year, its codes first appear in the FY2024 file, and the channel receives no fit. Inferential channels receive the parent's permutation inference and two verdicts. The parent rule returns `signal` when channel p is below 0.10 and the run's client placebo p is at or above 0.10; the family-adjusted rule for the three channels tested returns `signal_family_adjusted` when p is below 0.10/3. Descriptive channels receive effect sizes and paths, no p-values, and no verdict.
+
+The inherited estimator fits one set of donor weights on all the outcomes in a run at once. The decomposition run therefore fits its synthetic Rhode Island on the seven estimable channel outcomes and the client placebo together. That fit lands on Ohio (0.306), South Dakota (0.301), Michigan (0.132), Maryland (0.131), Connecticut (0.074), and the District of Columbia (0.057); the parent's landed on West Virginia and Michigan. On identical data the client placebo, the same outcome the parent ran, moves from +\$3.96, p = 0.233, rank 10 of 43 under the parent's fit to +\$5.64, p = 0.023, rank 1 of 43 under the joint fit. Placebo status in this design depends on which outcomes share the donor fit. Under the parent rule the fired placebo blocks every joint-fit channel from `signal`, including mass change at +\$2.08 (p = 0.023, rank 1 of 43) and the composite at +\$2.76 (p = 0.023, rank 1 of 43). Both carry `signal_family_adjusted`, whose rule tests the channel p alone. Information disregarded moves +\$0.56 (p = 0.791, rank 34 of 43).
+
+A sibling protocol, frozen 2026-08-16 before its estimation, specifies a fixed-donor estimator. It fits the weights once on the parent's three outcomes and holds them for every channel and for the client placebo; the synthetic Rhode Island does not move between outcomes. Its pre-registered check requires the client placebo to reproduce the parent's exactly, and it does: +\$3.964, p = 0.233, rank 10 of 43. With the parent's placebo in place, mass change is +\$2.14 (p = 0.023, rank 1 of 43), `signal` and `signal_family_adjusted`. The composite is +\$2.53 (p = 0.023, rank 1 of 43), `signal` and `signal_family_adjusted`. Information disregarded is +\$1.37 (p = 0.512, rank 22 of 43), `no_protocol_defined_signal` and `no_family_adjusted_signal`. The descriptive channels stay small under both fits, none above \$0.91 (@tbl-decomp). The mass-change gap concentrates in FY2017–19 under both estimators, +\$3.73 against +\$0.96 in the later post years under the joint fit and +\$4.06 against +\$1.06 under the fixed donor, a profile the protocol names descriptive and verdict-inert.
+
+Both estimators appear in @tbl-decomp; the reproduction check is the bridge between them, and neither is privileged. They agree on the ordering: mass change carries the largest inferential portion of the strict-channel rise under both fits, and information disregarded does not separate from its donor under either. They differ on the parent-rule verdict at the same channel p-value, and the difference is the donor fit [NEEDS CITATION: fixed-donor result artifact, `analysis/fixed_donor_decomposition_results.json` on branch `fixed-donor-protocol` (PR #72), merge pending].
+
+| Channel (codes) | Joint fit: effect | p (rank) | Verdict, parent / family | Fixed donor: effect | p (rank) | Verdict, parent / family |
+|---|---:|---:|---|---:|---:|---|
+| Client placebo (1, 2, 3, 4, 7): reproduction check | +5.637 | 0.023 (1/43) | placebo fires | +3.964 | 0.233 (10/43) | reproduces parent, PASS |
+| Mass change (19) | +2.082 | 0.023 (1/43) | `no_protocol_defined_signal` / `signal_family_adjusted` | +2.142 | 0.023 (1/43) | `signal` / `signal_family_adjusted` |
+| Defect or mass change (17, 19) | +2.758 | 0.023 (1/43) | `no_protocol_defined_signal` / `signal_family_adjusted` | +2.529 | 0.023 (1/43) | `signal` / `signal_family_adjusted` |
+| Information disregarded (12) | +0.557 | 0.791 (34/43) | `no_protocol_defined_signal` / `no_family_adjusted_signal` | +1.373 | 0.512 (22/43) | `no_protocol_defined_signal` / `no_family_adjusted_signal` |
+| Programming defect (17), descriptive | +0.907 | — | — | +0.614 | — | — |
+| Data entry (18), descriptive | +0.656 | — | — | +0.567 | — | — |
+| Arithmetic (20), descriptive | +0.309 | — | — | +0.433 | — | — |
+| User error (21), descriptive | +0.274 | — | — | +0.248 | — | — |
+| Recertification (23–25) | 0, no fit | — | — | 0, no fit | — | — |
+
+: Rhode Island cause-channel decomposition under both estimators, dollars per weighted case-month; the client-placebo row is the reproduction check. {#tbl-decomp}
+
+## Rhode Island's post-launch cases
+
+Two further layers describe the strict-coded Rhode Island cases themselves; neither has a comparison unit, and neither supports inference. The first is the element codes the reviewers record on each error case, counted by case presence: a case counts once for every code it carries, so shares overlap. The FY2017–19 consequence window holds 116 strict-coded cases and the FY2012–15 pre-window 15. Code 364 appears on 63 of the 116 (54.3 percent), 331 on 54 (46.6 percent), 363 on 46 (39.7 percent), and 333 on 26 (22.4 percent) [NEEDS CITATION: interpretation of RI element codes; labels not extracted]. Among the 15 pre-launch cases the leaders are 331 (7 cases), 365 (5), and 364 (3), too few for a rate comparison. The code inventory differs slightly between windows: 213 and 225 do not appear in the FY2012–15 inventory, 212 and 222 do not appear in the FY2017–19 inventory, and the comparison keeps the 43 codes present in both.
+
+The second layer dates each case's most recent certification. `YRMONTH − LASTCERT`, the review month minus the file's months-since-last-certification field, places that certification before or on/after the September 2016 go-live; `CERTMTH` measures a certification period's length and does not date it. Of the 116 consequence-window cases, 39 carry a certification recorded before the go-live and 77 on or after it, with none unclassifiable. The 39 hold \$5,710,151.19 of weighted error dollars (34.4 percent); the 77 hold \$10,874,154.55 (65.6 percent) of the \$16.58 million the window's strict outcome carries. The split reads the recorded vintage of the certification and nothing about conversion status: whether a given case was converted from the prior system or newly entered, the file does not say.
+
+The channels credit whole cases. The strict outcome credits a case's entire weighted error once when any cause-code slot carries a strict code. Each channel credits the entire case when its own code is present, so channel sums exceed the strict outcome wherever a case carries two strict codes. Seven such cases in FY2017, four in FY2018, and two in FY2019 add \$759,868.20, \$593,218.52, and \$187,891.02 of duplicate credit to the channel sums. The strict outcome itself is \$6,915,111.64 in FY2017 against \$404,871.50 in FY2016.
