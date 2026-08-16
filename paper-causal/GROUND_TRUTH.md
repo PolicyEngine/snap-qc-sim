@@ -14,7 +14,7 @@
 | Joint decomposition donor fit | CT/DC/MD/MI/OH/SD; dominant OH/SD | High / committed result | `analysis/uhip_decomposition_results.json:primary_specification.donor_weights` |
 | Joint-fit placebo | +5.637221; p 0.023256 | High / committed result | `analysis/uhip_decomposition_results.json:client_placebo` |
 | Fixed-donor protocol | frozen 2026-08-16; parent fit held fixed | High / branch protocol | `origin/fixed-donor-protocol:analysis/FIXED_DONOR_PROTOCOL.md` |
-| Fixed-donor results | absent from `origin/fixed-donor-protocol` | High / branch-tree check 2026-08-16 | `[NEEDS CITATION: fixed-donor result artifact]` |
+| Fixed-donor results | reproduction check PASS (client +3.964202, p 0.232558, rank 10/43); mass_change +2.142, p 0.023256, rank 1/43, signal + signal_family_adjusted; defect_or_mass_change +2.529, p 0.023256, rank 1/43, signal + family; disregard +1.373, p 0.511628, rank 22/43, no signal; descriptive: defect +0.614, entry +0.567, arithmetic +0.433, user +0.248 | High / committed on branch fixed-donor-protocol (PR #72), copied read-only to paper-causal/_fixed_donor_results.readonly.json | `origin/fixed-donor-protocol:analysis/fixed_donor_decomposition_results.json:side_by_side.fixed_donor` |
 | RI/KY threshold | 68.3138496651 FY2024 dollars | High / committed result | `analysis/riky_event_study_results.json:outcome_definitions` |
 | Oregon threshold | 56 FY2024 dollars | High / committed result | `analysis/event_study_results.json:outcome_definitions` |
 | Strict code class | 17 programming; 19 mass-change; 20 arithmetic | High / committed code map | `analysis/cause_shares.json:cause_codes` |
