@@ -308,14 +308,19 @@ def _wide(panel: pd.DataFrame, outcome: str) -> pd.DataFrame:
 
 
 def fit_weights(
-    panel: pd.DataFrame, treated: str, donors: list[str], pre_years: list[int]
+    panel: pd.DataFrame,
+    treated: str,
+    donors: list[str],
+    pre_years: list[int],
+    *,
+    outcomes: tuple[str, ...] = OUTCOMES,
 ) -> dict[str, float]:
     """Fit deterministic nonnegative synthetic weights jointly across outcomes."""
     if treated in donors or not donors:
         raise ValueError("Treated state must be separate from a nonempty donor pool")
     target_blocks = []
     donor_blocks = []
-    for outcome in OUTCOMES:
+    for outcome in outcomes:
         wide = _wide(panel, outcome).loc[pre_years]
         scale = float(wide[donors].stack().std(ddof=0))
         if not np.isfinite(scale) or scale == 0:
@@ -351,10 +356,11 @@ def _estimate(
     *,
     path_years: tuple[int, ...] = YEARS,
     treatment_year: int = TREATMENT_YEAR,
+    outcomes: tuple[str, ...] = OUTCOMES,
 ) -> dict[str, Any]:
-    weights = fit_weights(panel, treated, donors, pre_years)
+    weights = fit_weights(panel, treated, donors, pre_years, outcomes=outcomes)
     result: dict[str, Any] = {"donor_weights": weights, "outcomes": {}}
-    for outcome in OUTCOMES:
+    for outcome in outcomes:
         wide = _wide(panel, outcome)
         synthetic = wide[list(weights)] @ pd.Series(weights)
         gap = wide[treated] - synthetic
@@ -386,8 +392,9 @@ def _permutation_inference(
     *,
     path_years: tuple[int, ...] = YEARS,
     treatment_year: int = TREATMENT_YEAR,
+    outcomes: tuple[str, ...] = OUTCOMES,
 ) -> dict[str, Any]:
-    placebo_effects = {outcome: {} for outcome in OUTCOMES}
+    placebo_effects = {outcome: {} for outcome in outcomes}
     for pseudo_treated in donors:
         pseudo_donors = [state for state in donors if state != pseudo_treated]
         estimate = _estimate(
@@ -398,13 +405,14 @@ def _permutation_inference(
             post_years,
             path_years=path_years,
             treatment_year=treatment_year,
+            outcomes=outcomes,
         )
-        for outcome in OUTCOMES:
+        for outcome in outcomes:
             placebo_effects[outcome][pseudo_treated] = estimate["outcomes"][outcome][
                 "effect"
             ]
     inference = {}
-    for outcome in OUTCOMES:
+    for outcome in outcomes:
         effect = treated_result["outcomes"][outcome]["effect"]
         extreme = sum(
             abs(placebo) >= abs(effect) for placebo in placebo_effects[outcome].values()
