@@ -430,7 +430,7 @@
           ]
         }
       },
-      "techdoc_citation": "FY-2024-Tech-Doc.pdf p. 8: minor changes to AGENCY, ELEMENT, and NATURE codes"
+      "techdoc_citation": "FY-2024-Tech-Doc.pdf printed p. 3 / PDF p. 13: minor changes to AGENCY, ELEMENT, and NATURE codes"
     }
   },
   "pandemic_file_handling": {
@@ -4706,7 +4706,7 @@
         "sha256": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb"
       },
       "threshold": {
-        "citation": "FY-2024-Tech-Doc.pdf p. 5 (errors $56 or less excluded)",
+        "citation": "FY-2024-Tech-Doc.pdf printed p. 6 / PDF p. 16 (errors $56 or less excluded)",
         "dollars": 56,
         "status": "verified_local_techdoc"
       },

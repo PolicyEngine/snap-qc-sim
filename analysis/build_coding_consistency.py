@@ -98,7 +98,7 @@ THRESHOLDS: dict[int, dict[str, Any]] = {
     2024: {
         "status": "verified_local_techdoc",
         "dollars": 56,
-        "citation": "FY-2024-Tech-Doc.pdf p. 5 (errors $56 or less excluded)",
+        "citation": "FY-2024-Tech-Doc.pdf printed p. 6 / PDF p. 16 (errors $56 or less excluded)",
     },
 }
 
@@ -417,8 +417,8 @@ def build() -> dict[str, Any]:
             "consecutive_observed_code_changes": consecutive_changes,
             "fy2024_minor_revisions_evidence": {
                 "techdoc_citation": (
-                    "FY-2024-Tech-Doc.pdf p. 8: minor changes to AGENCY, "
-                    "ELEMENT, and NATURE codes"
+                    "FY-2024-Tech-Doc.pdf printed p. 3 / PDF p. 13: minor changes to "
+                    "AGENCY, ELEMENT, and NATURE codes"
                 ),
                 "observed_2023_to_2024": consecutive_changes["2024"],
                 "interpretation_limit": (
