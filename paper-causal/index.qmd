@@ -5,7 +5,7 @@ author:
     affiliation: PolicyEngine
 date: 2026-08-16
 abstract: |
-  State reviewers re-work a monthly sample of active SNAP cases, record every dollar paid in error, and code why. Those quality-control files, public back to fiscal 2012, carry error dollars the reviewers attribute to the computing apparatus for every state and year under one federal definition. This paper uses them as an outcome panel for three eligibility-system replacements, Rhode Island's UHIP (September 2016), Kentucky's Benefind (February 2016), and Oregon's ONE expansion (February 2021), each estimated against a synthetic control drawn from states with no recorded migration in a public event registry, with permutation inference and a decision rule frozen before estimation. The estimand is the bundled system replacement as implemented. Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month (permutation p = 0.023) while the client-caused placebo does not fire (p = 0.233), concentrated in fiscal 2017 through 2019, the pre-named consequence window inside the September 2016 to December 2019 interval for which the Food and Nutrition Service later billed the state \$37.3 million; Kentucky shows no protocol-defined signal; Oregon's placebo fires inside the pandemic window and the rule refuses attribution. A second frozen protocol decomposes the Rhode Island signal by cause code: computer-generated mass-change error is the inferential channel that moves, at \$2.08 per case-month with the donor refit across all outcomes and \$2.14 with the parent's donor held fixed (p = 0.023 and first of 43 placebo states under both), while information-disregarded error, the other inferential channel, does not separate from the donor under either; worker and data-entry error fall below the count gate and are reported descriptively. The decomposition also shows that the design's placebo status depends on which outcomes share the donor fit: under the joint refit the client placebo moves to p = 0.023 and the parent rule returns `no_protocol_defined_signal` for the channel; under a fixed-donor estimator that reproduces the parent's placebo exactly, the same rule returns `signal`. Both estimators are reported and neither is privileged.
+  State reviewers re-work a monthly sample of active SNAP cases, record every dollar paid in error, and code why. Those quality-control files, public back to fiscal 2012, carry error dollars the reviewers attribute to the computing apparatus for every state and year under one federal definition. This paper uses them as an outcome panel for three eligibility-system replacements, Rhode Island's UHIP (September 2016), Kentucky's Benefind (February 2016), and Oregon's ONE expansion (February 2021), each estimated against a synthetic control drawn from states with no recorded migration in a public event registry, with permutation inference and a decision rule frozen before estimation. The estimand is the bundled system replacement as implemented. Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month (permutation p = 0.023, first of 43; a post-results Bonferroni comparison across the three unit tests gives an adjusted p of 0.070) while the client-caused placebo does not fire (p = 0.233), concentrated in fiscal 2017 through 2019, the pre-named consequence window inside the September 2016 to December 2019 interval for which the Food and Nutrition Service later billed the state \$37.3 million; Kentucky shows no protocol-defined signal; Oregon's placebo fires inside the pandemic window and the rule refuses attribution. A second frozen protocol decomposes the Rhode Island signal by cause code: computer-generated mass-change error is the inferential channel that moves, at \$2.08 per case-month with the donor refit across all outcomes and \$2.14 with the parent's donor held fixed (p = 0.023 and first of 43 placebo states under both), while information-disregarded error, the other inferential channel, does not separate from the donor under either; worker and data-entry error fall below the count gate and are reported descriptively. The decomposition also shows that the design's placebo status depends on which outcomes share the donor fit: under the joint refit the client placebo moves to p = 0.023 and the parent rule returns `no_protocol_defined_signal` for the channel; under a fixed-donor estimator that reproduces the parent's placebo exactly, the same rule returns `signal`. Both estimators are reported and neither is privileged.
 bibliography: references.bib
 format:
   html:
@@ -103,6 +103,27 @@ The estimator infers by permutation in space. The estimator refits every donor s
 
 A unit earns the verdict "signal" only when its strict-outcome permutation p falls below 0.10 and its client-placebo p stays at or above 0.10; otherwise the verdict is "no protocol-defined signal", and the total-rate outcome cannot change either. The pooled statistic, the equal-weight mean of the Rhode Island and Kentucky effects, ranks against pooled placebos built the same way, and its verdict does not replace the unit verdicts. Because FNS billed Rhode Island through December 2019, the protocol names FY2017–19 as the consequence window and reports the mean strict gap there against the later post-years, FY2020 and FY2022–24, a descriptive and verdict-inert check; the billing record enters no estimate.
 
+The three unit-level tests form a family, and neither parent protocol
+corrects across them; each unit carries its own verdict at 0.10 with
+the placebo condition, and the pooled Rhode Island–Kentucky statistic
+aggregates two units into one test rather than correcting the family.
+The authors declared a family disclosure after the results and before
+this manuscript (`analysis/EVENT_FAMILY_ADDENDUM.md` and its
+correction); it computes from the committed ranks alone. Bonferroni
+across the three unit tests holds under any dependence among them and
+gives Rhode Island an adjusted strict p of 3 × 1/43 = 0.070. Holm
+returns the same rejection for Rhode Island and stops at Kentucky
+(0.302 against 0.05).
+A six-test family that adds the decomposition's three channel tests
+has a threshold of 0.10/6 = 0.0167, below both attainable floors
+(1/43 = 0.0233 and 1/35 = 0.0286), so no result in this paper could
+reach it. The channel tests condition on Rhode Island's signal, ask a
+second question, and carry their own three-way adjustment in their
+frozen protocol. Rhode Island and Kentucky share one donor pool and panel, and
+Oregon's pool overlaps both, so no product of unit-level probabilities
+describes the design's joint false-positive rate. The unit verdicts
+remain the frozen verdicts.
+
 The Rhode Island–Kentucky protocol excludes FY2016 as a transition year, since Kentucky's February 29 launch leaves seven exposed months in that fiscal year and Rhode Island's September launch at most one, and it drops FY2021 as pandemic-partial. The Oregon protocol drops FY2021, where the February launch leaves four fiscal months before it and eight after. The sensitivities include FY2021 as post (treated, for Oregon), drop FY2020 and FY2021 together, and treat FY2016 as post for Kentucky and as pre for Rhode Island.
 
 | | Rhode Island and Kentucky | Oregon |
@@ -116,7 +137,7 @@ The Rhode Island–Kentucky protocol excludes FY2016 as a transition year, since
 
 ## Rhode Island
 
-Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month against its synthetic donor after the September 2016 launch, and the client-caused placebo does not fire. The strict effect ranks first of 43 (p = 0.023), the smallest p-value a 42-state donor pool can return. The client placebo moves +\$3.96 and ranks tenth (p = 0.233). The frozen rule requires strict p below 0.10 and client p at or above 0.10; the verdict is `signal`. Before the launch the synthetic Rhode Island tracks the state to within \$0.34 per case-month on the strict outcome (pre-RMSPE 0.345, the pre-period root-mean-square gap). Its weights fall on West Virginia (0.358), Michigan (0.354), Connecticut (0.193), Vermont (0.055), and the District of Columbia (0.041), fit jointly on the strict, total-rate, and client outcomes.
+Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month against its synthetic donor after the September 2016 launch, and the client-caused placebo does not fire. The strict effect ranks first of 43 (p = 0.023), the smallest p-value a 42-state donor pool can return. The client placebo moves +\$3.96 and ranks tenth (p = 0.233). The frozen rule requires strict p below 0.10 and client p at or above 0.10; the verdict is `signal`. The strict p sits at the floor a 42-donor pool allows; adjusted for the three unit tests it is 0.070 (design section). Before the launch the synthetic Rhode Island tracks the state to within \$0.34 per case-month on the strict outcome (pre-RMSPE 0.345, the pre-period root-mean-square gap). Its weights fall on West Virginia (0.358), Michigan (0.354), Connecticut (0.193), Vermont (0.055), and the District of Columbia (0.041), fit jointly on the strict, total-rate, and client outcomes.
 
 The reconstructed total error rate rises 2.56 percentage points (p = 0.233); the protocol names it verdict-inert. The strict effect keeps its sign and size in every pre-named sensitivity, from +\$2.58 with the pandemic-partial FY2021 file counted as post to +\$3.10 with FY2016, the launch year, counted as pre (@tbl-ri).
 
@@ -137,7 +158,7 @@ The rise concentrates in the pre-named consequence window. The mean strict gap r
 
 Kentucky's computing-apparatus error dollars fall \$0.58 per weighted case-month against its synthetic donor after the February 29, 2016 Benefind launch (rank 13 of 43, p = 0.302). The verdict is `no_protocol_defined_signal`, and it turns on the strict p-value alone. The client placebo moves −\$4.53 (rank 5 of 43, p = 0.116) and stays at or above the 0.10 the rule requires; the total error rate falls 3.70 percentage points (p = 0.093) and cannot change the verdict. The pre-launch fit is the tightest of the three events, pre-RMSPE 0.079, on weights led by Connecticut (0.317), the District of Columbia (0.230), Delaware (0.192), and New York (0.180). The sensitivities keep the sign and stay small, from −\$0.39 to −\$0.73 (@tbl-ky).
 
-A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at this design's resolution. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
+A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
 
 | Outcome, specification | Effect | Pre-RMSPE | Rank | p |
 |---|---:|---:|---:|---:|
@@ -228,7 +249,10 @@ including the reproduction check, in
 `tests/test_fixed_donor_decomposition.py`). Event dates and sources sit
 in `analysis/system_migrations.json`; the coding audit and tolerance
 series in `analysis/coding_consistency.json`; cause-code labels in
-`analysis/cause_shares.json`.
+`analysis/cause_shares.json`; the event-family multiplicity disclosure in
+`analysis/EVENT_FAMILY_ADDENDUM.md` with `EVENT_FAMILY_ADDENDUM_CORRECTION.md`
+(post-results reporting commitment; arithmetic on committed ranks; no
+re-estimation).
 
 The tests that lock committed values run in the repository's pinned
 environment (`uv run --frozen --extra dev --extra analysis pytest`).
@@ -241,7 +265,7 @@ artifacts at repository commit `4aafd06`.
 
 ## Limitations
 
-One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error.
+One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and the design section reports its Bonferroni and Holm arithmetic.
 
 The decomposition runs on 325, 206, and 482 adjudicated Rhode Island error cases in fiscal 2017 through 2019. The protocol admits a channel to inference only when its code appears at least 30 times in each year. Mass-change (139, 93, 98), information-disregarded (84, 51, 137), and a defect-or-mass-change composite pass. Program defect (44, 12, 21), data entry (5, 13, 18), arithmetic (7, 3, 14), and user error (1, 4, 8) appear as effect sizes without p-values. Recertification codes 23 through 25 first appear in fiscal 2024, so that channel has no cases in the Rhode Island window.
 
@@ -255,7 +279,7 @@ The event registry defines the donor pools, so a migration it missed leaves that
 
 ## Relation to the accounting scenarios
 
-The companion simulation paper's adoption accounting scenarios [NEEDS CITATION: companion simulation paper] use the same coded class this paper takes as its strict outcome, codes 17, 19, and 20. The two papers share only that class. Accounting scenarios and event estimates answer different questions, and neither checks the other. Rhode Island's rise is the one estimate here that moves in that class; it estimates one state's bundled system replacement as implemented, and nothing in it transfers to a generic rules-engine adoption scenario.
+The companion simulation paper's adoption accounting scenarios [@ghenis2026oracle] use the same coded class this paper takes as its strict outcome, codes 17, 19, and 20. The two papers share only that class. Accounting scenarios and event estimates answer different questions, and neither checks the other. Rhode Island's rise is the one estimate here that moves in that class; it estimates one state's bundled system replacement as implemented, and nothing in it transfers to a generic rules-engine adoption scenario.
 
 ## Conclusion
 
