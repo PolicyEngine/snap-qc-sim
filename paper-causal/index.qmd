@@ -308,7 +308,21 @@ files, which the repository does not distribute; it commits their
 SHA-256 hashes and loaders, the regeneration tests skip when the
 hash-audited local cache is absent, and they compare values, not bytes,
 when it is present. The paper's tables were generated from the
-artifacts at repository commit `4aafd06`.
+artifacts at repository commit `4aafd06`; revision 3 leaves every
+quoted value unchanged.
+
+## Data availability
+
+The FY2012–24 SNAP quality-control public-use files and their
+technical documentation are public: USDA's Food and Nutrition Service
+distributes them through the SNAP QC database site
+(<https://snapqcdata.net/datafiles>) alongside the annual
+payment-error-rate releases (<https://www.fns.usda.gov/snap/qc/per>).
+The repository commits the SHA-256 hash of every raw file it reads,
+so a reader can confirm they hold the same bytes this paper consumed.
+Everything else — event registry, coding audit, protocols, estimation
+artifacts, figures, and the tests that lock quoted values — ships in
+the repository itself.
 
 ## Limitations
 
