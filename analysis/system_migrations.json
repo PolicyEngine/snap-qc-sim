@@ -105,8 +105,8 @@
       "go_live": "2013-07-22",
       "date_precision": "day",
       "confidence": "verified_multi_source",
-      "panel_position": "in_panel",
-      "notes": "Wave rollout: pilot July 22, 2013 (Rio Arriba County); southern counties September 23, 2013; northern counties November 18, 2013; Bernalillo County January 21, 2014. Press documented software glitches snarling food aid. Inside the FY2012-24 panel; the state was already excluded from every donor pool as a registry entry, so this verification changes no pool. no public federal SNAP overpayment billing record located (web search 2026-08-16; absence, not evidence of absence)",
+      "panel_position": "pre_panel",
+      "notes": "Wave rollout: pilot July 22, 2013 (Rio Arriba County); southern counties September 23, 2013; northern counties November 18, 2013; Bernalillo County January 21, 2014. Press documented software glitches snarling food aid. Pre-2017 under the registry's panel taxonomy (which keys to the original FY2017-24 panel) while inside the extended RI/KY FY2012-24 panel; the state was already excluded from every donor pool as a registry entry, so this verification changes no pool. no public federal SNAP overpayment billing record located (web search 2026-08-16; absence, not evidence of absence)",
       "sources": [
         "https://www.nmlegis.gov/Entity/LFC/Documents/Program_Evaluation_Reports/Human%20Services%20Department%20-%20Automated%20System%20Program%20and%20Eligibility%20Network%20(ASPEN).pdf",
         "https://www.santafenewmexican.com/news/local_news/software-glitches-snarl-food-aid-to-those-in-need-in-new-mexico/article_e1e22603-4321-5f37-9048-62909012c442.html"
