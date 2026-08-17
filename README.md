@@ -141,3 +141,21 @@ Apache-2.0
    uv run --frozen --extra dev --extra analysis pytest -q
    cd paper && quarto render index.qmd
    ```
+
+## Replication package for the migrations paper
+
+The migrations paper (`paper-causal/`, served at
+[/paper-migrations](https://policyengine.org/us/snap-payment-error-simulator/paper-migrations/))
+develops in this repository; journals get a scoped citation object instead
+of the whole monorepo. Export it from any tag or commit:
+
+```bash
+uv run python scripts/export_replication_package.py --ref v20260817 --verify
+```
+
+This extracts exactly the files the paper's reproduction section names —
+manuscript, figures and generator, estimation scripts, frozen protocols,
+committed artifacts, and the value-lock tests — from the pinned ref via
+`git archive`, writes a `MANIFEST.json` of SHA-256 hashes, and produces a
+deterministic zip under `dist/` (same ref, same bytes). `--verify` runs
+the value-lock tests inside the exported package.
