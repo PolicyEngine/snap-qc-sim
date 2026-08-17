@@ -62,6 +62,7 @@ def test_regeneration_file_set_and_inputs(tmp_path: Path) -> None:
 
 
 def test_generator_declares_the_same_value_inputs() -> None:
+    pytest.importorskip("matplotlib")
     spec = importlib.util.spec_from_file_location("migrations_figures", SCRIPT)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
