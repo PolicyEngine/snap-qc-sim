@@ -107,18 +107,19 @@ The three unit-level tests form a family, and neither parent protocol
 corrects across them; each unit carries its own verdict at 0.10 with
 the placebo condition, and the pooled Rhode Island–Kentucky statistic
 aggregates two units into one test rather than correcting the family.
-A family disclosure declared after the results and before this
-manuscript (`analysis/EVENT_FAMILY_ADDENDUM.md` and its correction)
-reports the arithmetic from the committed ranks. Bonferroni across the
-three unit tests, valid under any dependence among them, gives Rhode
-Island an adjusted strict p of 3 × 1/43 = 0.070; Holm returns the same
-rejection for Rhode Island and stops at Kentucky (0.302 against 0.05).
+The authors declared a family disclosure after the results and before
+this manuscript (`analysis/EVENT_FAMILY_ADDENDUM.md` and its
+correction); it computes from the committed ranks alone. Bonferroni
+across the three unit tests holds under any dependence among them and
+gives Rhode Island an adjusted strict p of 3 × 1/43 = 0.070. Holm
+returns the same rejection for Rhode Island and stops at Kentucky
+(0.302 against 0.05).
 A six-test family that adds the decomposition's three channel tests
-has a threshold of 0.10/6 = 0.017, below every floor the pools can
-reach (1/43 and 1/35), so no result in this paper could clear it; the
-channel tests condition on Rhode Island's signal and ask a second
-question, and carry their own three-way adjustment in their frozen
-protocol. Rhode Island and Kentucky share one donor pool and panel, and
+has a threshold of 0.10/6 = 0.0167, below both attainable floors
+(1/43 = 0.0233 and 1/35 = 0.0286), so no result in this paper could
+reach it. The channel tests condition on Rhode Island's signal, ask a
+second question, and carry their own three-way adjustment in their
+frozen protocol. Rhode Island and Kentucky share one donor pool and panel, and
 Oregon's pool overlaps both, so no product of unit-level probabilities
 describes the design's joint false-positive rate. The unit verdicts
 remain the frozen verdicts.
@@ -157,7 +158,7 @@ The rise concentrates in the pre-named consequence window. The mean strict gap r
 
 Kentucky's computing-apparatus error dollars fall \$0.58 per weighted case-month against its synthetic donor after the February 29, 2016 Benefind launch (rank 13 of 43, p = 0.302). The verdict is `no_protocol_defined_signal`, and it turns on the strict p-value alone. The client placebo moves −\$4.53 (rank 5 of 43, p = 0.116) and stays at or above the 0.10 the rule requires; the total error rate falls 3.70 percentage points (p = 0.093) and cannot change the verdict. The pre-launch fit is the tightest of the three events, pre-RMSPE 0.079, on weights led by Connecticut (0.317), the District of Columbia (0.230), Delaware (0.192), and New York (0.180). The sensitivities keep the sign and stay small, from −\$0.39 to −\$0.73 (@tbl-ky).
 
-A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at this design's resolution. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
+A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
 
 | Outcome, specification | Effect | Pre-RMSPE | Rank | p |
 |---|---:|---:|---:|---:|
@@ -264,7 +265,7 @@ artifacts at repository commit `4aafd06`.
 
 ## Limitations
 
-One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and its Bonferroni and Holm arithmetic (Rhode Island adjusted p 0.070; a six-test family unreachable by any floor) appears once, in the design section.
+One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and the design section reports its Bonferroni and Holm arithmetic.
 
 The decomposition runs on 325, 206, and 482 adjudicated Rhode Island error cases in fiscal 2017 through 2019. The protocol admits a channel to inference only when its code appears at least 30 times in each year. Mass-change (139, 93, 98), information-disregarded (84, 51, 137), and a defect-or-mass-change composite pass. Program defect (44, 12, 21), data entry (5, 13, 18), arithmetic (7, 3, 14), and user error (1, 4, 8) appear as effect sizes without p-values. Recertification codes 23 through 25 first appear in fiscal 2024, so that channel has no cases in the Rhode Island window.
 
