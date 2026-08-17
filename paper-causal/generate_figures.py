@@ -295,9 +295,23 @@ def figure_channels(data: dict[str, Any], output_dir: Path) -> None:
             )
     ax.axvline(0, color=GRAY, lw=0.8)
     ax.axhline(3.5, color="#CBD5E1", lw=0.8)
-    ax.text(-0.02, 1.01, "Inferential", transform=ax.transAxes, color=BLUE, fontsize=8)
     ax.text(
-        -0.02, 0.47, "Descriptive", transform=ax.transAxes, color=TEXT_GRAY, fontsize=8
+        0.01,
+        1.02,
+        "Inferential",
+        transform=ax.transAxes,
+        color=BLUE,
+        fontsize=8,
+        ha="left",
+    )
+    ax.text(
+        0.01,
+        0.545,
+        "Descriptive",
+        transform=ax.transAxes,
+        color=TEXT_GRAY,
+        fontsize=8,
+        ha="left",
     )
     ax.set_yticks(y, [labels[channel] for channel in channels])
     ax.set_xlabel("Effect ($ per weighted case-month)")

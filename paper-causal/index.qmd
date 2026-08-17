@@ -3,7 +3,7 @@ title: "What a system replacement does to measured error: three SNAP eligibility
 author:
   - name: Max Ghenis
     affiliation: PolicyEngine
-date: 2026-08-16
+date: 2026-08-17
 abstract: |
   State reviewers re-work a monthly sample of active SNAP cases, record every dollar paid in error, and code why. Those quality-control files, public back to fiscal 2012, carry error dollars the reviewers attribute to the computing apparatus for every state and year under one federal definition. This paper uses them as an outcome panel for three eligibility-system replacements, Rhode Island's UHIP (September 2016), Kentucky's Benefind (February 2016), and Oregon's ONE expansion (February 2021), each estimated against a synthetic control drawn from states with no recorded migration in a public event registry, with permutation inference and a decision rule frozen before estimation. The estimand is the bundled system replacement as implemented. Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month (permutation p = 0.023, first of 43; a post-results Bonferroni comparison across the three unit tests gives an adjusted p of 0.070) while the client-caused placebo does not fire (p = 0.233), concentrated in fiscal 2017 through 2019, the pre-named consequence window inside the September 2016 to December 2019 interval for which the Food and Nutrition Service later billed the state \$37.3 million; Kentucky shows no protocol-defined signal; Oregon's placebo fires inside the pandemic window and the rule refuses attribution. A second frozen protocol decomposes the Rhode Island signal by cause code: computer-generated mass-change error is the inferential channel that moves, at \$2.08 per case-month with the donor refit across all outcomes and \$2.14 with the parent's donor held fixed (p = 0.023 and first of 43 placebo states under both), while information-disregarded error, the other inferential channel, does not separate from the donor under either; worker and data-entry error fall below the count gate and are reported descriptively. The decomposition also shows that the design's placebo status depends on which outcomes share the donor fit: under the joint refit the client placebo moves to p = 0.023 and the parent rule returns `no_protocol_defined_signal` for the channel; under a fixed-donor estimator that reproduces the parent's placebo exactly, the same rule returns `signal`. Both estimators are reported and neither is privileged.
 bibliography: references.bib
@@ -59,6 +59,45 @@ permutation denominators of 35 and 43, cause-code cells that thin to
 single digits, and a reviewer's classification standing between the
 file and the machine.
 
+## Related work
+
+Eligibility-system replacements carry a documented case-study record.
+Peeters and Widlak studied the Dutch civil registry, where information
+architecture itself shut people out of services they qualified for
+[@peeters2018digital], and the Dutch daycare-benefit scandal, where
+agencies could not explain the decisions behind wrongful fraud
+accusations [@peeters2023administrative]. The registry this paper
+draws on holds an older United States record. Colorado launched an
+unfinished eligibility system in 2004 and faced a class action over
+lost benefits. Indiana canceled a \$1.16 billion modernization in
+2009 after denials rose 54 percent. Each of these records ends at its
+own state's border, on its own terms. The quality-control files add
+what a single-state record cannot: one outcome definition, every
+state, every year.
+
+The outcome belongs to accountability measurement. Kane and Staiger
+showed school ratings reward and punish sampling variation
+[@kane2002volatility], and Goldstein and Spiegelhalter set out what
+league tables can and cannot support [@goldstein1996league]. The QC
+rate shares that structure: a sampled, noisy statistic with money
+attached. This paper therefore rests its verdicts on permutation
+ranks rather than point estimates, and the companion paper
+[@ghenis2026oracle] prices the sampling layer directly. The federal
+government has measured states this way for four decades. Congress
+modified the sanction regime in the 2002 and 2014 Farm Bills
+[@gao2007errors; @crs2018errors], and the 2014 law most recently
+reset the tolerance threshold inside the panel years.
+
+The estimator is the synthetic control method for comparative case
+studies [@abadie2010synthetic], applied under the small-N discipline
+Abadie describes: transparent donor pools, permutation-in-space
+inference, and no claim beyond the pool [@abadie2021using]. Kentucky
+doubled certification periods as launch mitigation. That choice ties
+the estimand to the burden literature's identified result that
+recertification timing moves participation
+[@homonoff2021recertification]; the channel stays part of the bundled
+estimand, not separable from it.
+
 ## The quality-control record as an outcome source
 
 Every case in the public-use quality-control file carries a sampling weight, a review status, the benefit paid, the dollars paid in error, and up to nine agency-cause codes (FY2024 SNAP QC Technical Documentation: sampling and database scope, printed pp. 6 and 54–55; `HWGT`, pp. 65–66; `STATUS`, p. 64; `AMTERR`, p. 77; the nine `AGENCY`, `ELEMENT`, and `NATURE` slots, pp. 88–90). Error dollars enter as weight times error amount (`AMTERR`) from active cases (`CASE = 1`, `HWGT` > 0) at an adjudicated error status (`STATUS` 2 or 3); the denominator is the weight of every active case, so the dollar outcomes are dollars per weighted case-month. A total error rate divides the same above-floor dollars by weighted benefits paid (`RAWBEN`), times 100.
@@ -73,23 +112,23 @@ The strict codes support a FY2012 start and carry a semantic ceiling. All nine a
 
 Rhode Island cut over to UHIP, later RIBridges, statewide in September 2016, one year after the July 2015 plan; Deloitte built it.^[https://transparency.ri.gov/uhip/; https://www.wpri.com/target-12/we-are-very-sorry-deloitte-apologizes-to-ri-about-uhip/; https://turnto10.com/news/local/rhode-island-department-of-human-services-appeals-federal-government-snap-overpayments-37-million-dollars-uhip-ribridges-usda-food-and-nutrition-service; https://www.rimonthly.com/unified-health-infrastructure-project/] The application backlog reached about 15,000 at its peak, and the Food and Nutrition Service later billed the state \$37,343,809.68 for SNAP overpayments covering September 2016 through December 2019.
 
-Kentucky launched Benefind, Deloitte's integrated SNAP and Medicaid platform costing about \$101.5 million, on February 29, 2016.^[https://www.lpm.org/news/2016-07-21/state-officials-say-theyre-still-fixing-benefind; https://nkytribune.com/2016/04/one-stop-shop-benefind-isnt-causes-loss-of-benefits-and-confusion-for-thousands-of-kentuckians/; https://www.wkyufm.org/politics/2016-04-28/state-dedicates-workers-to-cut-benefind-backlog] After launch the state sent about 25,000 erroneous cancellation notices and worked a backlog of about 50,000 cases, and it extended SNAP recertification from six to twelve months, a mitigation inside the estimated bundle. The registry holds no billing record [NEEDS CITATION: Kentucky FNS billing record, if any].
+Kentucky launched Benefind, Deloitte's integrated SNAP and Medicaid platform costing about \$101.5 million, on February 29, 2016.^[https://www.lpm.org/news/2016-07-21/state-officials-say-theyre-still-fixing-benefind; https://nkytribune.com/2016/04/one-stop-shop-benefind-isnt-causes-loss-of-benefits-and-confusion-for-thousands-of-kentuckians/; https://www.wkyufm.org/politics/2016-04-28/state-dedicates-workers-to-cut-benefind-backlog] After launch the state sent about 25,000 erroneous cancellation notices and worked a backlog of about 50,000 cases, and it extended SNAP recertification from six to twelve months, a mitigation inside the estimated bundle.
 
-Oregon expanded ONE Eligibility from Oregon Health Plan eligibility to SNAP and other benefit programs in February 2021.^[https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx] One state web page dates it; the registry grades it single-source. The registry records no vendor [NEEDS CITATION: Oregon ONE vendor], no documented launch problems [NEEDS CITATION: Oregon ONE documented launch problems], and no billing record [NEEDS CITATION: Oregon FNS billing record, if any].
+Oregon expanded ONE Eligibility from Oregon Health Plan eligibility to SNAP and other benefit programs in February 2021.^[https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx; https://olis.oregonlegislature.gov/liz/2021I1/Downloads/CommitteeMeetingDocument/256848] The system runs on code Oregon acquired at no cost from Kentucky — the Benefind lineage — with about \$416 million spent to redesign and maintain it and Deloitte holding the support contract. A 2024 state audit found the automated part working well, with input errors in 11 of 40 sampled SNAP cases.^[https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/public-assistance-eligibility-system-audit-2024; https://www.opb.org/article/2024/10/10/oregon-eligibility-system-data-entry-errors/] The registry dates the expansion from one state source and a legislative update; it records no launch-specific problem coverage, and a search (2026-08-16) located no ONE-specific federal SNAP billing record.
 
-The registry grades each entry by its dating evidence: multi-source when two or more independent public sources corroborate the date, single-source when one credible source does, and candidate when the event is known but its date remains unverified. Nine states carry an entry (@tbl-registry); every one leaves every donor pool. Four carry open gaps [NEEDS CITATION: Georgia Gateway vendor and statewide completion date] [NEEDS CITATION: NM ASPEN date, vendor, launch record, problems, billing] [NEEDS CITATION: IN modernization exact go-live and primary public record] [NEEDS CITATION: CO CBMS exact go-live, vendor, problems, billing].
+The registry grades each entry by its dating evidence: multi-source when two or more independent public sources corroborate the date, single-source when one credible source does, and candidate when the event is known but its date remains unverified. Nine states carry an entry (@tbl-registry); every one leaves every donor pool. A source pass on 2026-08-16 verified the three former candidates with primary records — New Mexico's legislative program evaluation, Indiana's cancellation record, and Colorado's state-audit and litigation record — upgraded Georgia from single-source to multi-source with rollout coverage, and located no public federal SNAP billing record for Kentucky or Oregon.
 
 | State | System (vendor) | Go-live (precision) | Confidence |
 |---|---|---|---|
 | RI | UHIP (Deloitte) | September 2016 (month) | multi-source |
 | KY | Benefind (Deloitte) | February 29, 2016 (day) | multi-source |
 | OR | ONE Eligibility (unrecorded) | February 2021 (month) | single-source |
-| GA | Georgia Gateway | February 6, 2017 pilot (day); statewide completion unverified | single-source |
+| GA | Georgia Gateway (Deloitte) | February 6, 2017 pilot (day); waves through 2017, statewide | multi-source |
 | NC | NC FAST | May 2012–March 2013 county rollout (month) | multi-source |
 | FL | ACCESS modernization | reported start 2022; unverified | candidate |
-| NM | ASPEN | mid-2010s; unverified | candidate |
-| IN | FSSA modernization (IBM) | 2007–09; unverified | candidate |
-| CO | CBMS | 2004; unverified | candidate |
+| NM | ASPEN (Deloitte) | July 22, 2013 pilot; waves to January 21, 2014 (day) | multi-source |
+| IN | FSSA modernization (IBM/ACS) | 2007 rollout; canceled October 2009 (year) | multi-source |
+| CO | CBMS (EDS) | September 1, 2004 (day) | multi-source |
 
 : The migration registry; every listed state leaves every donor pool. {#tbl-registry}
 
@@ -135,13 +174,19 @@ The Rhode Island–Kentucky protocol excludes FY2016 as a transition year, since
 
 : The two frozen protocols; both apply the rule strict p < 0.10, client p ≥ 0.10. {#tbl-protocols}
 
+![Annual strict-outcome paths for each treated state and its synthetic control under the primary specifications; the hatched band marks the excluded FY2016 transition year and the dotted line the dropped FY2021 file.](figures/fig-paths.png){#fig-paths}
+
 ## Rhode Island
 
 Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month against its synthetic donor after the September 2016 launch, and the client-caused placebo does not fire. The strict effect ranks first of 43 (p = 0.023), the smallest p-value a 42-state donor pool can return. The client placebo moves +\$3.96 and ranks tenth (p = 0.233). The frozen rule requires strict p below 0.10 and client p at or above 0.10; the verdict is `signal`. The strict p sits at the floor a 42-donor pool allows; adjusted for the three unit tests it is 0.070 (design section). Before the launch the synthetic Rhode Island tracks the state to within \$0.34 per case-month on the strict outcome (pre-RMSPE 0.345, the pre-period root-mean-square gap). Its weights fall on West Virginia (0.358), Michigan (0.354), Connecticut (0.193), Vermont (0.055), and the District of Columbia (0.041), fit jointly on the strict, total-rate, and client outcomes.
 
+![Rhode Island's post-minus-pre strict-outcome effect against the 42 pseudo-treated donor effects; Rhode Island ranks first of 43 by absolute effect.](figures/fig-placebo.png){#fig-placebo}
+
 The reconstructed total error rate rises 2.56 percentage points (p = 0.233); the protocol names it verdict-inert. The strict effect keeps its sign and size in every pre-named sensitivity, from +\$2.58 with the pandemic-partial FY2021 file counted as post to +\$3.10 with FY2016, the launch year, counted as pre (@tbl-ri).
 
 The rise concentrates in the pre-named consequence window. The mean strict gap runs +\$4.95 per case-month across FY2017–19 and +\$1.48 across FY2020 and FY2022–24, a difference of +\$3.47. FNS billed the state \$37,343,809.68 for SNAP overpayments from September 2016 through December 2019, an interval that also touches FY2016 and FY2020. The billing record played no part in the estimate, the protocol names this profile descriptive and verdict-inert, and the profile neither confirms the estimate nor the billing; it reports where in time the estimated gap sits.
+
+![Rhode Island's annual strict-outcome gap; the shaded FY2017–19 band is the pre-named consequence window, a descriptive and verdict-inert check.](figures/fig-window.png){#fig-window}
 
 | Outcome, specification | Effect | Pre-RMSPE | Rank | p |
 |---|---:|---:|---:|---:|
@@ -158,7 +203,7 @@ The rise concentrates in the pre-named consequence window. The mean strict gap r
 
 Kentucky's computing-apparatus error dollars fall \$0.58 per weighted case-month against its synthetic donor after the February 29, 2016 Benefind launch (rank 13 of 43, p = 0.302). The verdict is `no_protocol_defined_signal`, and it turns on the strict p-value alone. The client placebo moves −\$4.53 (rank 5 of 43, p = 0.116) and stays at or above the 0.10 the rule requires; the total error rate falls 3.70 percentage points (p = 0.093) and cannot change the verdict. The pre-launch fit is the tightest of the three events, pre-RMSPE 0.079, on weights led by Connecticut (0.317), the District of Columbia (0.230), Delaware (0.192), and New York (0.180). The sensitivities keep the sign and stay small, from −\$0.39 to −\$0.73 (@tbl-ky).
 
-A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
+A `no_protocol_defined_signal` verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. The registry search located no federal billing record for the launch. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.
 
 | Outcome, specification | Effect | Pre-RMSPE | Rank | p |
 |---|---:|---:|---:|---:|
@@ -204,6 +249,8 @@ The inherited estimator fits one set of donor weights on all the outcomes in a r
 A sibling protocol, frozen 2026-08-16 before its estimation, specifies a fixed-donor estimator. It fits the weights once on the parent's three outcomes and holds them for every channel and for the client placebo; the synthetic Rhode Island does not move between outcomes. Its pre-registered check requires the client placebo to reproduce the parent's exactly, and it does: +\$3.964, p = 0.233, rank 10 of 43. With the parent's placebo in place, mass change is +\$2.14 (p = 0.023, rank 1 of 43), `signal` and `signal_family_adjusted`. The composite is +\$2.53 (p = 0.023, rank 1 of 43), `signal` and `signal_family_adjusted`. Information disregarded is +\$1.37 (p = 0.512, rank 22 of 43), `no_protocol_defined_signal` and `no_family_adjusted_signal`. The descriptive channels stay small under both fits, none above \$0.91 (@tbl-decomp). The mass-change gap concentrates in FY2017–19 under both estimators, +\$3.73 against +\$0.96 in the later post years under the joint fit and +\$4.06 against +\$1.06 under the fixed donor, a profile the protocol names descriptive and verdict-inert.
 
 Both estimators appear in @tbl-decomp; the reproduction check links them, and the paper privileges neither. They agree on the ordering: mass change carries the largest inferential portion of the strict-channel rise under both fits, and information disregarded does not separate from its donor under either. They differ on the parent-rule verdict at the same channel p-value, and the difference is the donor fit (`analysis/fixed_donor_decomposition_results.json` at repository commit `4aafd06`).
+
+![Channel effects under the joint-fit and fixed-donor estimators; inferential channels carry permutation p-values, descriptive channels do not, and the fixed-donor client placebo reproduces the parent's exactly.](figures/fig-channels.png){#fig-channels}
 
 | Channel (codes) | Joint fit: effect | p (rank) | Verdict, parent / family | Fixed donor: effect | p (rank) | Verdict, parent / family |
 |---|---:|---:|---|---:|---:|---|

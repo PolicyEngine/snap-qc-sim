@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Max Ghenis">
-<meta name="dcterms.date" content="2026-08-16">
+<meta name="dcterms.date" content="2026-08-17">
 
 <title>What a system replacement does to measured error: three SNAP eligibility-system migrations in the quality-control record</title>
 <style>
@@ -71,19 +71,20 @@ div.csl-indent {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#the-quality-control-record-as-an-outcome-source" id="toc-the-quality-control-record-as-an-outcome-source" class="nav-link" data-scroll-target="#the-quality-control-record-as-an-outcome-source"><span class="header-section-number">2</span> The quality-control record as an outcome source</a></li>
-  <li><a href="#events-and-registry" id="toc-events-and-registry" class="nav-link" data-scroll-target="#events-and-registry"><span class="header-section-number">3</span> Events and registry</a></li>
-  <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design"><span class="header-section-number">4</span> Design</a></li>
-  <li><a href="#rhode-island" id="toc-rhode-island" class="nav-link" data-scroll-target="#rhode-island"><span class="header-section-number">5</span> Rhode Island</a></li>
-  <li><a href="#kentucky" id="toc-kentucky" class="nav-link" data-scroll-target="#kentucky"><span class="header-section-number">6</span> Kentucky</a></li>
-  <li><a href="#oregon" id="toc-oregon" class="nav-link" data-scroll-target="#oregon"><span class="header-section-number">7</span> Oregon</a></li>
-  <li><a href="#pooled-inference" id="toc-pooled-inference" class="nav-link" data-scroll-target="#pooled-inference"><span class="header-section-number">8</span> Pooled inference</a></li>
-  <li><a href="#decomposing-the-rhode-island-signal" id="toc-decomposing-the-rhode-island-signal" class="nav-link" data-scroll-target="#decomposing-the-rhode-island-signal"><span class="header-section-number">9</span> Decomposing the Rhode Island signal</a></li>
-  <li><a href="#rhode-islands-post-launch-cases" id="toc-rhode-islands-post-launch-cases" class="nav-link" data-scroll-target="#rhode-islands-post-launch-cases"><span class="header-section-number">10</span> Rhode Island’s post-launch cases</a></li>
-  <li><a href="#artifacts-and-reproduction" id="toc-artifacts-and-reproduction" class="nav-link" data-scroll-target="#artifacts-and-reproduction"><span class="header-section-number">11</span> Artifacts and reproduction</a></li>
-  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">12</span> Limitations</a></li>
-  <li><a href="#relation-to-the-accounting-scenarios" id="toc-relation-to-the-accounting-scenarios" class="nav-link" data-scroll-target="#relation-to-the-accounting-scenarios"><span class="header-section-number">13</span> Relation to the accounting scenarios</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">14</span> Conclusion</a></li>
+  <li><a href="#related-work" id="toc-related-work" class="nav-link" data-scroll-target="#related-work"><span class="header-section-number">2</span> Related work</a></li>
+  <li><a href="#the-quality-control-record-as-an-outcome-source" id="toc-the-quality-control-record-as-an-outcome-source" class="nav-link" data-scroll-target="#the-quality-control-record-as-an-outcome-source"><span class="header-section-number">3</span> The quality-control record as an outcome source</a></li>
+  <li><a href="#events-and-registry" id="toc-events-and-registry" class="nav-link" data-scroll-target="#events-and-registry"><span class="header-section-number">4</span> Events and registry</a></li>
+  <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design"><span class="header-section-number">5</span> Design</a></li>
+  <li><a href="#rhode-island" id="toc-rhode-island" class="nav-link" data-scroll-target="#rhode-island"><span class="header-section-number">6</span> Rhode Island</a></li>
+  <li><a href="#kentucky" id="toc-kentucky" class="nav-link" data-scroll-target="#kentucky"><span class="header-section-number">7</span> Kentucky</a></li>
+  <li><a href="#oregon" id="toc-oregon" class="nav-link" data-scroll-target="#oregon"><span class="header-section-number">8</span> Oregon</a></li>
+  <li><a href="#pooled-inference" id="toc-pooled-inference" class="nav-link" data-scroll-target="#pooled-inference"><span class="header-section-number">9</span> Pooled inference</a></li>
+  <li><a href="#decomposing-the-rhode-island-signal" id="toc-decomposing-the-rhode-island-signal" class="nav-link" data-scroll-target="#decomposing-the-rhode-island-signal"><span class="header-section-number">10</span> Decomposing the Rhode Island signal</a></li>
+  <li><a href="#rhode-islands-post-launch-cases" id="toc-rhode-islands-post-launch-cases" class="nav-link" data-scroll-target="#rhode-islands-post-launch-cases"><span class="header-section-number">11</span> Rhode Island’s post-launch cases</a></li>
+  <li><a href="#artifacts-and-reproduction" id="toc-artifacts-and-reproduction" class="nav-link" data-scroll-target="#artifacts-and-reproduction"><span class="header-section-number">12</span> Artifacts and reproduction</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">13</span> Limitations</a></li>
+  <li><a href="#relation-to-the-accounting-scenarios" id="toc-relation-to-the-accounting-scenarios" class="nav-link" data-scroll-target="#relation-to-the-accounting-scenarios"><span class="header-section-number">14</span> Relation to the accounting scenarios</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">15</span> Conclusion</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
@@ -115,7 +116,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 16, 2026</p>
+      <p class="date">August 17, 2026</p>
     </div>
   </div>
   
@@ -140,19 +141,25 @@ div.csl-indent {
 <p>Rhode Island earns the frozen rule’s <code>signal</code>; Kentucky and Oregon each return <code>no_protocol_defined_signal</code>, Oregon’s a refusal because its client-caused placebo fires inside the pandemic window. A second frozen protocol then splits Rhode Island’s rise by the reviewers’ cause codes and estimates each channel as the QC record classified it, under two estimators: the parent’s, which refits donor weights on every outcome in a run, and a fixed-donor variant that holds the parent’s weights. The two agree on which channel moved and disagree on one verdict field; changing the outcome set that shares the donor fit changes the placebo’s status, and the paper reports that dependence beside its results.</p>
 <p>Four limits bound everything below: one treated unit per event, permutation denominators of 35 and 43, cause-code cells that thin to single digits, and a reviewer’s classification standing between the file and the machine.</p>
 </section>
-<section id="the-quality-control-record-as-an-outcome-source" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="the-quality-control-record-as-an-outcome-source"><span class="header-section-number">2</span> The quality-control record as an outcome source</h2>
+<section id="related-work" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="related-work"><span class="header-section-number">2</span> Related work</h2>
+<p>Eligibility-system replacements carry a documented case-study record. Peeters and Widlak studied the Dutch civil registry, where information architecture itself shut people out of services they qualified for <span class="citation" data-cites="peeters2018digital">(<a href="#ref-peeters2018digital" role="doc-biblioref">Peeters and Widlak 2018</a>)</span>, and the Dutch daycare-benefit scandal, where agencies could not explain the decisions behind wrongful fraud accusations <span class="citation" data-cites="peeters2023administrative">(<a href="#ref-peeters2023administrative" role="doc-biblioref">Peeters and Widlak 2023</a>)</span>. The registry this paper draws on holds an older United States record. Colorado launched an unfinished eligibility system in 2004 and faced a class action over lost benefits. Indiana canceled a $1.16 billion modernization in 2009 after denials rose 54 percent. Each of these records ends at its own state’s border, on its own terms. The quality-control files add what a single-state record cannot: one outcome definition, every state, every year.</p>
+<p>The outcome belongs to accountability measurement. Kane and Staiger showed school ratings reward and punish sampling variation <span class="citation" data-cites="kane2002volatility">(<a href="#ref-kane2002volatility" role="doc-biblioref">Kane and Staiger 2002</a>)</span>, and Goldstein and Spiegelhalter set out what league tables can and cannot support <span class="citation" data-cites="goldstein1996league">(<a href="#ref-goldstein1996league" role="doc-biblioref">Goldstein and Spiegelhalter 1996</a>)</span>. The QC rate shares that structure: a sampled, noisy statistic with money attached. This paper therefore rests its verdicts on permutation ranks rather than point estimates, and the companion paper <span class="citation" data-cites="ghenis2026oracle">(<a href="#ref-ghenis2026oracle" role="doc-biblioref">Ghenis 2026</a>)</span> prices the sampling layer directly. The federal government has measured states this way for four decades. Congress modified the sanction regime in the 2002 and 2014 Farm Bills <span class="citation" data-cites="gao2007errors crs2018errors">(<a href="#ref-gao2007errors" role="doc-biblioref">U.S. Government Accountability Office 2007</a>; <a href="#ref-crs2018errors" role="doc-biblioref">Congressional Research Service 2018</a>)</span>, and the 2014 law most recently reset the tolerance threshold inside the panel years.</p>
+<p>The estimator is the synthetic control method for comparative case studies <span class="citation" data-cites="abadie2010synthetic">(<a href="#ref-abadie2010synthetic" role="doc-biblioref">Abadie et al. 2010</a>)</span>, applied under the small-N discipline Abadie describes: transparent donor pools, permutation-in-space inference, and no claim beyond the pool <span class="citation" data-cites="abadie2021using">(<a href="#ref-abadie2021using" role="doc-biblioref">Abadie 2021</a>)</span>. Kentucky doubled certification periods as launch mitigation. That choice ties the estimand to the burden literature’s identified result that recertification timing moves participation <span class="citation" data-cites="homonoff2021recertification">(<a href="#ref-homonoff2021recertification" role="doc-biblioref">Homonoff and Somerville 2021</a>)</span>; the channel stays part of the bundled estimand, not separable from it.</p>
+</section>
+<section id="the-quality-control-record-as-an-outcome-source" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-quality-control-record-as-an-outcome-source"><span class="header-section-number">3</span> The quality-control record as an outcome source</h2>
 <p>Every case in the public-use quality-control file carries a sampling weight, a review status, the benefit paid, the dollars paid in error, and up to nine agency-cause codes (FY2024 SNAP QC Technical Documentation: sampling and database scope, printed pp.&nbsp;6 and 54–55; <code>HWGT</code>, pp.&nbsp;65–66; <code>STATUS</code>, p.&nbsp;64; <code>AMTERR</code>, p.&nbsp;77; the nine <code>AGENCY</code>, <code>ELEMENT</code>, and <code>NATURE</code> slots, pp.&nbsp;88–90). Error dollars enter as weight times error amount (<code>AMTERR</code>) from active cases (<code>CASE = 1</code>, <code>HWGT</code> &gt; 0) at an adjudicated error status (<code>STATUS</code> 2 or 3); the denominator is the weight of every active case, so the dollar outcomes are dollars per weighted case-month. A total error rate divides the same above-floor dollars by weighted benefits paid (<code>RAWBEN</code>), times 100.</p>
 <p>An error counts only above a floor, and the protocols fix that floor in real terms. The official tolerance, the floor of the official rate <span class="citation" data-cites="crs2018errors">(<a href="#ref-crs2018errors" role="doc-biblioref">Congressional Research Service 2018</a>)</span>, ran $50 in FY2012–13, $37 or $38 in FY2014–20, $39 in FY2021, then $48, $54, and $56 (annual SNAP QC Technical Documentation: FY2012 and FY2013 PDFs pp.&nbsp;128 and 126; FY2014–FY2017 printed p.&nbsp;5; FY2018 p.&nbsp;6; FY2019 p.&nbsp;4; FY2021 p.&nbsp;6 for FY2020 and FY2021; FY2022 and FY2023 p.&nbsp;6; FY2024 p.&nbsp;6). The Rhode Island–Kentucky protocol fixes its floor at the highest real value in that series, FY2012’s $50, or $68.31 in FY2024 dollars; the Oregon protocol fixes $56 in FY2024 dollars. Both floors sit at or above every official tolerance in their panels, so a changing nominal tolerance never defines the outcome.</p>
 <p>Reviewers code why each error occurred. Three codes form the strict class this paper calls the computing apparatus: computer programming error (17), computer-generated mass-change error (19), and arithmetic computation error (20). Five form the client-coded placebo (1, 2, 3, 4, 7): information the household did not report, reported wrongly, or withheld, and inaccurate collateral-contact reports, an analysis superclass since no field records a binary responsibility. The convention credits the whole case: a strict code in any slot puts the case’s entire weighted error dollars into the strict outcome, and because classes overlap, one case can count in both. A reviewer assigns each cause code; the code records how the QC record classified the failure, and no field records what the system mechanically did.</p>
 <p>The strict codes support a FY2012 start and carry a semantic ceiling. All nine agency slots and all three strict codes appear in every file from FY2012 through FY2024; numeric presence does not prove the codes kept one meaning, and the FY2024 technical documentation reports minor revisions to the agency, element, and nature codes (FY2024 SNAP QC Technical Documentation, printed p.&nbsp;3). Code 22 first appears in FY2023 and codes 23 through 25 in FY2024, so the strict class rather than the broad agency class serves as the historical outcome. The FY2020 file combines two period files, 18,319 and 8,793 rows, into 27,112; the FY2021 file holds 9,832 rows, a pandemic-partial year.</p>
 </section>
-<section id="events-and-registry" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="events-and-registry"><span class="header-section-number">3</span> Events and registry</h2>
+<section id="events-and-registry" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="events-and-registry"><span class="header-section-number">4</span> Events and registry</h2>
 <p>Rhode Island cut over to UHIP, later RIBridges, statewide in September 2016, one year after the July 2015 plan; Deloitte built it.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> The application backlog reached about 15,000 at its peak, and the Food and Nutrition Service later billed the state $37,343,809.68 for SNAP overpayments covering September 2016 through December 2019.</p>
-<p>Kentucky launched Benefind, Deloitte’s integrated SNAP and Medicaid platform costing about $101.5 million, on February 29, 2016.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> After launch the state sent about 25,000 erroneous cancellation notices and worked a backlog of about 50,000 cases, and it extended SNAP recertification from six to twelve months, a mitigation inside the estimated bundle. The registry holds no billing record [NEEDS CITATION: Kentucky FNS billing record, if any].</p>
-<p>Oregon expanded ONE Eligibility from Oregon Health Plan eligibility to SNAP and other benefit programs in February 2021.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> One state web page dates it; the registry grades it single-source. The registry records no vendor [NEEDS CITATION: Oregon ONE vendor], no documented launch problems [NEEDS CITATION: Oregon ONE documented launch problems], and no billing record [NEEDS CITATION: Oregon FNS billing record, if any].</p>
-<p>The registry grades each entry by its dating evidence: multi-source when two or more independent public sources corroborate the date, single-source when one credible source does, and candidate when the event is known but its date remains unverified. Nine states carry an entry (<a href="#tbl-registry" class="quarto-xref">Table&nbsp;1</a>); every one leaves every donor pool. Four carry open gaps [NEEDS CITATION: Georgia Gateway vendor and statewide completion date] [NEEDS CITATION: NM ASPEN date, vendor, launch record, problems, billing] [NEEDS CITATION: IN modernization exact go-live and primary public record] [NEEDS CITATION: CO CBMS exact go-live, vendor, problems, billing].</p>
+<p>Kentucky launched Benefind, Deloitte’s integrated SNAP and Medicaid platform costing about $101.5 million, on February 29, 2016.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> After launch the state sent about 25,000 erroneous cancellation notices and worked a backlog of about 50,000 cases, and it extended SNAP recertification from six to twelve months, a mitigation inside the estimated bundle.</p>
+<p>Oregon expanded ONE Eligibility from Oregon Health Plan eligibility to SNAP and other benefit programs in February 2021.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> The system runs on code Oregon acquired at no cost from Kentucky — the Benefind lineage — with about $416 million spent to redesign and maintain it and Deloitte holding the support contract. A 2024 state audit found the automated part working well, with input errors in 11 of 40 sampled SNAP cases.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> The registry dates the expansion from one state source and a legislative update; it records no launch-specific problem coverage, and a search (2026-08-16) located no ONE-specific federal SNAP billing record.</p>
+<p>The registry grades each entry by its dating evidence: multi-source when two or more independent public sources corroborate the date, single-source when one credible source does, and candidate when the event is known but its date remains unverified. Nine states carry an entry (<a href="#tbl-registry" class="quarto-xref">Table&nbsp;1</a>); every one leaves every donor pool. A source pass on 2026-08-16 verified the three former candidates with primary records — New Mexico’s legislative program evaluation, Indiana’s cancellation record, and Colorado’s state-audit and litigation record — upgraded Georgia from single-source to multi-source with rollout coverage, and located no public federal SNAP billing record for Kentucky or Oregon.</p>
 <div id="tbl-registry" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-registry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -195,9 +202,9 @@ Table&nbsp;1: The migration registry; every listed state leaves every donor pool
 </tr>
 <tr class="even">
 <td>GA</td>
-<td>Georgia Gateway</td>
-<td>February 6, 2017 pilot (day); statewide completion unverified</td>
-<td>single-source</td>
+<td>Georgia Gateway (Deloitte)</td>
+<td>February 6, 2017 pilot (day); waves through 2017, statewide</td>
+<td>multi-source</td>
 </tr>
 <tr class="odd">
 <td>NC</td>
@@ -213,21 +220,21 @@ Table&nbsp;1: The migration registry; every listed state leaves every donor pool
 </tr>
 <tr class="odd">
 <td>NM</td>
-<td>ASPEN</td>
-<td>mid-2010s; unverified</td>
-<td>candidate</td>
+<td>ASPEN (Deloitte)</td>
+<td>July 22, 2013 pilot; waves to January 21, 2014 (day)</td>
+<td>multi-source</td>
 </tr>
 <tr class="even">
 <td>IN</td>
-<td>FSSA modernization (IBM)</td>
-<td>2007–09; unverified</td>
-<td>candidate</td>
+<td>FSSA modernization (IBM/ACS)</td>
+<td>2007 rollout; canceled October 2009 (year)</td>
+<td>multi-source</td>
 </tr>
 <tr class="odd">
 <td>CO</td>
-<td>CBMS</td>
-<td>2004; unverified</td>
-<td>candidate</td>
+<td>CBMS (EDS)</td>
+<td>September 1, 2004 (day)</td>
+<td>multi-source</td>
 </tr>
 </tbody>
 </table>
@@ -235,8 +242,8 @@ Table&nbsp;1: The migration registry; every listed state leaves every donor pool
 </figure>
 </div>
 </section>
-<section id="design" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="design"><span class="header-section-number">4</span> Design</h2>
+<section id="design" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="design"><span class="header-section-number">5</span> Design</h2>
 <p>The authors froze two protocols before estimation, and together they fix everything the three estimates depend on: one for Rhode Island and Kentucky, two treated units on a FY2012–24 panel, and one for Oregon alone on FY2017–24 (<a href="#tbl-protocols" class="quarto-xref">Table&nbsp;2</a>). The estimand for every event is the bundled system replacement as implemented: contemporaneous process, staffing, and mitigation changes sit inside it, and the design isolates no component.</p>
 <p>For each treated state, nonnegative donor weights summing to one minimize the pretreatment squared distance jointly across three outcomes <span class="citation" data-cites="abadie2010synthetic abadie2021using">(<a href="#ref-abadie2010synthetic" role="doc-biblioref">Abadie et al. 2010</a>; <a href="#ref-abadie2021using" role="doc-biblioref">Abadie 2021</a>)</span>. The three are strict computing-apparatus dollars per case-month, the fixed-floor total error rate, and the client-coded placebo; the estimator scales each by its donor-state pretreatment standard deviation before the fit. The effect for each outcome is the mean post-period gap between state and synthetic donor minus the mean pre-period gap.</p>
 <p>The estimator infers by permutation in space. The estimator refits every donor state as pseudo-treated on the remaining donors under the identical year assignment and ranks the absolute treated effect among the absolute placebo effects, ties counting against the signal. The p-value is (1 + exceedances)/(1 + placebos): 42 placebos for Rhode Island and Kentucky, so the smallest p is 1/43 = 0.023, and 34 for Oregon, 1/35 = 0.029. These p-values compare the estimate with placebo runs inside a pre-named pool and carry no large-sample standard error. The Rhode Island–Kentucky pool holds every state and the District of Columbia less the nine registry states. The Oregon protocol also removes the jurisdictions on the FY2024 or FY2025 statutory delay rosters, a pre-named set with high recent measured error rates; because those rosters rest partly on rates measured after the launch, the Oregon estimate is conditional on the pre-named pool.</p>
@@ -288,12 +295,42 @@ Table&nbsp;2: The two frozen protocols; both apply the rule strict p &lt; 0.10, 
 </div>
 </figure>
 </div>
+<div id="fig-paths" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-paths.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Annual strict-outcome paths for each treated state and its synthetic control under the primary specifications; the hatched band marks the excluded FY2016 transition year and the dotted line the dropped FY2021 file.
+</figcaption>
+</figure>
+</div>
 </section>
-<section id="rhode-island" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="rhode-island"><span class="header-section-number">5</span> Rhode Island</h2>
+<section id="rhode-island" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="rhode-island"><span class="header-section-number">6</span> Rhode Island</h2>
 <p>Rhode Island’s computing-apparatus error dollars rise $2.90 per weighted case-month against its synthetic donor after the September 2016 launch, and the client-caused placebo does not fire. The strict effect ranks first of 43 (p = 0.023), the smallest p-value a 42-state donor pool can return. The client placebo moves +$3.96 and ranks tenth (p = 0.233). The frozen rule requires strict p below 0.10 and client p at or above 0.10; the verdict is <code>signal</code>. The strict p sits at the floor a 42-donor pool allows; adjusted for the three unit tests it is 0.070 (design section). Before the launch the synthetic Rhode Island tracks the state to within $0.34 per case-month on the strict outcome (pre-RMSPE 0.345, the pre-period root-mean-square gap). Its weights fall on West Virginia (0.358), Michigan (0.354), Connecticut (0.193), Vermont (0.055), and the District of Columbia (0.041), fit jointly on the strict, total-rate, and client outcomes.</p>
+<div id="fig-placebo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-placebo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-placebo.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-placebo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Rhode Island’s post-minus-pre strict-outcome effect against the 42 pseudo-treated donor effects; Rhode Island ranks first of 43 by absolute effect.
+</figcaption>
+</figure>
+</div>
 <p>The reconstructed total error rate rises 2.56 percentage points (p = 0.233); the protocol names it verdict-inert. The strict effect keeps its sign and size in every pre-named sensitivity, from +$2.58 with the pandemic-partial FY2021 file counted as post to +$3.10 with FY2016, the launch year, counted as pre (<a href="#tbl-ri" class="quarto-xref">Table&nbsp;3</a>).</p>
 <p>The rise concentrates in the pre-named consequence window. The mean strict gap runs +$4.95 per case-month across FY2017–19 and +$1.48 across FY2020 and FY2022–24, a difference of +$3.47. FNS billed the state $37,343,809.68 for SNAP overpayments from September 2016 through December 2019, an interval that also touches FY2016 and FY2020. The billing record played no part in the estimate, the protocol names this profile descriptive and verdict-inert, and the profile neither confirms the estimate nor the billing; it reports where in time the estimated gap sits.</p>
+<div id="fig-window" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-window-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-window.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-window-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Rhode Island’s annual strict-outcome gap; the shaded FY2017–19 band is the pre-named consequence window, a descriptive and verdict-inert check.
+</figcaption>
+</figure>
+</div>
 <div id="tbl-ri" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ri-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -366,10 +403,10 @@ Table&nbsp;3: Rhode Island — primary outcomes in dollars per weighted case-mon
 </figure>
 </div>
 </section>
-<section id="kentucky" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="kentucky"><span class="header-section-number">6</span> Kentucky</h2>
+<section id="kentucky" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="kentucky"><span class="header-section-number">7</span> Kentucky</h2>
 <p>Kentucky’s computing-apparatus error dollars fall $0.58 per weighted case-month against its synthetic donor after the February 29, 2016 Benefind launch (rank 13 of 43, p = 0.302). The verdict is <code>no_protocol_defined_signal</code>, and it turns on the strict p-value alone. The client placebo moves −$4.53 (rank 5 of 43, p = 0.116) and stays at or above the 0.10 the rule requires; the total error rate falls 3.70 percentage points (p = 0.093) and cannot change the verdict. The pre-launch fit is the tightest of the three events, pre-RMSPE 0.079, on weights led by Connecticut (0.317), the District of Columbia (0.230), Delaware (0.192), and New York (0.180). The sensitivities keep the sign and stay small, from −$0.39 to −$0.73 (<a href="#tbl-ky" class="quarto-xref">Table&nbsp;4</a>).</p>
-<p>A <code>no_protocol_defined_signal</code> verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. It carries no FNS billing record for Kentucky [NEEDS CITATION: Kentucky FNS billing record, if any]. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.</p>
+<p>A <code>no_protocol_defined_signal</code> verdict states that computing-apparatus error dollars did not separate from the donor path at the finest distinction this design can draw. It says nothing about how the launch went. The event registry documents about 25,000 erroneous cancellation notices, a case backlog near 50,000, and a recertification-interval extension from six to twelve months in the launch year. The registry search located no federal billing record for the launch. The outcome counts error dollars on active, adjudicated cases; it holds no closed case and no waiting time, and the null is a statement about that outcome and nothing wider.</p>
 <div id="tbl-ky" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ky-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -442,8 +479,8 @@ Table&nbsp;4: Kentucky — primary outcomes and strict-outcome sensitivities; ve
 </figure>
 </div>
 </section>
-<section id="oregon" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="oregon"><span class="header-section-number">7</span> Oregon</h2>
+<section id="oregon" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="oregon"><span class="header-section-number">8</span> Oregon</h2>
 <p>Oregon’s client-caused placebo fires, and the frozen rule refuses attribution. Against a synthetic Oregon drawn from a 34-state pool, computing-apparatus error dollars move −$0.20 per case-month after the February 2021 ONE expansion (rank 25 of 35, p = 0.714). Client-caused error dollars rise $10.53 (rank 1 of 35, p = 0.029, the floor of a 34-state pool), and the total error rate rises 5.76 percentage points (p = 0.029). The verdict is <code>no_protocol_defined_signal</code>. A client p below 0.10 blocks a signal whatever the strict outcome does, and here the strict outcome does not move either. Iowa carries 0.673 of the donor weight, Connecticut 0.187, Wisconsin 0.116, and Missouri 0.025; the strict pre-RMSPE is 0.550.</p>
 <p>The launch shares its calendar with the pandemic. Oregon’s panel runs FY2017–24 with pre years FY2017–20 and post years FY2022–24; the primary drops FY2021, a 9,832-row pandemic-partial file whose fiscal months split four before the February launch and eight after. The two pandemic sensitivities move the strict effect to +$0.21 and −$0.17 and leave the client gap above $9 in both (<a href="#tbl-or" class="quarto-xref">Table&nbsp;5</a>). Client-coded error dollars rose in Oregon relative to its donors across that window. Whether the expansion or the pandemic-era changes that share its dates moved them, the design cannot separate, and the rule refuses. The 34-state pool conditions the result; the protocol pre-named its delay-roster and registry exclusions.</p>
 <div id="tbl-or" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -511,18 +548,28 @@ Table&nbsp;5: Oregon — primary outcomes and pandemic sensitivities; verdict <c
 </figure>
 </div>
 </section>
-<section id="pooled-inference" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="pooled-inference"><span class="header-section-number">8</span> Pooled inference</h2>
+<section id="pooled-inference" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="pooled-inference"><span class="header-section-number">9</span> Pooled inference</h2>
 <p>The pooled Rhode Island–Kentucky statistic is the equal-weight mean of the two state effects: +$1.16 per case-month on the strict outcome (rank 4 of 43, p = 0.093) and −$0.29 on the client placebo (rank 43 of 43, p = 1.0). The unit rule, applied unchanged to the pooled strict and client statistics, returns <code>signal</code>. Three of the 42 placebo statistics match or exceed the pooled strict effect in absolute value. The pooled client effect is the smallest of all 43 because the two states’ client movements, +$3.96 and −$4.53, nearly cancel. The total rate falls 0.57 percentage points (p = 0.744) and cannot change the verdict.</p>
 <p>The pooled verdict stands apart from the two unit verdicts. It averages a +$2.90 <code>signal</code> with a −$0.58 <code>no_protocol_defined_signal</code>; it neither upgrades Kentucky nor averages away Rhode Island’s concentration in FY2017–19. It answers one question, whether the two 2016 launches together moved computing-apparatus error dollars against a common pool.</p>
 </section>
-<section id="decomposing-the-rhode-island-signal" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="decomposing-the-rhode-island-signal"><span class="header-section-number">9</span> Decomposing the Rhode Island signal</h2>
+<section id="decomposing-the-rhode-island-signal" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="decomposing-the-rhode-island-signal"><span class="header-section-number">10</span> Decomposing the Rhode Island signal</h2>
 <p>The reviewers’ cause codes split the strict outcome into channels, and a second frozen protocol estimates each channel against a synthetic Rhode Island. Seven channels follow the codebook: programming defect (code 17), computer-generated mass change (19), arithmetic (20), user error (21), data entry (18), information disregarded (12), and recertification (23–25). The protocol pre-names one composite, defect-or-mass-change (17 and 19). A reviewer’s classification defines every channel, so the estimates describe how the QC record classified the failures, not what the system mechanically did.</p>
 <p>A count gate fixes which channels receive inference. Rhode Island’s adjudicated error cases number 325, 206, and 482 in FY2017, FY2018, and FY2019; a channel is inferential only if its code appears on at least 30 of them in each year. Mass change (139, 93, 98), information disregarded (84, 51, 137), and the composite (183, 105, 119) clear the gate. Programming defect (44, 12, 21) fails FY2018; arithmetic (7, 3, 14), user error (1, 4, 8), and data entry (5, 13, 18) fall well short. Recertification records zero presence in every Rhode Island year, its codes first appear in the FY2024 file, and the channel receives no fit. Inferential channels receive the parent’s permutation inference and two verdicts. The parent rule returns <code>signal</code> when channel p is below 0.10 and the run’s client placebo p is at or above 0.10; the family-adjusted rule for the three channels tested returns <code>signal_family_adjusted</code> when p is below 0.10/3. Descriptive channels receive effect sizes and paths, no p-values, and no verdict.</p>
 <p>The inherited estimator fits one set of donor weights on all the outcomes in a run at once. The decomposition run therefore fits its synthetic Rhode Island on the seven estimable channel outcomes and the client placebo together. That fit lands on Ohio (0.306), South Dakota (0.301), Michigan (0.132), Maryland (0.131), Connecticut (0.074), and the District of Columbia (0.057); the parent’s landed on West Virginia and Michigan. On identical data the client placebo, the same outcome the parent ran, moves from +$3.96, p = 0.233, rank 10 of 43 under the parent’s fit to +$5.64, p = 0.023, rank 1 of 43 under the joint fit. Placebo status in this design depends on which outcomes share the donor fit. Under the parent rule the fired placebo blocks every joint-fit channel from <code>signal</code>, including mass change at +$2.08 (p = 0.023, rank 1 of 43) and the composite at +$2.76 (p = 0.023, rank 1 of 43). Both carry <code>signal_family_adjusted</code>, whose rule tests the channel p alone. Information disregarded moves +$0.56 (p = 0.791, rank 34 of 43).</p>
 <p>A sibling protocol, frozen 2026-08-16 before its estimation, specifies a fixed-donor estimator. It fits the weights once on the parent’s three outcomes and holds them for every channel and for the client placebo; the synthetic Rhode Island does not move between outcomes. Its pre-registered check requires the client placebo to reproduce the parent’s exactly, and it does: +$3.964, p = 0.233, rank 10 of 43. With the parent’s placebo in place, mass change is +$2.14 (p = 0.023, rank 1 of 43), <code>signal</code> and <code>signal_family_adjusted</code>. The composite is +$2.53 (p = 0.023, rank 1 of 43), <code>signal</code> and <code>signal_family_adjusted</code>. Information disregarded is +$1.37 (p = 0.512, rank 22 of 43), <code>no_protocol_defined_signal</code> and <code>no_family_adjusted_signal</code>. The descriptive channels stay small under both fits, none above $0.91 (<a href="#tbl-decomp" class="quarto-xref">Table&nbsp;6</a>). The mass-change gap concentrates in FY2017–19 under both estimators, +$3.73 against +$0.96 in the later post years under the joint fit and +$4.06 against +$1.06 under the fixed donor, a profile the protocol names descriptive and verdict-inert.</p>
 <p>Both estimators appear in <a href="#tbl-decomp" class="quarto-xref">Table&nbsp;6</a>; the reproduction check links them, and the paper privileges neither. They agree on the ordering: mass change carries the largest inferential portion of the strict-channel rise under both fits, and information disregarded does not separate from its donor under either. They differ on the parent-rule verdict at the same channel p-value, and the difference is the donor fit (<code>analysis/fixed_donor_decomposition_results.json</code> at repository commit <code>4aafd06</code>).</p>
+<div id="fig-channels" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-channels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-channels.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-channels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Channel effects under the joint-fit and fixed-donor estimators; inferential channels carry permutation p-values, descriptive channels do not, and the fixed-donor client placebo reproduces the parent’s exactly.
+</figcaption>
+</figure>
+</div>
 <div id="tbl-decomp" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-decomp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -638,19 +685,19 @@ Table&nbsp;6: Rhode Island cause-channel decomposition under both estimators, do
 </figure>
 </div>
 </section>
-<section id="rhode-islands-post-launch-cases" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="rhode-islands-post-launch-cases"><span class="header-section-number">10</span> Rhode Island’s post-launch cases</h2>
+<section id="rhode-islands-post-launch-cases" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="rhode-islands-post-launch-cases"><span class="header-section-number">11</span> Rhode Island’s post-launch cases</h2>
 <p>The strict-coded Rhode Island cases carry two more descriptions, each without a comparison unit and each outside inference. The first is the element codes the reviewers record on each error case, counted by case presence: a case counts once for every code it carries, so shares overlap. The FY2017–19 consequence window holds 116 strict-coded cases and the FY2012–15 pre-window 15. Code 364 appears on 63 of the 116 (54.3 percent), 331 on 54 (46.6 percent), 363 on 46 (39.7 percent), and 333 on 26 (22.4 percent); the FY2024 codebook labels 364 as the standard utility allowance, 331 as RSDI benefits, 363 as the shelter deduction, and 333 as SSI or state SSI supplement (FY2024 SNAP QC Technical Documentation, printed pp.&nbsp;89–90; the same labels appear in the FY2015 documentation, PDF pp.&nbsp;108–109), and the semantic-stability caveat above applies. Among the 15 pre-launch cases the leaders are 331 (7 cases), 365 (5), and 364 (3), too few for a rate comparison. The code inventory differs slightly between windows: 213 and 225 do not appear in the FY2012–15 inventory, 212 and 222 do not appear in the FY2017–19 inventory, and the comparison keeps the 43 codes present in both.</p>
 <p>The second layer dates each case’s most recent certification. <code>YRMONTH − LASTCERT</code>, the review month minus the file’s months-since-last-certification field, places that certification before or on/after the September 2016 go-live; <code>CERTMTH</code> measures a certification period’s length and does not date it. Of the 116 consequence-window cases, 39 carry a certification recorded before the go-live and 77 on or after it, with none unclassifiable. The 39 hold $5,710,151.19 of weighted error dollars (34.4 percent); the 77 hold $10,874,154.55 (65.6 percent) of the $16.58 million the window’s strict outcome carries. The split reads the recorded vintage of the certification and nothing about conversion status: whether a given case was converted from the prior system or newly entered, the file does not say.</p>
 <p>The channels credit whole cases. The strict outcome credits a case’s entire weighted error once when any cause-code slot carries a strict code. Each channel credits the entire case when its own code is present, so channel sums exceed the strict outcome wherever a case carries two strict codes. Seven such cases in FY2017, four in FY2018, and two in FY2019 add $759,868.20, $593,218.52, and $187,891.02 of duplicate credit to the channel sums. The strict outcome itself is $6,915,111.64 in FY2017 against $404,871.50 in FY2016.</p>
 </section>
-<section id="artifacts-and-reproduction" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="artifacts-and-reproduction"><span class="header-section-number">11</span> Artifacts and reproduction</h2>
+<section id="artifacts-and-reproduction" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="artifacts-and-reproduction"><span class="header-section-number">12</span> Artifacts and reproduction</h2>
 <p>Every number in this paper reads from a committed artifact in the PolicyEngine/snap-qc-sim repository, and a fast test locks each quoted value to its artifact. The parent event studies live in <code>analysis/riky_event_study_results.json</code> (Rhode Island, Kentucky, and the pooled statistic; generator <code>analysis/event_study.py</code>; protocol <code>analysis/RIKY_EVENT_STUDY_PROTOCOL.md</code>; locks in <code>tests/test_riky_event_study.py</code>) and <code>analysis/event_study_results.json</code> (Oregon; protocol <code>analysis/EVENT_STUDY_PROTOCOL.md</code>; locks in <code>tests/test_event_study.py</code>). The decomposition lives in <code>analysis/uhip_decomposition_results.json</code> (generator <code>analysis/uhip_decomposition.py</code>; protocol <code>analysis/UHIP_DECOMPOSITION_PROTOCOL.md</code>, SHA-256 <code>ffbf63b1…</code>; locks in <code>tests/test_uhip_decomposition.py</code>) and the fixed-donor run in <code>analysis/fixed_donor_decomposition_results.json</code> (generator <code>analysis/fixed_donor_decomposition.py</code>; protocol <code>analysis/FIXED_DONOR_PROTOCOL.md</code>, SHA-256 <code>80dad3c0…</code>; locks, including the reproduction check, in <code>tests/test_fixed_donor_decomposition.py</code>). Event dates and sources sit in <code>analysis/system_migrations.json</code>; the coding audit and tolerance series in <code>analysis/coding_consistency.json</code>; cause-code labels in <code>analysis/cause_shares.json</code>; the event-family multiplicity disclosure in <code>analysis/EVENT_FAMILY_ADDENDUM.md</code> with <code>EVENT_FAMILY_ADDENDUM_CORRECTION.md</code> (post-results reporting commitment; arithmetic on committed ranks; no re-estimation).</p>
 <p>The tests that lock committed values run in the repository’s pinned environment (<code>uv run --frozen --extra dev --extra analysis pytest</code>). Full regeneration from raw files needs the FY2012–24 SNAP QC public-use files, which the repository does not distribute; it commits their SHA-256 hashes and loaders, the regeneration tests skip when the hash-audited local cache is absent, and they compare values, not bytes, when it is present. The paper’s tables were generated from the artifacts at repository commit <code>4aafd06</code>.</p>
 </section>
-<section id="limitations" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="limitations"><span class="header-section-number">12</span> Limitations</h2>
+<section id="limitations" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="limitations"><span class="header-section-number">13</span> Limitations</h2>
 <p>One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island’s strict estimate and Oregon’s client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and the design section reports its Bonferroni and Holm arithmetic.</p>
 <p>The decomposition runs on 325, 206, and 482 adjudicated Rhode Island error cases in fiscal 2017 through 2019. The protocol admits a channel to inference only when its code appears at least 30 times in each year. Mass-change (139, 93, 98), information-disregarded (84, 51, 137), and a defect-or-mass-change composite pass. Program defect (44, 12, 21), data entry (5, 13, 18), arithmetic (7, 3, 14), and user error (1, 4, 8) appear as effect sizes without p-values. Recertification codes 23 through 25 first appear in fiscal 2024, so that channel has no cases in the Rhode Island window.</p>
 <p>The channels describe how the QC record classified the failures. Nothing in the file observes the system; a reviewer read each case and chose a code. This paper groups five codes into the client-caused class; the file has no binary responsibility field. The code-semantics bounds stated with the outcome definitions apply to every channel: numeric presence across fiscal 2012–2024 does not establish unchanged meaning. The element and certification-vintage layers describe Rhode Island’s own cases and identify no conversion status.</p>
@@ -658,12 +705,12 @@ Table&nbsp;6: Rhode Island cause-channel decomposition under both estimators, do
 <p>The pandemic left the fiscal 2021 file partial, 9,832 rows against 27,112 in the reconciled fiscal 2020 file, and every primary specification drops it. Keeping it as post, or dropping fiscal 2020 with it, moves no strict estimate by more than $0.41 per case-month. Fiscal 2016 holds both launches and sits outside every primary specification. Oregon’s launch sits inside the pandemic window and splits fiscal 2021 into four pre-launch and eight post-launch months. Its client-caused placebo fires, the frozen rule refuses attribution, and the design does not separate the launch from the pandemic.</p>
 <p>The event registry defines the donor pools, so a migration it missed leaves that state among the donors. Its Oregon entry rests on one source with no vendor, launch-problem, or federal billing record; Kentucky’s has no billing record; and six context entries carry unverified dates or vendors. Oregon’s donor pool also excludes a delay roster; the protocol named every exclusion before estimation, some of them condition on information from after the February 2021 launch, and the estimate is conditional on that pool.</p>
 </section>
-<section id="relation-to-the-accounting-scenarios" class="level2" data-number="13">
-<h2 data-number="13" class="anchored" data-anchor-id="relation-to-the-accounting-scenarios"><span class="header-section-number">13</span> Relation to the accounting scenarios</h2>
+<section id="relation-to-the-accounting-scenarios" class="level2" data-number="14">
+<h2 data-number="14" class="anchored" data-anchor-id="relation-to-the-accounting-scenarios"><span class="header-section-number">14</span> Relation to the accounting scenarios</h2>
 <p>The companion simulation paper’s adoption accounting scenarios <span class="citation" data-cites="ghenis2026oracle">(<a href="#ref-ghenis2026oracle" role="doc-biblioref">Ghenis 2026</a>)</span> use the same coded class this paper takes as its strict outcome, codes 17, 19, and 20. The two papers share only that class. Accounting scenarios and event estimates answer different questions, and neither checks the other. Rhode Island’s rise is the one estimate here that moves in that class; it estimates one state’s bundled system replacement as implemented, and nothing in it transfers to a generic rules-engine adoption scenario.</p>
 </section>
-<section id="conclusion" class="level2" data-number="14">
-<h2 data-number="14" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">14</span> Conclusion</h2>
+<section id="conclusion" class="level2" data-number="15">
+<h2 data-number="15" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">15</span> Conclusion</h2>
 <p>Three eligibility-system replacements return one <code>signal</code> and two <code>no_protocol_defined_signal</code> verdicts under the frozen rule, the second of those a refusal by the placebo test. Rhode Island’s computing-apparatus error dollars rise $2.90 per weighted case-month against its synthetic donor (p = 0.023, rank 1 of 43), and the client-caused placebo does not fire (p = 0.233). The rise concentrates in fiscal 2017 through 2019, the pre-named window inside the September 2016 to December 2019 interval FNS later billed at $37.3 million; that alignment is descriptive and verdict-inert, and the billing record entered no estimate. Kentucky returns −$0.58 (p = 0.30), no protocol-defined signal, beside a launch whose registry entry documents about 25,000 erroneous cancellation notices and a backlog near 50,000 cases; the null speaks to coded error dollars and passes no verdict on the launch. Oregon’s strict estimate is −$0.20 (p = 0.71), its client-caused placebo rises $10.53 inside the pandemic window (p = 0.029, rank 1 of 35), and the design attributes nothing.</p>
 <p>Inside Rhode Island the rise sits in mass-change error, code 19, under both estimators. It runs +$2.08 per case-month with the donor refit across all outcomes and +$2.14 with the parent’s donor held fixed, each at p = 0.023 and rank 1 of 43. Information-disregarded error shows no signal under either estimator, and defect, data-entry, arithmetic, and user error stay below $1 per case-month under both. All of it describes how the QC record classified UHIP’s failures.</p>
 <p>The design finding stands with the results. Under the parent estimator the placebo’s status depends on which outcomes share the donor fit; fixing the donor on the parent’s three outcomes reproduces that placebo, and the mass-change channel then earns the parent-rule verdict at the same p-value and rank the joint fit found. The paper reports both estimators, the reproduction check links them, and the paper privileges neither. Every estimate here measures a bundled system replacement as implemented, against a named donor set of states with no migration recorded in the paper’s event registry.</p>
@@ -684,12 +731,31 @@ Congressional Research Service. 2018. <em>Errors and Fraud in the Supplemental N
 <div id="ref-ghenis2026oracle" class="csl-entry" role="listitem">
 Ghenis, Max. 2026. <span>“Administrative Quality Control Data as an Oracle: Verifying Encoded <span>SNAP</span> Rules and Simulating Payment Error Under Cost Sharing.”</span> <a href="https://policyengine.org/us/snap-payment-error-simulator/paper">https://policyengine.org/us/snap-payment-error-simulator/paper</a>.
 </div>
+<div id="ref-goldstein1996league" class="csl-entry" role="listitem">
+Goldstein, Harvey, and David J. Spiegelhalter. 1996. <span>“League Tables and Their Limitations: Statistical Issues in Comparisons of Institutional Performance.”</span> <em>Journal of the Royal Statistical Society: Series A</em> 159 (3): 385–409. <a href="https://doi.org/10.2307/2983325">https://doi.org/10.2307/2983325</a>.
+</div>
+<div id="ref-homonoff2021recertification" class="csl-entry" role="listitem">
+Homonoff, Tatiana, and Jason Somerville. 2021. <span>“Program Recertification Costs: Evidence from <span>SNAP</span>.”</span> <em>American Economic Journal: Economic Policy</em> 13 (4): 271–98. <a href="https://doi.org/10.1257/pol.20190272">https://doi.org/10.1257/pol.20190272</a>.
+</div>
+<div id="ref-kane2002volatility" class="csl-entry" role="listitem">
+Kane, Thomas J., and Douglas O. Staiger. 2002. <span>“The Promise and Pitfalls of Using Imprecise School Accountability Measures.”</span> <em>Journal of Economic Perspectives</em> 16 (4): 91–114. <a href="https://doi.org/10.1257/089533002320950993">https://doi.org/10.1257/089533002320950993</a>.
+</div>
+<div id="ref-peeters2018digital" class="csl-entry" role="listitem">
+Peeters, Rik, and Arjan Widlak. 2018. <span>“The Digital Cage: Administrative Exclusion Through Information Architecture – the Case of the <span>Dutch</span> Civil Registry’s Master Data Management System.”</span> <em>Government Information Quarterly</em> 35 (2): 175–83. <a href="https://doi.org/10.1016/j.giq.2018.02.003">https://doi.org/10.1016/j.giq.2018.02.003</a>.
+</div>
+<div id="ref-peeters2023administrative" class="csl-entry" role="listitem">
+Peeters, Rik, and Arjan Widlak. 2023. <span>“Administrative Exclusion in the Infrastructure-Level Bureaucracy: The Case of the <span>Dutch</span> Daycare Benefit Scandal.”</span> <em>Public Administration Review</em> 83 (4): 863–77. <a href="https://doi.org/10.1111/puar.13615">https://doi.org/10.1111/puar.13615</a>.
+</div>
+<div id="ref-gao2007errors" class="csl-entry" role="listitem">
+U.S. Government Accountability Office. 2007. <em>Food <span>Stamp</span> <span>Program</span>: Payment Errors and Trafficking Have Declined Despite Increased Program Participation</em>. GAO-07-422T. U.S. Government Accountability Office. <a href="https://www.gao.gov/products/gao-07-422t">https://www.gao.gov/products/gao-07-422t</a>.
+</div>
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>https://transparency.ri.gov/uhip/; https://www.wpri.com/target-12/we-are-very-sorry-deloitte-apologizes-to-ri-about-uhip/; https://turnto10.com/news/local/rhode-island-department-of-human-services-appeals-federal-government-snap-overpayments-37-million-dollars-uhip-ribridges-usda-food-and-nutrition-service; https://www.rimonthly.com/unified-health-infrastructure-project/<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>https://www.lpm.org/news/2016-07-21/state-officials-say-theyre-still-fixing-benefind; https://nkytribune.com/2016/04/one-stop-shop-benefind-isnt-causes-loss-of-benefits-and-confusion-for-thousands-of-kentuckians/; https://www.wkyufm.org/politics/2016-04-28/state-dedicates-workers-to-cut-benefind-backlog<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>https://www.oregon.gov/odhs/agency/pages/oep-one-system.aspx; https://olis.oregonlegislature.gov/liz/2021I1/Downloads/CommitteeMeetingDocument/256848<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/public-assistance-eligibility-system-audit-2024; https://www.opb.org/article/2024/10/10/oregon-eligibility-system-data-entry-errors/<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main>
 <!-- /main column -->
