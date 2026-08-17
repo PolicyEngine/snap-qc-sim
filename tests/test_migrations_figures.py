@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import subprocess
+
+import pytest
 import sys
 from pathlib import Path
 
@@ -45,6 +47,7 @@ def test_script_and_committed_figures_exist() -> None:
 
 
 def test_regeneration_file_set_and_inputs(tmp_path: Path) -> None:
+    pytest.importorskip("matplotlib")
     output = tmp_path / "figures"
     subprocess.run(
         [sys.executable, str(SCRIPT), "--output-dir", str(output)],
