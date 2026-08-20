@@ -1,0 +1,1779 @@
+{
+  "coverage_pct": [
+    1,
+    2,
+    5,
+    10,
+    20
+  ],
+  "environment": {
+    "seed": 20260820
+  },
+  "input_hashes": {
+    "inputs": {
+      "medicare_part_b_premiums.csv": "b8f192092823e5158737fe412c63a1cad19c768d040fe5b5bc2aa229afb00afa",
+      "qc_pub_fy2017.sav": "18e0c7f9b42c26a1c70652d43e461ce0086bdf6749ed7534778bf8f0f5b71ea9",
+      "qc_pub_fy2018.sav": "02fcbb4ea4116a162f89e56efc930d1716371a29e0196c551ffd96da72b71e82",
+      "qc_pub_fy2019.sav": "0d8302b672529feb87b160d12297fe1adda1703eec0e3a4558f57e278ce12846",
+      "qc_pub_fy2022.sav": "c795aac12ea67937af3242593280fbc8dd3eb70938f56b7a7badbfd71ac74f5d",
+      "qc_pub_fy2023.sav": "9a1028e180028905e55edf3d72f028bc7740acfbc66cad1ccf935c6bb3fd2257",
+      "qc_pub_fy2024.sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
+      "standard_medical_deductions.csv": "83cc6023471474cc82bb45648b1cd39530379ea60f4194f8582ee45a1eb404ca",
+      "state_bbce.csv": "47c0255266f8fd62c6408697fc53b465c49f19004de8bf99c5c7d4f1def70b22"
+    },
+    "model_results": "47ed1afb587cc214d0edaecc92705eea54bcc9218fec06a12d7db7988ab96c59",
+    "train_error_model": "8d8891fd7b2d0d39bcc4492d26d384c41bd39487e38ec857b0d93ab8e832732b"
+  },
+  "interpretation": "accounting construction: share of FY2024 measured counted error dollars within an HWGT-weighted review budget; not a causal estimate",
+  "national": {
+    "1": {
+      "model": 0.07691529,
+      "oracle": 0.22791699,
+      "random_expectation": 0.01,
+      "random_seeded_draw": 0.0126181
+    },
+    "10": {
+      "model": 0.41604456,
+      "oracle": 0.90362823,
+      "random_expectation": 0.1,
+      "random_seeded_draw": 0.09977889
+    },
+    "2": {
+      "model": 0.13369562,
+      "oracle": 0.35898492,
+      "random_expectation": 0.02,
+      "random_seeded_draw": 0.01998464
+    },
+    "20": {
+      "model": 0.60158743,
+      "oracle": 1.0,
+      "random_expectation": 0.2,
+      "random_seeded_draw": 0.20317607
+    },
+    "5": {
+      "model": 0.26060459,
+      "oracle": 0.64246584,
+      "random_expectation": 0.05,
+      "random_seeded_draw": 0.05149836
+    }
+  },
+  "provenance": {
+    "evaluation_year": 2024,
+    "feature_set": "COVARIATES + BURDEN_INTERMEDIATES",
+    "out_of_sample_by_construction": true,
+    "training_path_reused": "load_year + build_features + fit_score",
+    "training_years": [
+      2017,
+      2018,
+      2019,
+      2022,
+      2023
+    ],
+    "verification": "YEAR_TEST is absent from YEARS_TRAIN in analysis/train_error_model.py"
+  },
+  "roc_auc_cross_check": {
+    "committed": 0.7666262908275983,
+    "display_lock": 0.7666,
+    "recomputed": 0.7666262908275983
+  },
+  "runtime": "measured externally and reported in INTERVENTIONS_REPORT.md to keep regeneration byte-identical",
+  "schema_version": 1,
+  "states": {
+    "AK": {
+      "1": {
+        "model": 0.00958493,
+        "oracle": 0.30531755,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.20043792,
+        "oracle": 0.89636098,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.07846007
+      },
+      "2": {
+        "model": 0.09034477,
+        "oracle": 0.44380597,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.05229819
+      },
+      "20": {
+        "model": 0.44966391,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.13276485
+      },
+      "5": {
+        "model": 0.13572851,
+        "oracle": 0.6821945,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.06428959
+      }
+    },
+    "AL": {
+      "1": {
+        "model": 0.03639932,
+        "oracle": 0.20647344,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.43381172,
+        "oracle": 0.88950535,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.11793731
+      },
+      "2": {
+        "model": 0.06879046,
+        "oracle": 0.34294003,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01095535
+      },
+      "20": {
+        "model": 0.59716038,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.20065818
+      },
+      "5": {
+        "model": 0.22471832,
+        "oracle": 0.62369307,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.04948691
+      }
+    },
+    "AR": {
+      "1": {
+        "model": 0.03074034,
+        "oracle": 0.30082074,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01020705
+      },
+      "10": {
+        "model": 0.32288801,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.04621329
+      },
+      "2": {
+        "model": 0.06601924,
+        "oracle": 0.47259148,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01371087
+      },
+      "20": {
+        "model": 0.51850905,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.10997965
+      },
+      "5": {
+        "model": 0.19633254,
+        "oracle": 0.79089333,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01901872
+      }
+    },
+    "AZ": {
+      "1": {
+        "model": 0.0910681,
+        "oracle": 0.26316475,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.54980277,
+        "oracle": 0.96284966,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05531548
+      },
+      "2": {
+        "model": 0.19984311,
+        "oracle": 0.40927763,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.72175553,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.13217299
+      },
+      "5": {
+        "model": 0.33773636,
+        "oracle": 0.71159412,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0262911
+      }
+    },
+    "CA": {
+      "1": {
+        "model": 0.05757688,
+        "oracle": 0.20104525,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.02857574
+      },
+      "10": {
+        "model": 0.38408319,
+        "oracle": 0.89249956,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.12532994
+      },
+      "2": {
+        "model": 0.13087122,
+        "oracle": 0.31042848,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0330944
+      },
+      "20": {
+        "model": 0.59941715,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.22428609
+      },
+      "5": {
+        "model": 0.26221829,
+        "oracle": 0.60660925,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.05977407
+      }
+    },
+    "CO": {
+      "1": {
+        "model": 0.06157095,
+        "oracle": 0.26609718,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00354018
+      },
+      "10": {
+        "model": 0.38255347,
+        "oracle": 0.93449602,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.08657856
+      },
+      "2": {
+        "model": 0.1452008,
+        "oracle": 0.41273991,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.02749669
+      },
+      "20": {
+        "model": 0.58294999,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.22670016
+      },
+      "5": {
+        "model": 0.26443568,
+        "oracle": 0.70621881,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.07174807
+      }
+    },
+    "CT": {
+      "1": {
+        "model": 0.06517919,
+        "oracle": 0.17621249,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01102395
+      },
+      "10": {
+        "model": 0.42411371,
+        "oracle": 0.83668033,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.11152326
+      },
+      "2": {
+        "model": 0.0893348,
+        "oracle": 0.30034791,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0125511
+      },
+      "20": {
+        "model": 0.63383165,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.23670814
+      },
+      "5": {
+        "model": 0.24341111,
+        "oracle": 0.56296233,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.05941956
+      }
+    },
+    "DC": {
+      "1": {
+        "model": 0.05102307,
+        "oracle": 0.15988228,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01504945
+      },
+      "10": {
+        "model": 0.4261487,
+        "oracle": 0.73256462,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.13545818
+      },
+      "2": {
+        "model": 0.08141604,
+        "oracle": 0.26492232,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0210155
+      },
+      "20": {
+        "model": 0.61153138,
+        "oracle": 0.97915967,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21135233
+      },
+      "5": {
+        "model": 0.23665852,
+        "oracle": 0.47747447,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03729212
+      }
+    },
+    "DE": {
+      "1": {
+        "model": 0.07423743,
+        "oracle": 0.20546167,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.43602581,
+        "oracle": 0.90065846,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.1087804
+      },
+      "2": {
+        "model": 0.13677145,
+        "oracle": 0.33463009,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01298156
+      },
+      "20": {
+        "model": 0.63111935,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21733767
+      },
+      "5": {
+        "model": 0.29837973,
+        "oracle": 0.63226822,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01938942
+      }
+    },
+    "FL": {
+      "1": {
+        "model": 0.03896663,
+        "oracle": 0.17350621,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01213751
+      },
+      "10": {
+        "model": 0.31767247,
+        "oracle": 0.83047566,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.10393492
+      },
+      "2": {
+        "model": 0.06795502,
+        "oracle": 0.30200134,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01488141
+      },
+      "20": {
+        "model": 0.54427921,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.20279224
+      },
+      "5": {
+        "model": 0.22114053,
+        "oracle": 0.56179712,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0444543
+      }
+    },
+    "GA": {
+      "1": {
+        "model": 0.07053085,
+        "oracle": 0.17979969,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01112427
+      },
+      "10": {
+        "model": 0.48954836,
+        "oracle": 0.78191589,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.11526907
+      },
+      "2": {
+        "model": 0.13651636,
+        "oracle": 0.30439865,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01411625
+      },
+      "20": {
+        "model": 0.63916031,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1950635
+      },
+      "5": {
+        "model": 0.30842806,
+        "oracle": 0.53515973,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03688331
+      }
+    },
+    "GU": {
+      "1": {
+        "model": 0.0,
+        "oracle": 0.22469323,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.03671495
+      },
+      "10": {
+        "model": 0.3847012,
+        "oracle": 0.79730378,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.15725215
+      },
+      "2": {
+        "model": 0.00353496,
+        "oracle": 0.32054835,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.07329622
+      },
+      "20": {
+        "model": 0.59228934,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.40517689
+      },
+      "5": {
+        "model": 0.08093344,
+        "oracle": 0.54887067,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.07329622
+      }
+    },
+    "HI": {
+      "1": {
+        "model": 0.02481816,
+        "oracle": 0.22653879,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.17422345,
+        "oracle": 0.94038568,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.06944162
+      },
+      "2": {
+        "model": 0.05010668,
+        "oracle": 0.36817286,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00771905
+      },
+      "20": {
+        "model": 0.32024791,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1598671
+      },
+      "5": {
+        "model": 0.09838002,
+        "oracle": 0.66146956,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0341089
+      }
+    },
+    "IA": {
+      "1": {
+        "model": 0.16082832,
+        "oracle": 0.34246203,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00541668
+      },
+      "10": {
+        "model": 0.53424265,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.07220377
+      },
+      "2": {
+        "model": 0.28569555,
+        "oracle": 0.53696392,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00541668
+      },
+      "20": {
+        "model": 0.6928475,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.25436883
+      },
+      "5": {
+        "model": 0.40169386,
+        "oracle": 0.88205331,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01115336
+      }
+    },
+    "ID": {
+      "1": {
+        "model": 0.16005182,
+        "oracle": 0.42466356,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01435394
+      },
+      "10": {
+        "model": 0.4183261,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.16217072
+      },
+      "2": {
+        "model": 0.26960041,
+        "oracle": 0.64477422,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.13183257
+      },
+      "20": {
+        "model": 0.53830426,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.20909333
+      },
+      "5": {
+        "model": 0.35997261,
+        "oracle": 1.0,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.16217072
+      }
+    },
+    "IL": {
+      "1": {
+        "model": 0.09780361,
+        "oracle": 0.20279054,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00198349
+      },
+      "10": {
+        "model": 0.44250112,
+        "oracle": 0.83495892,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.08329896
+      },
+      "2": {
+        "model": 0.17340891,
+        "oracle": 0.31136952,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01264808
+      },
+      "20": {
+        "model": 0.62417349,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21140347
+      },
+      "5": {
+        "model": 0.30992039,
+        "oracle": 0.55845377,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.06994647
+      }
+    },
+    "IN": {
+      "1": {
+        "model": 0.07950104,
+        "oracle": 0.18997344,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0104465
+      },
+      "10": {
+        "model": 0.38767006,
+        "oracle": 0.89671301,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.13241821
+      },
+      "2": {
+        "model": 0.1084331,
+        "oracle": 0.32545088,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0104465
+      },
+      "20": {
+        "model": 0.63100515,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1726303
+      },
+      "5": {
+        "model": 0.30197784,
+        "oracle": 0.61677692,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0206723
+      }
+    },
+    "KS": {
+      "1": {
+        "model": 0.0265266,
+        "oracle": 0.22672447,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01994756
+      },
+      "10": {
+        "model": 0.2572244,
+        "oracle": 0.9753536,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.081297
+      },
+      "2": {
+        "model": 0.04357485,
+        "oracle": 0.37864673,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01994756
+      },
+      "20": {
+        "model": 0.43888114,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.16392272
+      },
+      "5": {
+        "model": 0.10476606,
+        "oracle": 0.67658069,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03885856
+      }
+    },
+    "KY": {
+      "1": {
+        "model": 0.08248648,
+        "oracle": 0.31881566,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0083664
+      },
+      "10": {
+        "model": 0.41590876,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.04883613
+      },
+      "2": {
+        "model": 0.14695463,
+        "oracle": 0.47835674,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01269497
+      },
+      "20": {
+        "model": 0.69734243,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.13213006
+      },
+      "5": {
+        "model": 0.19498915,
+        "oracle": 0.79260138,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03602009
+      }
+    },
+    "LA": {
+      "1": {
+        "model": 0.09431146,
+        "oracle": 0.2408964,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.34108275,
+        "oracle": 0.96705683,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.15355113
+      },
+      "2": {
+        "model": 0.12284135,
+        "oracle": 0.40892847,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.59056992,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.23123624
+      },
+      "5": {
+        "model": 0.21805243,
+        "oracle": 0.71596463,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03506753
+      }
+    },
+    "MA": {
+      "1": {
+        "model": 0.04764123,
+        "oracle": 0.17407265,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00795546
+      },
+      "10": {
+        "model": 0.42998443,
+        "oracle": 0.88392626,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.11550478
+      },
+      "2": {
+        "model": 0.13312993,
+        "oracle": 0.31298721,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00795546
+      },
+      "20": {
+        "model": 0.75932685,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.2236791
+      },
+      "5": {
+        "model": 0.27186147,
+        "oracle": 0.57283655,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01930795
+      }
+    },
+    "MD": {
+      "1": {
+        "model": 0.09053704,
+        "oracle": 0.21459912,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.38531554,
+        "oracle": 0.9054981,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.08320654
+      },
+      "2": {
+        "model": 0.16479623,
+        "oracle": 0.37898005,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00604817
+      },
+      "20": {
+        "model": 0.52198734,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.19366939
+      },
+      "5": {
+        "model": 0.26246165,
+        "oracle": 0.65033733,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.05490369
+      }
+    },
+    "ME": {
+      "1": {
+        "model": 0.02717075,
+        "oracle": 0.2229298,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.31007437,
+        "oracle": 0.91566019,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.06656459
+      },
+      "2": {
+        "model": 0.02717075,
+        "oracle": 0.34720154,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.49377645,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.25390953
+      },
+      "5": {
+        "model": 0.1349887,
+        "oracle": 0.63364549,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03665736
+      }
+    },
+    "MI": {
+      "1": {
+        "model": 0.0465385,
+        "oracle": 0.21065771,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00685156
+      },
+      "10": {
+        "model": 0.34364911,
+        "oracle": 0.86157844,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.17661901
+      },
+      "2": {
+        "model": 0.08356561,
+        "oracle": 0.35122058,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01879584
+      },
+      "20": {
+        "model": 0.57104233,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.27110926
+      },
+      "5": {
+        "model": 0.14136644,
+        "oracle": 0.61774644,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.04382462
+      }
+    },
+    "MN": {
+      "1": {
+        "model": 0.03391798,
+        "oracle": 0.23938276,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.02906127
+      },
+      "10": {
+        "model": 0.27544642,
+        "oracle": 0.87771012,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.12235819
+      },
+      "2": {
+        "model": 0.09060078,
+        "oracle": 0.36899435,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.05034005
+      },
+      "20": {
+        "model": 0.49565444,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.27965831
+      },
+      "5": {
+        "model": 0.21015263,
+        "oracle": 0.61859853,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.09625604
+      }
+    },
+    "MO": {
+      "1": {
+        "model": 0.03198279,
+        "oracle": 0.2778406,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.02738892
+      },
+      "10": {
+        "model": 0.38538645,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05852114
+      },
+      "2": {
+        "model": 0.07622287,
+        "oracle": 0.437546,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.03554717
+      },
+      "20": {
+        "model": 0.61303468,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1291844
+      },
+      "5": {
+        "model": 0.21032183,
+        "oracle": 0.75194271,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03554717
+      }
+    },
+    "MS": {
+      "1": {
+        "model": 0.01630176,
+        "oracle": 0.22776846,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.31702401,
+        "oracle": 0.91469546,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.10479985
+      },
+      "2": {
+        "model": 0.07400107,
+        "oracle": 0.36486899,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00335217
+      },
+      "20": {
+        "model": 0.61954379,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.16036955
+      },
+      "5": {
+        "model": 0.15779987,
+        "oracle": 0.65658148,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03809622
+      }
+    },
+    "MT": {
+      "1": {
+        "model": 0.0,
+        "oracle": 0.26127538,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.19619149,
+        "oracle": 0.96516099,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.08459528
+      },
+      "2": {
+        "model": 0.02133543,
+        "oracle": 0.3999108,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.35805253,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.24891659
+      },
+      "5": {
+        "model": 0.06271181,
+        "oracle": 0.68699859,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0143654
+      }
+    },
+    "NC": {
+      "1": {
+        "model": 0.0669653,
+        "oracle": 0.20880306,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.45408025,
+        "oracle": 0.90577077,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.07640178
+      },
+      "2": {
+        "model": 0.11386002,
+        "oracle": 0.34538075,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00883319
+      },
+      "20": {
+        "model": 0.62164396,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.15402616
+      },
+      "5": {
+        "model": 0.27296882,
+        "oracle": 0.6375245,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03118447
+      }
+    },
+    "ND": {
+      "1": {
+        "model": 0.04714416,
+        "oracle": 0.27537676,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.10880983
+      },
+      "10": {
+        "model": 0.43638728,
+        "oracle": 0.97459359,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.16199846
+      },
+      "2": {
+        "model": 0.07715213,
+        "oracle": 0.4460627,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.10880983
+      },
+      "20": {
+        "model": 0.60689409,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.34137091
+      },
+      "5": {
+        "model": 0.30732193,
+        "oracle": 0.72692115,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.14048222
+      }
+    },
+    "NE": {
+      "1": {
+        "model": 0.18466047,
+        "oracle": 0.44171585,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.02727718
+      },
+      "10": {
+        "model": 0.36825594,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.10079862
+      },
+      "2": {
+        "model": 0.23186094,
+        "oracle": 0.63036552,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.02727718
+      },
+      "20": {
+        "model": 0.68598998,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.19863793
+      },
+      "5": {
+        "model": 0.33952684,
+        "oracle": 0.93647708,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.04935099
+      }
+    },
+    "NH": {
+      "1": {
+        "model": 0.05991957,
+        "oracle": 0.20146131,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01763817
+      },
+      "10": {
+        "model": 0.30096932,
+        "oracle": 0.93785434,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.04801576
+      },
+      "2": {
+        "model": 0.08069434,
+        "oracle": 0.349113,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01763817
+      },
+      "20": {
+        "model": 0.48666366,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.11334539
+      },
+      "5": {
+        "model": 0.18139459,
+        "oracle": 0.65061986,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01763817
+      }
+    },
+    "NJ": {
+      "1": {
+        "model": 0.08002298,
+        "oracle": 0.25910199,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.06548368
+      },
+      "10": {
+        "model": 0.35400978,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.17983181
+      },
+      "2": {
+        "model": 0.1342331,
+        "oracle": 0.42280089,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.07353861
+      },
+      "20": {
+        "model": 0.49806625,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.17983181
+      },
+      "5": {
+        "model": 0.2071727,
+        "oracle": 0.76505269,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.11924082
+      }
+    },
+    "NM": {
+      "1": {
+        "model": 0.02278492,
+        "oracle": 0.20025703,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.41391062,
+        "oracle": 0.83614793,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05931968
+      },
+      "2": {
+        "model": 0.06894789,
+        "oracle": 0.3291993,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00247129
+      },
+      "20": {
+        "model": 0.64838714,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.12898013
+      },
+      "5": {
+        "model": 0.17548871,
+        "oracle": 0.57702403,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.02183518
+      }
+    },
+    "NV": {
+      "1": {
+        "model": 0.10026891,
+        "oracle": 0.22707131,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.03361695
+      },
+      "10": {
+        "model": 0.35003207,
+        "oracle": 0.98314691,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.16342965
+      },
+      "2": {
+        "model": 0.17792124,
+        "oracle": 0.36758194,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.09545013
+      },
+      "20": {
+        "model": 0.55271232,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.31793728
+      },
+      "5": {
+        "model": 0.2694823,
+        "oracle": 0.72534263,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.11035216
+      }
+    },
+    "NY": {
+      "1": {
+        "model": 0.08645006,
+        "oracle": 0.25609008,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.57037703,
+        "oracle": 0.93515324,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05881655
+      },
+      "2": {
+        "model": 0.20213688,
+        "oracle": 0.40755315,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00524116
+      },
+      "20": {
+        "model": 0.78605409,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21954004
+      },
+      "5": {
+        "model": 0.37498591,
+        "oracle": 0.68762478,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01774669
+      }
+    },
+    "OH": {
+      "1": {
+        "model": 0.0739307,
+        "oracle": 0.30882584,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.36392187,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.12722018
+      },
+      "2": {
+        "model": 0.16463326,
+        "oracle": 0.464214,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00783758
+      },
+      "20": {
+        "model": 0.56225037,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21431769
+      },
+      "5": {
+        "model": 0.30650861,
+        "oracle": 0.77432205,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.06863356
+      }
+    },
+    "OK": {
+      "1": {
+        "model": 0.07776795,
+        "oracle": 0.22030524,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00796127
+      },
+      "10": {
+        "model": 0.43507541,
+        "oracle": 0.85183504,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.0972258
+      },
+      "2": {
+        "model": 0.16966014,
+        "oracle": 0.34652276,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.02973368
+      },
+      "20": {
+        "model": 0.61555952,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.27111942
+      },
+      "5": {
+        "model": 0.29788425,
+        "oracle": 0.59239268,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.05960682
+      }
+    },
+    "OR": {
+      "1": {
+        "model": 0.06596056,
+        "oracle": 0.22146594,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00411266
+      },
+      "10": {
+        "model": 0.423548,
+        "oracle": 0.83341855,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05258908
+      },
+      "2": {
+        "model": 0.14272052,
+        "oracle": 0.3531912,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00713686
+      },
+      "20": {
+        "model": 0.66204274,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.18475008
+      },
+      "5": {
+        "model": 0.29701233,
+        "oracle": 0.58969513,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.02825575
+      }
+    },
+    "PA": {
+      "1": {
+        "model": 0.05796888,
+        "oracle": 0.24669468,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00855775
+      },
+      "10": {
+        "model": 0.48967137,
+        "oracle": 0.89269616,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.06475861
+      },
+      "2": {
+        "model": 0.09551014,
+        "oracle": 0.36560873,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00855775
+      },
+      "20": {
+        "model": 0.64939278,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.16297583
+      },
+      "5": {
+        "model": 0.35980575,
+        "oracle": 0.63989007,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.02241591
+      }
+    },
+    "RI": {
+      "1": {
+        "model": 0.06422478,
+        "oracle": 0.15193646,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0023646
+      },
+      "10": {
+        "model": 0.36114549,
+        "oracle": 0.72543951,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.07716008
+      },
+      "2": {
+        "model": 0.12462573,
+        "oracle": 0.24967434,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01713102
+      },
+      "20": {
+        "model": 0.55324283,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.15616361
+      },
+      "5": {
+        "model": 0.2200631,
+        "oracle": 0.46610759,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.06230212
+      }
+    },
+    "SC": {
+      "1": {
+        "model": 0.05367775,
+        "oracle": 0.2442529,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.00318035
+      },
+      "10": {
+        "model": 0.40438951,
+        "oracle": 0.91289895,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.11435984
+      },
+      "2": {
+        "model": 0.09321291,
+        "oracle": 0.38094875,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.00932973
+      },
+      "20": {
+        "model": 0.58491639,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.22987891
+      },
+      "5": {
+        "model": 0.25005358,
+        "oracle": 0.6550905,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0350507
+      }
+    },
+    "SD": {
+      "1": {
+        "model": 0.0,
+        "oracle": 0.36307546,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.26963741,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.06976358
+      },
+      "2": {
+        "model": 0.05202861,
+        "oracle": 0.60738842,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.02089124
+      },
+      "20": {
+        "model": 0.56942025,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.31577243
+      },
+      "5": {
+        "model": 0.14096218,
+        "oracle": 0.99670478,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.02089124
+      }
+    },
+    "TN": {
+      "1": {
+        "model": 0.0339951,
+        "oracle": 0.25768167,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.33789322,
+        "oracle": 0.99360615,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.06832863
+      },
+      "2": {
+        "model": 0.06729172,
+        "oracle": 0.40882355,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0045494
+      },
+      "20": {
+        "model": 0.52014834,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.14844727
+      },
+      "5": {
+        "model": 0.22770982,
+        "oracle": 0.72389106,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.03160968
+      }
+    },
+    "TX": {
+      "1": {
+        "model": 0.03057729,
+        "oracle": 0.21055666,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01157455
+      },
+      "10": {
+        "model": 0.23384299,
+        "oracle": 0.84827634,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05532763
+      },
+      "2": {
+        "model": 0.05343139,
+        "oracle": 0.33042732,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01532293
+      },
+      "20": {
+        "model": 0.41514681,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.18178699
+      },
+      "5": {
+        "model": 0.12384947,
+        "oracle": 0.59141226,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.02912422
+      }
+    },
+    "UT": {
+      "1": {
+        "model": 0.1215288,
+        "oracle": 0.4475196,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.37946499,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.02984695
+      },
+      "2": {
+        "model": 0.15092053,
+        "oracle": 0.6641691,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.51532728,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1147718
+      },
+      "5": {
+        "model": 0.17575498,
+        "oracle": 1.0,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0129281
+      }
+    },
+    "VA": {
+      "1": {
+        "model": 0.07238093,
+        "oracle": 0.20731121,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.37840002,
+        "oracle": 0.83279106,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.10393879
+      },
+      "2": {
+        "model": 0.11230263,
+        "oracle": 0.33101793,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.014108
+      },
+      "20": {
+        "model": 0.5325323,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.18900007
+      },
+      "5": {
+        "model": 0.22503935,
+        "oracle": 0.5885249,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0520025
+      }
+    },
+    "VI": {
+      "1": {
+        "model": 0.11037348,
+        "oracle": 0.24622963,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.38576429,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.05709782
+      },
+      "2": {
+        "model": 0.13192688,
+        "oracle": 0.41486951,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.70087155,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.13831318
+      },
+      "5": {
+        "model": 0.13299646,
+        "oracle": 0.76117616,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0
+      }
+    },
+    "VT": {
+      "1": {
+        "model": 0.0,
+        "oracle": 0.30085967,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.02176083
+      },
+      "10": {
+        "model": 0.41304452,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.0893368
+      },
+      "2": {
+        "model": 0.01515261,
+        "oracle": 0.5190619,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0338286
+      },
+      "20": {
+        "model": 0.58098565,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1780206
+      },
+      "5": {
+        "model": 0.19561942,
+        "oracle": 0.8716878,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.04311003
+      }
+    },
+    "WA": {
+      "1": {
+        "model": 0.13524291,
+        "oracle": 0.26913489,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.01951869
+      },
+      "10": {
+        "model": 0.52572226,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.07313396
+      },
+      "2": {
+        "model": 0.24449497,
+        "oracle": 0.43253657,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01951869
+      },
+      "20": {
+        "model": 0.74280017,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.21819968
+      },
+      "5": {
+        "model": 0.40403621,
+        "oracle": 0.76620004,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01951869
+      }
+    },
+    "WI": {
+      "1": {
+        "model": 0.0510698,
+        "oracle": 0.36693236,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.37802514,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.12135213
+      },
+      "2": {
+        "model": 0.10941211,
+        "oracle": 0.55582971,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.01126527
+      },
+      "20": {
+        "model": 0.56109484,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.23175222
+      },
+      "5": {
+        "model": 0.19232875,
+        "oracle": 0.9035707,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01267436
+      }
+    },
+    "WV": {
+      "1": {
+        "model": 0.06814311,
+        "oracle": 0.32788557,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.34288348,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.01848159
+      },
+      "2": {
+        "model": 0.17510519,
+        "oracle": 0.494492,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.62310105,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.1734221
+      },
+      "5": {
+        "model": 0.26017397,
+        "oracle": 0.8399907,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.01848159
+      }
+    },
+    "WY": {
+      "1": {
+        "model": 0.0,
+        "oracle": 0.34442769,
+        "random_expectation": 0.01,
+        "random_seeded_draw": 0.0
+      },
+      "10": {
+        "model": 0.27619066,
+        "oracle": 1.0,
+        "random_expectation": 0.1,
+        "random_seeded_draw": 0.0679835
+      },
+      "2": {
+        "model": 0.0,
+        "oracle": 0.50570934,
+        "random_expectation": 0.02,
+        "random_seeded_draw": 0.0
+      },
+      "20": {
+        "model": 0.41218598,
+        "oracle": 1.0,
+        "random_expectation": 0.2,
+        "random_seeded_draw": 0.10157231
+      },
+      "5": {
+        "model": 0.18923035,
+        "oracle": 0.78956532,
+        "random_expectation": 0.05,
+        "random_seeded_draw": 0.0679835
+      }
+    }
+  }
+}

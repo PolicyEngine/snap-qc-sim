@@ -276,6 +276,7 @@ def exposure(
     v: pd.DataFrame,
     fit: dict[str, float],
     rng: np.random.Generator,
+    state_level_shift_pp: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Multi-year cost-share exposure per state on the 2013(a)(2) tiers.
 
@@ -294,6 +295,7 @@ def exposure(
     that share times a sourced issuance.
     """
     movement = json.loads(MOVEMENT_PATH.read_text())
+    state_level_shift_pp = state_level_shift_pp or {}
     official_2025 = {row["state"]: row["fy2025"] for row in movement["states"]}
     sampling_sd = {
         row["state"]: row["sampling_sd_fy2024_pp"] for row in movement["states"]
@@ -324,7 +326,11 @@ def exposure(
         by_year: dict[str, Any] = {}
         share_paths = np.zeros((EXPOSURE_DRAWS, len(EXPOSURE_YEARS)))
         for j, year in enumerate(EXPOSURE_YEARS):
-            unclipped = anchored[:, j + 1] + rng.standard_normal(EXPOSURE_DRAWS) * sd
+            unclipped = (
+                anchored[:, j + 1]
+                + state_level_shift_pp.get(state, 0.0)
+                + rng.standard_normal(EXPOSURE_DRAWS) * sd
+            )
             measured = np.clip(unclipped, 0.0, None)
             clipped_mass = float((unclipped < 0.0).mean())
             shares = np.array([tier_of(r) for r in measured], dtype=float)
