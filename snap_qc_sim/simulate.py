@@ -61,6 +61,20 @@ def lever_error(
     return error * (1 - effectiveness * hit)
 
 
+def targeted_error(error: float, in_group: float, effectiveness: float) -> float:
+    """Scale counted error dollars for a procedurally targeted case.
+
+    ``in_group`` is normally zero or one. Fractional values are permitted for
+    the boundary case of an HWGT-weighted coverage budget, where they represent
+    the share of that case's survey weight assigned to the accounting group.
+    """
+    if not 0 <= in_group <= 1:
+        raise ValueError("in_group must be between zero and one")
+    if not 0 <= effectiveness <= 1:
+        raise ValueError("effectiveness must be between zero and one")
+    return error * (1 - effectiveness * in_group)
+
+
 def simulate(
     cases: list[QcCase],
     official_rate: float,
@@ -68,6 +82,7 @@ def simulate(
     extra_audits: int = 0,
     suppressed: frozenset[int] = frozenset(),
     effectiveness: float = 1.0,
+    targeted_memberships: np.ndarray | None = None,
     draws: int = 10_000,
     rng: np.random.Generator | None = None,
 ) -> np.ndarray:
@@ -83,9 +98,20 @@ def simulate(
     w = np.array([c.weight for c in cases])
     iss = np.array([c.issuance for c in cases])
     err0 = np.array([c.error for c in cases])
-    err = np.array(
-        [lever_error(c.error, c.elements, suppressed, effectiveness) for c in cases]
-    )
+    if targeted_memberships is not None:
+        memberships = np.asarray(targeted_memberships, dtype=float)
+        if memberships.shape != (len(cases),):
+            raise ValueError("targeted_memberships must have one value per case")
+        err = np.array(
+            [
+                targeted_error(c.error, membership, effectiveness)
+                for c, membership in zip(cases, memberships, strict=True)
+            ]
+        )
+    else:
+        err = np.array(
+            [lever_error(c.error, c.elements, suppressed, effectiveness) for c in cases]
+        )
     n = len(cases)
     point0 = 100 * (w * err0).sum() / (w * iss).sum()
     point1 = 100 * (w * err).sum() / (w * iss).sum()
