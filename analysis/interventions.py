@@ -19,6 +19,7 @@ from snap_qc_sim.data import QcCase
 from snap_qc_sim.simulate import simulate, tier_of
 
 OUT = Path(__file__).with_name("interventions_results.json")
+ISSUANCE_PATH = Path(__file__).with_name("issuance_fy2024.json")
 MEMO_OUT = Path(__file__).with_name("INTERVENTIONS.md")
 RANKING_RULES = ("oracle", "model", "self_employment", "random")
 COVERAGE_PCT = (1, 5, 10)
@@ -217,6 +218,23 @@ def compute_artifact() -> dict[str, Any]:
         for state, result in scenario["states"].items():
             result["sustained_intervention_fy2028_30"] = exposure[state]["years"]
 
+    issuance = json.loads(ISSUANCE_PATH.read_text())
+    for scenario in scenarios:
+        for state, result in scenario["states"].items():
+            dollars = issuance["states"].get(state)
+            if dollars is None:
+                continue
+            result["issuance_fy2024_dollars"] = dollars
+            result["single_measurement"]["expected_cost_share_dollars"] = round(
+                result["single_measurement"]["expected_share_pct"] / 100 * dollars
+            )
+            result["sustained_expected_cost_share_dollars_3yr"] = round(
+                sum(
+                    year["expected_share_pct"] / 100 * dollars
+                    for year in result["sustained_intervention_fy2028_30"].values()
+                )
+            )
+
     persistence_path = Path(persistence.__file__).with_name("persistence_results.json")
     return {
         "schema_version": 1,
@@ -237,6 +255,29 @@ def compute_artifact() -> dict[str, Any]:
         "boundary_case_rule": (
             "one ranked boundary case is fractionally assigned so each HWGT budget is exact"
         ),
+        "issuance_source": {
+            "file_url": issuance["source"]["file_url"],
+            "sha256": issuance["source"]["sha256"],
+            "semantics": issuance["source"]["semantics"],
+            "caveat": (
+                "whether the cost column includes disaster-supplement dollars "
+                "is unverified; the file title confirms only P-EBT/other "
+                "issuance is excluded"
+            ),
+        },
+        "threshold_convention": (
+            "single-measurement deltas price FY2024 counted errors at the "
+            "official nominal threshold; the persistence anchor path derives "
+            "from the fixed-real-threshold panel; both are location-anchored "
+            "on FY2025 official rates"
+        ),
+        "delay_clause_not_modeled": (
+            "tier_of applies the 7 USC 2013(a)(2) shares immediately; the "
+            "OBBBA delayed-implementation provision for the highest-error "
+            "states (the 13.33 percent boundary the movement memo computes "
+            "as rate x 1.5 >= 20) is not modeled, so near-term dollar "
+            "exposure for states above it is overstated"
+        ),
         "scenario_grid": scenarios,
         "input_hashes": {
             "coding_consistency": _sha256(event_study.AUDIT_PATH),
@@ -246,6 +287,7 @@ def compute_artifact() -> dict[str, Any]:
             "fy2024_sav": train_error_model._provenance()["input_sha256"][
                 "qc_pub_fy2024.sav"
             ],
+            "issuance_fy2024": _sha256(ISSUANCE_PATH),
         },
         "environment": {
             "seed": SEED,
@@ -287,6 +329,28 @@ def _memo(artifact: dict[str, Any]) -> str:
             "",
             artifact["sustained_intervention_assumption"].capitalize() + ".",
             "The persistence layer otherwise retains its anchored path, process dispersion, sampling proxy, clipping, and 7 USC 2013(a)(2) tiers.",
+            "",
+            "## Dollars",
+            "",
+            (
+                "Dollar exposure multiplies expected cost share by each "
+                "jurisdiction's official FY2024 benefit issuance (USDA FNS "
+                "annual state summary, hash-recorded in the artifact; "
+                "$93.5B national). Whether the source's cost column includes "
+                "disaster-supplement dollars is unverified."
+            ),
+            "",
+            "## Constructions not modeled",
+            "",
+            (
+                "Statutory shares apply immediately in every year: the OBBBA "
+                "delayed-implementation provision for the highest-error "
+                "states is not modeled, so near-term dollar exposure above "
+                "the 13.33 percent boundary is overstated. Single-measurement "
+                "deltas use the FY2024 official counted-error threshold while "
+                "the persistence path uses the fixed-real-threshold panel; "
+                "both anchor on FY2025 official rates."
+            ),
             "",
             "## Data definitions and limits",
             "",

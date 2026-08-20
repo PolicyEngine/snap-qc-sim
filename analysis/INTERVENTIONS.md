@@ -17,6 +17,14 @@ FY2024 QC cases are resampled through the existing simulator and location-anchor
 The single-measurement rate delta is subtracted from the anchored fy2028-30 path in every horizon year because the procedure persists.
 The persistence layer otherwise retains its anchored path, process dispersion, sampling proxy, clipping, and 7 USC 2013(a)(2) tiers.
 
+## Dollars
+
+Dollar exposure multiplies expected cost share by each jurisdiction's official FY2024 benefit issuance (USDA FNS annual state summary, hash-recorded in the artifact; $93.5B national). Whether the source's cost column includes disaster-supplement dollars is unverified.
+
+## Constructions not modeled
+
+Statutory shares apply immediately in every year: the OBBBA delayed-implementation provision for the highest-error states is not modeled, so near-term dollar exposure above the 13.33 percent boundary is overstated. Single-measurement deltas use the FY2024 official counted-error threshold while the persistence path uses the fixed-real-threshold panel; both anchor on FY2025 official rates.
+
 ## Data definitions and limits
 
 Self-employment means any available SLFEMP1-18 value above zero or FSSLFEMP above zero. The shared loader enforces CASE == 1 and valid state codes; the intervention lane also applies load_cases' nonmissing RAWBEN and positive-HWGT filters. Full state-scenario results and audited input hashes are in `analysis/interventions_results.json`.

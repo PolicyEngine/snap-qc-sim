@@ -105,3 +105,42 @@ def test_raw_regeneration_matches_committed_artifact(
     fresh = json.loads(json.dumps(interventions.compute_artifact(), sort_keys=True))
     committed = json.loads(json.dumps(artifact, sort_keys=True))
     assert_artifact_values_match(fresh, committed, path="interventions")
+
+
+def test_issuance_dollars_are_consistent(artifact) -> None:
+    """Dollar fields equal share times the hash-guarded issuance file."""
+    import hashlib as _hashlib
+
+    issuance = json.loads((ROOT / "analysis" / "issuance_fy2024.json").read_text())
+    live = _hashlib.sha256(
+        (ROOT / "analysis" / "issuance_fy2024.json").read_bytes()
+    ).hexdigest()
+    assert artifact["input_hashes"]["issuance_fy2024"] == live
+    assert artifact["issuance_source"]["sha256"] == issuance["source"]["sha256"]
+    checked = 0
+    for scenario in artifact["scenario_grid"]:
+        for state, result in scenario["states"].items():
+            dollars = issuance["states"].get(state)
+            if dollars is None:
+                assert "issuance_fy2024_dollars" not in result
+                continue
+            assert result["issuance_fy2024_dollars"] == dollars
+            single = result["single_measurement"]
+            assert single["expected_cost_share_dollars"] == round(
+                single["expected_share_pct"] / 100 * dollars
+            )
+            implied = round(
+                sum(
+                    year["expected_share_pct"] / 100 * dollars
+                    for year in result["sustained_intervention_fy2028_30"].values()
+                )
+            )
+            assert result["sustained_expected_cost_share_dollars_3yr"] == implied
+            checked += 1
+    assert checked > 0
+
+
+def test_disclosures_present(artifact) -> None:
+    assert "not modeled" in artifact["delay_clause_not_modeled"]
+    assert "official nominal threshold" in artifact["threshold_convention"]
+    assert "unverified" in artifact["issuance_source"]["caveat"]
