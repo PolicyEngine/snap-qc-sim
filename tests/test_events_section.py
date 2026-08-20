@@ -52,3 +52,25 @@ def test_events_section_language_discipline() -> None:
     assert "the effect of a rules engine" in html  # inside the never-quote
     assert "verdict-inert" in html
     assert "causal" not in html.lower()
+
+
+def test_interventions_section_copy_and_language_discipline() -> None:
+    html = INDEX.read_text()
+    match = re.search(
+        r'<section class="chart-card" id="interventions">.*?</section>',
+        html,
+        re.DOTALL,
+    )
+    assert match, "interventions section missing from index.html"
+    section = match.group(0)
+    assert "Targeted review scenarios" in section
+    assert (
+        "Cut counted error dollars by a chosen amount inside a targeted group of "
+        "cases, and see what the measured rate, the tier odds, and the expected "
+        "bill do. An accounting construction: it prices the arithmetic of a "
+        "smaller error pool, not any claim about how a state achieves it."
+    ) in section
+    assert "Oracle ranks by each case's actual recorded error" in section
+    assert "If the cut persists, FY 2028–30" in section
+    assert "Sustained-intervention construction: the same rate delta applied" in section
+    assert "causal" not in section.lower()
