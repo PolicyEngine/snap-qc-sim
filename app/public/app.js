@@ -7,9 +7,15 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260816d"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260820a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
+const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
+// SHA-256 of app/public/interventions_data.json, printed by
+// analysis/build_interventions_app_data.py; the browser refuses a payload
+// that does not hash to this pin.
+const INTERVENTIONS_DATA_SHA256 =
+  "97966429fcf82d8d6f883e601ed1ab3024b2ccb568de4487e0d175a56e52800d";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
 // and locked by tests/test_engine_comparison.py; the browser refuses a payload
 // that does not hash to this pin.
@@ -20,7 +26,7 @@ const ADOPT_SCHEMA = "snap_qc_sim.engine_scenario.v1";
 // analysis/build_engine_scenario.py and locked by tests/test_engine_scenario.py;
 // the browser refuses a payload that does not hash to this pin.
 const ADOPT_DATA_SHA256 =
-  "d7cef992d40ab7d1ee5f59887515e64a4cff74b339f1a5e56a1b9f5e4248bda0";
+  "dd375f147f3b97242817a4c373ced15cf0c0faa5bc956784738c298973b639f0";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,
@@ -54,6 +60,7 @@ function mulberry32(seed) {
 
 let DATA = null;
 let FY27 = null;
+let INTERVENTIONS = null;
 const $ = (id) => document.getElementById(id);
 const tooltip = document.createElement("div");
 tooltip.className = "tooltip";
@@ -113,6 +120,75 @@ function simulate(st, { extra = 0, seed = 11, anchor } = {}) {
     rates[d] = center + (100 * e) / s - point;
   }
   return rates;
+}
+
+function unpackBits(encoded, n) {
+  const bytes = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0));
+  return Array.from({ length: n }, (_, i) => (bytes[i >> 3] >> (i & 7)) & 1);
+}
+
+function stateSeed(code) {
+  let seed = 20260820;
+  for (const c of code) seed = Math.imul(seed ^ c.charCodeAt(0), 16777619);
+  return seed >>> 0;
+}
+
+function weightedMembership(weights, scores, coverage) {
+  const order = Array.from(scores.keys()).sort((a, b) => scores[b] - scores[a] || a - b);
+  const target = coverage * weights.reduce((a, b) => a + b, 0);
+  const membership = new Float64Array(weights.length);
+  let used = 0;
+  for (const i of order) {
+    membership[i] = Math.max(0, Math.min(1, (target - used) / weights[i]));
+    used += weights[i];
+  }
+  return membership;
+}
+
+function interventionMembership(code, st) {
+  const rule = $("intervention-rule").value;
+  let scores;
+  if (rule === "model") {
+    // The artifact's out-of-sample FY2024 scores, aligned to case order by
+    // the build script's weight/issuance assertion — NOT the fitted p_dev
+    // array, whose ranking differs from the committed grid.
+    scores = INTERVENTIONS.model_scores[code];
+  }
+  else if (rule === "oracle") scores = st.err;
+  else if (rule === "self_employment") scores = unpackBits(st.self_emp, st.n);
+  else {
+    const rng = mulberry32(stateSeed(code));
+    scores = Array.from({ length: st.n }, () => rng());
+  }
+  return weightedMembership(st.w, scores, +$("intervention-coverage").value / 100);
+}
+
+function interventionDraws(code, st, extra = 0) {
+  const membership = interventionMembership(code, st);
+  const effectiveness = +$("intervention-effectiveness").value / 100;
+  const err = st.err.map((value, i) => value * (1 - effectiveness * membership[i]));
+  const basePoint = pointRate(st, st.err);
+  const shiftedPoint = pointRate(st, err);
+  return {
+    rates: simulate({ ...st, err }, {
+      extra,
+      anchor: st.official_fy2025 + shiftedPoint - basePoint,
+    }),
+    delta: shiftedPoint - basePoint,
+  };
+}
+
+async function loadInterventionsArtifact() {
+  const res = await fetch("interventions_data.json?v=" + ASSET_V);
+  if (!res.ok) throw new Error("interventions artifact fetch failed");
+  const bytes = await res.arrayBuffer();
+  const hex = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
+  if (hex !== INTERVENTIONS_DATA_SHA256)
+    throw new Error("interventions_data.json sha256 does not match the committed pin");
+  const payload = JSON.parse(new TextDecoder().decode(bytes));
+  if (payload.schema !== INTERVENTIONS_SCHEMA) throw new Error("interventions schema mismatch");
+  INTERVENTIONS = payload;
 }
 
 // ---- FY2026 election lens ------------------------------------------------
@@ -1054,6 +1130,44 @@ function renderAdoption(code, st, elec, drift) {
 
 // ---- Render --------------------------------------------------------------
 
+function interventionGridRows(code) {
+  if (!INTERVENTIONS) return [];
+  const rule = $("intervention-rule").value;
+  const coverage = +$("intervention-coverage").value;
+  const effectiveness = +$("intervention-effectiveness").value;
+  let grid;
+  if (effectiveness === 25 || effectiveness === 50) grid = [effectiveness];
+  else grid = [25, 50];
+  return grid.map((value) => INTERVENTIONS.scenarios.find((scenario) =>
+    scenario.ranking_rule === rule && scenario.coverage_pct === coverage &&
+    scenario.effectiveness_pct === value
+  )).filter(Boolean).map((scenario) => [scenario.effectiveness_pct, scenario.states[code]]);
+}
+
+function renderInterventions(code, st, result) {
+  const effectiveness = +$("intervention-effectiveness").value;
+  $("intervention-effectiveness-val").textContent = effectiveness + "%";
+  const summary = summarize(result.rates, st.issuance);
+  const election = electionStats(st, result.rates);
+  $("interventions-live").innerHTML =
+    `<p><strong>Live single measurement:</strong> ${fmtPP(result.delta)}pp file-rate delta; ` +
+    `mean ${summary.mean.toFixed(2)}%; expected statutory share ` +
+    `${(100 * summary.eShare / st.issuance).toFixed(2)}%; delay-aware FY 2028 bill ` +
+    `${fmtM(election.elect28)}/yr.</p>`;
+  const rows = interventionGridRows(code);
+  if (!rows.length) {
+    $("interventions-sustained-body").textContent = "Precomputed grid unavailable.";
+    return;
+  }
+  const label = rows.length === 2 ? "grid: 25% / 50%" : `grid: ${rows[0][0]}%`;
+  $("interventions-sustained-body").innerHTML = `<p class="hint">${label}</p>` + rows.map(([grid, value]) => {
+    const years = Object.entries(value.sustained_fy2028_30)
+      .map(([year, item]) => `${year}: ${item.expected_share_pct}%`).join(" · ");
+    return `<p><strong>${grid}%:</strong> ${years} · three-year cost ` +
+      `${fmtM(value.sustained_expected_cost_share_dollars_3yr)}</p>`;
+  }).join("");
+}
+
 function render() {
   const code = $("state").value;
   const st = DATA.states[code];
@@ -1065,12 +1179,16 @@ function render() {
   const driftOn = $("lever-drift").checked && FY27;
   const drift = driftOn ? driftDraws(FY27.drift_tau_pp.robust) : null;
 
-  let base, scen;
+  let base, scen, interventionResult = null;
   const issuance = st.issuance;
   if (scenarioOn) {
     const anchor = modelAnchor(code, st.official_fy2025);
     base = shiftRates(anchor.rates, anchor.shift);
     scen = shiftRates(simulateModel(prepPatchedState(code), { extra }), anchor.shift);
+  } else if (MODEL) {
+    base = simulate(st, {});
+    interventionResult = interventionDraws(code, st, extra);
+    scen = interventionResult.rates;
   } else {
     base = simulate(st, {});
     scen = extra ? simulate(st, { extra }) : base;
@@ -1087,6 +1205,7 @@ function render() {
   $("mechanism").textContent = mechanismLine(scenarioOn, driftOn);
   const sb = summarize(base, issuance);
   const ss = summarize(scen, issuance);
+  if (interventionResult) renderInterventions(code, st, interventionResult);
 
   $("t-official").textContent = st.official_fy2025.toFixed(2) + "%";
   $("t-official-24").textContent = "FY 2024: " + st.official.toFixed(2) + "%";
@@ -1148,6 +1267,7 @@ function render() {
 async function main() {
   if (FRAMED) document.documentElement.classList.add("framed");
   DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
+  await Promise.all([loadInterventionsArtifact(), loadModelArtifacts()]);
   try {
     FY27 = await (await fetch("fy2027_data.json?v=" + ASSET_V)).json();
   } catch {
@@ -1192,6 +1312,9 @@ async function main() {
   sel.addEventListener("change", queue);
   $("lever-drift").addEventListener("change", queue);
   $("audits").addEventListener("input", queue);
+  $("intervention-rule").addEventListener("change", queue);
+  $("intervention-coverage").addEventListener("change", queue);
+  $("intervention-effectiveness").addEventListener("input", queue);
   $("lever-smd").addEventListener("change", async () => {
     if ($("lever-smd").checked && !SCEN) {
       $("smd-hint").textContent = "Loading model distributions…";

@@ -15853,7 +15853,7 @@
     },
     "app/public/data.json": {
      "role": "FY2024 cases, FY2024/FY2025 official rates, issuance",
-     "sha256": "2fb60670d79d93a107c60b08e6fbbac9e3953df0da3b15c9edad5620e675d953"
+     "sha256": "f48335db4d91c9d3904e8e04098550d769521d0523ec8f8a05f8911539300bf6"
     }
    },
    "mirror_reference": "tests/test_adoption_numbers.py bit-faithful Python mirror and paper/FACTS.md M2/M3/J8 committed goldens",
@@ -15865,5 +15865,5 @@
   },
   "schema": "snap_qc_sim.preregistration_obbba_boundary.v1"
  },
- "payload_sha256": "dd212c78b43f2c6ce00c261a8c7aad986627b65bbadb84ae5835262f9417fad2"
+ "payload_sha256": "08c7138f2283f41f43bdeaef27423829df904291f0f8efa6526999ad0ffa0f5d"
 }

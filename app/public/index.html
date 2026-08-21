@@ -46,9 +46,9 @@
       FY 2030 — so the highest-error states owe $0 in FY 2028. This
       simulator draws from the state's own USDA Quality Control sample to
       show the <em>distribution</em> of a measured rate, the odds its FY 2026
-      election beats its locked FY 2025 rate, the delay odds, and what audit
-      volume and a model-based standard medical deduction scenario do to the
-      bill.
+      election beats its locked FY 2025 rate, the delay odds, and what
+      targeted review of high-risk cases, audit volume, and a model-based
+      standard medical deduction scenario do to the bill.
     </p>
   </div>
 </header>
@@ -65,6 +65,45 @@
       <input type="range" id="audits" min="0" max="1000" step="50" value="0">
       <div class="hint">Beyond the state's FY 2024 sample size</div>
     </div>
+  </section>
+
+  <section class="chart-card" id="interventions">
+    <h2>Targeted review scenarios</h2>
+    <p class="sub">Cut counted error dollars by a chosen amount inside a targeted group of cases, and see what the measured rate, the tier odds, and the expected bill do. An accounting construction: it prices the arithmetic of a smaller error pool, not any claim about how a state achieves it.</p>
+    <div class="controls" aria-label="Targeted review controls">
+      <div class="control">
+        <label for="intervention-rule">Ranking rule</label>
+        <select id="intervention-rule">
+          <option value="model">Model risk score (out-of-sample)</option>
+          <option value="oracle">Actual error dollars (oracle bound)</option>
+          <option value="self_employment">Self-employment cases</option>
+          <option value="random">Random cases (floor)</option>
+        </select>
+        <div class="hint">Oracle ranks by each case's actual recorded error — the ceiling any targeting method can reach. Random is the floor. The model row uses the fitted error model's out-of-sample FY2024 scores.</div>
+      </div>
+      <div class="control">
+        <label for="intervention-coverage">Coverage</label>
+        <select id="intervention-coverage">
+          <option value="1">1%</option>
+          <option value="5" selected>5%</option>
+          <option value="10">10%</option>
+        </select>
+        <div class="hint">Of weighted caseload; one boundary case can be fractional.</div>
+      </div>
+      <div class="control">
+        <label for="intervention-effectiveness">Effectiveness <span class="val" id="intervention-effectiveness-val">50%</span></label>
+        <input type="range" id="intervention-effectiveness" min="0" max="100" step="5" value="50">
+      </div>
+    </div>
+    <div id="interventions-live"></div>
+    <div class="panel" id="interventions-sustained">
+      <strong>If the cut persists, FY 2028–30</strong>
+      <div class="hint">Sustained-intervention construction: the same rate delta applied to each horizon year of the persistence-anchored path.</div>
+      <div id="interventions-sustained-body"></div>
+    </div>
+  </section>
+
+  <section class="controls" aria-label="Policy levers">
     <div class="control levers">
       <span class="label">Policy scenario — case-level model</span>
       <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
@@ -191,6 +230,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20260816d"></script>
+<script type="module" src="app.js?v=20260820a"></script>
 </body>
 </html>
