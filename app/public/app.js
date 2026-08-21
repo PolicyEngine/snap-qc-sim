@@ -26,7 +26,7 @@ const ADOPT_SCHEMA = "snap_qc_sim.engine_scenario.v1";
 // analysis/build_engine_scenario.py and locked by tests/test_engine_scenario.py;
 // the browser refuses a payload that does not hash to this pin.
 const ADOPT_DATA_SHA256 =
-  "d7cef992d40ab7d1ee5f59887515e64a4cff74b339f1a5e56a1b9f5e4248bda0";
+  "dd375f147f3b97242817a4c373ced15cf0c0faa5bc956784738c298973b639f0";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,

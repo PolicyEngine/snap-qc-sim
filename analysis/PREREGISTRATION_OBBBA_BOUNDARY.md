@@ -23,10 +23,10 @@ permits historical pins only inside that section.
 - Machine-readable predictions artifact:
   `analysis/preregistration_obbba_boundary.json`
 - Artifact file SHA-256:
-  `cb3d10fb1640b25c7921ee62d4d781af7c6d3d541ad070dd99ac26ac936cde31`
+  `0c43b76381ed9d0927a2970874d64897d0333a2c05c0e528b0460115ee6e5ccd`
 - Payload self-pin (SHA-256 of the canonical payload serialization,
   recorded inside the file):
-  `dd212c78b43f2c6ce00c261a8c7aad986627b65bbadb84ae5835262f9417fad2`
+  `08c7138f2283f41f43bdeaef27423829df904291f0f8efa6526999ad0ffa0f5d`
 - Generator (deterministic; regeneration is byte-identical and
   test-locked): `analysis/preregister_obbba_boundary.py`;
   locks in `tests/test_preregistration.py`
@@ -644,3 +644,26 @@ publicly timestamped before the measurement year closes and before its
 official outcomes exist or are observable. The manuscript gains a
 pointer to this document; results will enter a future revision under
 the reporting commitments above.
+
+## Amendments
+
+### 2026-08-20 — provenance-only refresh of the artifact's input hash
+
+`app/public/data.json` gained a per-case self-employment flag for the
+simulator's targeted-review section. The registered analysis reads none
+of the affected fields; regenerating the predictions artifact changed
+only its recorded `data.json` input hash and, consequently, its own
+hashes. Every prediction, window, probability, and commitment above is
+byte-for-byte unchanged (field-level diff:
+`payload.provenance.inputs."app/public/data.json".sha256` and
+`payload_sha256` moved; nothing else). The pins in the body now quote
+the refreshed hashes; the originally registered values were:
+
+- Artifact file SHA-256 at registration:
+  `cb3d10fb1640b25c7921ee62d4d781af7c6d3d541ad070dd99ac26ac936cde31`
+- Payload self-pin at registration:
+  `dd212c78b43f2c6ce00c261a8c7aad986627b65bbadb84ae5835262f9417fad2`
+
+The registration event itself — the public commit history and the
+original timestamps — is unchanged and remains the integrity anchor
+for the design's priority date.
