@@ -15,7 +15,7 @@ const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
 // analysis/build_interventions_app_data.py; the browser refuses a payload
 // that does not hash to this pin.
 const INTERVENTIONS_DATA_SHA256 =
-  "9f7a00a43628738665d5a280ea0e317e550df1b5121481a352d37ce1422f9229";
+  "97966429fcf82d8d6f883e601ed1ab3024b2ccb568de4487e0d175a56e52800d";
 // SHA-256 of app/public/engine_data.json, printed by analysis/engine_comparison.py
 // and locked by tests/test_engine_comparison.py; the browser refuses a payload
 // that does not hash to this pin.
@@ -148,7 +148,12 @@ function weightedMembership(weights, scores, coverage) {
 function interventionMembership(code, st) {
   const rule = $("intervention-rule").value;
   let scores;
-  if (rule === "model") scores = MODEL.states[code].p_dev;
+  if (rule === "model") {
+    // The artifact's out-of-sample FY2024 scores, aligned to case order by
+    // the build script's weight/issuance assertion — NOT the fitted p_dev
+    // array, whose ranking differs from the committed grid.
+    scores = INTERVENTIONS.model_scores[code];
+  }
   else if (rule === "oracle") scores = st.err;
   else if (rule === "self_employment") scores = unpackBits(st.self_emp, st.n);
   else {
