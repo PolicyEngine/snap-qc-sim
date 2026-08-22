@@ -52,12 +52,43 @@ def _self_employment_by_state(path: str) -> dict[str, list[bool]]:
                 continue
             if _num(row.get("RAWBEN")) is None or (_num(row.get("HWGT")) or 0) <= 0:
                 continue
-            person = any(
-                (_num(row.get(f"SLFEMP{i}")) or 0) > 0 for i in range(1, 19)
-            )
+            person = any((_num(row.get(f"SLFEMP{i}")) or 0) > 0 for i in range(1, 19))
             flag = person or (_num(row.get("FSSLFEMP")) or 0) > 0
             flags.setdefault(state, []).append(flag)
     return flags
+
+
+def _agency_findings_by_state(path: str) -> dict[str, list[list[int]]]:
+    """Per case, [finding slots with an agency code, slots coded 17/19/20].
+
+    Mirrors load_cases' universe and row order. Codes 17 (computer
+    programming), 19 (computer-generated mass change), and 20 (arithmetic
+    computation) form the computation-caused class; 18 (data entry) and 21
+    (computer user) stay outside it.
+    """
+    from snap_qc_sim.data import FIPS
+
+    strict = {17, 19, 20}
+    counts: dict[str, list[list[int]]] = {}
+    with open(path) as source:
+        for row in csv.DictReader(source):
+            state = FIPS.get((row.get("STATE") or "").strip())
+            if state is None:
+                continue
+            case_flag = _num(row.get("CASE"))
+            if case_flag is not None and case_flag != 1:
+                continue
+            if _num(row.get("RAWBEN")) is None or (_num(row.get("HWGT")) or 0) <= 0:
+                continue
+            codes = [
+                int(value)
+                for i in range(1, 10)
+                if (value := _num(row.get(f"AGENCY{i}"))) is not None
+            ]
+            counts.setdefault(state, []).append(
+                [len(codes), sum(1 for c in codes if c in strict)]
+            )
+    return counts
 
 
 def _pack_bits(flags: list[bool]) -> str:
@@ -69,6 +100,7 @@ def _pack_bits(flags: list[bool]) -> str:
 
 
 self_employment_by_state = _self_employment_by_state(qc_path)
+agency_findings_by_state = _agency_findings_by_state(qc_path)
 official = load_official_rates(per_path, include_national=True)
 official_fy2025 = load_official_rates(per25_path, include_national=True)
 missing_fy2025 = sorted(set(official) - set(official_fy2025) - {"US"})
@@ -91,6 +123,11 @@ for state, cases in sorted(cases_by_state.items()):
     self_emp = self_employment_by_state.get(state, [])
     if len(self_emp) != len(cases):
         raise SystemExit(f"{state}: self-employment flags do not align with cases")
+    agency = agency_findings_by_state.get(state, [])
+    if len(agency) != len(cases):
+        raise SystemExit(f"{state}: agency finding counts do not align with cases")
+    # Compact: 0 for cases with no agency-coded findings, else [n, strict_n].
+    agency_compact = [0 if pair[0] == 0 else pair for pair in agency]
     out[state] = {
         "official": official[state],
         "official_fy2025": official_fy2025[state],
@@ -102,12 +139,17 @@ for state, cases in sorted(cases_by_state.items()):
         "err": err,
         "hits": hits,
         "self_emp": _pack_bits(self_emp),
+        "agency_findings": agency_compact,
     }
 path = Path("app/public/data.json")
 path.parent.mkdir(parents=True, exist_ok=True)
 payload = {
     "levers": LEVER_KEYS,
     "self_emp_encoding": "base64, little-endian bits within each byte",
+    "agency_findings_encoding": (
+        "per case: 0 when no finding slot carries an agency cause code, "
+        "else [slots with an agency code, slots coded 17/19/20]"
+    ),
     "national": {"fy2024": official.get("US"), "fy2025": official_fy2025.get("US")},
     "states": out,
 }
