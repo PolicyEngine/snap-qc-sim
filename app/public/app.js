@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260820a"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20260820b"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
@@ -26,7 +26,7 @@ const ADOPT_SCHEMA = "snap_qc_sim.engine_scenario.v1";
 // analysis/build_engine_scenario.py and locked by tests/test_engine_scenario.py;
 // the browser refuses a payload that does not hash to this pin.
 const ADOPT_DATA_SHA256 =
-  "dd375f147f3b97242817a4c373ced15cf0c0faa5bc956784738c298973b639f0";
+  "7886710020f940beabc01110564384829ff4cb54b806ed1aee5bd9cac5f26b20";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,
@@ -163,10 +163,20 @@ function interventionMembership(code, st) {
   return weightedMembership(st.w, scores, +$("intervention-coverage").value / 100);
 }
 
-function interventionDraws(code, st, extra = 0) {
+function engineCutErr(st) {
+  // Single-attribution: each case's error dollars scale by its share of
+  // agency-coded findings in the computation class {17, 19, 20}.
+  const x = +$("engine-cut-pct").value / 100;
+  return st.err.map((value, i) => {
+    const pair = st.agency_findings[i];
+    return pair ? value * (1 - x * (pair[1] / pair[0])) : value;
+  });
+}
+
+function interventionDraws(code, st, extra = 0, errBasis = st.err) {
   const membership = interventionMembership(code, st);
   const effectiveness = +$("intervention-effectiveness").value / 100;
-  const err = st.err.map((value, i) => value * (1 - effectiveness * membership[i]));
+  const err = errBasis.map((value, i) => value * (1 - effectiveness * membership[i]));
   const basePoint = pointRate(st, st.err);
   const shiftedPoint = pointRate(st, err);
   return {
@@ -1149,18 +1159,25 @@ function renderInterventions(code, st, result) {
   $("intervention-effectiveness-val").textContent = effectiveness + "%";
   const summary = summarize(result.rates, st.issuance);
   const election = electionStats(st, result.rates);
+  const engineOn = $("lever-engine-cut").checked && !$("lever-engine-cut").disabled;
+  const engineNote = engineOn
+    ? ` The cause-coded cut contributes ${fmtPP(pointRate(st, engineCutErr(st)) - pointRate(st, st.err))}pp of the delta.`
+    : "";
   $("interventions-live").innerHTML =
     `<p><strong>Live single measurement:</strong> ${fmtPP(result.delta)}pp file-rate delta; ` +
     `mean ${summary.mean.toFixed(2)}%; expected statutory share ` +
     `${(100 * summary.eShare / st.issuance).toFixed(2)}%; delay-aware FY 2028 bill ` +
-    `${fmtM(election.elect28)}/yr.</p>`;
+    `${fmtM(election.elect28)}/yr.${engineNote}</p>`;
   const rows = interventionGridRows(code);
   if (!rows.length) {
     $("interventions-sustained-body").textContent = "Precomputed grid unavailable.";
     return;
   }
+  const engineCaveat = $("lever-engine-cut").checked && !$("lever-engine-cut").disabled
+    ? '<p class="hint">Sustained grid excludes the cause-coded cut.</p>'
+    : "";
   const label = rows.length === 2 ? "grid: 25% / 50%" : `grid: ${rows[0][0]}%`;
-  $("interventions-sustained-body").innerHTML = `<p class="hint">${label}</p>` + rows.map(([grid, value]) => {
+  $("interventions-sustained-body").innerHTML = engineCaveat + `<p class="hint">${label}</p>` + rows.map(([grid, value]) => {
     const years = Object.entries(value.sustained_fy2028_30)
       .map(([year, item]) => `${year}: ${item.expected_share_pct}%`).join(" · ");
     return `<p><strong>${grid}%:</strong> ${years} · three-year cost ` +
@@ -1175,6 +1192,8 @@ function render() {
   $("audits-val").textContent = "+" + extra;
   syncScenarioControl();
   const scenarioOn = $("lever-smd").checked && SCEN && !scenarioInfo(code)?.gated;
+  const engineCutOn = $("lever-engine-cut").checked && !scenarioOn;
+  const engineErr = engineCutOn ? engineCutErr(st) : st.err;
 
   const driftOn = $("lever-drift").checked && FY27;
   const drift = driftOn ? driftDraws(FY27.drift_tau_pp.robust) : null;
@@ -1187,11 +1206,17 @@ function render() {
     scen = shiftRates(simulateModel(prepPatchedState(code), { extra }), anchor.shift);
   } else if (MODEL) {
     base = simulate(st, {});
-    interventionResult = interventionDraws(code, st, extra);
+    interventionResult = interventionDraws(code, st, extra, engineErr);
     scen = interventionResult.rates;
   } else {
     base = simulate(st, {});
-    scen = extra ? simulate(st, { extra }) : base;
+    scen = extra || engineCutOn
+      ? simulate({ ...st, err: engineErr }, {
+          extra,
+          anchor:
+            st.official_fy2025 + pointRate(st, engineErr) - pointRate(st, st.err),
+        })
+      : base;
   }
   // One common drift stream across engines: scenario-vs-baseline deltas
   // stay clean, while election and delay odds widen with process movement.
@@ -1315,7 +1340,16 @@ async function main() {
   $("intervention-rule").addEventListener("change", queue);
   $("intervention-coverage").addEventListener("change", queue);
   $("intervention-effectiveness").addEventListener("input", queue);
+  $("lever-engine-cut").addEventListener("change", queue);
+  $("engine-cut-pct").addEventListener("input", () => {
+    $("engine-cut-val").textContent = $("engine-cut-pct").value + "%";
+    queue();
+  });
   $("lever-smd").addEventListener("change", async () => {
+    // The model-based SMD path re-predicts every case; the cause-coded cut
+    // is file arithmetic. The two do not compose; SMD wins while checked.
+    $("lever-engine-cut").disabled = $("lever-smd").checked;
+    if ($("lever-smd").checked) $("lever-engine-cut").checked = false;
     if ($("lever-smd").checked && !SCEN) {
       $("smd-hint").textContent = "Loading model distributions…";
       try {

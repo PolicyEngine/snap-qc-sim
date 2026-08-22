@@ -110,6 +110,12 @@
       <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
     </div>
     <div class="control levers">
+      <span class="label">Rules-engine scenario — cause-coded</span>
+      <label><input type="checkbox" id="lever-engine-cut"> <span>Cut computation-caused errors <span class="val" id="engine-cut-val">100%</span></span></label>
+      <input type="range" id="engine-cut-pct" min="0" max="100" step="5" value="100">
+      <div class="hint">Scales each case's error dollars by its share of findings the reviewers coded as computer programming (17), computer-generated mass change (19), or arithmetic computation (20) — the class a correct rules engine removes. Data entry (18) and computer user error (21) stay. Steady-state FY 2024 carries little of it: 2.2% of counted error dollars nationally under this attribution. System transitions are where the class spikes — see the migrations paper in the events section.</div>
+    </div>
+    <div class="control levers">
       <span class="label">Benefit recomputation</span>
       <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
       <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's FNA Minimodel benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
@@ -230,6 +236,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20260820a"></script>
+<script type="module" src="app.js?v=20260820b"></script>
 </body>
 </html>

@@ -23,10 +23,10 @@ permits historical pins only inside that section.
 - Machine-readable predictions artifact:
   `analysis/preregistration_obbba_boundary.json`
 - Artifact file SHA-256:
-  `0c43b76381ed9d0927a2970874d64897d0333a2c05c0e528b0460115ee6e5ccd`
+  `9d9342dde967f830ff63051ec1f2ed4b529115c2fcd2aa40f935808826f0978c`
 - Payload self-pin (SHA-256 of the canonical payload serialization,
   recorded inside the file):
-  `08c7138f2283f41f43bdeaef27423829df904291f0f8efa6526999ad0ffa0f5d`
+  `caba7d94c1ff742a87f500ca2a2ae246c072aee67714b7aa4fdcf086003603f7`
 - Generator (deterministic; regeneration is byte-identical and
   test-locked): `analysis/preregister_obbba_boundary.py`;
   locks in `tests/test_preregistration.py`
@@ -667,3 +667,17 @@ the refreshed hashes; the originally registered values were:
 The registration event itself — the public commit history and the
 original timestamps — is unchanged and remains the integrity anchor
 for the design's priority date.
+
+### 2026-08-20 — second provenance-only refresh (computation-error lever)
+
+`app/public/data.json` gained per-case agency-coded finding counts for
+the simulator's cause-coded computation-error lever. As with the first
+refresh, the registered analysis reads none of the affected fields;
+only the artifact's recorded `data.json` input hash and its own hashes
+moved, and every prediction and commitment is byte-for-byte unchanged.
+Body pins now quote the refreshed hashes; the prior values were:
+
+- Artifact file SHA-256 before this refresh:
+  `0c43b76381ed9d0927a2970874d64897d0333a2c05c0e528b0460115ee6e5ccd`
+- Payload self-pin before this refresh:
+  `08c7138f2283f41f43bdeaef27423829df904291f0f8efa6526999ad0ffa0f5d`
