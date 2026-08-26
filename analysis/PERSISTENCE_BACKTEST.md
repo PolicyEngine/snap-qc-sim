@@ -7,17 +7,21 @@ Expanding-window backtest over target years 2016-2024 (FY2021 dropped), 424 stat
 | construction | mean CRPS | pinball | log score | 50% cover | 90% cover | mean SD |
 |---|---:|---:|---:|---:|---:|---:|
 | static | 0.9914 | 0.5117 | -4.7344 | 0.1981 | 0.4835 | 0.5706pp |
+| static_fair | 0.9426 | 0.4896 | -2.8617 | 0.3066 | 0.6415 | 0.8069pp |
 | widened | 0.9003 | 0.4701 | -2.0101 | 0.4646 | 0.8137 | 1.2005pp |
 | rao_yu | 0.8778 | 0.4587 | -1.9318 | 0.4953 | 0.8491 | 1.2908pp |
+| static_official_1p1 (sensitivity) | 0.911 | 0.4749 | -2.2021 | 0.4151 | 0.7807 | 1.1pp |
+| static_fair_official_1p1 (sensitivity) | 0.9009 | 0.4709 | -1.9547 | 0.5778 | 0.9009 | 1.5556pp |
 
 The sampling-only construction's nominal 90% intervals cover 48% of realized next-year rates; adding persistence terms to the variance alone lifts coverage to 81% at about double the predictive width, and the full model reaches 85%. Winners by year sit in the artifact; the full model's edge concentrates in large-movement years.
 
 ## In bill terms
 
-Centering every state on its FY 2025 official rate and pricing the FY 2028 bill (delay-aware, official FY 2024 issuance): the median state's most-likely-bucket probability falls from 0.8377 under sampling-only to 0.5883 with persistence in the variance, and the national bill SD rises from $837,370,254 to $1,007,179,598 (independent state draws; cross-state process correlation would raise the widened figure further).
+Pricing bills with the simulator's election semantics (FY 2028 keys to the elected minimum of the locked FY 2025 rate and the simulated FY 2026 measurement, zero when either crosses the delay test; FY 2029 keys to FY 2026 alone): the median state's FY 2029 most-likely-bucket probability falls from 0.8377 under sampling-only to 0.5883 with persistence in the variance. National FY 2028 bill SD: $782,146,777 static versus $907,069,987 widened; FY 2029: $837,370,254 versus $1,007,179,598 (no cross-state correlation modeled).
 
 ## Caveats
 
-- Reconstructed rates at the fixed real threshold, not official rates; sampling variances are the i.i.d. cell bootstrap.
+- Reconstructed rates at the fixed real threshold, not official rates; sampling variances are the i.i.d. cell bootstrap, which runs smaller than published design SEs (~1.1pp average) — the sensitivity rows rerun the static family at that scale.
+- The penalty translation's innovation variance is estimated on the reconstructed panel and applied to official-scale rates: the additive-wedge evidence supports transferring level shifts in percentage points; extending the transfer to a variance component is an additional stated assumption.
 - All three constructions carry the national year level from the last observed year, so common national shifts handicap each equally and depress all coverage numbers together.
 - Normal predictive forms throughout; the bootstrap-vs-normal tier-odds gap is second-order at state sample sizes.

@@ -53,22 +53,53 @@ def test_penalty_translation_is_internally_consistent(artifact) -> None:
     for code, row in pt["states"].items():
         for name in ("static", "widened"):
             cell = row[name]
-            assert sum(cell["p_bucket"].values()) == pytest.approx(1.0, abs=5e-3), code
-            assert cell["modal_bucket_probability"] == pytest.approx(
-                max(cell["p_bucket"].values()), abs=1e-6
+            p29 = cell["fy2029"]["p_bucket"]
+            assert sum(p29.values()) == pytest.approx(1.0, abs=5e-3), code
+            assert cell["fy2029"]["modal_bucket_probability"] == pytest.approx(
+                max(p29.values()), abs=1e-6
             )
-            assert cell["sd_bill_dollars"] >= 0
+            for year in ("fy2028", "fy2029"):
+                assert cell[year]["sd_bill_dollars"] >= 0
         assert row["widened"]["predictive_sd_pp"] > row["static"]["predictive_sd_pp"], (
             code
         )
-    m = pt["median_modal_bucket_probability"]
+    m = pt["median_modal_bucket_probability_fy2029"]
     assert m["widened"] <= m["static"]
     for name in ("static", "widened"):
-        nat = pt["national"][name]
-        assert (
-            nat["expected_total_dollars"] > 0
-            and nat["sd_total_dollars_independent"] > 0
-        )
+        for year in ("fy2028", "fy2029"):
+            nat = pt["national"][name][year]
+            assert nat["expected_total_dollars"] >= 0
+            assert nat["sd_total_dollars_no_correlation"] > 0
+
+
+def test_statutory_fy2028_semantics(artifact) -> None:
+    """A state whose locked FY2025 crosses the delay test owes exactly zero
+    in FY2028 with zero variance under every construction (7 USC
+    2013(a)(2)(B); the Illinois case from the sol review)."""
+    pt = artifact["penalty_translation"]
+    checked = 0
+    for code, row in pt["states"].items():
+        if not row["fy2025_delay"]:
+            continue
+        for name in ("static", "widened"):
+            assert row[name]["fy2028"]["expected_bill_dollars"] == 0, code
+            assert row[name]["fy2028"]["sd_bill_dollars"] == 0, code
+        checked += 1
+    assert checked >= 1
+    assert pt["states"]["IL"]["fy2025_delay"] is True
+
+
+def test_sensitivity_rows_present_and_ordered(artifact) -> None:
+    sens = artifact["sensitivity_official_se_scale"]
+    assert set(sens) == set(persistence_backtest.SENSITIVITY)
+    s = artifact["summary"]
+    assert (
+        s["static"]["mean_predictive_sd_pp"]
+        < s["static_fair"]["mean_predictive_sd_pp"]
+        < sens["static_fair_official_1p1"]["mean_predictive_sd_pp"]
+    )
+    for row in sens.values():
+        assert 0.0 <= row["coverage_50"] <= row["coverage_90"] <= 1.0
 
 
 def test_penalty_hashes_match_live_files(artifact) -> None:
