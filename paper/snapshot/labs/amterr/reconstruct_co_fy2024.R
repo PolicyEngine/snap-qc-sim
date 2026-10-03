@@ -9,8 +9,14 @@
 #   - keeps ALL solver/filter logic verbatim otherwise.
 suppressPackageStartupMessages({library(haven); library(dplyr); library(tidyr)})
 
-repo <- Sys.getenv("SNAP_QC_REPO", "~/snap_qc/")  # clone of github.com/giannella/snap_qc
-out_dir <- "/Users/maxghenis/.cache/axiom-oracles/amterr-lab/"
+# SNAP_QC_REPO: clone of github.com/giannella/snap_qc at the commit pinned in
+# README.md. AMTERR_LAB_DIR: output directory (default: this script's directory).
+script_dir <- local({
+  arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(arg)) dirname(normalizePath(sub("^--file=", "", arg[1]))) else getwd()
+})
+repo <- paste0(normalizePath(Sys.getenv("SNAP_QC_REPO", "~/snap_qc"), mustWork = TRUE), "/")
+out_dir <- paste0(normalizePath(Sys.getenv("AMTERR_LAB_DIR", script_dir), mustWork = TRUE), "/")
 correct_variables <- TRUE
 
 mydata <- read_sav(paste0(repo, "qc_data/qc_pub_fy2024.sav"))
