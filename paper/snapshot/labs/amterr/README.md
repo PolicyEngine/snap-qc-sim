@@ -31,7 +31,7 @@ for byte.
 | TheAxiomFoundation/axiom-oracles | `d34aa6fa04287387e0dab6912d128ef746c7b6b2` (merge of #268) |
 | TheAxiomFoundation/rulespec-us | `b53ce208771085030939db4b9691762506b6bca2` (#826) |
 | TheAxiomFoundation/axiom-rules-engine | `de0efdc73b469132ee268e1c832e8f7148b91431` (#102) |
-| Engine release binary | sha256 `bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee`, built from that commit with `cargo build --release --offline` (see `../../cert/CERT_REPORT.md`) |
+| Engine release binary | sha256 `bb8ec23689697a5417b74c38196c0488e002e4ee6fe3b33faabb39005e6e5eee`, the 2026-08-06 build of that commit recorded in `../../cert/CERT_REPORT.md` (built there with `cargo build --release --offline`) |
 | FY2024 QC CSV, May 2026 posting | zip `https://snapqcdata.net/sites/default/files/2026-05/qcfy2024_csv.zip` (sha256 `0f3230a4318307d3088382546095eebfde03e781da6f65c9eac7f077bd4263f4`); member `qc_pub_fy2024.csv` sha256 `45193eb7370463ab3067d71da23a580fec34a5460341e4e750dda0be061e1aa9` |
 | FY2024 QC CSV, August 2026 posting | zip `https://snapqcdata.net/sites/default/files/2026-08/qcfy2024_csv.zip` (sha256 `b8b29b8593f78aa51c48332c47d2d92fa5bbecf5346570acb45e26f2d9ebd2b5`); member sha256 `e871a8e9caca0be72e2003b09bdf71e1d020984b52289d2b74c4c6b88c4f793b` |
 | R | 4.3.0 with haven 2.5.5, dplyr 1.1.2, tidyr 1.3.0 |
@@ -57,13 +57,23 @@ mkdir -p $WORK
 
 ### Stage 3: audit (this repository only)
 
-Download both postings, unzip each into its own directory, and check the CSV
-hashes above. Then:
+Download the two zips named in the pins table into `$WORK/may2026/` and
+`$WORK/aug2026/`. The axiom-oracles loader sends a `Referer` of
+`https://snapqcdata.net/datafiles` with its request; the same page lists the
+files for a browser download. USDA replaces postings, so the May 2026 zip may stop
+being served; the hashes identify which posting a file is. Then unzip and
+check the CSV hashes against the table:
+
+```bash
+unzip -o -d $WORK/may2026 $WORK/may2026/qcfy2024_csv.zip
+unzip -o -d $WORK/aug2026 $WORK/aug2026/qcfy2024_csv.zip
+shasum -a 256 $WORK/may2026/qc_pub_fy2024.csv $WORK/aug2026/qc_pub_fy2024.csv
+```
 
 ```bash
 SNAP_QC_CSV_MAY2026=$WORK/may2026/qc_pub_fy2024.csv \
 SNAP_QC_CSV_AUG2026=$WORK/aug2026/qc_pub_fy2024.csv \
-uv run --extra analysis python $LAB/audit_claims.py --check
+uv run --frozen --extra analysis python $LAB/audit_claims.py --check
 ```
 
 `--check` exits 1 if the regenerated audit differs from `claims_audit.json`;

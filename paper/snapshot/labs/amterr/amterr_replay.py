@@ -6,12 +6,10 @@ build the case through the proven map_qc_unit — but from a proxy unit carrying
 the ORIGINAL values — run the engine, and compare the allotment to RAWBEN
 (the benefit the agency actually issued).
 
-Interpretation:
-  match  -> the issuance is explained by correct arithmetic on the original
-            facts: an input/information error, faithfully propagated.
-  miss   -> no plausible original value + correct math reproduces the
-            issuance: computation-side error (or reconstruction failure —
-            correctednotes/at_max separate those).
+Reading the result:
+  match  -> the engine on the solver's inputs is within $5 of RAWBEN.
+  miss   -> it is not.
+ANALYSIS.md (layer 3) says what each does and does not show.
 
 Run from an axiom-oracles checkout at the commit pinned in README.md:
   AXIOM_SNAP_QC_RULESPEC_ROOT=<rulespec-us checkout> \

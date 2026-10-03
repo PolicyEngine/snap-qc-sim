@@ -113,6 +113,13 @@ def test_analysis_example_is_outside_the_broad_class():
 def test_regenerated_layer_one_and_two_artifacts_match_committed_copies():
     for name, record in AUDIT["regenerated_artifacts"].items():
         assert record["matches_committed"], name
+        # The audit compared against this exact file; an edit to it must fail.
+        assert record["sha256"] == audit.sha256(audit.REPO / record["path"]), name
+
+
+def test_audit_was_built_from_the_committed_replay_and_solver_output():
+    for path, digest in AUDIT["inputs"]["committed"].items():
+        assert audit.sha256(audit.REPO / path) == digest, path
 
 
 def test_postings_differ_only_in_weight_columns():
@@ -182,39 +189,133 @@ def _millions(value: float, digits: int) -> str:
     return f"${value / 1e6:.{digits}f}M"
 
 
+def _percent(value: float, digits: int = 1) -> str:
+    return f"{100 * value:.{digits}f}%"
+
+
 def test_analysis_quotes_the_audit():
-    text = (LAB / "ANALYSIS.md").read_text(encoding="utf-8")
+    """Whole sentences and table rows, so a figure cannot match elsewhere."""
+    text = " ".join((LAB / "ANALYSIS.md").read_text(encoding="utf-8").split())
     may = AUDIT["by_posting"]["may2026"]
     aug = AUDIT["by_posting"]["aug2026"]
-    replay = CASES["replay"]
+    counts = CASES["replay"]
+    replay = may["replay"]
+    misses = replay["broad_coded_misses"]
     quoted = [
-        f"{replay['reproduced_n']} of {replay['n']}",
-        _millions(may["replay"]["broad_coded_misses"]["dollars"], 2),
-        _millions(may["replay"]["broad_coded_misses"]["engine_gap_dollars"], 2),
-        f"{100 * may['replay']['broad_coded_misses']['share_of_replayed']:.1f}%",
-        _millions(may["totals"]["CO"]["axis1"]["data_entry_18"]["dollars"], 2),
-        _millions(aug["totals"]["CO"]["axis1"]["data_entry_18"]["dollars"], 2),
-        _millions(
-            may["totals"]["US"]["axis1"]["worker_computation_20_21"]["dollars"], 1
+        (
+            f"{counts['reproduced_n']} of {counts['n']} "
+            f"({_percent(counts['reproduced_n'] / counts['n'])} of cases, "
+            f"{_percent(replay['reproduced']['share_of_replayed'])} of the "
+            f"{_millions(replay['replayed']['dollars'], 1)} replayed error dollars)"
         ),
-        f"${may['totals']['US']['axis1']['policy_or_budgeted_10_22']['dollars'] / 1e6:,.0f}M",
-        f"${may['totals']['US']['issuance_rawben_dollars'] / 1e9:.1f}B",
-        _millions(may["totals"]["CO"]["cost_share_step_dollars"], 1),
-        _millions(aug["totals"]["CO"]["cost_share_step_dollars"], 1),
-        f"{may['replay']['computation_candidates']['points_of_official_fy2024_rate']:.2f}",
-        f"{may['replay']['computation_candidates']['above_threshold_points_of_official_fy2024_rate']:.2f}",
-        f"In {CASES['replay']['reproduced_solver_moved_input_n']} the solver moved",
-        f"in {CASES['replay']['reproduced_without_move_n']} nothing moved",
-        _millions(
-            may["replay"]["not_reproduced_with_computational_finding"]["dollars"], 1
+        (
+            f"In {counts['reproduced_solver_moved_input_n']} the solver moved an input; "
+            f"in {counts['reproduced_without_move_n']} nothing moved"
         ),
-        f"{CASES['layer2_computational_findings']['findings']} computational findings",
-        f"{CASES['reconstruction']['national_rows']:,} national",
+        (
+            f"In {counts['not_reproduced_solver_moved_input_n']} the solver moved an "
+            "input and stopped short"
+        ),
+        (
+            f"They carry {_millions(misses['dollars'], 2)}/yr: "
+            f"{_percent(misses['share_of_replayed'])} of replayed error dollars and "
+            f"{_percent(misses['share_of_colorado_error_dollars'])} of Colorado"
+        ),
+        f"gives {_millions(misses['engine_gap_dollars'], 2)}.",
+        (
+            f"{replay['reproduced_with_computational_finding']['n']} reproduce "
+            f"({_millions(replay['reproduced_with_computational_finding']['dollars'], 1)}"
+            f"/yr, "
+            f"{_percent(replay['reproduced_with_computational_finding']['share_of_colorado_error_dollars'])}"
+            " of Colorado error dollars), "
+            f"{replay['not_reproduced_with_computational_finding']['n']} do not "
+            f"({_millions(replay['not_reproduced_with_computational_finding']['dollars'], 1)}"
+            f", "
+            f"{_percent(replay['not_reproduced_with_computational_finding']['share_of_colorado_error_dollars'])})"
+        ),
+        (
+            f"The {CASES['layer2_computational_findings']['cases']} pure_math and mixed "
+            f"cases carry {CASES['layer2_computational_findings']['findings']} "
+            "computational findings"
+        ),
+        f"on ${may['totals']['US']['issuance_rawben_dollars'] / 1e9:.1f}B of issuance",
+        f"{CASES['reconstruction']['national_rows']:,} national error rows",
     ]
-    split = may["class_by_replay_outcome"]["broad_10_17_19_20_21_22"]["all_errors"]
+
+    # Software-cause table rows (Colorado and national).
+    labels = {
+        "software_17_19": "Software (17, 19)",
+        "worker_computation_20_21": "Worker computation (20, 21)",
+        "data_entry_18": "Data entry (18)",
+        "policy_or_budgeted_10_22": "Policy misapplied or budgeted wrong (10, 22)",
+    }
+    for name, label in labels.items():
+        colorado = may["totals"]["CO"]["axis1"][name]
+        national = may["totals"]["US"]["axis1"][name]
+        national_dollars = national["dollars"] / 1e6
+        shown = (
+            f"${national_dollars:,.0f}M"
+            if national_dollars >= 1000
+            else f"${national_dollars:.1f}M"
+        )
+        quoted.append(
+            f"| {label} | {_millions(colorado['dollars'], 1)}/yr "
+            f"({colorado['n']} cases) | {_percent(colorado['share'])} | "
+            f"{shown}/yr | {_percent(national['share'])} |"
+        )
+
+    # Cost-share table rows: all error dollars, then above the $56 threshold.
+    split = may["class_by_replay_outcome"]["broad_10_17_19_20_21_22"]
+    rows = {
+        "All": "all",
+        "Replay reproduces the issued benefit": "reproduced",
+        "Replay does not reproduce": "not_reproduced",
+        "Not replayed (solver filters)": "not_replayed",
+    }
+    for label, part in rows.items():
+        every, above = split["all_errors"][part], split["above_threshold"][part]
+        quoted.append(
+            f"| {label} | {every['n']} ({above['n']}) | {_percent(every['share'])} | "
+            f"{every['points_of_official_fy2024_rate']:.2f} | "
+            f"{_percent(above['share'])} | "
+            f"{above['points_of_official_fy2024_rate']:.2f} |"
+        )
+    candidates = replay["computation_candidates"]
+    quoted.append(
+        f"| The 7 computation candidates | {candidates['n']} "
+        f"({candidates['above_threshold_n']}) | "
+        f"{_percent(candidates['share_of_colorado_error_dollars'])} | "
+        f"{candidates['points_of_official_fy2024_rate']:.2f} | "
+        f"{_percent(candidates['share_of_colorado_above_threshold_error_dollars'])} | "
+        f"{candidates['above_threshold_points_of_official_fy2024_rate']:.2f} |"
+    )
+
+    # August-weights table rows that carry both postings.
+    def both(label, path, digits=2):
+        left, right = may, aug
+        for key in path:
+            left, right = left[key], right[key]
+        return (
+            f"| {label} | {_millions(left['dollars'], digits)} "
+            f"({_percent(left['share'])}) | {_millions(right['dollars'], digits)} "
+            f"({_percent(right['share'])}) |"
+        )
+
     quoted += [
-        f"{split[part]['points_of_official_fy2024_rate']:.2f}"
-        for part in ("all", "reproduced", "not_reproduced", "not_replayed")
+        both("Layer 1 strict, Colorado", ("totals", "CO", "layer1", "strict_17_19_20")),
+        both(
+            "Layer 1 broad, Colorado",
+            ("totals", "CO", "layer1", "broad_10_17_19_20_21_22"),
+        ),
+        both("Data entry (18), Colorado", ("totals", "CO", "axis1", "data_entry_18")),
+        both(
+            "Software (17, 19), Colorado", ("totals", "CO", "axis1", "software_17_19")
+        ),
+        (
+            f"| One cost-share tier (5% of issuance) | "
+            f"{_millions(may['totals']['CO']['cost_share_step_dollars'], 1)} | "
+            f"{_millions(aug['totals']['CO']['cost_share_step_dollars'], 1)} |"
+        ),
     ]
     missing = [q for q in quoted if q not in text]
     assert not missing, missing

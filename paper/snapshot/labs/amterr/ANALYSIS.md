@@ -61,7 +61,7 @@ element is 520 (arithmetic computation), its nature is one that describes
 computation (rounding 36, conversion 42, averaging 43, wrong standard 54/65,
 amount after a move 64, benefit incorrectly computed 75, allotment tables 79,
 initial-month proration 80, transcription or computation 98, proration 123),
-or its nature is a deduction amount (52/53/56/57) and its own cause code is
+or its nature is a deduction nature (52/53/56/57) and its own cause code is
 in the broad layer-1 set. Cases partition by how many of their findings are
 computational:
 
@@ -94,12 +94,16 @@ the file's edited inputs (household size, earned and unearned income, rent,
 utilities and deductions) and moves only the input named by the case's first
 finding (ELEMENT1): earned or unearned income, rent, the utility allowance,
 medical, dependent care or child-support deduction in $3 steps, or household
-size by one person for element 150 (natures 7, 12, 14, 16). It steps until its recomputed benefit reaches or
-passes RAWBEN (the benefit the agency issued; deduction steps also stop
-within $3 of it), or until the input reaches zero or the shelter cap. A moved
-utility allowance is then set to the nearest utility value used in more than
-5 cases in that state and year. When ELEMENT1 is outside those lists the
-inputs stay as they are (`correctednotes == "no_change"`). The Axiom
+size by one person for element 150 (natures 7, 12, 14, 16). Income steps
+stop once the recomputed benefit passes RAWBEN (the benefit the agency
+issued). Rent, utility and deduction steps also stop within $3 of it. Every
+step stops when the input reaches zero, the benefit reaches $0, the shelter
+deduction reaches its cap, or after 1,000 steps. Rows the solver labels
+`util_up` or `util_down` then have the utility allowance set to the nearest
+value above (or below) the file's UTIL that more than 5 filtered cases in
+that state and calendar year use; a `util_down` row with no such value is
+set to 0. When ELEMENT1 is outside those lists the inputs stay as they are
+(`correctednotes == "no_change"`). The Axiom
 engine, which reproduces all 856 Colorado FSBEN values at zero tolerance on
 the file's inputs (axiom-oracles#268), then computes the benefit on the
 solver's inputs, and the result is compared with RAWBEN at the file's own $5
@@ -109,9 +113,10 @@ inputs differs from the file value it started from. (The solver's
 202404-40803, because it is recorded before the utility snap.)
 
 FSBEN is a constructed variable: the final benefit Mathematica's model
-calculates from the edited inputs (technical documentation, PDF pp. 75 and
-91). RAWBEN is a raw variable: the benefit the unit was certified to receive
-in the sample month (PDF p. 92).
+calculates from the edited inputs (technical documentation: listed as
+constructed on PDF p. 73, with the raw/constructed legend on p. 75 and the
+formula on p. 91). RAWBEN is a raw variable: the benefit the unit was
+certified to receive in the sample month (PDF p. 92).
 
 ### Results
 
@@ -131,9 +136,17 @@ in the sample month (PDF p. 92).
 A reproduced case shows that one value of the first-listed input, run
 through correct arithmetic, yields the issued benefit. That is consistent
 with an input error on that element; it does not identify which input the
-agency had wrong. The 37 are an upper bound on computation-side error: the
-solver tries one element in one direction, so multi-element and household
-composition errors also land there.
+agency had wrong, and it does not rule out a computation error that a moved
+input absorbed. A non-reproduced case does not by itself show a computation
+error: the solver tries one element in one direction, so multi-element and
+household-composition errors also land among the 37.
+
+The replay outcome does not separate the layer-2 computational findings. Of
+the 26 cases that carry one, 13 reproduce ($3.6M/yr, 3.2% of Colorado error
+dollars), 10 do not ($3.5M, 3.1%) and 3 were not replayed. Among the 13 are
+202404-40794 and 202404-40823, which reproduce after the solver moved the
+child-support deduction and whose finding is 366/56/17 (computer programming
+error).
 
 ### The 10 broad-coded cases that do not reproduce
 
@@ -172,10 +185,10 @@ What the replay shows for these cases:
   (arithmetic computation) in 2. None carries 17 or 19.
 
 The candidate count depends on the cause-code set. By the layer-2 rule alone,
-10 non-reproduced cases carry a computational finding ($3.5M/yr, 3.1%): the
-7 candidates, two more 520/75 findings with cause 15 (agency failed to
-follow up on impending changes; 202312-40441 and 202401-40566) and a wrong
-utility standard with cause 18 (364/54/18; 202310-40297).
+the 10 non-reproduced cases with a computational finding are the 7
+candidates, two more 520/75 findings with cause 15 (agency failed to follow
+up on impending changes; 202312-40441 and 202401-40566) and a wrong utility
+standard with cause 18 (364/54/18; 202310-40297).
 
 The July text illustrated the class with 202312-40441 (issued $704, FSBEN
 $973). That case's only cause code is 15, so it is outside the 10; it is a
@@ -326,7 +339,10 @@ P.L. 119-21 sec. 10105. Rerun instructions and pins: `README.md`.
     example, 202312-40441, is outside the 10 (cause 15).
   - "No single-variable original value + correct math reproduces the
     issuance" now states what the solver does: it moves only the ELEMENT1
-    input, and for 17 of the 37 it moved nothing (14 `no_change` rows).
+    input, and for 17 of the 37 it moved nothing (14 `no_change` rows). The
+    "upper bound on computation-side" reading of the 37 is withdrawn: of
+    the 26 cases with a layer-2 computational finding, 13 reproduce and 10
+    do not.
   - Software cases: of the 14 that reproduce, 10 matched by moving the
     software-coded element's input, 2 by moving the same unearned-income
     total through a different finding and 2 by moving rent. The 2 that do

@@ -267,7 +267,7 @@ def class_metric(cases: pd.DataFrame, mask: pd.Series, total: float) -> dict:
 # posting comparison
 
 
-def posting_diff(may: pd.DataFrame, aug: pd.DataFrame) -> dict[str, Any]:
+def posting_diff() -> dict[str, Any]:
     """Columns that differ between the postings, over every column."""
     may_path, aug_path = posting_path("may2026"), posting_path("aug2026")
     full_may = pd.read_csv(may_path, low_memory=False)
@@ -550,6 +550,11 @@ def case_level(joined: pd.DataFrame) -> dict[str, Any]:
         for r in case_findings(joined, miss)
         if any(is_computational(tuple(f)) for f in r["findings"])
     ]
+    computational_matches = [
+        r["key"]
+        for r in case_findings(joined, ~miss)
+        if any(is_computational(tuple(f)) for f in r["findings"])
+    ]
 
     software_rows = []
     for _, row in joined.loc[software].sort_values("key").iterrows():
@@ -629,6 +634,7 @@ def case_level(joined: pd.DataFrame) -> dict[str, Any]:
             "engine_on_original": float(example["engine_on_original"]),
         },
         "not_reproduced_with_computational_finding_keys": computational_misses,
+        "reproduced_with_computational_finding_keys": computational_matches,
         "not_reproduced_cases": case_findings(joined, miss),
     }
 
@@ -788,6 +794,9 @@ def replay_dollars(
         },
         "computation_candidates": metric(is_candidate),
         "not_reproduced_with_computational_finding": metric(computational),
+        "reproduced_with_computational_finding": metric(
+            joined["key"].isin(set(level["reproduced_with_computational_finding_keys"]))
+        ),
     }
 
 
@@ -898,8 +907,11 @@ def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
             "code_class": "a case counts if any of AGENCY1-AGENCY9 is in the class (classes overlap)",
             "reproduced": f"abs(engine_on_original - RAWBEN) <= {REPLAY_TOLERANCE}",
             "solver_moved_input": (
-                "correctednotes != 'no_change' and (household-size row or "
-                "correctedamount != 0)"
+                "any replayed input ("
+                + ", ".join(REPLAY_INPUTS)
+                + ") differs from its file field ("
+                + ", ".join(REPLAY_INPUTS.values())
+                + "; missing -> 0)"
             ),
             "computation_candidate": (
                 "not reproduced, and a finding carrying a code in "
@@ -929,7 +941,7 @@ def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
         },
     }
     if {"may2026", "aug2026"} <= set(postings):
-        artifact["posting_diff"] = posting_diff(frames["may2026"], frames["aug2026"])
+        artifact["posting_diff"] = posting_diff()
         for label in postings:
             level = {
                 **case_level(join_replay(replay, frames[label])),
