@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20260820b"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20261003a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
@@ -26,7 +26,7 @@ const ADOPT_SCHEMA = "snap_qc_sim.engine_scenario.v1";
 // analysis/build_engine_scenario.py and locked by tests/test_engine_scenario.py;
 // the browser refuses a payload that does not hash to this pin.
 const ADOPT_DATA_SHA256 =
-  "7886710020f940beabc01110564384829ff4cb54b806ed1aee5bd9cac5f26b20";
+  "f64b9fd7408daabe0e5ffad8115ef658572b35e0bdd102deca860f4230e6c044";
 
 // 7 USC 2013(a)(2)(B)(iii): a year whose rate × 1.5 reaches 20% delays the
 // state's first billed year — FY 2025 crossing pushes the start to FY 2029,

@@ -9,12 +9,12 @@
     "single_draws": 10000
   },
   "input_hashes": {
-    "coding_consistency": "3b14f64cc8244811d46a90fc7e9bb9ef949cedc0ba5d941bd194ddfe291fdc14",
+    "coding_consistency": "2f3ca071db94e7ae1fe0bb734531d875916a98e56038159d4d647b07b7b6effe",
     "fy2024_sav": "ab6420fa359ab9bcc280a21b9ba7b11172c79c6f7a661718bc6e318f97723fbb",
     "fy2025_movement": "11faaf42081f7eca8676c28a7ed3741d26bcbb46eb6b63c40744fefad82cfd7c",
     "issuance_fy2024": "472d944ff48a993944eaa1de655d04cff6a2ded238c6b4267da680353d27c93f",
     "model_capture_results": "0574b7d1b7839c4f8954a87f5c1b23376892f4ec3b28eb39f9cb152d8f8a23aa",
-    "persistence_results": "e0c71ea292c6b04da2ab01fda521c594a81705a6b41d98e76c25cbe916b0788b"
+    "persistence_results": "bb7bfcf616cf9417154489e6bbdc684416b489aaed19bcffc1a49bce49085cb5"
   },
   "interpretation": "accounting construction: what happens to the measured rate if counted error dollars in this group fall by X, however achieved",
   "issuance_source": {

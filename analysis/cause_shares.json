@@ -129,7 +129,8 @@
     "committed_prose_discrepancy": {
       "assessment": "The 10-case count reproduces from all nine SAV AGENCY slots; neither available dollar definition reproduces $3.28M.",
       "claim": "10 cases, $3.28M, 3.3%",
-      "claim_location": "paper/snapshot/labs/amterr/ANALYSIS.md:L62-L67",
+      "claim_location": "paper/snapshot/labs/amterr/ANALYSIS.md:L62-L67 at commit 755a7f3179e964dccdf6dc2f7266e7c4758a0141",
+      "claim_status": "Corrected in the lab's 2026-10-03 revision: ANALYSIS.md, section 'The 10 broad-coded cases that do not reproduce', reports that $3.28M does not reproduce, and claims_audit.json case_level.broad_coded_misses lists the 10 cases.",
       "recomputed_broad_residual_n": 10,
       "recomputed_hwgt_times_amterr_dollars": 4469987.48,
       "recomputed_hwgt_times_engine_gap_dollars": 2913739.34,
@@ -144,13 +145,13 @@
     },
     "official_replay_any_agency_by_engine_outcome": {
       "qc_any_agency": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 21385851.53,
           "n": 16,
           "share_of_slice_dollars": 0.262868558653,
           "weighted_n": 70854.559396
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 35722171.4,
           "n": 47,
           "share_of_slice_dollars": 0.439086360163,
@@ -158,13 +159,13 @@
         }
       },
       "qc_no_agency": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 3996798.73,
           "n": 5,
           "share_of_slice_dollars": 0.049127467341,
           "weighted_n": 17856.458946
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 20250862.86,
           "n": 29,
           "share_of_slice_dollars": 0.248917613843,
@@ -174,13 +175,13 @@
     },
     "official_replay_fractional_cause_by_engine_outcome": {
       "agency_or_system": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 18613052.87,
           "fractional_n": 13.0,
           "fractional_weighted_n": 57245.3175,
           "share_of_replay_official_dollars": 0.228786138057
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 30229226.25,
           "fractional_n": 39.333333,
           "fractional_weighted_n": 163473.948503,
@@ -188,13 +189,13 @@
         }
       },
       "client_or_fact": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 6769597.39,
           "fractional_n": 8.0,
           "fractional_weighted_n": 31465.700841,
           "share_of_replay_official_dollars": 0.083209887937
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 25457397.13,
           "fractional_n": 35.833333,
           "fractional_weighted_n": 147975.931408,
@@ -202,13 +203,13 @@
         }
       },
       "excluded_federal_match": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
           "share_of_replay_official_dollars": 0.0
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
@@ -216,13 +217,13 @@
         }
       },
       "no_required_action": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
           "share_of_replay_official_dollars": 0.0
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 286410.88,
           "fractional_n": 0.833333,
           "fractional_weighted_n": 3299.582211,
@@ -230,13 +231,13 @@
         }
       },
       "other": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
           "share_of_replay_official_dollars": 0.0
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
@@ -244,13 +245,13 @@
         }
       },
       "unclassified": {
-        "computation_side_upper_bound": {
+        "not_reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
           "share_of_replay_official_dollars": 0.0
         },
-        "explained_input_facts": {
+        "reproduced": {
           "dollars": 0.0,
           "fractional_n": 0.0,
           "fractional_weighted_n": 0.0,
@@ -259,20 +260,20 @@
       }
     },
     "reference": {
-      "classification": "abs(engine_on_original - RAWBEN) <= 5; a miss is a computation-side upper bound, not a proven computation error",
+      "classification": "reproduced if abs(engine_on_original - RAWBEN) <= 5, else not_reproduced",
       "path": "paper/snapshot/labs/amterr/amterr_replay_results.json",
       "sha256": "3e214d2161269a8e5f1dad882aeec4dc0f7e35d957b6f836ea3170907b3368c6"
     },
     "slices": {
       "all_283": {
         "outcomes": {
-          "computation_side_upper_bound": {
+          "not_reproduced": {
             "dollars": 27739818.9,
             "n": 37,
             "share_of_slice_dollars": 0.279838033554,
             "weighted_n": 158746.939352
           },
-          "explained_input_facts": {
+          "reproduced": {
             "dollars": 71388303.72,
             "n": 246,
             "share_of_slice_dollars": 0.720161966446,
@@ -289,13 +290,13 @@
       },
       "official_above_threshold_97": {
         "outcomes": {
-          "computation_side_upper_bound": {
+          "not_reproduced": {
             "dollars": 25382650.26,
             "n": 21,
             "share_of_slice_dollars": 0.311996025994,
             "weighted_n": 88711.018341
           },
-          "explained_input_facts": {
+          "reproduced": {
             "dollars": 55973034.26,
             "n": 76,
             "share_of_slice_dollars": 0.688003974006,
@@ -312,13 +313,13 @@
       },
       "subthreshold_186": {
         "outcomes": {
-          "computation_side_upper_bound": {
+          "not_reproduced": {
             "dollars": 2357168.64,
             "n": 16,
             "share_of_slice_dollars": 0.13263057259,
             "weighted_n": 70035.921011
           },
-          "explained_input_facts": {
+          "reproduced": {
             "dollars": 15415269.46,
             "n": 170,
             "share_of_slice_dollars": 0.86736942741,
@@ -572,7 +573,7 @@
     "element_dollar_formula": "sum(HWGT * AMOUNTi) where E_FINDGi in {2,3,4} and AMOUNTi > 0",
     "generator": {
       "path": "analysis/cause_shares.py",
-      "sha256": "67b7748b9cf02f63d910b9750839582068da1419005d1c9b5cf6f76ea1443ac3"
+      "sha256": "3eed82ca7af9c50fdccd3a924194e8cd65e22409487d6f4d7d217304c163721a"
     },
     "input_sav": {
       "bytes": 62737439,

@@ -508,7 +508,7 @@
       "path": "~/.cache/axiom-oracles/snap-qc/historical/SHA256SUMS.txt",
       "sha256": "815d5ed796a206a242d649f3f598f3af6d413c25d980f23f31d209b4748f1559"
     },
-    "reference_artifact_sha256": "c5b16617b982ce6e00f70142652cd2bcc9fc145a33ad7fce341de84b8eff61bb"
+    "reference_artifact_sha256": "7f22148c65a10430ed154acdf9b4c408591636f49a2b92af26c0d89f480780b2"
   },
   "reference_conventions": {
     "broad_computing_apparatus": [
