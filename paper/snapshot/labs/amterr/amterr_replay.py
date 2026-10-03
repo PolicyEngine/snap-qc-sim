@@ -13,9 +13,12 @@ Interpretation:
             issuance: computation-side error (or reconstruction failure —
             correctednotes/at_max separate those).
 
-Run from the axiom-oracles worktree:
-  uv run python /Users/maxghenis/.cache/axiom-oracles/amterr-lab/amterr_replay.py
-with AXIOM_SNAP_QC_RULESPEC_ROOT / AXIOM_SNAP_QC_AXIOM_BINARY set.
+Run from an axiom-oracles checkout at the commit pinned in README.md:
+  AXIOM_SNAP_QC_RULESPEC_ROOT=<rulespec-us checkout> \
+  AXIOM_SNAP_QC_AXIOM_BINARY=<axiom-rules-engine release binary> \
+  uv run python <this directory>/amterr_replay.py
+AMTERR_LAB_DIR (default: this file's directory) holds the input
+co_fy2024_reconstruction.csv and receives amterr_replay_results.json.
 """
 
 from __future__ import annotations
@@ -49,7 +52,7 @@ from axiom_oracles.bridges.snap_populace import (
 )
 from axiom_oracles.populations.snap_qc import load_qc_units
 
-LAB = Path("/Users/maxghenis/.cache/axiom-oracles/amterr-lab")
+LAB = Path(os.environ.get("AMTERR_LAB_DIR", Path(__file__).resolve().parent)).expanduser()
 
 
 def _num(v):
