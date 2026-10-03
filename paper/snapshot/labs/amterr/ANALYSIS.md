@@ -96,9 +96,10 @@ finding (ELEMENT1): earned or unearned income, rent, the utility allowance,
 medical, dependent care or child-support deduction in $3 steps, or household
 size by one person for element 150 (natures 7, 12, 14, 16). Income steps
 stop once the recomputed benefit passes RAWBEN (the benefit the agency
-issued). Rent, utility and deduction steps also stop within $3 of it. Every
-step stops when the input reaches zero, the benefit reaches $0, the shelter
-deduction reaches its cap, or after 1,000 steps. Rows the solver labels
+issued). Rent, utility and deduction steps also stop within $3 of it. Steps
+that lower an input stop at zero; rent and utility steps also stop when the
+shelter deduction reaches its cap; every step stops when the benefit reaches
+$0 or after 1,000 steps. Rows the solver labels
 `util_up` or `util_down` then have the utility allowance set to the nearest
 value above (or below) the file's UTIL that more than 5 filtered cases in
 that state and calendar year use; a `util_down` row with no such value is

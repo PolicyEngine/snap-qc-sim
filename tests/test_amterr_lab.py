@@ -149,6 +149,14 @@ def test_weighted_partitions_conserve_dollars(posting):
         assert metric["above_threshold_n"] <= metric["n"]
     candidates = set(CASES["broad_coded_misses"]["computation_candidate_keys"])
     assert candidates <= set(CASES["not_reproduced_with_computational_finding_keys"])
+    # 26 cases carry a computational finding: 13 reproduce, 10 do not, 3 were
+    # not replayed.
+    assert (
+        CASES["layer2_computational_findings"]["cases"]
+        - len(CASES["reproduced_with_computational_finding_keys"])
+        - len(CASES["not_reproduced_with_computational_finding_keys"])
+        == 3
+    )
 
     for classes in result["class_by_replay_outcome"].values():
         for parts in classes.values():
