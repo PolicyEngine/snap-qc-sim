@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-10-03
+date: 2026-10-04
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -475,7 +475,12 @@ within $5 of `FSBEN` before the solver moved, so those matches did not
 need the move. The
 rate differs by threshold status: among the 97 above-threshold official
 error cases 76 reproduce (78.4%, binomial standard error about 4
-points), and among the 186 sub-threshold deviations 170 do (91.4%). The
+points), and among the 186 sub-threshold deviations 170 do (91.4%). In
+34 of the 230 moved matches, 19 of them above the threshold, the issued
+benefit is the maximum allotment and the solver lowered an income. Every
+value of that income at or below its break-even point yields the maximum,
+so these matches are weakly identified: they do not pin the income down,
+and the steps ran on to zero income or the step limit. The
 solver's own recomputation and the engine agree on the within-$5
 classification for all 283 cases, two implementations with distinct
 codebases reading the same file.
@@ -487,7 +492,8 @@ agency had wrong, and a moved input can absorb a computation error. A
 non-reproduced case can reflect the solver's limits: it tries one input
 in one direction, and in 17 of the 37 it moved nothing (14 cases whose
 first finding falls outside those codes, and 3 where it stopped before
-moving). Of the 26 cases that carry a layer-2 computational
+moving). In 6 more, its $3 steps reached within $3 of the issued benefit
+before the utility reset moved the input off that match. Of the 26 cases that carry a layer-2 computational
 finding, 13 reproduce, 10 do not and 3 were not replayed. The complete
 per-case replay output (283 rows), the layer-1 and layer-2
 classification outputs, the reconstruction scripts and

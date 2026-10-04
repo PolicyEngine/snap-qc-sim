@@ -196,6 +196,8 @@ def _replay_counts() -> dict[str, int]:
     layer2 = AUDIT["case_level"]["layer2_computational_findings"]["cases"]
     above = SLICES["official_above_threshold_97"]
     sub = SLICES["subthreshold_186"]
+    outcomes = AUDIT["case_level"]["solver_outcomes"]
+    at_maximum = outcomes["income_lowered_rawben_at_maximum"]
     return {
         "error_cases": co["error_cases"],
         "n": replay["n"],
@@ -217,6 +219,9 @@ def _replay_counts() -> dict[str, int]:
         "above_reproduced": above["outcomes"]["reproduced"]["n"],
         "sub_n": sub["total"]["n"],
         "sub_reproduced": sub["outcomes"]["reproduced"]["n"],
+        "weak": at_maximum["reproduced_n"],
+        "weak_above": at_maximum["reproduced_above_threshold_n"],
+        "reset_off": len(outcomes["utility_reset"]["reset_off_after_step_match_keys"]),
     }
 
 
@@ -273,11 +278,20 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
             f"among the {c['sub_n']} sub-threshold deviations {c['sub_reproduced']} "
             f"do ({sub})."
         ),
+        (
+            f"In {c['weak']} of the {c['moved']} moved matches, {c['weak_above']} of "
+            "them above the threshold, the issued benefit is the maximum allotment "
+            "and the solver lowered an income."
+        ),
         (f"agree on the within-$5 classification for all {c['agree']} cases"),
         (
             f"in {unmoved_misses} of the {c['not_reproduced']} it moved nothing "
             f"({c['miss_no_change']} cases whose first finding falls outside those "
             f"codes, and {c['miss_stopped']} where it stopped before moving)"
+        ),
+        (
+            f"In {c['reset_off']} more, its $3 steps reached within $3 of the issued "
+            "benefit before the utility reset moved the input off that match."
         ),
         (
             f"Of the {c['layer2']} cases that carry a layer-2 computational finding, "
@@ -293,6 +307,57 @@ def test_manuscript_quotes_the_replay_audit():
     assert not missing, missing
 
 
+def test_facts_quotes_the_solver_outcomes():
+    """FACTS D5 and D6 carry the lab audit's solver-outcome counts."""
+    facts = _read(FACTS)
+    outcomes = AUDIT["case_level"]["solver_outcomes"]
+    at_maximum = outcomes["income_lowered_rawben_at_maximum"]
+    moved = outcomes["not_reproduced_solver_moved_input"]
+    replay = AUDIT["case_level"]["replay"]
+    household = outcomes["household_size"]
+    rule = AUDIT["case_level"]["utility_reset_rule"]
+    quotes = [
+        (
+            f"in {at_maximum['reproduced_n']} of the "
+            f"{replay['reproduced_solver_moved_input_n']} moved matches "
+            f"({at_maximum['reproduced_above_threshold_n']} above the $56 threshold)"
+        ),
+        (
+            "ran on to zero income in "
+            f"{at_maximum['reproduced_ended_at_zero_income_n']} and to the "
+            f"1,000-step limit in {at_maximum['reproduced_ended_at_step_limit_n']}"
+        ),
+        (
+            f"marks {outcomes['reproduced_at_max_flag']['n']} of the "
+            f"{replay['reproduced_n']} matches, these {at_maximum['reproduced_n']} "
+            "among them"
+        ),
+        (
+            f"in the {moved['n']} moved cases that do not reproduce: in "
+            f"{len(moved['steps_stopped_short_keys'])} its $3 steps stopped short of "
+            f"RAWBEN; in {len(moved['reset_off_after_step_match_keys'])} ("
+            + ", ".join(moved["reset_off_after_step_match_keys"])
+            + ")"
+        ),
+        f"in {len(moved['household_size_keys'])} the one-person household-size move missed",
+        (
+            f"{len(household['away_from_rawben_keys'])} of the {household['n']} "
+            "household-size moves ("
+            + ", ".join(household["away_from_rawben_keys"])
+            + ") take the benefit away from RAWBEN"
+        ),
+        (
+            "reproduces all "
+            f"{outcomes['solver_benefit_reproduces_rawben_recreated_n']} recreated "
+            "benefits, and the reset rule D4 states reproduces all "
+            f"{rule['rule_reproduces_final_amount_n']} final utility amounts"
+        ),
+    ]
+    missing = [quote for quote in quotes if quote not in facts]
+    assert not missing, missing
+    assert rule["rule_reproduces_final_amount_n"] == rule["rows_n"]
+
+
 def test_replay_counts_partition():
     """The identities the replay paragraph's arithmetic relies on."""
     c = _replay_counts()
@@ -302,6 +367,13 @@ def test_replay_counts_partition():
     assert c["above_reproduced"] + c["sub_reproduced"] == c["reproduced"]
     assert c["layer2_reproduced"] + c["layer2_not_reproduced"] <= c["layer2"]
     assert c["n"] <= c["error_cases"]
+    # The weakly identified and reset-off cases sit inside the classes the
+    # paragraph quotes them against.
+    assert c["weak_above"] <= min(c["weak"], c["above_reproduced"])
+    assert c["weak"] <= c["moved"]
+    assert (
+        c["reset_off"] + c["miss_no_change"] + c["miss_stopped"] <= c["not_reproduced"]
+    )
     # "nothing moved and the match restates the parity result" needs every
     # unmoved match to sit within $5 of FSBEN already.
     replay = AUDIT["case_level"]["replay"]
@@ -480,6 +552,7 @@ def replay_counts(draw):
     miss_overlap = draw(
         st.integers(0, min(miss_no_change + miss_stopped, layer2_not_reproduced))
     )
+    weak = draw(st.integers(0, reproduced - unmoved))
     return {
         "error_cases": n + draw(st.integers(0, 100)),
         "n": n,
@@ -499,6 +572,11 @@ def replay_counts(draw):
         "above_reproduced": above_reproduced,
         "sub_n": sub_n,
         "sub_reproduced": sub_reproduced,
+        "weak": weak,
+        "weak_above": draw(st.integers(0, min(weak, above_reproduced))),
+        "reset_off": draw(
+            st.integers(0, not_reproduced - miss_no_change - miss_stopped)
+        ),
     }
 
 
