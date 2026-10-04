@@ -162,6 +162,19 @@ MAX_ALLOTMENT_FY2024 = {
 # The reset's candidates: amounts more than this many filtered cases report.
 UTILITY_CANDIDATE_MIN_CASES = 5
 UTILITY_RESET_NOTES = ("util_up", "util_down")
+# The input each stepped label moves (adjust_* calls in the R script).
+SOLVER_NOTE_INPUTS = {
+    "earn": "rawearn",
+    "unearn": "rawunearn",
+    "rent": "rawrent",
+    "util": "rawutil",
+    "med": "rawmedded",
+    "dep": "rawdepded",
+    "cs": "rawcsded",
+}
+# Stands in for "without limit" when an input is pushed past the solver's
+# value: far beyond every Colorado income, cost and the shelter cap.
+SOLVER_PUSH = 100_000
 # Labels adjust_income gives a moved income when RAWBEN exceeds the file-side
 # uncapped benefit, so its steps lower the income (_error: it reached zero).
 INCOME_LOWERING_NOTES = ("earn_down", "earn_error", "unearn_down", "unearn_error")
@@ -523,12 +536,15 @@ def join_replay(replay: pd.DataFrame, posting: pd.DataFrame) -> pd.DataFrame:
     return classify_solver_moves(joined)
 
 
-def solver_benefit(inputs: pd.DataFrame) -> pd.Series:
-    """The solver's benefit: calculate_raw_benefits in reconstruct_co_fy2024.R.
+def solver_terms(inputs: pd.DataFrame) -> pd.DataFrame:
+    """The solver's benefit and its parts: calculate_raw_benefits in
+    reconstruct_co_fy2024.R.
 
     ``inputs`` carries ``SOLVER_BENEFIT_INPUTS`` and ``shelter_cap`` (infinite
     for a unit with an elderly or disabled member). The operations and their
     order follow the R function, so the floors land on the same doubles.
+    Returns the shelter deduction, net income (which may be negative) and the
+    benefit.
     """
     earn = inputs["rawearn"]
     net_before_shelter = (earn + inputs["rawunearn"]) - (
@@ -545,9 +561,15 @@ def solver_benefit(inputs: pd.DataFrame) -> pd.Series:
     )
     net = np.floor(net_before_shelter - (shelter + inputs["rawhomeless_ded"]))
     uncapped = np.floor(inputs["rawbenmax"] - 0.3 * net)
-    return np.minimum(
+    benefit = np.minimum(
         np.maximum(uncapped, inputs["rawminimum_ben"]), inputs["rawbenmax"]
     )
+    return pd.DataFrame({"shelter": shelter, "net": net, "benefit": benefit})
+
+
+def solver_benefit(inputs: pd.DataFrame) -> pd.Series:
+    """The solver's benefit (see ``solver_terms``)."""
+    return solver_terms(inputs)["benefit"]
 
 
 def classify_solver_moves(joined: pd.DataFrame) -> pd.DataFrame:
@@ -611,7 +633,55 @@ def classify_solver_moves(joined: pd.DataFrame) -> pd.DataFrame:
     out["income_lowered_rawben_at_maximum"] = notes.isin(
         INCOME_LOWERING_NOTES
     ) & rawben.eq(out["rawbenmax"].astype(float))
+    out["flat_stretch"] = flat_stretch(out, inputs, final)
+    lowered_at_maximum = out["income_lowered_rawben_at_maximum"] & out["reproduced"]
+    if not out.loc[lowered_at_maximum, "flat_stretch"].eq("maximum_allotment").all():
+        raise AssertionError("an at-maximum income match is not on the cap")
     return out
+
+
+def flat_stretch(
+    joined: pd.DataFrame, inputs: pd.DataFrame, final: pd.Series
+) -> pd.Series:
+    """Where a reproduced match sits on a flat stretch of the benefit formula.
+
+    The moved input is pushed without limit in the solver's direction (to $0
+    when the solver lowered it, up by ``SOLVER_PUSH`` when it raised it). The
+    benefit is monotone in each input, so if the pushed benefit still lies
+    within $5 of RAWBEN, every amount between the solver's and the limit
+    reproduces RAWBEN too, and the match bounds the input on one side only.
+    The stretch is named by what makes the formula flat there: the maximum
+    allotment, the minimum benefit, or (for a raised rent or utility amount)
+    the shelter-deduction cap. A lowered input whose band merely reaches $0
+    is left unnamed. Household-size moves are not stepped and are left out.
+    """
+    notes = joined["correctednotes"]
+    column = notes.str.split("_").str[0].map(SOLVER_NOTE_INPUTS)
+    candidate = joined["reproduced"] & joined["solver_moved_input"] & column.notna()
+    pushed = inputs.copy()
+    raised = pd.Series(False, index=joined.index)
+    for name in set(column.dropna()):
+        rows = candidate & column.eq(name)
+        start = joined[REPLAY_INPUTS[name]].fillna(0).astype(float)
+        up = rows & (inputs[name] > start)
+        raised |= up
+        pushed.loc[rows, name] = np.where(
+            up[rows], inputs.loc[rows, name] + SOLVER_PUSH, 0.0
+        )
+    terms = solver_terms(pushed)
+    rawben = joined["RAWBEN"].astype(float)
+    holds = candidate & (rawben - terms["benefit"]).abs().le(REPLAY_TOLERANCE)
+    shelter_input = column.isin(["rawrent", "rawutil"])
+    named = np.select(
+        [
+            holds & terms["benefit"].eq(inputs["rawbenmax"]),
+            holds & terms["benefit"].eq(inputs["rawminimum_ben"]),
+            holds & raised & shelter_input & terms["shelter"].eq(inputs["shelter_cap"]),
+        ],
+        ["maximum_allotment", "minimum_benefit", "shelter_cap"],
+        default=None,
+    )
+    return pd.Series(named, index=joined.index, dtype=object)
 
 
 def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
@@ -643,6 +713,17 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
             "an at-maximum income match ended before zero or the limit"
         )
     flagged = joined["solver_at_max"].astype(bool) & reproduced
+    above = joined["AMTERR"].gt(THRESHOLD_FY2024)
+    stretch = joined["flat_stretch"]
+    weak = stretch.notna()
+    at_cap = stretch.eq("maximum_allotment")
+    rawben = joined["RAWBEN"].astype(float)
+    moved = joined["solver_moved_input"]
+    farther = moved & (
+        (rawben - joined["rawben_recreated"].astype(float)).abs()
+        > (rawben - joined["FSBEN"].astype(float)).abs()
+    )
+    final_change = joined["rawutil"].astype(float) - joined["UTIL"].astype(float)
 
     return {
         "solver_benefit_reproduces_rawben_recreated_n": len(joined),
@@ -651,8 +732,15 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
             "reproduced_n": int((household & reproduced).sum()),
             "away_from_rawben_keys": sorted(keys[away]),
         },
+        "moved_benefit_farther_from_rawben_than_fsben_keys": sorted(keys[farther]),
+        "household_size_correctedamount_zero_n": int(
+            (household & joined["correctedamount"].eq(0)).sum()
+        ),
         "utility_reset": {
             "n": int(utility.sum()),
+            "correctedamount_differs_from_final_change_n": int(
+                (utility & joined["correctedamount"].ne(final_change)).sum()
+            ),
             "steps_within_3_of_rawben_n": int((utility & steps_matched).sum()),
             "reproduced_n": int((utility & reproduced).sum()),
             "reset_off_after_step_match_keys": sorted(keys[reset_off]),
@@ -675,8 +763,26 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
             "reproduced_at_max_flag_n": int((matched & flagged).sum()),
             "reproduced_keys": sorted(keys[matched]),
         },
+        "weakly_identified": {
+            "n": int(weak.sum()),
+            "above_threshold_n": int((weak & above).sum()),
+            "by_flat_stretch": {
+                name: int(count)
+                for name, count in sorted(stretch[weak].value_counts().items())
+            },
+            "maximum_allotment_by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(notes[at_cap].value_counts().items())
+            },
+            "maximum_allotment_at_max_flag_n": int((at_cap & flagged).sum()),
+            "keys": {
+                name: sorted(keys[stretch.eq(name)])
+                for name in sorted(set(stretch.dropna()))
+            },
+        },
         "reproduced_at_max_flag": {
             "n": int(flagged.sum()),
+            "outside_weakly_identified_keys": sorted(keys[flagged & ~weak]),
             "by_correctednotes": {
                 note: int(count)
                 for note, count in sorted(notes[flagged].value_counts().items())

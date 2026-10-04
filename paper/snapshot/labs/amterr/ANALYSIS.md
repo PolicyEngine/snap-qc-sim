@@ -110,9 +110,11 @@ finding (ELEMENT1).
   deduction reaches its cap (when raising) or zero (when lowering);
   income-raising steps stop when the uncapped benefit falls below zero; and
   all steps stop when the benefit reaches $0 or after 1,000 steps. Where
-  RAWBEN is the maximum allotment, which the benefit cannot pass,
-  income-lowering steps continue until the income reaches zero or the step
-  limit.
+  RAWBEN is at or above the maximum allotment, which the benefit cannot
+  pass, income-lowering steps continue until the income reaches zero or the
+  step limit. Where it is at or below a one- or two-person unit's minimum
+  benefit, which the benefit cannot fall below, income-raising steps
+  continue until the uncapped benefit falls below zero or the step limit.
 - **The utility reset** then applies to every row the solver labels
   `util_up` (RAWBEN above FSBEN) or `util_down` (RAWBEN below FSBEN). The
   candidates are the utility amounts that more than 5 cases report in the
@@ -121,7 +123,11 @@ finding (ELEMENT1).
   row takes the candidate above the file's UTIL that lies nearest the
   amount its steps reached, and keeps that stepped amount if no candidate
   lies above. A `util_down` row takes the candidate below the file's UTIL
-  nearest its stepped amount, and is set to 0 if none lies below.
+  nearest its stepped amount, and is set to 0 if none lies below. The reset
+  can also take the benefit away from RAWBEN: in 202405-40908 it leaves the
+  benefit farther from RAWBEN than FSBEN. With the 2 household-size moves
+  above, these are the only 3 moved cases that end farther from RAWBEN than
+  FSBEN.
 - **Any other first finding** leaves the inputs as they are
   (`correctednotes == "no_change"`).
 
@@ -129,13 +135,15 @@ The Axiom engine, which reproduces all 856 Colorado FSBEN values at zero
 tolerance on the file's inputs (axiom-oracles#268), then computes the
 benefit on the solver's inputs, and the result is compared with RAWBEN at
 the file's own $5 editing tolerance. Below, "moved" means at least one of
-the eight replayed inputs differs from the file value it started from. (The
-solver's `correctedamount` column misses two utility rows, 202403-40765 and
-202404-40803, because it is recorded before the utility reset.)
-`audit_claims.py` checks this account against the solver's output. Its port
-of the solver's benefit formula reproduces all 283 recreated benefits, and
-the reset rule above reproduces the final utility amount in all 15 utility
-rows.
+the eight replayed inputs differs from the file value it started from. The
+solver's `correctedamount` column is not the final change: household-size
+moves never write it, so it is 0 in all 7, and it is recorded before the
+utility reset, so it differs from the final change in all 15 utility rows
+and is 0 in two of them, 202403-40765 and 202404-40803, which only the reset
+moved. `audit_claims.py` checks two parts of this account against the
+solver's output: its port of the solver's benefit formula reproduces all 283
+recreated benefits, and the reset rule above, applied to each row's stepped
+amount, reproduces all 15 final utility amounts.
 
 FSBEN is a constructed variable: the final benefit Mathematica's model
 calculates from the edited inputs (technical documentation: listed as
@@ -151,14 +159,26 @@ certified to receive in the sample month (PDF p. 92).
 - 246 of 283 (86.9% of cases, 72.0% of the $99.1M replayed error dollars)
   reproduce the issued benefit within $5. In 230 the solver moved an input;
   in 16 nothing moved and |RAWBEN − FSBEN| ≤ $5 already.
-- 34 of the 230 are weakly identified. In each, RAWBEN is the maximum
-  allotment and the solver lowered an income. Every value of that income at
-  or below its break-even point yields the maximum, so the match does not
-  pin the income down. The steps, which cannot pass RAWBEN, ran on to zero
-  income in 32 and to the 1,000-step limit in 2. 19 of the 34 are above the
-  $56 threshold. The solver exports an `at_max` flag to mark such cases (the
-  uncapped benefit on the replayed inputs is at least the maximum allotment
-  less $5); it is set for 54 of the 246 matches, these 34 among them.
+- 60 of the 230 are weakly identified: the issued benefit sits on a flat
+  stretch of the benefit formula in the moved input, so the match bounds
+  that input on one side only. 31 of the 60 are above the $56 threshold.
+  - 53 are at or within $5 of the maximum allotment, which caps the
+    benefit. In 34 of them RAWBEN is the maximum and the solver lowered an
+    income. The solver pays the maximum whenever net income is zero or
+    less, and net income never falls as income rises, so every value of
+    that income up to the point where net income reaches zero yields the
+    maximum. The steps, which cannot pass RAWBEN, ran that income down to
+    $0 in 32 and to the 1,000-step limit in 2. In the other 19 the solver
+    moved rent (15), the utility allowance (3) or the medical deduction (1),
+    and every further amount in the same direction also reproduces RAWBEN.
+  - 4 are at the $23 minimum benefit of a one- or two-person unit.
+  - 3 are rent increases that reach the shelter-deduction cap, beyond which
+    rent no longer changes the benefit.
+
+  The solver exports an `at_max` flag to mark capped cases (the uncapped
+  benefit on the replayed inputs is at least the maximum allotment less
+  $5). It is set for 54 of the 246 matches: 52 of the 53, one household-size
+  match and one match where nothing moved.
 - 37 do not reproduce. In 20 the solver moved an input: in 9 its $3 steps
   stopped short of RAWBEN; in 6 they reached within $3 of it and the
   utility reset then moved the input off that match (202310-40297,
@@ -181,7 +201,9 @@ utility reset moved off a match their steps had reached.
 
 The replay outcome does not separate the layer-2 computational findings. Of
 the 26 cases that carry one, 13 reproduce ($3.6M/yr, 3.2% of Colorado error
-dollars), 10 do not ($3.5M, 3.1%) and 3 were not replayed. Among the 13 are
+dollars), 10 do not ($3.5M, 3.1%) and 3 were not replayed. 2 of the 10,
+202310-40297 and 202312-40456, are among the 6 cases the utility reset moved
+off a match. Among the 13 are
 202404-40794 and 202404-40823, which reproduce after the solver moved the
 child-support deduction and whose finding is 366/56/17 (computer programming
 error).
@@ -414,20 +436,24 @@ P.L. 119-21 sec. 10105. Rerun instructions and pins: `README.md`.
   formula and re-applies the utility reset, and the new counts below come
   from it. Changes:
   - Utility reset: the solver takes the candidate nearest the amount its
-    steps reached. The 2026-10-03 text said the candidate nearest the
-    file's UTIL; that rule gives the final amount in 8 of the 15 utility
-    rows. The candidates are counted over filtered cases of any review
+    steps reached. The 2026-10-03 text said the candidate above (or below)
+    the file's UTIL nearest that UTIL; that rule gives the final amount in
+    8 of the 15 utility rows. The candidates are counted over filtered cases of any review
     status, and a `util_up` row with no candidate above keeps its stepped
     amount.
   - Stop rules: rent and utility steps also stop at a zero shelter
     deduction when lowering, and income-raising steps stop when the
-    uncapped benefit falls below zero. Where RAWBEN is the maximum
-    allotment, income-lowering steps run on to zero income or the step
-    limit.
+    uncapped benefit falls below zero. Where RAWBEN is at or above the
+    maximum allotment, income-lowering steps run on to zero income or the
+    step limit, and at or below the minimum benefit, income-raising steps
+    run on until the uncapped benefit falls below zero.
   - Household size: the nature code sets the direction. The move takes the
     benefit away from RAWBEN in 2 of the 7 Colorado cases.
   - "In 20 the solver moved an input and stopped short" was true of 9 of
     the 20. In 6 the steps reached within $3 of RAWBEN and the utility reset
     moved the input off that match; in 5 the household-size move missed.
-  - Added: 34 of the 230 moved matches are weakly identified (RAWBEN at the
-    maximum allotment, income lowered).
+  - The `correctedamount` note now covers household-size moves and all 15
+    utility rows.
+  - Added: 60 of the 230 moved matches are weakly identified, 34 of them
+    because RAWBEN is the maximum allotment and the solver lowered an
+    income.
