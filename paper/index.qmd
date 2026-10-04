@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-08-16
+date: 2026-10-03
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -21,12 +21,14 @@ abstract: |
   intermediates, exactly — all 6,081 in-scope cases of the 6,194-case
   official universe (113 documented exclusions), six computation stages
   per case, zero dollar tolerance — a process that surfaced and fixed two
-  defects in the encodings and surfaced errata in the federal technical
-  documentation. Replaying reconstructed pre-edit case facts through the
-  verified engine explains 78.4% of Colorado's above-threshold official
-  error cases — and 91.4% of sub-threshold deviations — as correct
-  arithmetic on wrong facts. Pricing that decomposition through the
-  formula's tiers, elections, and delay clause — removing the error
+  defects in the encodings. For 283 of Colorado's 305 error cases, a
+  public solver moves the input named by each case's first finding, where
+  it can, until its recomputed benefit reaches the issued amount; run on
+  those inputs, the verified engine reproduces the issued benefit within
+  $5 for 78.4% of the above-threshold official error cases and 91.4% of
+  the sub-threshold deviations, which is consistent with correct
+  arithmetic on a wrong input. Pricing a cause-code decomposition through
+  the formula's tiers, elections, and delay clause — removing the error
   dollars the file's cause codes assign to the computing apparatus, an
   accounting scenario rather than a causal estimate — moves summed
   expected fiscal 2028 bills from $7.7B to $7.6B a year under a strict
@@ -104,18 +106,19 @@ encoded as executable rule modules — against the QC file's recorded
 benefit computations in seven states, holding the bar at exact
 reproduction: zero dollar tolerance across six computation stages per
 case (@sec-oracle). The target's precise character matters and is stated
-in @sec-oracle-scope: the file's benefit chain is the FNS QC Minimodel's
-computation on edited, internally consistent case records, so parity
-certifies agreement with the agency's own computational canon, not
-independent adjudication. Reaching it surfaced defects on three sides:
-two in the encodings under test, errata in the federal technical
-documentation, and a residue attributable to state issuance systems.
+in @sec-oracle-scope: the file's benefit chain is a computation Mathematica
+runs for USDA on edited case records with the benefit formula of the FNS
+QC Minimodel, so parity certifies agreement with the benefit computation
+recorded in the file; it does not adjudicate case outcomes. Reaching it surfaced defects on two
+sides: two in the encodings under test, and a residue attributable to
+state issuance systems.
 
 Second, as raw material for decomposing measured error. QC's own cause
-coding, a finding-nature classification, and a replay of reconstructed
-pre-edit case facts through the verified engine give three nested
-estimates of how much of the error rate reflects computation failure
-versus wrong facts correctly processed (@sec-decompose).
+coding and a finding-nature classification give two nested estimates of
+how much of the error rate reflects computation failure versus wrong
+facts correctly processed, and a replay of reconstructed case inputs
+through the verified engine tests whether one wrong input reproduces
+each issued benefit (@sec-decompose).
 
 Third, as training and validation data for a case-level model of the
 error process (@sec-model) and the basis for a distributional simulator
@@ -213,7 +216,7 @@ residents.
 | `RAWBEN` | the allotment the state actually issued |
 | `BENFIX` | the allotment corrected for the reviewer's findings |
 | `AMTERR` | the recorded error amount |
-| `FSBEN` | the formula benefit recomputed by the FNS QC Minimodel from the case's edited inputs |
+| `FSBEN` | the formula benefit Mathematica computes for USDA from the case's edited inputs with the FNS QC Minimodel's benefit formula |
 | `STATUS` | the review disposition (correct, overpayment, underpayment) |
 | `ELEMENT1-9`, `E_FINDG1-9`, `AMOUNT1-9` | up to nine coded error findings: the element in error, the nature of the finding, and its dollar amount |
 | `HWGT` | the case weight |
@@ -296,7 +299,8 @@ testing an independent encoding of the French tax code against the tax
 authority's own published test cases [@merigoux2021compiler].
 Administrative QC data extends that strategy to a benefits program at
 case level: tens of thousands of real cases per year, each carrying
-inputs and the agency's own computed outputs.
+edited inputs and the benefit chain Mathematica computes for USDA from
+the edited record.
 
 I tested encodings of federal SNAP law and seven states' policy manuals
 (Arizona, California, Colorado, Georgia, Maryland, New York, Texas),
@@ -346,27 +350,39 @@ Exactness claims invite overreading, so the scope deserves a precise
 statement — more precise than an earlier draft of this paper gave it.
 
 The compared benefit chain is the one recorded in the edited public-use
-file, whose benefit variable (`FSBEN`) is computed by the FNS QC
-Minimodel — the agency's own benefit-calculation software — and whose
-editing process reconciles case records until internal identities hold,
-adjusting deduction fields in a documented sequence until the calculated
-benefit matches the raw benefit within $5 [@fns2024techdoc]. The
-comparison also supplies several intermediates directly from the file
-rather than deriving them from raw facts: the QC-calculated medical and
+file. Its benefit variable (`FSBEN`) is a constructed variable:
+Mathematica, which edits the file for USDA under contract, computes it
+from each edited case record with the benefit formula of the QC
+Minimodel, one of FNS's SNAP microsimulation models; the file's other
+chain values (gross income, the standard and excess shelter deductions,
+net income, maximum allotment) are constructed variables too
+[@fns2024techdoc]. Where the calculated benefit is more than $5 from the
+issued benefit adjusted for the reviewer's error amount (Step 13a lists
+the exact match conditions), the editing tries a documented sequence of
+changes (setting the dependent care deduction to dependent care costs,
+setting the utility amount in the excess shelter deduction to a standard
+allowance or zero, and zeroing the medical deduction of standard medical
+deduction demonstration participants) and keeps a change only if it
+produces a match [@fns2024techdoc, chap. III, Steps 12–13]. The
+sequence does not always close the gap: in Colorado, `FSBEN` ends within
+$5 of `BENFIX` in 797 of 856 cases. The comparison also supplies several
+intermediates directly from the file rather than deriving them from raw
+facts: the QC-calculated medical and
 child-support deduction amounts, the recorded utility allowance, and the
 recorded categorical-eligibility status; eligibility screens receive
 passing defaults, since every filed case was enrolled.
 
 Parity therefore certifies the following: that the encoded computation
 chain — income aggregation, deduction sequencing, net-income arithmetic,
-allotment lookup, rounding — agrees exactly with the agency's own
-computational canon, over the full diversity of 6,081 real case
+allotment lookup, rounding — agrees exactly with the benefit computation
+recorded in the edited file, over the full diversity of 6,081 real case
 configurations, parameter values, and boundary conditions. It is an
 agreement between two implementations of the same rules, closer in kind
 to the cross-model comparisons this method extends than to independent
 adjudication of case outcomes; what distinguishes it from ordinary
-cross-model comparison is the counterparty (the agency's own canon), the
-case realism, and the zero-tolerance bar. It does not certify independent
+cross-model comparison is the counterparty (a computation Mathematica
+runs for USDA on the edited case records), the case realism, and the
+zero-tolerance bar. It does not certify independent
 derivation of every state eligibility and deduction pathway from raw
 facts. Extending the harness to feed raw facts — recorded medical
 expenses rather than the computed deduction, energy-assistance facts
@@ -381,10 +397,9 @@ runs did not match, and each mismatch class was a finding about
 somebody's rules: two defects in the encodings under test (a regulatory
 dollar literal superseded by statute, and a missing whole-dollar rounding
 step — both fixed in the public repository, with the oracle as the
-detector), errata in the technical documentation's variable descriptions
-(reported upstream), and — once the encodings reproduced the file's
-chain exactly — a residue in *issued* amounts attributable to the
-issuing side, which @sec-decompose takes up. The corrections were global
+detector) and, once the encodings reproduced the file's chain exactly, a
+residue in *issued* amounts attributable to the issuing side, which
+@sec-decompose takes up. The corrections were global
 rule fixes, not case-specific accommodations; still, the exactness result
 is post-correction on the same case set, a reuse the certification
 protocol mitigates but does not eliminate. A confirmatory run on the
@@ -403,8 +418,8 @@ report.
 ## Decomposing measured error: computation versus facts {#sec-decompose}
 
 If a verified engine issued every benefit, how much measured error would
-disappear? The QC file supports three nested answers for Colorado fiscal
-2024, summarized in @tbl-decompose: 305 of 856 sampled cases carry
+disappear? The QC file supports three layers of evidence for Colorado
+fiscal 2024, summarized in @tbl-decompose: 305 of 856 sampled cases carry
 recorded payment deviations (`RAWBEN` ≠ `BENFIX`) — but only 110 of the
 305 are official errors above the $56 threshold; the other 195 are
 sub-threshold deviations the official rate excludes. Weighted, the 305
@@ -420,9 +435,9 @@ construction of the file, that ineligible-case error.
 |---|---|---|---|
 | 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change), any-presence across a case's nine cause slots, share of official error dollars (HWGT × `AMTERR`) | 7.4% strict ($6.9M/yr); 10.6% ($10.0M/yr) adding policy-misapplied, budgeted-wrong, computer-user | Colorado; nationally 3.5% strict ($232M/yr), 19.3% broad ($1.27B of $6.59B) |
 | 2. Finding natures | `NATURE` codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic `ELEMENT`; deduction-amount natures count only when the paired cause is in layer 1's broad computing-apparatus set | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7% |
-| 3. Engine replay | Reconstructed pre-edit facts replayed through the verified engine and compared to issued amounts | Above-threshold official errors: 21.6% of cases unexplained (upper bound), 78.4% explained as correct arithmetic on wrong facts. Sub-threshold deviations: 8.6% unexplained, 91.4% explained. Blended: 13.1% / 86.9% | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
+| 3. Engine replay | A public solver moves the input named by each case's first finding until its recomputed benefit reaches the issued amount; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; the non-reproduced cases mix solver limits, multi-element errors and computation findings | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
-: Three nested decompositions of Colorado fiscal 2024 measured error.
+: Three decompositions of Colorado fiscal 2024 measured error.
 Layers 1–2 quote the committed cause-share artifact
 (`analysis/cause_shares.json`, all 53 jurisdictions, conventions and
 code-to-class maps serialized in the file); layer 3 is a share of
@@ -438,36 +453,49 @@ judgment under handbook guidance [@fns310handbook] and carry
 cross-state coding variation; fiscal 2024 also brought minor revisions
 to the finding-code sets. {#tbl-decompose}
 
-The strictest layer reconstructs each error case's pre-edit original
-values using the public reconstruction solver of @giannella_snapqc —
-which exploits the file's disclosure-protection perturbation structure
-to recover original values — adapted to fiscal 2024, then replays those
-originals through the verified engine. Of 283 deviation cases surviving
-the solver's consistency filters (22 of 305 are excluded), 246 reproduce
-the issued amount at the file's own $5 editing tolerance: the agency's
-arithmetic was correct, applied to wrong facts. The rate differs by
-threshold status, and the distinction matters for how the headline reads:
-among the 97 above-threshold official error cases, 76 are explained
-(78.4%, binomial standard error about 4 points; the 21.6% residual is
-the computation-side upper bound for *official* errors), while among the
-186 sub-threshold deviations 170 are explained (91.4%). The solver and
-the engine partition the 283 cases identically — two implementations
-with distinct codebases and logic reaching the same classification,
-though both consume the same file, and 33 of the 246 explained cases
-have deviations of $5 or less, mechanically within the comparison
-tolerance. The residual class includes solver limitations as well as
-genuine multi-variable or computational discrepancies. The complete
-per-case replay output (283 rows), the layer-1 and layer-2
-classification outputs, and the reconstruction scripts are committed
-with this paper.
+The third layer adapts the public reconstruction solver of
+@giannella_snapqc to fiscal 2024 and replays its output through the
+verified engine. The solver starts from the file's edited inputs and
+moves only the input named by the case's first finding (`ELEMENT1`):
+earned or unearned income, rent, the utility allowance, or the medical,
+dependent care or child-support deduction in $3 steps, or household size
+by one person. It stops when its own recomputed benefit reaches or passes
+the issued benefit (`RAWBEN`), when the input hits zero or a cap, or
+after 1,000 steps; when the first finding names none of those inputs,
+nothing moves. Of 283 deviation cases surviving the solver's consistency
+filters (22 of 305 are excluded), 246 reproduce the issued amount within
+the file's $5 editing tolerance, which is consistent with correct
+arithmetic applied to wrong facts. In 230 of the 246 the solver moved an
+input; in the other 16 the issued benefit was already within $5 of
+`FSBEN`, so nothing moved and the match restates the parity result. The
+rate differs by threshold status: among the 97 above-threshold official
+error cases 76 reproduce (78.4%, binomial standard error about 4
+points), and among the 186 sub-threshold deviations 170 do (91.4%). The
+solver's own recomputation and the engine agree on the within-$5
+classification for all 283 cases, two implementations with distinct
+codebases reading the same file.
 
-The three layers agree on the structure: most measured SNAP payment
-error among eligible cases is information failure, not calculation
-failure — consistent with the administrative-burden literature's account
-of where compliance costs bind [@herd2018burden]. Correct-computation
-guarantees address the smaller share directly — roughly 3 to 10% of
-error dollars by layers 1–2, and bounded above by the replay's 21.6%
-case share among official errors — plus whatever share of information
+Neither outcome identifies a computation error. A reproduced case shows
+that one value of the first-listed input, run through correct
+arithmetic, yields the issued benefit; it does not show which input the
+agency had wrong, and a moved input can absorb a computation error. A
+non-reproduced case can reflect the solver's limits: it tries one input
+in one direction, and in 17 of the 37 it moved nothing (14 cases whose
+first finding names an input it does not adjust, and 3 where it stopped
+before moving). Of the 26 cases that carry a layer-2 computational
+finding, 13 reproduce, 10 do not and 3 were not replayed. The complete
+per-case replay output (283 rows), the layer-1 and layer-2
+classification outputs, the reconstruction scripts and
+`audit_claims.py`, which regenerates the replay counts into
+`claims_audit.json`, are committed with this paper.
+
+Layers 1 and 2 agree on the structure, and the replay's reproduction
+rate fits it: most measured SNAP payment error among eligible cases is
+information failure, not calculation failure — consistent with the
+administrative-burden literature's account of where compliance costs
+bind [@herd2018burden]. Correct-computation guarantees address the
+smaller share directly — roughly 3 to 10% of error dollars by layers
+1–2 — plus whatever share of information
 failures better tooling
 prevents indirectly through verification prompts and
 documentation-requirement computation at intake; @sec-adoption prices
@@ -709,8 +737,9 @@ boundaries.
 ![Colorado's simulated measured-rate distribution (100,000 resampled
 QC-style measurements, official error definition, centered on the
 official 9.97% rate) against the cost-share tier bands. The state's
-official rate sits 0.03 points below the 15%-share boundary; 52% of
-simulated measurements fall below it and 48% above. Generated by the
+official fiscal 2024 rate sits 0.03 points below the 15%-share boundary,
+and its fiscal 2025 rate, 10.09%, sits above it; 52% of simulated
+measurements fall below the boundary and 48% above. Generated by the
 committed `paper/generate_figures.py` (seed 11).](figures/co_measured_rate.svg){#fig-co}
 
 The formula maps a point estimate to a tier with no
@@ -1020,7 +1049,7 @@ structural: the certified parity chain never consumes Colorado's
 standard-medical-deduction rule, because QC editing bakes the deduction
 into the stored expense fields and the federal computation path
 reproduces every case exactly without it — a sharper instance of the
-Minimodel-canon scope point of @sec-oracle-scope. (A separate
+edited-file scope point of @sec-oracle-scope. (A separate
 raw-facts leg, reconstructing inputs rather than supplying the file's
 intermediates, agrees on 845 of 856 cases, its eleven divergences
 diagnosed to missing public TANF facts and one utility-allowance tier
@@ -1071,10 +1100,11 @@ derivation from raw facts, and not the reviewer-adjudicated outcome
 fields (@sec-oracle-scope); it is also post-correction on the same case
 set, pending a fiscal 2025 confirmatory run. The public file excludes
 ineligible-case and full-overissuance error, truncating the error
-distribution every file-based estimate inherits. The replay
-decomposition depends on a reconstruction solver whose filters exclude
-22 of 305 error cases, and its residual class is an upper bound in case
-shares, not dollar shares. The error models predict an adjudicated,
+distribution every file-based estimate inherits. The replay depends on
+a reconstruction solver whose filters exclude 22 of 305 error cases and
+which moves one input per case; its shares are case shares, and neither
+its reproduced nor its non-reproduced class identifies computation
+errors. The error models predict an adjudicated,
 thresholded label — a property of the measurement system, with a
 documented manipulation history (@sec-qc). Cross-state model transport
 is imperfect: the model's raw level underpredicts high-error states,
@@ -1099,8 +1129,8 @@ burden policies on error.
 
 A measurement system designed for oversight now sets prices. That makes
 the QC files three things at once: a case-level verification oracle
-against the agency's own computational canon — where the bar can be
-exact, and holding it exact is what made the residuals informative; the
+against the benefit computation recorded in the file, where the bar can
+be exact and holding it exact is what made the residuals informative; the
 dataset showing that most measured error among eligible cases is
 information failure rather than calculation failure; and a sampling
 frame whose noise the new formula converts into near-even-odds tier
