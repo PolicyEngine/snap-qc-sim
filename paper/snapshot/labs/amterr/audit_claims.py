@@ -633,7 +633,8 @@ def classify_solver_moves(joined: pd.DataFrame) -> pd.DataFrame:
     out["income_lowered_rawben_at_maximum"] = notes.isin(
         INCOME_LOWERING_NOTES
     ) & rawben.eq(out["rawbenmax"].astype(float))
-    out["flat_stretch"] = flat_stretch(out, inputs, final)
+    stretch = flat_stretch(out, inputs, final)
+    out[list(stretch)] = stretch
     lowered_at_maximum = out["income_lowered_rawben_at_maximum"] & out["reproduced"]
     if not out.loc[lowered_at_maximum, "flat_stretch"].eq("maximum_allotment").all():
         raise AssertionError("an at-maximum income match is not on the cap")
@@ -642,46 +643,94 @@ def classify_solver_moves(joined: pd.DataFrame) -> pd.DataFrame:
 
 def flat_stretch(
     joined: pd.DataFrame, inputs: pd.DataFrame, final: pd.Series
-) -> pd.Series:
-    """Where a reproduced match sits on a flat stretch of the benefit formula.
+) -> pd.DataFrame:
+    """Where a reproduced match sits near a flat stretch of the benefit formula.
 
-    The moved input is pushed without limit in the solver's direction (to $0
-    when the solver lowered it, up by ``SOLVER_PUSH`` when it raised it). The
-    benefit is monotone in each input, so if the pushed benefit still lies
-    within $5 of RAWBEN, every amount between the solver's and the limit
-    reproduces RAWBEN too, and the match bounds the input on one side only.
-    The stretch is named by what makes the formula flat there: the maximum
-    allotment, the minimum benefit, or (for a raised rent or utility amount)
-    the shelter-deduction cap. A lowered input whose band merely reaches $0
-    is left unnamed. Household-size moves are not stepped and are left out.
+    All benefits here come from the solver's formula (``solver_terms``); the
+    engine was not run at the pushed points. The moved input is pushed in the
+    solver's direction: to $0 when the solver lowered it, up by
+    ``SOLVER_PUSH`` when it raised it. The benefit is monotone in each input,
+    so if the pushed benefit still lies within $5 of RAWBEN, every amount
+    between the solver's and the pushed one does too. Where the formula is
+    already flat at the pushed amount (the benefit at the maximum allotment
+    or the minimum benefit, or the shelter deduction at its cap), every
+    amount beyond it gives the same benefit, so the match bounds the input on
+    one side at most. The stretch is named by what makes the formula flat:
+    ``maximum_allotment``, ``minimum_benefit`` or, for a raised rent or
+    utility amount, ``shelter_cap``.
+
+    Columns returned:
+
+    * ``flat_stretch``: that name, or None;
+    * ``opposite_push_holds``: for a named row, pushing the other way (up by
+      ``SOLVER_PUSH`` or to $0) also stays within $5 of RAWBEN, so the match
+      bounds the input on neither side;
+    * ``unnamed_push_holds``: the push stays within $5 but no flat stretch is
+      reached: ``input_already_zero`` (a lowered input the steps took to $0)
+      or ``band_reaches_zero`` (a lowered input whose band of matching
+      amounts runs down to $0);
+    * ``shelter_cap_gap``: for a ``shelter_cap`` row, the cap less the
+      shelter deduction at the solver's amount.
+
+    Household-size moves are not stepped and are left out.
     """
     notes = joined["correctednotes"]
     column = notes.str.split("_").str[0].map(SOLVER_NOTE_INPUTS)
     candidate = joined["reproduced"] & joined["solver_moved_input"] & column.notna()
-    pushed = inputs.copy()
+    pushed, opposite = inputs.copy(), inputs.copy()
     raised = pd.Series(False, index=joined.index)
+    at_zero = pd.Series(False, index=joined.index)
     for name in set(column.dropna()):
         rows = candidate & column.eq(name)
         start = joined[REPLAY_INPUTS[name]].fillna(0).astype(float)
         up = rows & (inputs[name] > start)
         raised |= up
-        pushed.loc[rows, name] = np.where(
-            up[rows], inputs.loc[rows, name] + SOLVER_PUSH, 0.0
-        )
-    terms = solver_terms(pushed)
+        at_zero |= rows & ~up & inputs[name].eq(0)
+        far = inputs.loc[rows, name] + SOLVER_PUSH
+        pushed.loc[rows, name] = np.where(up[rows], far, 0.0)
+        opposite.loc[rows, name] = np.where(up[rows], 0.0, far)
     rawben = joined["RAWBEN"].astype(float)
+    terms = solver_terms(pushed)
     holds = candidate & (rawben - terms["benefit"]).abs().le(REPLAY_TOLERANCE)
+    back = solver_terms(opposite)["benefit"]
     shelter_input = column.isin(["rawrent", "rawutil"])
-    named = np.select(
-        [
-            holds & terms["benefit"].eq(inputs["rawbenmax"]),
-            holds & terms["benefit"].eq(inputs["rawminimum_ben"]),
-            holds & raised & shelter_input & terms["shelter"].eq(inputs["shelter_cap"]),
-        ],
-        ["maximum_allotment", "minimum_benefit", "shelter_cap"],
-        default=None,
+    named = pd.Series(
+        np.select(
+            [
+                holds & terms["benefit"].eq(inputs["rawbenmax"]),
+                holds & terms["benefit"].eq(inputs["rawminimum_ben"]),
+                holds
+                & raised
+                & shelter_input
+                & terms["shelter"].eq(inputs["shelter_cap"]),
+            ],
+            ["maximum_allotment", "minimum_benefit", "shelter_cap"],
+            default=None,
+        ),
+        index=joined.index,
+        dtype=object,
     )
-    return pd.Series(named, index=joined.index, dtype=object)
+    unnamed = holds & named.isna()
+    shelter_at_solver = solver_terms(inputs)["shelter"]
+    return pd.DataFrame(
+        {
+            "flat_stretch": named,
+            "opposite_push_holds": named.notna()
+            & (rawben - back).abs().le(REPLAY_TOLERANCE),
+            "unnamed_push_holds": pd.Series(
+                np.select(
+                    [unnamed & at_zero, unnamed & ~at_zero],
+                    ["input_already_zero", "band_reaches_zero"],
+                    default=None,
+                ),
+                index=joined.index,
+                dtype=object,
+            ),
+            "shelter_cap_gap": (inputs["shelter_cap"] - shelter_at_solver).where(
+                named.eq("shelter_cap")
+            ),
+        }
+    )
 
 
 def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
@@ -719,10 +768,15 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
     at_cap = stretch.eq("maximum_allotment")
     rawben = joined["RAWBEN"].astype(float)
     moved = joined["solver_moved_input"]
+    from_fsben = (rawben - joined["FSBEN"].astype(float)).abs()
     farther = moved & (
-        (rawben - joined["rawben_recreated"].astype(float)).abs()
-        > (rawben - joined["FSBEN"].astype(float)).abs()
+        (rawben - joined["rawben_recreated"].astype(float)).abs() > from_fsben
     )
+    engine_farther = moved & (
+        (rawben - joined["engine_on_original"].astype(float)).abs() > from_fsben
+    )
+    if not farther.equals(engine_farther):
+        raise AssertionError("solver and engine disagree on moves away from RAWBEN")
     final_change = joined["rawutil"].astype(float) - joined["UTIL"].astype(float)
 
     return {
@@ -775,6 +829,21 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
                 for note, count in sorted(notes[at_cap].value_counts().items())
             },
             "maximum_allotment_at_max_flag_n": int((at_cap & flagged).sum()),
+            "bounded_on_neither_side_keys": sorted(
+                keys[weak & joined["opposite_push_holds"]]
+            ),
+            "minimum_benefit_rawben_values": sorted(
+                {float(v) for v in rawben[stretch.eq("minimum_benefit")]}
+            ),
+            "shelter_cap_largest_gap_dollars": float(
+                joined["shelter_cap_gap"].max(skipna=True)
+            )
+            if joined["shelter_cap_gap"].notna().any()
+            else None,
+            "unnamed_push_holds_keys": {
+                reason: sorted(keys[joined["unnamed_push_holds"].eq(reason)])
+                for reason in ("input_already_zero", "band_reaches_zero")
+            },
             "keys": {
                 name: sorted(keys[stretch.eq(name)])
                 for name in sorted(set(stretch.dropna()))

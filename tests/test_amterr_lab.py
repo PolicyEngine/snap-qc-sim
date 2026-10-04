@@ -291,6 +291,23 @@ def test_solver_outcome_counts_are_consistent():
         == (flagged["n"])
     )
     assert set(flagged["outside_weakly_identified_keys"]).isdisjoint(weak_keys)
+    # "one household-size match and one match where nothing moved"
+    replay = audit.load_replay().set_index("key")
+    outside = flagged["outside_weakly_identified_keys"]
+    unchanged = set(CASES["replay_inputs_unchanged_keys"])
+    kinds = sorted(
+        "unmoved" if key in unchanged else replay.loc[key, "correctednotes"][:6]
+        for key in outside
+    )
+    assert kinds == ["hhsize", "unmoved"]
+    # Bounded on neither side, and pushes that hold without a flat stretch.
+    assert set(weak["bounded_on_neither_side_keys"]) <= weak_keys
+    for key in weak["bounded_on_neither_side_keys"]:
+        assert replay.loc[key, "correctednotes"] in audit.UTILITY_RESET_NOTES
+    unnamed = set().union(*map(set, weak["unnamed_push_holds_keys"].values()))
+    assert unnamed.isdisjoint(weak_keys) and unnamed.isdisjoint(missed)
+    assert len(weak["minimum_benefit_rawben_values"]) == 1
+    assert 0 < weak["shelter_cap_largest_gap_dollars"] <= audit.SHELTER_CAP_FY2024
 
     farther = set(outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"])
     assert set(household["away_from_rawben_keys"]) <= farther <= missed
@@ -335,6 +352,9 @@ def test_analysis_quotes_the_audit():
     cap_other = stretches["maximum_allotment"] - at_maximum["reproduced_n"]
     assert cap_rent + cap_util + cap_med == cap_other
     flagged = outcomes["reproduced_at_max_flag"]
+    neither = weak["bounded_on_neither_side_keys"]
+    unnamed = weak["unnamed_push_holds_keys"]
+    (minimum,) = weak["minimum_benefit_rawben_values"]
     farther = outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"]
     reset_away = sorted(set(farther) - set(household["away_from_rawben_keys"]))
     computational_reset_off = sorted(
@@ -371,10 +391,15 @@ def test_analysis_quotes_the_audit():
         ),
         (
             f"{weak['n']} of the {counts['reproduced_solver_moved_input_n']} are "
-            "weakly identified: the issued benefit sits on a flat stretch of the "
-            "benefit formula in the moved input, so the match bounds that input on "
-            f"one side only. {weak['above_threshold_n']} of the {weak['n']} are above "
-            f"the ${audit.THRESHOLD_FY2024} threshold."
+            "weakly identified. In each, the issued benefit lies within $5 of a "
+            "stretch where the solver's benefit formula is flat in the moved input: "
+            "the maximum allotment, the minimum benefit, or the benefit past the "
+            "shelter-deduction cap. By the solver's formula, every amount of the "
+            "input on that stretch reproduces the issued benefit, so the match "
+            f"bounds the input on one side at most. {len(neither)} of the "
+            f"{weak['n']}, {_keys(neither)}, reproduce at every utility amount and "
+            f"bound it on neither side. {weak['above_threshold_n']} of the "
+            f"{weak['n']} are above the ${audit.THRESHOLD_FY2024} threshold."
         ),
         (
             f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
@@ -384,18 +409,28 @@ def test_analysis_quotes_the_audit():
         (
             "The steps, which cannot pass RAWBEN, ran that income down to $0 in "
             f"{at_maximum['reproduced_ended_at_zero_income_n']} and to the "
-            f"1,000-step limit in {at_maximum['reproduced_ended_at_step_limit_n']}. "
+            f"{audit.SOLVER_MAX_STEPS:,}-step limit in "
+            f"{at_maximum['reproduced_ended_at_step_limit_n']}. "
             f"In the other {cap_other} the solver moved rent ({cap_rent}), the "
             f"utility allowance ({cap_util}) or the medical deduction ({cap_med}), "
-            "and every further amount in the same direction also reproduces RAWBEN."
+            "and every further amount in the same direction keeps the benefit within "
+            f"${audit.REPLAY_TOLERANCE} of RAWBEN."
         ),
         (
-            f"{stretches['minimum_benefit']} are at the $23 minimum benefit of a "
-            "one- or two-person unit."
+            f"{stretches['minimum_benefit']} are at the ${minimum:.0f} minimum benefit "
+            "of a one- or two-person unit."
         ),
         (
-            f"{stretches['shelter_cap']} are rent increases that reach the "
-            "shelter-deduction cap"
+            f"{stretches['shelter_cap']} are rent increases that stop within "
+            f"${weak['shelter_cap_largest_gap_dollars']:.0f} of the shelter-deduction "
+            "cap. Past the cap, rent no longer changes the benefit, which stays "
+            f"within ${audit.REPLAY_TOLERANCE} of RAWBEN."
+        ),
+        (
+            f"Not counted: {sum(len(v) for v in unnamed.values())} matches whose "
+            "lowered input reaches no flat stretch, because the steps took it to $0 "
+            f"({len(unnamed['input_already_zero'])}) or its band of matching amounts "
+            f"runs down to $0 ({len(unnamed['band_reaches_zero'])})."
         ),
         (
             f"It is set for {flagged['n']} of the {counts['reproduced_n']} matches: "
@@ -421,7 +456,7 @@ def test_analysis_quotes_the_audit():
             f"{outcomes['household_size_correctedamount_zero_n']}, and it is recorded "
             "before the utility reset, so it differs from the final change in all "
             f"{utility['correctedamount_differs_from_final_change_n']} utility rows "
-            "and is 0 in two of them, "
+            f"and is 0 in {len(CASES['moved_with_zero_correctedamount_keys'])} of them, "
             f"{_keys(CASES['moved_with_zero_correctedamount_keys'])}, which only the "
             "reset moved."
         ),
