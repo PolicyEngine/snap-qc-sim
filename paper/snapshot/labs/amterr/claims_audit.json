@@ -41,6 +41,9 @@
   "code_class": "a case counts if any of AGENCY1-AGENCY9 is in the class (classes overlap)",
   "reproduced": "abs(engine_on_original - RAWBEN) <= 5",
   "solver_moved_input": "any replayed input (rawusize, rawearn, rawunearn, rawrent, rawutil, rawmedded, rawdepded, rawcsded) differs from its file field (FSUSIZE, FSEARN, FSUNEARN, RENT, UTIL, FSMEDDED, FSDEPDED, FSCSDED; missing -> 0)",
+  "benefit_after_steps": "the solver's benefit formula (calculate_raw_benefits, ported as solver_benefit and checked against rawben_recreated for every row) on the inputs its $3 steps reached; for util_up and util_down rows the utility amount is UTIL + correctedamount, before the reset to a commonly reported amount",
+  "moved_miss_kind": "for a moved input that does not reproduce: household_size; reset_off_after_step_match (benefit_after_steps within $3 of RAWBEN); otherwise steps_stopped_short",
+  "income_lowered_rawben_at_maximum": "correctednotes in ['earn_down', 'earn_error', 'unearn_down', 'unearn_error'] and RAWBEN equal to the solver's maximum allotment (rawbenmax)",
   "computation_candidate": "not reproduced, and a finding carrying a code in [10, 17, 19, 20, 21, 22] is computational under the layer-2 rule",
   "points_of_official_fy2024_rate": "share of file error dollars x 9.97; an approximation, since the official rate is regression-adjusted and counts only errors above the $56 threshold"
  },
@@ -85,6 +88,234 @@
     "unearn_error": 1,
     "util_down": 2,
     "util_up": 5
+   }
+  },
+  "solver_outcomes": {
+   "solver_benefit_reproduces_rawben_recreated_n": 283,
+   "household_size": {
+    "n": 7,
+    "reproduced_n": 2,
+    "away_from_rawben_keys": [
+     "202310-40265",
+     "202402-40618"
+    ]
+   },
+   "moved_benefit_farther_from_rawben_than_fsben_keys": [
+    "202310-40265",
+    "202402-40618",
+    "202405-40908"
+   ],
+   "household_size_correctedamount_zero_n": 7,
+   "utility_reset": {
+    "n": 15,
+    "correctedamount_differs_from_final_change_n": 15,
+    "steps_within_3_of_rawben_n": 14,
+    "reproduced_n": 8,
+    "reset_off_after_step_match_keys": [
+     "202310-40297",
+     "202312-40456",
+     "202312-40513",
+     "202402-40603",
+     "202405-40908",
+     "202409-41321"
+    ]
+   },
+   "not_reproduced_solver_moved_input": {
+    "n": 20,
+    "steps_stopped_short_keys": [
+     "202310-40304",
+     "202311-40369",
+     "202401-40546",
+     "202401-40548",
+     "202405-40957",
+     "202406-41065",
+     "202408-41268",
+     "202409-41302",
+     "202409-41362"
+    ],
+    "reset_off_after_step_match_keys": [
+     "202310-40297",
+     "202312-40456",
+     "202312-40513",
+     "202402-40603",
+     "202405-40908",
+     "202409-41321"
+    ],
+    "household_size_keys": [
+     "202310-40265",
+     "202311-40407",
+     "202402-40618",
+     "202403-40738",
+     "202406-40998"
+    ]
+   },
+   "income_lowered_rawben_at_maximum": {
+    "n": 35,
+    "reproduced_n": 34,
+    "reproduced_above_threshold_n": 19,
+    "reproduced_ended_at_zero_income_n": 32,
+    "reproduced_ended_at_step_limit_n": 2,
+    "reproduced_at_max_flag_n": 34,
+    "reproduced_keys": [
+     "202310-40260",
+     "202310-40281",
+     "202310-40303",
+     "202311-40362",
+     "202311-40366",
+     "202311-40389",
+     "202312-40457",
+     "202312-40501",
+     "202312-40506",
+     "202312-40511",
+     "202401-40557",
+     "202401-40578",
+     "202401-40584",
+     "202401-40599",
+     "202402-40672",
+     "202403-40712",
+     "202403-40744",
+     "202404-40805",
+     "202404-40869",
+     "202405-40879",
+     "202405-40919",
+     "202405-40947",
+     "202405-40960",
+     "202406-41001",
+     "202406-41032",
+     "202406-41053",
+     "202406-41059",
+     "202406-41071",
+     "202407-41150",
+     "202407-41165",
+     "202407-41175",
+     "202408-41240",
+     "202408-41282",
+     "202409-41365"
+    ]
+   },
+   "weakly_identified": {
+    "n": 60,
+    "above_threshold_n": 31,
+    "by_flat_stretch": {
+     "maximum_allotment": 53,
+     "minimum_benefit": 4,
+     "shelter_cap": 3
+    },
+    "maximum_allotment_by_correctednotes": {
+     "earn_down": 19,
+     "med_up": 1,
+     "rent_up": 15,
+     "unearn_down": 15,
+     "util_down": 1,
+     "util_up": 2
+    },
+    "maximum_allotment_at_max_flag_n": 52,
+    "bounded_on_neither_side_keys": [
+     "202403-40765",
+     "202404-40803"
+    ],
+    "minimum_benefit_rawben_values": [
+     23.0
+    ],
+    "shelter_cap_largest_gap_dollars": 14.0,
+    "unnamed_push_holds_keys": {
+     "input_already_zero": [
+      "202311-40394",
+      "202312-40465",
+      "202402-40675",
+      "202406-41017"
+     ],
+     "band_reaches_zero": [
+      "202310-40275",
+      "202405-40902",
+      "202406-41007"
+     ]
+    },
+    "keys": {
+     "maximum_allotment": [
+      "202310-40260",
+      "202310-40281",
+      "202310-40303",
+      "202311-40355",
+      "202311-40362",
+      "202311-40366",
+      "202311-40389",
+      "202312-40448",
+      "202312-40457",
+      "202312-40501",
+      "202312-40506",
+      "202312-40511",
+      "202401-40557",
+      "202401-40561",
+      "202401-40564",
+      "202401-40571",
+      "202401-40578",
+      "202401-40584",
+      "202401-40599",
+      "202402-40635",
+      "202402-40672",
+      "202403-40712",
+      "202403-40744",
+      "202403-40765",
+      "202404-40788",
+      "202404-40803",
+      "202404-40805",
+      "202404-40869",
+      "202405-40879",
+      "202405-40884",
+      "202405-40905",
+      "202405-40919",
+      "202405-40947",
+      "202405-40950",
+      "202405-40960",
+      "202406-41001",
+      "202406-41003",
+      "202406-41005",
+      "202406-41032",
+      "202406-41053",
+      "202406-41059",
+      "202406-41071",
+      "202406-41073",
+      "202407-41112",
+      "202407-41150",
+      "202407-41165",
+      "202407-41175",
+      "202407-41181",
+      "202408-41198",
+      "202408-41240",
+      "202408-41282",
+      "202409-41365",
+      "202409-41373"
+     ],
+     "minimum_benefit": [
+      "202310-40276",
+      "202403-40717",
+      "202403-40756",
+      "202408-41258"
+     ],
+     "shelter_cap": [
+      "202402-40643",
+      "202403-40772",
+      "202404-40790"
+     ]
+    }
+   },
+   "reproduced_at_max_flag": {
+    "n": 54,
+    "outside_weakly_identified_keys": [
+     "202311-40381",
+     "202407-41141"
+    ],
+    "by_correctednotes": {
+     "earn_down": 19,
+     "hhsize_up": 1,
+     "med_up": 1,
+     "rent_down": 1,
+     "rent_up": 14,
+     "unearn_down": 15,
+     "util_down": 1,
+     "util_up": 2
+    }
    }
   },
   "replay_inputs_unchanged_keys": [
@@ -163,6 +394,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 520,
      "findings": [
       [
@@ -190,6 +422,7 @@
      "reproduced": false,
      "correctednotes": "util_up",
      "solver_moved_input": true,
+     "moved_miss_kind": "reset_off_after_step_match",
      "solver_element": 364,
      "findings": [
       [
@@ -227,6 +460,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 520,
      "findings": [
       [
@@ -254,6 +488,7 @@
      "reproduced": false,
      "correctednotes": "util_up",
      "solver_moved_input": true,
+     "moved_miss_kind": "reset_off_after_step_match",
      "solver_element": 364,
      "findings": [
       [
@@ -291,6 +526,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 520,
      "findings": [
       [
@@ -318,6 +554,7 @@
      "reproduced": false,
      "correctednotes": "rent_down",
      "solver_moved_input": true,
+     "moved_miss_kind": "steps_stopped_short",
      "solver_element": 363,
      "findings": [
       [
@@ -355,6 +592,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 362,
      "findings": [
       [
@@ -382,6 +620,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 161,
      "findings": [
       [
@@ -414,6 +653,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 520,
      "findings": [
       [
@@ -446,6 +686,7 @@
      "reproduced": false,
      "correctednotes": "no_change",
      "solver_moved_input": false,
+     "moved_miss_kind": null,
      "solver_element": 520,
      "findings": [
       [
@@ -925,6 +1166,7 @@
     "reproduced": false,
     "correctednotes": "hhsize_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "household_size",
     "solver_element": 150,
     "findings": [
      [
@@ -951,6 +1193,7 @@
     "reproduced": false,
     "correctednotes": "util_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -972,6 +1215,7 @@
     "reproduced": false,
     "correctednotes": "earn_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 311,
     "findings": [
      [
@@ -993,6 +1237,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1020,6 +1265,7 @@
     "reproduced": false,
     "correctednotes": "earn_error",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 312,
     "findings": [
      [
@@ -1056,6 +1302,7 @@
     "reproduced": false,
     "correctednotes": "hhsize_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "household_size",
     "solver_element": 150,
     "findings": [
      [
@@ -1092,6 +1339,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1113,6 +1361,7 @@
     "reproduced": false,
     "correctednotes": "util_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -1150,6 +1399,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1177,6 +1427,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 362,
     "findings": [
      [
@@ -1198,6 +1449,7 @@
     "reproduced": false,
     "correctednotes": "util_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -1235,6 +1487,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1262,6 +1515,7 @@
     "reproduced": false,
     "correctednotes": "util_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 364,
     "findings": [
      [
@@ -1283,6 +1537,7 @@
     "reproduced": false,
     "correctednotes": "rent_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 363,
     "findings": [
      [
@@ -1320,6 +1575,7 @@
     "reproduced": false,
     "correctednotes": "rent_down",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 363,
     "findings": [
      [
@@ -1346,6 +1602,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1367,6 +1624,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 150,
     "findings": [
      [
@@ -1393,6 +1651,7 @@
     "reproduced": false,
     "correctednotes": "util_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -1414,6 +1673,7 @@
     "reproduced": false,
     "correctednotes": "hhsize_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "household_size",
     "solver_element": 150,
     "findings": [
      [
@@ -1435,6 +1695,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 362,
     "findings": [
      [
@@ -1456,6 +1717,7 @@
     "reproduced": false,
     "correctednotes": "hhsize_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "household_size",
     "solver_element": 150,
     "findings": [
      [
@@ -1487,6 +1749,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 362,
     "findings": [
      [
@@ -1508,6 +1771,7 @@
     "reproduced": false,
     "correctednotes": "util_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -1529,6 +1793,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 362,
     "findings": [
      [
@@ -1556,6 +1821,7 @@
     "reproduced": false,
     "correctednotes": "unearn_error",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 350,
     "findings": [
      [
@@ -1582,6 +1848,7 @@
     "reproduced": false,
     "correctednotes": "earn_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 311,
     "findings": [
      [
@@ -1603,6 +1870,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 161,
     "findings": [
      [
@@ -1635,6 +1903,7 @@
     "reproduced": false,
     "correctednotes": "hhsize_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "household_size",
     "solver_element": 150,
     "findings": [
      [
@@ -1656,6 +1925,7 @@
     "reproduced": false,
     "correctednotes": "earn_error",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 312,
     "findings": [
      [
@@ -1682,6 +1952,7 @@
     "reproduced": false,
     "correctednotes": "rent_error",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 363,
     "findings": [
      [
@@ -1708,6 +1979,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 150,
     "findings": [
      [
@@ -1739,6 +2011,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1771,6 +2044,7 @@
     "reproduced": false,
     "correctednotes": "rent_error",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 363,
     "findings": [
      [
@@ -1797,6 +2071,7 @@
     "reproduced": false,
     "correctednotes": "no_change",
     "solver_moved_input": false,
+    "moved_miss_kind": null,
     "solver_element": 520,
     "findings": [
      [
@@ -1824,6 +2099,7 @@
     "reproduced": false,
     "correctednotes": "earn_error",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 314,
     "findings": [
      [
@@ -1850,6 +2126,7 @@
     "reproduced": false,
     "correctednotes": "util_up",
     "solver_moved_input": true,
+    "moved_miss_kind": "reset_off_after_step_match",
     "solver_element": 364,
     "findings": [
      [
@@ -1876,6 +2153,7 @@
     "reproduced": false,
     "correctednotes": "earn_down",
     "solver_moved_input": true,
+    "moved_miss_kind": "steps_stopped_short",
     "solver_element": 311,
     "findings": [
      [
@@ -1898,6 +2176,34 @@
     "broad_coded_finding_is_computational": false
    }
   ],
+  "utility_reset_rule": {
+   "candidate_pool_n": 803,
+   "candidates_by_calendar_year": {
+    "2023": [
+     0.0,
+     91.0,
+     560.0
+    ],
+    "2024": [
+     0.0,
+     91.0,
+     356.0,
+     560.0
+    ]
+   },
+   "rows_n": 15,
+   "rule_reproduces_final_amount_n": 15,
+   "nearest_to_file_util_reproduces_final_amount_n": 8,
+   "nearest_to_file_util_misses_keys": [
+    "202310-40297",
+    "202402-40603",
+    "202403-40709",
+    "202403-40716",
+    "202407-41181",
+    "202409-41321",
+    "202409-41353"
+   ]
+  },
   "layer2_computational_findings": {
    "cases": 26,
    "findings": 29,
