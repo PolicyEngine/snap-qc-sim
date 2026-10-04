@@ -311,17 +311,8 @@ def test_replay_within5_flag_is_the_documented_test():
     ).hexdigest()
 
 
-@pytest.mark.parametrize(
-    ("engine", "rawben", "within5"),
-    [
-        (300.0, 200.0, True),  # a $100 gap flagged as reproduced
-        (203.0, 200.0, False),  # a $3 gap flagged as not reproduced
-        (None, 200.0, True),  # no engine benefit flagged as reproduced
-    ],
-)
-def test_generator_rejects_a_flag_that_contradicts_the_test(
-    tmp_path, monkeypatch, engine, rawben, within5
-):
+def _one_row_replay(tmp_path, monkeypatch, engine, rawben, within5):
+    """Point the generator at a one-row replay; return the matching universe."""
     replay_path = tmp_path / "amterr_replay_results.json"
     replay_path.write_text(
         json.dumps(
@@ -340,7 +331,7 @@ def test_generator_rejects_a_flag_that_contradicts_the_test(
         encoding="utf-8",
     )
     monkeypatch.setattr(cause_shares, "REPLAY_PATH", replay_path)
-    universe = pd.DataFrame(
+    return pd.DataFrame(
         {
             "state": ["CO"],
             "source_row_index": [7],
@@ -350,7 +341,46 @@ def test_generator_rejects_a_flag_that_contradicts_the_test(
         }
     )
 
+
+@pytest.mark.parametrize(
+    ("engine", "rawben", "within5"),
+    [
+        (300.0, 200.0, True),  # a $100 gap flagged as reproduced
+        (203.0, 200.0, False),  # a $3 gap flagged as not reproduced
+        (None, 200.0, True),  # no engine benefit flagged as reproduced
+    ],
+)
+def test_generator_rejects_a_flag_that_contradicts_the_test(
+    tmp_path, monkeypatch, engine, rawben, within5
+):
+    universe = _one_row_replay(tmp_path, monkeypatch, engine, rawben, within5)
+
     with pytest.raises(ValueError, match="within5 does not match"):
+        cause_shares.colorado_replay_reconciliation(universe)
+
+
+class _PastTheGuard(Exception):
+    """Raised by the first call after the within5 guard."""
+
+
+@pytest.mark.parametrize(
+    ("engine", "rawben", "within5"),
+    [
+        (205.0, 200.0, True),  # a gap of exactly $5 is reproduced
+        (194.0, 200.0, False),  # a $6 gap is not
+        (None, 200.0, False),  # no engine benefit is not reproduced
+    ],
+)
+def test_generator_accepts_a_flag_that_matches_the_test(
+    tmp_path, monkeypatch, engine, rawben, within5
+):
+    universe = _one_row_replay(tmp_path, monkeypatch, engine, rawben, within5)
+
+    def stop(*args, **kwargs):
+        raise _PastTheGuard
+
+    monkeypatch.setattr(cause_shares.error_model, "official_error_label", stop)
+    with pytest.raises(_PastTheGuard):
         cause_shares.colorado_replay_reconciliation(universe)
 
 
