@@ -72,15 +72,26 @@ RETIRED = (
 )
 
 
-def _normalize(text: str, *, is_html: bool = False) -> str:
-    """Collapse whitespace and typographic apostrophes; for HTML, drop tags."""
+def _normalize(text: str, *, is_html: bool = False, is_js: bool = False) -> str:
+    """Collapse whitespace and typographic apostrophes.
+
+    For HTML, drop tags. For JavaScript, rejoin string and template-literal
+    concatenations broken across source lines, so a phrase split over two
+    lines still reads as one.
+    """
     if is_html:
         text = html.unescape(re.sub(r"<[^>]+>", " ", text))
+    if is_js:
+        text = re.sub(r"[`\"']\s*\+\s*[`\"']", "", text)
     return " ".join(text.replace("’", "'").split())
 
 
 def _read(path: Path) -> str:
-    return _normalize(path.read_text(encoding="utf-8"), is_html=path.suffix == ".html")
+    return _normalize(
+        path.read_text(encoding="utf-8"),
+        is_html=path.suffix == ".html",
+        is_js=path.suffix == ".js",
+    )
 
 
 def _percent(numerator: int, denominator: int) -> str:
@@ -112,6 +123,18 @@ def test_retired_wording_is_gone_from_the_pdf():
     text = _normalize(re.sub(r"-\n", "-", text)).lower()
     found = [phrase for phrase in RETIRED if phrase in text]
     assert not found, f"index.pdf still carries {found}"
+
+
+def test_js_scan_sees_phrases_split_across_concatenated_lines():
+    """The retired app.js sentence was split over a template-literal join."""
+    retired_js = (
+        "`the allotment corrected for the reviewer's findings (BENFIX), and the "
+        "Minimodel's full-formula ` +\n    `recomputation (FSBEN). |RAWBEN - "
+        "BENFIX| equals`"
+    )
+    text = _normalize(retired_js, is_js=True).lower()
+    assert "minimodel's full-formula recomputation" in text
+    assert "minimodel's full-formula recomputation" in RETIRED
 
 
 def test_facts_records_each_withdrawal():
@@ -202,8 +225,8 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         ),
         (
             f"In {c['moved']} of the {c['reproduced']} the solver moved an input; in "
-            f"the other {c['unmoved']} the issued benefit was already within $5 of "
-            "`FSBEN`, so nothing moved and the match restates the parity result."
+            f"the other {c['unmoved']} it took no step, and the issued benefit was "
+            "already within $5 of `FSBEN`, so the match restates the parity result."
         ),
         (
             f"among the {c['above_n']} above-threshold official error cases "

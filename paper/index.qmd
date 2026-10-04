@@ -23,7 +23,7 @@ abstract: |
   per case, zero dollar tolerance — a process that surfaced and fixed two
   defects in the encodings. For 283 of the 305 Colorado cases with a
   recorded payment deviation, a public solver moves the input named by each case's first finding, where
-  it can, until its recomputed benefit reaches the issued amount; run on
+  it can, toward the issued amount; run on
   those inputs, the verified engine reproduces the issued benefit within
   $5 for 78.4% of the above-threshold official error cases and 91.4% of
   the sub-threshold deviations, which is consistent with correct
@@ -393,7 +393,7 @@ engine can compute counterfactual intermediates under alternative policy
 target; they are the subject of @sec-decompose.
 
 Holding tolerance at zero is what made the exercise informative. Early
-runs did not match, and each mismatch class traced to a defect in the
+runs did not match; reaching parity surfaced two defects in the
 encodings under test (a regulatory dollar literal superseded by statute,
 and a missing whole-dollar rounding step — both fixed in the public
 repository, with the oracle as the detector). Once the encodings
@@ -435,7 +435,7 @@ construction of the file, that ineligible-case error.
 |---|---|---|---|
 | 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change), any-presence across a case's nine cause slots, share of official error dollars (HWGT × `AMTERR`) | 7.4% strict ($6.9M/yr); 10.6% ($10.0M/yr) adding policy-misapplied, budgeted-wrong, computer-user | Colorado; nationally 3.5% strict ($232M/yr), 19.3% broad ($1.27B of $6.59B) |
 | 2. Finding natures | `NATURE` codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic `ELEMENT`; deduction-amount natures count only when the paired cause is in layer 1's broad computing-apparatus set | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7% |
-| 3. Engine replay | A public solver moves the input named by each case's first finding until its recomputed benefit reaches the issued amount; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; of the 37 that do not, the solver moved nothing in 17 and 10 carry a computational finding (8 are both) | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
+| 3. Engine replay | A public solver moves the input named by each case's first finding toward the issued amount; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; of the 37 that do not, the solver moved nothing in 17 and 10 carry a computational finding (8 are both) | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
 : Three decompositions of Colorado fiscal 2024 measured error.
 Layers 1–2 quote the committed cause-share artifact
@@ -456,24 +456,20 @@ to the finding-code sets. {#tbl-decompose}
 The third layer adapts the public reconstruction solver of
 @giannella_snapqc to fiscal 2024 and replays its output through the
 verified engine. The solver starts from the file's edited inputs and
-moves only the input named by the case's first finding (`ELEMENT1`):
-earned or unearned income, rent, the utility allowance, or the medical,
-dependent care or child-support deduction in $3 steps, or household size
-by one person (element 150 with natures 7, 12, 14 or 16). It stops when
-its own recomputed benefit reaches or passes the issued benefit
-(`RAWBEN`), when the input hits zero or a cap, when the benefit reaches
-$0, or after 1,000 steps. Each case it labels as a utility error then has
-its utility amount set to the nearest value above (or below) the file's
-utility amount that more than five filtered cases in the same state and
-calendar year use, or to zero if none lies below; in 2 cases this moves
-an amount the steps left unchanged. When the first finding falls outside
-those element and nature codes, nothing moves. Of 283 deviation cases
-surviving the solver's consistency filters (22 of 305 are excluded), 246
-reproduce the issued amount within
-the file's $5 editing tolerance, which is consistent with correct
-arithmetic applied to a wrong input. In 230 of the 246 the solver moved an
-input; in the other 16 the issued benefit was already within $5 of
-`FSBEN`, so nothing moved and the match restates the parity result. The
+moves only the input named by the case's first finding (`ELEMENT1`).
+Household size moves once, by one person (element 150 with natures 7,
+12, 14 or 16). Earned or unearned income, rent, the utility allowance,
+and the medical, dependent care or child-support deduction move in $3
+steps toward the issued benefit (`RAWBEN`) until a stop rule binds, and
+a stepped utility amount is then reset to a commonly reported
+value.[^solver-rules] When the first finding falls outside those element
+and nature codes, nothing moves. Of 283 deviation cases surviving the
+solver's consistency filters (22 of 305 are excluded), 246 reproduce the
+issued amount within the file's $5 editing tolerance, which is
+consistent with correct arithmetic applied to a wrong input. In 230 of
+the 246 the solver moved an input; in the other 16 it took no step, and
+the issued benefit was already within $5 of `FSBEN`, so the match
+restates the parity result. The
 rate differs by threshold status: among the 97 above-threshold official
 error cases 76 reproduce (78.4%, binomial standard error about 4
 points), and among the 186 sub-threshold deviations 170 do (91.4%). The
@@ -494,6 +490,25 @@ per-case replay output (283 rows), the layer-1 and layer-2
 classification outputs, the reconstruction scripts and
 `audit_claims.py`, which regenerates the replay counts into
 `claims_audit.json`, are committed with this paper.
+
+[^solver-rules]: Income steps stop once the solver's recomputed benefit
+    passes `RAWBEN`; rent, utility and deduction steps also stop within
+    $3 of it. Steps that lower an input stop at zero; rent and utility
+    steps also stop when the shelter deduction reaches its cap (when
+    raising) or zero (when lowering); income-raising steps stop when the
+    uncapped benefit falls below zero; and every step stops when the
+    benefit reaches $0 or after 1,000 steps. Where `RAWBEN` is the
+    maximum allotment, which the benefit cannot pass, income steps
+    continue until the income reaches zero or the step limit. Each case
+    whose first finding is the utility allowance and whose `RAWBEN`
+    differs from `FSBEN` then has its utility amount reset among the
+    amounts that more than five filtered cases of any review status in
+    the same state and calendar year report: those above the file's
+    amount when `RAWBEN` exceeds `FSBEN`, those below it when `RAWBEN` is
+    lower. The solver takes the candidate nearest its stepped amount,
+    keeps the stepped amount if none lies above, and sets zero if none
+    lies below; in 2 cases this moves an amount the steps left unchanged
+    (`reconstruct_co_fy2024.R`).
 
 Layers 1 and 2 agree on the structure: most measured SNAP payment error among eligible cases is
 information failure, not calculation failure — consistent with the
