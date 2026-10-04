@@ -8,7 +8,10 @@ Inputs:
 
 Outputs ``claims_audit.json`` (this directory). The audit also regenerates
 ``native_decomposition.json`` and ``../phase_a_classification.json`` from the
-May 2026 posting and records whether they match the committed copies.
+May 2026 posting and records whether they match the committed copies. To check
+ANALYSIS.md's account of the solver, it ports the solver's benefit formula and
+utility reset from ``reconstruct_co_fy2024.R`` and fails unless the port
+reproduces every benefit the solver recorded.
 
 The two postings differ only in the weight columns (HWGT, FYWGT, HWGT_OLD,
 FYWGT_OLD); the audit re-verifies that, so every case-level result (which
@@ -140,6 +143,42 @@ SOLVER_ELEMENT_INPUTS = {
     366: "rawcsded",
     150: "rawusize",
 }
+# The solver's step size, step limit and within-$3 stop (income_shift,
+# max_iterations and diff_matches in reconstruct_co_fy2024.R).
+SOLVER_STEP = 3
+SOLVER_MAX_STEPS = 1000
+SOLVER_MATCH = 3
+# FY2024 excess shelter deduction cap (48 states and DC; snap_qc
+# additional_data/year_data.csv). The solver lifts it for units with an
+# elderly or disabled member (FSNELDER + FSNDIS > 0).
+SHELTER_CAP_FY2024 = 672
+# FY2024 maximum allotments by household size, 48 states and DC (snap_qc
+# additional_data/max_allotments.csv). The solver keeps only rows whose BENMAX
+# matches this table, which also bounds the utility reset's candidate pool.
+MAX_ALLOTMENT_FY2024 = {
+    **dict(enumerate((291, 535, 766, 973, 1155, 1386, 1532, 1751), start=1)),
+    **{size: 1751 + 219 * (size - 8) for size in range(9, 21)},
+}
+# The reset's candidates: amounts more than this many filtered cases report.
+UTILITY_CANDIDATE_MIN_CASES = 5
+UTILITY_RESET_NOTES = ("util_up", "util_down")
+# Labels adjust_income gives a moved income when RAWBEN exceeds the file-side
+# uncapped benefit, so its steps lower the income (_error: it reached zero).
+INCOME_LOWERING_NOTES = ("earn_down", "earn_error", "unearn_down", "unearn_error")
+# The solver's benefit inputs, as written to co_fy2024_reconstruction.csv.
+SOLVER_BENEFIT_INPUTS = (
+    "rawearn",
+    "rawunearn",
+    "rawrent",
+    "rawutil",
+    "rawmedded",
+    "rawdepded",
+    "rawcsded",
+    "rawstdded",
+    "rawhomeless_ded",
+    "rawbenmax",
+    "rawminimum_ben",
+)
 
 FINDING_COLUMNS = tuple(
     f"{root}{slot}"
@@ -155,6 +194,9 @@ QC_COLUMNS = (
     "RAWBEN",
     "FSBEN",
     "HWGT",
+    "BENMAX",
+    "FSNELDER",
+    "FSNDIS",
     *REPLAY_INPUTS.values(),
     *FINDING_COLUMNS,
 )
@@ -427,9 +469,17 @@ def load_replay() -> pd.DataFrame:
         case_key(y, h)
         for y, h in zip(reconstruction["YRMONTH"], reconstruction["HHLDNO"])
     ]
+    solver_columns = [c for c in SOLVER_BENEFIT_INPUTS if c not in REPLAY_INPUTS]
     keep = reconstruction[
-        ["key", "correctedamount", "ELEMENT1", *REPLAY_INPUTS]
-    ].rename(columns={"ELEMENT1": "solver_element"})
+        [
+            "key",
+            "correctedamount",
+            "ELEMENT1",
+            *REPLAY_INPUTS,
+            *solver_columns,
+            "at_max",
+        ]
+    ].rename(columns={"ELEMENT1": "solver_element", "at_max": "solver_at_max"})
     merged = replay.merge(keep, on="key", how="left", validate="1:1")
     if merged["correctedamount"].isna().any():
         raise AssertionError("replay rows missing from the reconstruction")
@@ -470,7 +520,229 @@ def join_replay(replay: pd.DataFrame, posting: pd.DataFrame) -> pd.DataFrame:
     joined["solver_moved_input"] = changed.any(axis=1)
     if (joined["solver_moved_input"] & joined["solver_no_change"]).any():
         raise AssertionError("a no_change row has a changed input")
-    return joined
+    return classify_solver_moves(joined)
+
+
+def solver_benefit(inputs: pd.DataFrame) -> pd.Series:
+    """The solver's benefit: calculate_raw_benefits in reconstruct_co_fy2024.R.
+
+    ``inputs`` carries ``SOLVER_BENEFIT_INPUTS`` and ``shelter_cap`` (infinite
+    for a unit with an elderly or disabled member). The operations and their
+    order follow the R function, so the floors land on the same doubles.
+    """
+    earn = inputs["rawearn"]
+    net_before_shelter = (earn + inputs["rawunearn"]) - (
+        earn * 0.2
+        + inputs["rawdepded"]
+        + inputs["rawmedded"]
+        + inputs["rawcsded"]
+        + inputs["rawstdded"]
+    )
+    half = np.maximum(net_before_shelter * 0.5, 0)
+    uncapped_shelter = np.floor((inputs["rawrent"] + inputs["rawutil"]) - half)
+    shelter = np.floor(
+        np.minimum(np.maximum(uncapped_shelter, 0), inputs["shelter_cap"])
+    )
+    net = np.floor(net_before_shelter - (shelter + inputs["rawhomeless_ded"]))
+    uncapped = np.floor(inputs["rawbenmax"] - 0.3 * net)
+    return np.minimum(
+        np.maximum(uncapped, inputs["rawminimum_ben"]), inputs["rawbenmax"]
+    )
+
+
+def classify_solver_moves(joined: pd.DataFrame) -> pd.DataFrame:
+    """Recompute what each move did, with the solver's own benefit formula.
+
+    * ``benefit_after_steps``: the benefit on the inputs the $3 steps reached,
+      before the utility reset (the stepped utility amount is the file's UTIL
+      plus ``correctedamount``, which the solver records before the reset).
+    * ``moved_miss_kind``, for a moved input that does not reproduce:
+      ``household_size`` (the one-person move), ``reset_off_after_step_match``
+      (the steps reached within $3 of RAWBEN and the reset moved the input off
+      that match) or ``steps_stopped_short`` (a stop rule ended the steps on
+      the starting side of RAWBEN, more than $3 from it).
+    """
+    out = joined.copy()
+    inputs = out[list(SOLVER_BENEFIT_INPUTS)].astype(float)
+    elderly_or_disabled = (out["FSNELDER"] + out["FSNDIS"]) > 0
+    inputs["shelter_cap"] = np.where(elderly_or_disabled, np.inf, SHELTER_CAP_FY2024)
+    final = solver_benefit(inputs)
+    if not final.eq(out["rawben_recreated"].astype(float)).all():
+        raise AssertionError("solver_benefit does not reproduce rawben_recreated")
+
+    notes = out["correctednotes"]
+    utility = notes.isin(UTILITY_RESET_NOTES)
+    stepped = inputs.assign(rawutil=out["UTIL"] + out["correctedamount"])
+    out["benefit_after_steps"] = final.where(~utility, solver_benefit(stepped))
+    rawben, fsben = out["RAWBEN"].astype(float), out["FSBEN"].astype(float)
+    steps_matched = (rawben - out["benefit_after_steps"]).abs() <= SOLVER_MATCH
+    household = notes.str.startswith("hhsize")
+    moved_miss = out["solver_moved_input"] & ~out["reproduced"]
+    kind = pd.Series(
+        np.select(
+            [
+                moved_miss & household,
+                moved_miss & ~household & steps_matched,
+                moved_miss & ~household & ~steps_matched,
+            ],
+            [
+                "household_size",
+                "reset_off_after_step_match",
+                "steps_stopped_short",
+            ],
+            default=None,
+        ),
+        index=out.index,
+        dtype=object,
+    )
+    if (kind.eq("reset_off_after_step_match") & ~utility).any():
+        raise AssertionError("a stepped non-utility miss ended within $3")
+    short = kind.eq("steps_stopped_short")
+    starting_side = np.sign(rawben - out["benefit_after_steps"]) == np.sign(
+        rawben - fsben
+    )
+    if not starting_side[short].all():
+        raise AssertionError("a miss counted as stopped short passed RAWBEN")
+    out["moved_miss_kind"] = kind
+    # The household-size move's direction comes from the nature code alone.
+    out["household_size_move_away_from_rawben"] = household & (
+        (final - fsben) * (rawben - fsben) < 0
+    )
+    out["income_lowered_rawben_at_maximum"] = notes.isin(
+        INCOME_LOWERING_NOTES
+    ) & rawben.eq(out["rawbenmax"].astype(float))
+    return out
+
+
+def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
+    """Counts behind ANALYSIS.md's account of what the solver's moves did."""
+    reproduced = joined["reproduced"]
+    keys = joined["key"]
+    notes = joined["correctednotes"]
+
+    household = notes.str.startswith("hhsize")
+    away = joined["household_size_move_away_from_rawben"]
+
+    utility = notes.isin(UTILITY_RESET_NOTES)
+    steps_matched = (
+        joined["RAWBEN"].astype(float) - joined["benefit_after_steps"]
+    ).abs() <= SOLVER_MATCH
+    reset_off = joined["moved_miss_kind"].eq("reset_off_after_step_match")
+
+    kinds = ("steps_stopped_short", "reset_off_after_step_match", "household_size")
+    moved_miss = joined["solver_moved_input"] & ~reproduced
+
+    at_maximum = joined["income_lowered_rawben_at_maximum"]
+    matched = at_maximum & reproduced
+    lowered = joined["rawearn"].where(notes.str.startswith("earn"), joined["rawunearn"])
+    at_zero = matched & lowered.eq(0)
+    at_limit = matched & ~at_zero
+    at_limit &= joined["correctedamount"].eq(-SOLVER_STEP * SOLVER_MAX_STEPS)
+    if (at_zero | at_limit).sum() != matched.sum():
+        raise AssertionError(
+            "an at-maximum income match ended before zero or the limit"
+        )
+    flagged = joined["solver_at_max"].astype(bool) & reproduced
+
+    return {
+        "solver_benefit_reproduces_rawben_recreated_n": len(joined),
+        "household_size": {
+            "n": int(household.sum()),
+            "reproduced_n": int((household & reproduced).sum()),
+            "away_from_rawben_keys": sorted(keys[away]),
+        },
+        "utility_reset": {
+            "n": int(utility.sum()),
+            "steps_within_3_of_rawben_n": int((utility & steps_matched).sum()),
+            "reproduced_n": int((utility & reproduced).sum()),
+            "reset_off_after_step_match_keys": sorted(keys[reset_off]),
+        },
+        "not_reproduced_solver_moved_input": {
+            "n": int(moved_miss.sum()),
+            **{
+                f"{kind}_keys": sorted(keys[joined["moved_miss_kind"].eq(kind)])
+                for kind in kinds
+            },
+        },
+        "income_lowered_rawben_at_maximum": {
+            "n": int(at_maximum.sum()),
+            "reproduced_n": int(matched.sum()),
+            "reproduced_above_threshold_n": int(
+                (matched & joined["AMTERR"].gt(THRESHOLD_FY2024)).sum()
+            ),
+            "reproduced_ended_at_zero_income_n": int(at_zero.sum()),
+            "reproduced_ended_at_step_limit_n": int(at_limit.sum()),
+            "reproduced_at_max_flag_n": int((matched & flagged).sum()),
+            "reproduced_keys": sorted(keys[matched]),
+        },
+        "reproduced_at_max_flag": {
+            "n": int(flagged.sum()),
+            "by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(notes[flagged].value_counts().items())
+            },
+        },
+    }
+
+
+def utility_reset_check(frame: pd.DataFrame, joined: pd.DataFrame) -> dict[str, Any]:
+    """Re-apply the utility reset that ANALYSIS.md describes.
+
+    The candidate pool follows reconstruct_co_fy2024.R: Colorado cases of any
+    review status that pass its consistency filters (|RAWBEN - FSBEN| within $5
+    of AMTERR, RENT and UTIL present, BENMAX equal to the FY2024 table value),
+    grouped by calendar year. A candidate is a UTIL amount that more than five
+    of them report. Each util_up (util_down) row takes the candidate above
+    (below) the file's UTIL nearest the amount its steps reached, keeps that
+    amount when none lies above, and gets 0 when none lies below; ties go to
+    the smaller amount, as R's which.min over the sorted counts does. The
+    rule the 2026-10-03 text gave instead, the candidate nearest the file's
+    UTIL, is scored alongside it.
+    """
+    pool = frame[frame["STATE"] == COLORADO_FIPS]
+    consistent = ((pool["RAWBEN"] - pool["FSBEN"]).abs() - pool["AMTERR"]).abs() <= 5
+    pool = pool[consistent & pool["RENT"].notna() & pool["UTIL"].notna()]
+    table = pool["FSUSIZE"].fillna(0).map(MAX_ALLOTMENT_FY2024)
+    pool = pool[pool["BENMAX"].eq(table)]
+    counts = pool.groupby([pool["YRMONTH"] // 100, "UTIL"]).size()
+    candidates: dict[int, list[float]] = {}
+    for (year, amount), n in counts.items():
+        if n > UTILITY_CANDIDATE_MIN_CASES:
+            candidates.setdefault(int(year), []).append(float(amount))
+
+    rows = joined[joined["correctednotes"].isin(UTILITY_RESET_NOTES)]
+    by_rule, by_file_util = [], []
+    for _, row in rows.iterrows():
+        pool_year = np.array(sorted(candidates.get(int(row["YRMONTH"]) // 100, [])))
+        raising = row["correctednotes"] == "util_up"
+        file_util = float(row["UTIL"])
+        side = (
+            pool_year[pool_year > file_util]
+            if raising
+            else pool_year[pool_year < file_util]
+        )
+        stepped = file_util + float(row["correctedamount"])
+        if len(side) == 0:
+            rule = file_rule = stepped if raising else 0.0
+        else:
+            rule = float(side[np.argmin(np.abs(side - stepped))])
+            file_rule = float(side.min() if raising else side.max())
+        final = float(row["rawutil"])
+        by_rule.append(rule == final)
+        by_file_util.append(file_rule == final)
+    keys = list(rows["key"])
+    return {
+        "candidate_pool_n": len(pool),
+        "candidates_by_calendar_year": {
+            str(year): amounts for year, amounts in sorted(candidates.items())
+        },
+        "rows_n": len(rows),
+        "rule_reproduces_final_amount_n": int(sum(by_rule)),
+        "nearest_to_file_util_reproduces_final_amount_n": int(sum(by_file_util)),
+        "nearest_to_file_util_misses_keys": sorted(
+            k for k, hit in zip(keys, by_file_util) if not hit
+        ),
+    }
 
 
 def case_findings(joined: pd.DataFrame, mask: pd.Series) -> list[dict[str, Any]]:
@@ -489,6 +761,7 @@ def case_findings(joined: pd.DataFrame, mask: pd.Series) -> list[dict[str, Any]]
                 "reproduced": bool(row["reproduced"]),
                 "correctednotes": row["correctednotes"],
                 "solver_moved_input": bool(row["solver_moved_input"]),
+                "moved_miss_kind": row["moved_miss_kind"],
                 "solver_element": int(row["solver_element"]),
                 "findings": [list(f) for f in found],
                 "broad_coded_findings": [list(f) for f in broad],
@@ -591,6 +864,7 @@ def case_level(joined: pd.DataFrame) -> dict[str, Any]:
     snapped &= ~joined["correctednotes"].str.startswith("hhsize")
     return {
         "replay": replay_partition(joined, joined["solver_moved_input"]),
+        "solver_outcomes": solver_outcomes(joined),
         "replay_inputs_unchanged_keys": unchanged,
         "moved_with_zero_correctedamount_keys": sorted(joined.loc[snapped, "key"]),
         "broad_coded_misses": {
@@ -878,6 +1152,17 @@ def weighted_results(frame: pd.DataFrame, replay: pd.DataFrame) -> dict[str, Any
 # artifact
 
 
+def posting_case_level(frame: pd.DataFrame, replay: pd.DataFrame) -> dict[str, Any]:
+    """Every case-level block; build() checks it is the same under each posting."""
+    joined = join_replay(replay, frame)
+    return {
+        **case_level(joined),
+        "utility_reset_rule": utility_reset_check(frame, joined),
+        "layer2_computational_findings": computational_findings(frame),
+        "reconstruction": reconstruction_rows(),
+    }
+
+
 def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
     postings = tuple(postings)
     frames = {label: load_posting(label) for label in postings}
@@ -913,6 +1198,22 @@ def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
                 + ", ".join(REPLAY_INPUTS.values())
                 + "; missing -> 0)"
             ),
+            "benefit_after_steps": (
+                "the solver's benefit formula (calculate_raw_benefits, ported as "
+                "solver_benefit and checked against rawben_recreated for every "
+                "row) on the inputs its $3 steps reached; for util_up and "
+                "util_down rows the utility amount is UTIL + correctedamount, "
+                "before the reset to a commonly reported amount"
+            ),
+            "moved_miss_kind": (
+                "for a moved input that does not reproduce: household_size; "
+                f"reset_off_after_step_match (benefit_after_steps within "
+                f"${SOLVER_MATCH} of RAWBEN); otherwise steps_stopped_short"
+            ),
+            "income_lowered_rawben_at_maximum": (
+                f"correctednotes in {list(INCOME_LOWERING_NOTES)} and RAWBEN "
+                "equal to the solver's maximum allotment (rawbenmax)"
+            ),
             "computation_candidate": (
                 "not reproduced, and a finding carrying a code in "
                 f"{sorted(BROAD_CODES)} is computational under the layer-2 rule"
@@ -931,11 +1232,7 @@ def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
                 phase_a_classification(legacy), PHASE_A_PATH
             ),
         },
-        "case_level": {
-            **case_level(join_replay(replay, legacy)),
-            "layer2_computational_findings": computational_findings(legacy),
-            "reconstruction": reconstruction_rows(),
-        },
+        "case_level": posting_case_level(legacy, replay),
         "by_posting": {
             label: weighted_results(frame, replay) for label, frame in frames.items()
         },
@@ -943,11 +1240,7 @@ def build(postings: Iterable[str] = tuple(POSTINGS)) -> dict[str, Any]:
     if {"may2026", "aug2026"} <= set(postings):
         artifact["posting_diff"] = posting_diff()
         for label in postings:
-            level = {
-                **case_level(join_replay(replay, frames[label])),
-                "layer2_computational_findings": computational_findings(frames[label]),
-                "reconstruction": artifact["case_level"]["reconstruction"],
-            }
+            level = posting_case_level(frames[label], replay)
             if level != artifact["case_level"]:
                 raise AssertionError(f"case-level results differ under {label}")
     return artifact
