@@ -40,6 +40,11 @@ REPLAY_PATH = (
     Path(__file__).parents[1]
     / "paper/snapshot/labs/amterr/amterr_replay_results.json"
 )
+# A replayed case is "reproduced" when abs(engine_on_original - RAWBEN) <= 5.
+REPLAY_OUTCOMES = ("reproduced", "not_reproduced")
+REPLAY_TOLERANCE_DOLLARS = 5
+# The lab's July 2026 ANALYSIS.md, before its 2026-10-03 revision.
+PROSE_CLAIM_COMMIT = "755a7f3179e964dccdf6dc2f7266e7c4758a0141"
 
 SLOTS = tuple(error_model.FINDING_SLOTS)
 DETAIL_ROOTS = (
@@ -1023,13 +1028,22 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
         raise ValueError("Replay HWGT does not match source SAV")
     if not joined["STATUS"].astype(int).eq(replay["status"].astype(int)).all():
         raise ValueError("Replay STATUS does not match source SAV")
+    engine_gap = (
+        pd.to_numeric(replay["engine_on_original"])
+        - pd.to_numeric(replay["rawben"])
+    ).abs()
+    if not replay["within5"].astype(bool).eq(
+        engine_gap.le(REPLAY_TOLERANCE_DOLLARS)
+    ).all():
+        raise ValueError("Replay within5 does not match its engine-RAWBEN gap")
 
     for column in replay.columns:
         if column not in joined:
             joined[column] = replay[column]
     joined["case_dollars"] = joined["HWGT"] * joined["AMTERR"]
+    reproduced, not_reproduced = REPLAY_OUTCOMES
     joined["engine_outcome"] = np.where(
-        joined["within5"], "explained_input_facts", "computation_side_upper_bound"
+        joined["within5"], reproduced, not_reproduced
     )
     joined["official_above_threshold"] = error_model.official_error_label(joined).eq(1)
     joined["cause_classes"] = joined.apply(_class_sets_for_row, axis=1)
@@ -1062,10 +1076,7 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
                 outcome: _replay_metric(
                     part.loc[part["engine_outcome"].eq(outcome)], denominator
                 )
-                for outcome in (
-                    "explained_input_facts",
-                    "computation_side_upper_bound",
-                )
+                for outcome in REPLAY_OUTCOMES
             },
             "solver_engine_within5_concordant_n": int(
                 part["solver_within5"].eq(part["within5"]).sum()
@@ -1093,10 +1104,7 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
     fractional_cross_tab: dict[str, Any] = {}
     for cause_class in CAUSE_CLASSES:
         fractional_cross_tab[cause_class] = {}
-        for outcome in (
-            "explained_input_facts",
-            "computation_side_upper_bound",
-        ):
+        for outcome in REPLAY_OUTCOMES:
             part = crosswalk.loc[
                 crosswalk["class"].eq(cause_class)
                 & crosswalk["outcome"].eq(outcome)
@@ -1119,10 +1127,7 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
         ("qc_no_agency", False),
     ):
         binary_cross_tab[qc_label] = {}
-        for outcome in (
-            "explained_input_facts",
-            "computation_side_upper_bound",
-        ):
+        for outcome in REPLAY_OUTCOMES:
             part = official.loc[
                 official["qc_any_agency"].eq(qc_value)
                 & official["engine_outcome"].eq(outcome)
@@ -1135,7 +1140,7 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
     all_replay_dollars = float(all_replay["case_dollars"].sum())
     broad_residual = all_replay.loc[
         all_replay["qc_broad_rules_engine"]
-        & all_replay["engine_outcome"].eq("computation_side_upper_bound")
+        & all_replay["engine_outcome"].eq(not_reproduced)
     ].copy()
     broad_residual["engine_gap_dollars"] = (
         (broad_residual["engine_on_original"] - broad_residual["rawben"]).abs()
@@ -1152,8 +1157,8 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
             "path": str(REPLAY_PATH.relative_to(Path(__file__).parents[1])),
             "sha256": error_model._sha256(REPLAY_PATH),
             "classification": (
-                "abs(engine_on_original - RAWBEN) <= 5; a miss is a "
-                "computation-side upper bound, not a proven computation error"
+                "reproduced if abs(engine_on_original - RAWBEN) <= 5, "
+                "else not_reproduced"
             ),
         },
         "denominator_reconciliation": {
@@ -1176,9 +1181,16 @@ def colorado_replay_reconciliation(universe: pd.DataFrame) -> dict[str, Any]:
         "official_replay_any_agency_by_engine_outcome": binary_cross_tab,
         "committed_prose_discrepancy": {
             "claim_location": (
-                "paper/snapshot/labs/amterr/ANALYSIS.md:L62-L67"
+                "paper/snapshot/labs/amterr/ANALYSIS.md:L62-L67 at commit "
+                f"{PROSE_CLAIM_COMMIT}"
             ),
             "claim": "10 cases, $3.28M, 3.3%",
+            "claim_status": (
+                "Corrected in the lab's 2026-10-03 revision: ANALYSIS.md, "
+                "section 'The 10 broad-coded cases that do not reproduce', "
+                "reports that $3.28M does not reproduce, and claims_audit.json "
+                "case_level.broad_coded_misses lists the 10 cases."
+            ),
             "recomputed_broad_residual_n": len(broad_residual),
             "recomputed_hwgt_times_amterr_dollars": _rounded(
                 broad_residual["case_dollars"].sum(), 2
