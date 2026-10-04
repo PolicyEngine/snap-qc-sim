@@ -1,10 +1,12 @@
-"""AMTERR replay: engine over reconstructed ORIGINAL inputs vs RAWBEN.
+"""AMTERR replay: engine over the solver's reconstructed inputs vs RAWBEN.
 
-For each Colorado FY2024 error case (STATUS 2/3) whose pre-edit original
-values the Giannella/Molin solver reconstructed (co_fy2024_reconstruction.csv),
-build the case through the proven map_qc_unit — but from a proxy unit carrying
-the ORIGINAL values — run the engine, and compare the allotment to RAWBEN
-(the benefit the agency actually issued).
+For each Colorado FY2024 error case (STATUS 2/3) the Giannella/Molin solver
+processed (co_fy2024_reconstruction.csv), build the case through the proven
+map_qc_unit, but from a proxy unit carrying the solver's raw* inputs; run the
+engine, and compare the allotment to RAWBEN (the benefit the agency actually
+issued). The solver changes at most the input named by the case's first finding
+(reconstruct_co_fy2024.R); the output field keeps its historical name,
+``engine_on_original``.
 
 Reading the result:
   match  -> the engine on the solver's inputs is within $5 of RAWBEN.
@@ -207,7 +209,7 @@ def main() -> None:
     n = len(summary)
     for tol, key in [("exact", "exact"), ("<=$1", "within1"), ("<=$5", "within5")]:
         k = sum(1 for s in summary if s[key])
-        print(f"engine(original) vs RAWBEN {tol}: {k}/{n} ({100*k/n:.1f}%)")
+        print(f"engine(solver inputs) vs RAWBEN {tol}: {k}/{n} ({100*k/n:.1f}%)")
     solver_ok = sum(1 for s in summary if s["solver_within5"])
     both = sum(1 for s in summary if s["solver_within5"] and s["within5"])
     print(f"solver within $5: {solver_ok}/{n}; engine agrees (<=$5) on {both} of those")

@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20261003a"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20261004a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
@@ -813,7 +813,7 @@ function renderFy2027(code) {
 // ---- Axiom rules-engine comparison mode ----------------------------------
 // The engine mode surfaces precomputed verification artifacts: the committed
 // axiom-oracles suite reports (stage-by-stage parity of the Axiom RuleSpec
-// computation against the QC file's Minimodel-recomputed benefit chain) and
+// computation against the QC file's computed benefit chain) and
 // the formula-benefit divergence catalog built by analysis/engine_comparison.py.
 // It does not change the Monte Carlo simulation — engine runs are precomputed,
 // never recomputed in the browser.
@@ -866,8 +866,8 @@ function enginePanelBody(code) {
   const conflates =
     `<h3>What the formula benefit conflates with error</h3>` +
     `<p>The file records three benefit anchors per case: the allotment the state issued (RAWBEN), ` +
-    `the allotment corrected for the reviewer's findings (BENFIX), and the Minimodel's full-formula ` +
-    `recomputation (FSBEN). |RAWBEN − BENFIX| equals the recorded error amount for every ` +
+    `the allotment corrected for the reviewer's findings (BENFIX), and the formula benefit Mathematica ` +
+    `computes for USDA from the edited record with the QC Minimodel's benefit formula (FSBEN). |RAWBEN − BENFIX| equals the recorded error amount for every ` +
     `official-universe case in the seven verified states — nationally ${pct(nat.concordance_weighted.benfix, 3)} of ` +
     `weighted FY 2024 cases. Taking the formula benefit as the error anchor instead — |RAWBEN − FSBEN| — matches ` +
     `the recorded error for only ${pct(nat.concordance_weighted.fsben, 1)} weighted: a formula recomputation alone ` +
