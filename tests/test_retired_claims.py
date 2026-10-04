@@ -439,9 +439,9 @@ def test_fsben_within_five_of_benfix_in_colorado(posting):
     ) in _read(MANUSCRIPT)
     facts = _read(FACTS)
     assert (
-        f"within $5 of `BENFIX` in {within} of {len(co)} cases ({exact} exactly"
-        in facts
-    )
+        f"within $5 of `BENFIX` in {within} of {len(co)} cases ({exact} exactly "
+        f"equal; {prorated} of the other {len(off)} are prorated allotments"
+    ) in facts
 
 
 # ---------------------------------------------------------------------------
