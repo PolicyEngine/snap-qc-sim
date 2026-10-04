@@ -311,6 +311,49 @@ def test_replay_within5_flag_is_the_documented_test():
     ).hexdigest()
 
 
+@pytest.mark.parametrize(
+    ("engine", "rawben", "within5"),
+    [
+        (300.0, 200.0, True),  # a $100 gap flagged as reproduced
+        (203.0, 200.0, False),  # a $3 gap flagged as not reproduced
+        (None, 200.0, True),  # no engine benefit flagged as reproduced
+    ],
+)
+def test_generator_rejects_a_flag_that_contradicts_the_test(
+    tmp_path, monkeypatch, engine, rawben, within5
+):
+    replay_path = tmp_path / "amterr_replay_results.json"
+    replay_path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "202310-7",
+                    "amterr": 100.0,
+                    "weight": 2.0,
+                    "status": 2,
+                    "engine_on_original": engine,
+                    "rawben": rawben,
+                    "within5": within5,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cause_shares, "REPLAY_PATH", replay_path)
+    universe = pd.DataFrame(
+        {
+            "state": ["CO"],
+            "source_row_index": [7],
+            "AMTERR": [100.0],
+            "HWGT": [2.0],
+            "STATUS": [2],
+        }
+    )
+
+    with pytest.raises(ValueError, match="within5 does not match"):
+        cause_shares.colorado_replay_reconciliation(universe)
+
+
 def test_replay_reconciliation_partitions_are_exact():
     replay = _replay_reconciliation()
     slices = replay["slices"]
