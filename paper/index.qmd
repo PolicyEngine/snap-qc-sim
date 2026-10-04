@@ -21,8 +21,8 @@ abstract: |
   intermediates, exactly — all 6,081 in-scope cases of the 6,194-case
   official universe (113 documented exclusions), six computation stages
   per case, zero dollar tolerance — a process that surfaced and fixed two
-  defects in the encodings. For 283 of Colorado's 305 error cases, a
-  public solver moves the input named by each case's first finding, where
+  defects in the encodings. For 283 of the 305 Colorado cases with a
+  recorded payment deviation, a public solver moves the input named by each case's first finding, where
   it can, until its recomputed benefit reaches the issued amount; run on
   those inputs, the verified engine reproduces the issued benefit within
   $5 for 78.4% of the above-threshold official error cases and 91.4% of
@@ -109,12 +109,12 @@ case (@sec-oracle). The target's precise character matters and is stated
 in @sec-oracle-scope: the file's benefit chain is a computation Mathematica
 runs for USDA on edited case records with the benefit formula of the FNS
 QC Minimodel, so parity certifies agreement with the benefit computation
-recorded in the file; it does not adjudicate case outcomes. Reaching it surfaced defects on two
-sides: two in the encodings under test, and a residue attributable to
-state issuance systems.
+recorded in the file; it does not adjudicate case outcomes. Reaching it surfaced two defects in
+the encodings under test and left a residue in issued amounts, which
+@sec-decompose decomposes.
 
 Second, as raw material for decomposing measured error. QC's own cause
-coding and a finding-nature classification give two nested estimates of
+coding and a finding-nature classification give two estimates of
 how much of the error rate reflects computation failure versus wrong
 facts correctly processed, and a replay of reconstructed case inputs
 through the verified engine tests whether one wrong input reproduces
@@ -435,7 +435,7 @@ construction of the file, that ineligible-case error.
 |---|---|---|---|
 | 1. Cause codes | QC agency-cause codes naming the computing apparatus (programming, arithmetic, mass change), any-presence across a case's nine cause slots, share of official error dollars (HWGT × `AMTERR`) | 7.4% strict ($6.9M/yr); 10.6% ($10.0M/yr) adding policy-misapplied, budgeted-wrong, computer-user | Colorado; nationally 3.5% strict ($232M/yr), 19.3% broad ($1.27B of $6.59B) |
 | 2. Finding natures | `NATURE` codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic `ELEMENT`; deduction-amount natures count only when the paired cause is in layer 1's broad computing-apparatus set | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7% |
-| 3. Engine replay | A public solver moves the input named by each case's first finding until its recomputed benefit reaches the issued amount; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; the non-reproduced cases mix solver limits, multi-element errors and computation findings | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
+| 3. Engine replay | A public solver moves the input named by each case's first finding until its recomputed benefit reaches the issued amount; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; of the 37 that do not, the solver moved nothing in 17 and 10 carry a computational finding (8 are both) | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
 : Three decompositions of Colorado fiscal 2024 measured error.
 Layers 1–2 quote the committed cause-share artifact
@@ -461,11 +461,13 @@ earned or unearned income, rent, the utility allowance, or the medical,
 dependent care or child-support deduction in $3 steps, or household size
 by one person. It stops when its own recomputed benefit reaches or passes
 the issued benefit (`RAWBEN`), when the input hits zero or a cap, or
-after 1,000 steps; when the first finding names none of those inputs,
-nothing moves. Of 283 deviation cases surviving the solver's consistency
+after 1,000 steps; a moved utility amount is then reset to the nearest
+value above or below the file's that more than five filtered cases in
+the same state and calendar year use. When the first finding names none
+of those inputs, nothing moves. Of 283 deviation cases surviving the solver's consistency
 filters (22 of 305 are excluded), 246 reproduce the issued amount within
 the file's $5 editing tolerance, which is consistent with correct
-arithmetic applied to wrong facts. In 230 of the 246 the solver moved an
+arithmetic applied to a wrong input. In 230 of the 246 the solver moved an
 input; in the other 16 the issued benefit was already within $5 of
 `FSBEN`, so nothing moved and the match restates the parity result. The
 rate differs by threshold status: among the 97 above-threshold official
@@ -489,8 +491,7 @@ classification outputs, the reconstruction scripts and
 `audit_claims.py`, which regenerates the replay counts into
 `claims_audit.json`, are committed with this paper.
 
-Layers 1 and 2 agree on the structure, and the replay's reproduction
-rate fits it: most measured SNAP payment error among eligible cases is
+Layers 1 and 2 agree on the structure: most measured SNAP payment error among eligible cases is
 information failure, not calculation failure — consistent with the
 administrative-burden literature's account of where compliance costs
 bind [@herd2018burden]. Correct-computation guarantees address the
@@ -1095,13 +1096,13 @@ one.
 ## Limitations {#sec-limitations}
 
 The parity result certifies agreement with the edited file's
-Minimodel-computed chain from supplied intermediates — not independent
+computed benefit chain from supplied intermediates — not independent
 derivation from raw facts, and not the reviewer-adjudicated outcome
 fields (@sec-oracle-scope); it is also post-correction on the same case
 set, pending a fiscal 2025 confirmatory run. The public file excludes
 ineligible-case and full-overissuance error, truncating the error
 distribution every file-based estimate inherits. The replay depends on
-a reconstruction solver whose filters exclude 22 of 305 error cases and
+a reconstruction solver whose filters exclude 22 of 305 deviation cases and
 which moves one input per case; its shares are case shares, and neither
 its reproduced nor its non-reproduced class identifies computation
 errors. The error models predict an adjudicated,
@@ -1170,7 +1171,8 @@ here, and The Axiom Foundation, which builds the rulespec-us encodings
 and the axiom-oracles verification harness whose parity this paper
 reports — the paper is an evaluation of systems its author is
 responsible for. The mitigations are structural: every parity claim
-replays against the government's own recorded values at zero tolerance
+replays against the benefit computation recorded in the QC file at zero
+tolerance
 from committed, hash-pinned artifacts any reader can rerun, and the
 manuscript's six rounds of adversarial review are archived unedited in
 the repository.

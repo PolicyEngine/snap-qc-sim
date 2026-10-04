@@ -29,8 +29,8 @@ noise alone materially affects tier assignment.
 
 - **Tier assignment is noisy.** Several states' tiers are near coin flips
   under QC sampling variation (Colorado: official FY 2024 rate 9.97%, 0.03
-  points below the 15% boundary, with a ±0.9-point sampling SD; its FY 2025
-  rate, 10.09%, is above the boundary).
+  points below the 10% rate where the 15% cost share begins, with a
+  ±0.9-point sampling SD; its FY 2025 rate, 10.09%, is above it).
 - **Simplification options carry large expected values** where they can move
   a state across a boundary: about $609M/yr in combined expected state
   cost-share reduction nationally at 50% category-suppression effectiveness

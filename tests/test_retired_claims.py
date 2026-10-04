@@ -17,6 +17,8 @@ import html
 import importlib.util
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,6 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LAB = ROOT / "paper/snapshot/labs/amterr"
 MANUSCRIPT = ROOT / "paper/index.qmd"
 RENDERED = ROOT / "app/public/paper/web/index.html"
+RENDERED_PDF = ROOT / "app/public/paper/web/index.pdf"
 README = ROOT / "README.md"
 FACTS = ROOT / "paper/FACTS.md"
 SIMULATOR = ROOT / "app/public/index.html"
@@ -44,6 +47,8 @@ FY2024_THRESHOLD = 56  # official error threshold, FY2024 (FACTS A6)
 
 # Lowercased, whitespace-collapsed fragments of the retired claims.
 RETIRED = (
+    "agency's own",
+    "government's own",
     "agency's own computational canon",
     "the agency's own canon",
     "agency's own benefit-calculation software",
@@ -89,6 +94,20 @@ def test_retired_wording_is_gone(path):
     assert not found, f"{path.relative_to(ROOT)} still carries {found}"
 
 
+@pytest.mark.skipif(shutil.which("pdftotext") is None, reason="pdftotext absent")
+def test_retired_wording_is_gone_from_the_pdf():
+    text = subprocess.run(
+        ["pdftotext", str(RENDERED_PDF), "-"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    # pdftotext breaks hyphenated words across lines; rejoin them first.
+    text = _normalize(re.sub(r"-\n", "-", text)).lower()
+    found = [phrase for phrase in RETIRED if phrase in text]
+    assert not found, f"index.pdf still carries {found}"
+
+
 def test_facts_records_each_withdrawal():
     """The catalog keeps the retired wording only as a superseded record."""
     facts = _read(FACTS)
@@ -99,6 +118,15 @@ def test_facts_records_each_withdrawal():
 
 # ---------------------------------------------------------------------------
 # replay figures: manuscript prose against claims_audit.json and the slices
+
+
+def _unmoved_computational_misses() -> int:
+    """Non-reproduced cases that both moved nothing and carry a computational finding."""
+    cases = AUDIT["case_level"]
+    unmoved = {
+        c["key"] for c in cases["not_reproduced_cases"] if not c["solver_moved_input"]
+    }
+    return len(unmoved & set(cases["not_reproduced_with_computational_finding_keys"]))
 
 
 def _replay_counts() -> dict[str, int]:
@@ -123,6 +151,7 @@ def _replay_counts() -> dict[str, int]:
         "layer2_not_reproduced": by_posting[
             "not_reproduced_with_computational_finding"
         ]["n"],
+        "miss_overlap": _unmoved_computational_misses(),
         "above_n": above["total"]["n"],
         "above_reproduced": above["outcomes"]["reproduced"]["n"],
         "sub_n": sub["total"]["n"],
@@ -139,7 +168,10 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
     not_replayed = c["layer2"] - c["layer2_reproduced"] - c["layer2_not_reproduced"]
     return [
         # abstract
-        f"For {c['n']} of Colorado's {c['error_cases']} error cases, a public solver",
+        (
+            f"For {c['n']} of the {c['error_cases']} Colorado cases with a recorded "
+            "payment deviation, a public solver"
+        ),
         (
             f"reproduces the issued benefit within $5 for {above} of the "
             f"above-threshold official error cases and {sub} of the sub-threshold "
@@ -149,7 +181,10 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         (
             f"Not identified. {above} of above-threshold official errors and {sub} "
             f"of sub-threshold deviations ({blended} blended) reproduce the issued "
-            "benefit within $5, consistent with a wrong input"
+            "benefit within $5, consistent with a wrong input; of the "
+            f"{c['not_reproduced']} that do not, the solver moved nothing in "
+            f"{unmoved_misses} and {c['layer2_not_reproduced']} carry a computational "
+            f"finding ({c['miss_overlap']} are both)"
         ),
         # replay paragraph
         (
@@ -157,7 +192,7 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
             f"({c['error_cases'] - c['n']} of {c['error_cases']} are excluded), "
             f"{c['reproduced']} reproduce the issued amount within the file's $5 "
             "editing tolerance, which is consistent with correct arithmetic applied "
-            "to wrong facts."
+            "to a wrong input."
         ),
         (
             f"In {c['moved']} of the {c['reproduced']} the solver moved an input; in "
@@ -263,20 +298,20 @@ def test_colorado_margin_carries_both_years():
         f"boundary, and its fiscal 2025 rate, {fy25:.2f}%, sits above it"
     ) in _read(MANUSCRIPT)
     assert (
-        f"official FY 2024 rate {fy24:.2f}%, {margin:.2f} points below the 15% "
-        f"boundary, with a ±0.9-point sampling SD; its FY 2025 rate, {fy25:.2f}%, "
-        "is above the boundary"
+        f"official FY 2024 rate {fy24:.2f}%, {margin:.2f} points below the 10% "
+        "rate where the 15% cost share begins, with a ±0.9-point sampling SD; its "
+        f"FY 2025 rate, {fy25:.2f}%, is above it"
     ) in _read(README)
     assert (
-        f"official FY2024 {fy24:.2f}% ({margin:.2f}pp below the 15% boundary; the "
-        f"FY2025 rate, {fy25:.2f}%, is above it, J3)"
+        f"official FY2024 {fy24:.2f}% ({margin:.2f}pp below the 10% rate where the "
+        f"15% share begins; the FY2025 rate, {fy25:.2f}%, is above it, J3)"
     ) in _read(FACTS)
 
 
 def test_every_margin_mention_names_fy2025():
-    for path in (MANUSCRIPT, README):
+    for path in (MANUSCRIPT, README, FACTS):
         text = _read(path)
-        for match in re.finditer(r"0\.03 points", text):
+        for match in re.finditer(r"(?<![\d.])0\.03(?!\d)[- ]?(points?|pp)", text):
             window = text[match.start() : match.start() + 200]
             assert "10.09%" in window, (path.name, window)
 
@@ -356,6 +391,9 @@ def replay_counts(draw):
     layer2_reproduced = draw(st.integers(0, 50))
     layer2_not_reproduced = draw(st.integers(0, 50))
     layer2 = layer2_reproduced + layer2_not_reproduced + draw(st.integers(0, 20))
+    miss_overlap = draw(
+        st.integers(0, min(miss_no_change + miss_stopped, layer2_not_reproduced))
+    )
     return {
         "error_cases": n + draw(st.integers(0, 100)),
         "n": n,
@@ -369,6 +407,7 @@ def replay_counts(draw):
         "layer2": layer2,
         "layer2_reproduced": layer2_reproduced,
         "layer2_not_reproduced": layer2_not_reproduced,
+        "miss_overlap": miss_overlap,
         "above_n": above_n,
         "above_reproduced": above_reproduced,
         "sub_n": sub_n,
