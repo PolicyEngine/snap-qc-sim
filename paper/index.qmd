@@ -117,8 +117,8 @@ Second, as raw material for decomposing measured error. QC's own cause
 coding and a finding-nature classification give two estimates of
 how much of the error rate reflects computation failure versus
 information failure, and a replay of reconstructed case inputs
-through the verified engine tests whether one wrong input reproduces
-each issued benefit (@sec-decompose).
+through the verified engine tests whether changing the input named by
+each case's first finding reproduces the issued benefit (@sec-decompose).
 
 Third, as training and validation data for a case-level model of the
 error process (@sec-model) and the basis for a distributional simulator
@@ -365,7 +365,8 @@ allowance or zero, and zeroing the medical deduction of standard medical
 deduction demonstration participants) and keeps a change only if it
 produces a match [@fns2024techdoc, chap. III, Steps 12–13]. The
 sequence does not always close the gap: in Colorado, `FSBEN` ends within
-$5 of `BENFIX` in 797 of 856 cases. The comparison also supplies several
+$5 of `BENFIX` in 797 of 856 cases; 21 of the other 59 are prorated
+allotments, which the full-month `FSBEN` does not reflect. The comparison also supplies several
 intermediates directly from the file rather than deriving them from raw
 facts: the QC-calculated medical and
 child-support deduction amounts, the recorded utility allowance, and the
@@ -437,7 +438,7 @@ construction of the file, that ineligible-case error.
 | 2. Finding natures | `NATURE` codes inherently describing computation (rounding, conversion, wrong standard, benefit miscomputed) plus the arithmetic `ELEMENT`; deduction-amount natures count only when the paired cause is in layer 1's broad computing-apparatus set | 3.3% pure-computation; 6.6% system-caused input; 4.2% mixed; 86.0% other input | Colorado weighted deviation dollars; nationally 4.6% / 11.1% / 6.5% / 77.7% |
 | 3. Engine replay | A public solver changes the input named by each case's first finding, where it can; the verified engine replays the solver's inputs | Not identified. 78.4% of above-threshold official errors and 91.4% of sub-threshold deviations (86.9% blended) reproduce the issued benefit within $5, consistent with a wrong input; of the 37 that do not, the solver moved nothing in 17 and 10 carry a computational finding (8 are both) | 283 filtered Colorado deviation cases (97 above threshold, 186 below); case shares, not dollar shares |
 
-: Three decompositions of Colorado fiscal 2024 measured error.
+: Three layers of evidence on Colorado fiscal 2024 measured error.
 Layers 1–2 quote the committed cause-share artifact
 (`analysis/cause_shares.json`, all 53 jurisdictions, conventions and
 code-to-class maps serialized in the file); layer 3 is a share of
@@ -469,7 +470,9 @@ issued amount within the file's $5 editing tolerance, which is
 consistent with correct arithmetic applied to a wrong input. In 230 of
 the 246 the solver moved an input; in the other 16 it took no step, and
 the issued benefit was already within $5 of `FSBEN`, so the match
-restates the parity result. The
+restates the parity result. In 19 of the 230 the issued benefit was also
+within $5 of `FSBEN` before the solver moved, so those matches did not
+need the move. The
 rate differs by threshold status: among the 97 above-threshold official
 error cases 76 reproduce (78.4%, binomial standard error about 4
 points), and among the 186 sub-threshold deviations 170 do (91.4%). The
@@ -479,7 +482,7 @@ codebases reading the same file.
 
 Neither outcome identifies a computation error. A reproduced case shows
 that one value of the first-listed input, run through correct
-arithmetic, yields the issued benefit; it does not show which input the
+arithmetic, yields a benefit within $5 of the issued benefit; it does not show which input the
 agency had wrong, and a moved input can absorb a computation error. A
 non-reproduced case can reflect the solver's limits: it tries one input
 in one direction, and in 17 of the 37 it moved nothing (14 cases whose
@@ -1122,7 +1125,7 @@ set, pending a fiscal 2025 confirmatory run. The public file excludes
 ineligible-case and full-overissuance error, truncating the error
 distribution every file-based estimate inherits. The replay depends on
 a reconstruction solver whose filters exclude 22 of 305 deviation cases and
-which moves one input per case; its shares are case shares, and neither
+which moves at most one input per case; its shares are case shares, and neither
 its reproduced nor its non-reproduced class identifies computation
 errors. The error models predict an adjudicated,
 thresholded label — a property of the measurement system, with a

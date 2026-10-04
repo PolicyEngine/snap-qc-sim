@@ -149,6 +149,23 @@ def test_facts_records_each_withdrawal():
 # replay figures: manuscript prose against claims_audit.json and the slices
 
 
+def _key(row: dict) -> str:
+    return f"{row['yrmonth']}-{row['hhldno']}"
+
+
+def _near_fsben_rows() -> list[dict]:
+    """Replay rows whose issued benefit was within $5 of FSBEN before any step."""
+    return [r for r in REPLAY_ROWS if abs(r["rawben"] - r["fsben"]) <= 5]
+
+
+def _moved_near_matches() -> int:
+    """Reproduced cases the solver moved although RAWBEN was already near FSBEN."""
+    unchanged = set(AUDIT["case_level"]["replay_inputs_unchanged_keys"])
+    return sum(
+        1 for r in _near_fsben_rows() if r["within5"] and _key(r) not in unchanged
+    )
+
+
 def _unmoved_computational_misses() -> int:
     """Non-reproduced cases that both moved nothing and carry a computational finding."""
     cases = AUDIT["case_level"]
@@ -181,6 +198,7 @@ def _replay_counts() -> dict[str, int]:
             "not_reproduced_with_computational_finding"
         ]["n"],
         "miss_overlap": _unmoved_computational_misses(),
+        "moved_near": _moved_near_matches(),
         "above_n": above["total"]["n"],
         "above_reproduced": above["outcomes"]["reproduced"]["n"],
         "sub_n": sub["total"]["n"],
@@ -227,6 +245,11 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
             f"In {c['moved']} of the {c['reproduced']} the solver moved an input; in "
             f"the other {c['unmoved']} it took no step, and the issued benefit was "
             "already within $5 of `FSBEN`, so the match restates the parity result."
+        ),
+        (
+            f"In {c['moved_near']} of the {c['moved']} the issued benefit was also "
+            "within $5 of `FSBEN` before the solver moved, so those matches did not "
+            "need the move."
         ),
         (
             f"among the {c['above_n']} above-threshold official error cases "
@@ -300,16 +323,33 @@ def test_unmoved_matches_restate_parity():
         assert abs(r["rawben"] - r["fsben"]) <= 5
 
 
-def test_superseded_33_reconciles_with_the_16():
-    """FACTS H8: 33 reproduced cases have AMTERR <= $5; 16 of them moved nothing."""
+def test_superseded_33_reconciles_with_the_near_fsben_matches():
+    """FACTS H8: every match that started within $5 of FSBEN needed no move.
+
+    The old "33 within comparison tolerance mechanically" counted AMTERR <= $5.
+    All 33 started with RAWBEN within $5 of FSBEN, as did 2 more, and on the
+    file's own inputs the engine returns FSBEN, so all 35 match without a move.
+    The solver took no step in 16 and moved an input anyway in the other 19.
+    """
     unchanged = set(AUDIT["case_level"]["replay_inputs_unchanged_keys"])
     small = [r for r in REPLAY_ROWS if r["within5"] and r["amterr"] <= 5]
-    unmoved = [r for r in small if f"{r['yrmonth']}-{r['hhldno']}" in unchanged]
-    assert (len(small), len(unmoved)) == (33, 16)
+    near = _near_fsben_rows()
+    assert all(abs(r["rawben"] - r["fsben"]) <= 5 for r in small)
+    assert all(r["within5"] for r in near)
+    unmoved = [r for r in near if _key(r) in unchanged]
+    moved = [r for r in near if _key(r) not in unchanged]
+    assert (len(small), len(near), len(unmoved), len(moved)) == (33, 35, 16, 19)
     assert len(unmoved) == _replay_counts()["unmoved"]
+    assert len(moved) == _replay_counts()["moved_near"]
+    extra = sorted({r["amterr"] for r in near if r["amterr"] > 5})
     facts = _read(FACTS)
     assert f"{len(small)} of the 246 have AMTERR ≤ $5" in facts
-    assert f"the solver moved an input in {len(small) - len(unmoved)} of them" in facts
+    assert (
+        f"in {len(near) - len(small)} more with AMTERR of ${extra[0]:.0f}" in facts
+        and len(extra) == 1
+    )
+    assert f"none of these {len(near)} matches needed a move" in facts
+    assert f"moved an input anyway in {len(moved)}" in facts
 
 
 # ---------------------------------------------------------------------------
@@ -384,15 +424,18 @@ def _available_postings() -> list[str]:
 def test_fsben_within_five_of_benfix_in_colorado(posting):
     frame = pd.read_csv(
         audit.posting_path(posting),
-        usecols=["STATE", "FSBEN", "BENFIX"],
+        usecols=["STATE", "FSBEN", "BENFIX", "ALLADJ"],
         low_memory=False,
     )
     co = frame[frame["STATE"] == 8]
     within = int(((co["FSBEN"] - co["BENFIX"]).abs() <= 5).sum())
     exact = int((co["FSBEN"] == co["BENFIX"]).sum())
-    assert (within, len(co), exact) == (797, 856, 743)
+    off = co[(co["FSBEN"] - co["BENFIX"]).abs() > 5]
+    prorated = int((off["ALLADJ"] == 2).sum())  # ALLADJ 2 = prorated benefit
+    assert (within, len(co), exact, prorated) == (797, 856, 743, 21)
     assert (
-        f"`FSBEN` ends within $5 of `BENFIX` in {within} of {len(co)} cases"
+        f"`FSBEN` ends within $5 of `BENFIX` in {within} of {len(co)} cases; "
+        f"{prorated} of the other {len(off)} are prorated allotments"
     ) in _read(MANUSCRIPT)
     facts = _read(FACTS)
     assert (
@@ -437,6 +480,7 @@ def replay_counts(draw):
         "layer2_reproduced": layer2_reproduced,
         "layer2_not_reproduced": layer2_not_reproduced,
         "miss_overlap": miss_overlap,
+        "moved_near": draw(st.integers(0, reproduced - unmoved)),
         "above_n": above_n,
         "above_reproduced": above_reproduced,
         "sub_n": sub_n,
