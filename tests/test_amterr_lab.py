@@ -263,6 +263,40 @@ def test_solver_outcome_counts_are_consistent():
     assert at_maximum["reproduced_n"] <= flagged["n"] <= CASES["replay"]["reproduced_n"]
     assert sum(flagged["by_correctednotes"].values()) == flagged["n"]
 
+    weak = outcomes["weakly_identified"]
+    by_stretch = weak["by_flat_stretch"]
+    assert sum(by_stretch.values()) == weak["n"] <= CASES["replay"]["n"]
+    assert weak["above_threshold_n"] <= weak["n"]
+    keys = {name: set(listed) for name, listed in weak["keys"].items()}
+    assert {name: len(listed) for name, listed in keys.items()} == by_stretch
+    assert sum(len(listed) for listed in keys.values()) == len(
+        set().union(*keys.values())
+    )
+    weak_keys = set().union(*keys.values())
+    # Weakly identified matches are moved matches.
+    assert weak_keys.isdisjoint(missed)
+    assert weak_keys.isdisjoint(CASES["replay_inputs_unchanged_keys"])
+    assert len(weak_keys) <= CASES["replay"]["reproduced_solver_moved_input_n"]
+    # The 34 income-lowered matches at the maximum sit on the cap stretch.
+    assert matched <= keys["maximum_allotment"]
+    assert (
+        sum(weak["maximum_allotment_by_correctednotes"].values())
+        == by_stretch["maximum_allotment"]
+    )
+    # The solver's at_max flag overlaps only the cap stretch; the rest of it
+    # is listed.
+    assert (
+        weak["maximum_allotment_at_max_flag_n"]
+        + len(flagged["outside_weakly_identified_keys"])
+        == (flagged["n"])
+    )
+    assert set(flagged["outside_weakly_identified_keys"]).isdisjoint(weak_keys)
+
+    farther = set(outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"])
+    assert set(household["away_from_rawben_keys"]) <= farther <= missed
+    assert outcomes["household_size_correctedamount_zero_n"] == household["n"]
+    assert utility["correctedamount_differs_from_final_change_n"] <= utility["n"]
+
 
 def _millions(value: float, digits: int) -> str:
     return f"${value / 1e6:.{digits}f}M"
@@ -291,6 +325,21 @@ def test_analysis_quotes_the_audit():
     household = outcomes["household_size"]
     at_maximum = outcomes["income_lowered_rawben_at_maximum"]
     rule = CASES["utility_reset_rule"]
+    utility = outcomes["utility_reset"]
+    weak = outcomes["weakly_identified"]
+    stretches = weak["by_flat_stretch"]
+    at_cap = weak["maximum_allotment_by_correctednotes"]
+    cap_rent = sum(v for k, v in at_cap.items() if k.startswith("rent"))
+    cap_util = sum(v for k, v in at_cap.items() if k.startswith("util"))
+    cap_med = sum(v for k, v in at_cap.items() if k.startswith("med"))
+    cap_other = stretches["maximum_allotment"] - at_maximum["reproduced_n"]
+    assert cap_rent + cap_util + cap_med == cap_other
+    flagged = outcomes["reproduced_at_max_flag"]
+    farther = outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"]
+    reset_away = sorted(set(farther) - set(household["away_from_rawben_keys"]))
+    computational_reset_off = sorted(
+        set(CASES["not_reproduced_with_computational_finding_keys"]) & set(reset_off)
+    )
     broad_reset_off = [
         row["key"]
         for row in CASES["broad_coded_misses"]["cases"]
@@ -321,21 +370,38 @@ def test_analysis_quotes_the_audit():
             "missed."
         ),
         (
-            f"{at_maximum['reproduced_n']} of the "
-            f"{counts['reproduced_solver_moved_input_n']} are weakly identified."
+            f"{weak['n']} of the {counts['reproduced_solver_moved_input_n']} are "
+            "weakly identified: the issued benefit sits on a flat stretch of the "
+            "benefit formula in the moved input, so the match bounds that input on "
+            f"one side only. {weak['above_threshold_n']} of the {weak['n']} are above "
+            f"the ${audit.THRESHOLD_FY2024} threshold."
         ),
         (
-            "The steps, which cannot pass RAWBEN, ran on to zero income in "
+            f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
+            f"allotment, which caps the benefit. In {at_maximum['reproduced_n']} of them RAWBEN is the "
+            "maximum and the solver lowered an income."
+        ),
+        (
+            "The steps, which cannot pass RAWBEN, ran that income down to $0 in "
             f"{at_maximum['reproduced_ended_at_zero_income_n']} and to the "
             f"1,000-step limit in {at_maximum['reproduced_ended_at_step_limit_n']}. "
-            f"{at_maximum['reproduced_above_threshold_n']} of the "
-            f"{at_maximum['reproduced_n']} are above the ${audit.THRESHOLD_FY2024} "
-            "threshold."
+            f"In the other {cap_other} the solver moved rent ({cap_rent}), the "
+            f"utility allowance ({cap_util}) or the medical deduction ({cap_med}), "
+            "and every further amount in the same direction also reproduces RAWBEN."
         ),
         (
-            f"it is set for {outcomes['reproduced_at_max_flag']['n']} of the "
-            f"{counts['reproduced_n']} matches, these {at_maximum['reproduced_n']} "
-            "among them."
+            f"{stretches['minimum_benefit']} are at the $23 minimum benefit of a "
+            "one- or two-person unit."
+        ),
+        (
+            f"{stretches['shelter_cap']} are rent increases that reach the "
+            "shelter-deduction cap"
+        ),
+        (
+            f"It is set for {flagged['n']} of the {counts['reproduced_n']} matches: "
+            f"{weak['maximum_allotment_at_max_flag_n']} of the "
+            f"{stretches['maximum_allotment']}, one household-size match and one "
+            "match where nothing moved."
         ),
         (
             f"It does in {len(household['away_from_rawben_keys'])} of the "
@@ -343,10 +409,33 @@ def test_analysis_quotes_the_audit():
             f"{_keys(household['away_from_rawben_keys'])}."
         ),
         (
-            "Its port of the solver's benefit formula reproduces all "
+            "checks two parts of this account against the solver's output: its port "
+            "of the solver's benefit formula reproduces all "
             f"{outcomes['solver_benefit_reproduces_rawben_recreated_n']} recreated "
-            "benefits, and the reset rule above reproduces the final utility amount "
-            f"in all {rule['rule_reproduces_final_amount_n']} utility rows."
+            "benefits, and the reset rule above, applied to each row's stepped "
+            f"amount, reproduces all {rule['rule_reproduces_final_amount_n']} final "
+            "utility amounts."
+        ),
+        (
+            "household-size moves never write it, so it is 0 in all "
+            f"{outcomes['household_size_correctedamount_zero_n']}, and it is recorded "
+            "before the utility reset, so it differs from the final change in all "
+            f"{utility['correctedamount_differs_from_final_change_n']} utility rows "
+            "and is 0 in two of them, "
+            f"{_keys(CASES['moved_with_zero_correctedamount_keys'])}, which only the "
+            "reset moved."
+        ),
+        (
+            f"in {_keys(reset_away)} it leaves the benefit farther from RAWBEN than "
+            f"FSBEN. With the {len(household['away_from_rawben_keys'])} "
+            "household-size moves above, these are the only "
+            f"{len(farther)} moved cases that end farther from RAWBEN than FSBEN."
+        ),
+        (
+            f"{len(computational_reset_off)} of the "
+            f"{replay['not_reproduced_with_computational_finding']['n']}, "
+            f"{_keys(computational_reset_off)}, are among the {len(reset_off)} cases "
+            "the utility reset moved off a match."
         ),
         (
             f"as do the {len(reset_off)} cases the utility reset moved off a match "
@@ -362,7 +451,8 @@ def test_analysis_quotes_the_audit():
             "of RAWBEN before the reset moved the input off that match."
         ),
         (
-            "that rule gives the final amount in "
+            "The 2026-10-03 text said the candidate above (or below) the file's UTIL "
+            "nearest that UTIL; that rule gives the final amount in "
             f"{rule['nearest_to_file_util_reproduces_final_amount_n']} of the "
             f"{rule['rows_n']} utility rows."
         ),
@@ -379,9 +469,9 @@ def test_analysis_quotes_the_audit():
             f"{len(moved['household_size_keys'])} the household-size move missed."
         ),
         (
-            f"Added: {at_maximum['reproduced_n']} of the "
-            f"{counts['reproduced_solver_moved_input_n']} moved matches are weakly "
-            "identified"
+            f"Added: {weak['n']} of the {counts['reproduced_solver_moved_input_n']} "
+            f"moved matches are weakly identified, {at_maximum['reproduced_n']} of "
+            "them because RAWBEN is the maximum allotment"
         ),
         (
             f"They carry {_millions(misses['dollars'], 2)}/yr: "
@@ -640,6 +730,8 @@ def test_retired_solver_wording_is_gone():
         "every step stops",
         "value above (or below) the file's UTIL",
         "utility snap",
+        "break-even",
+        "ran on to zero income",
     ):
         assert phrase not in body, phrase
     assert "value above (or below) the file's UTIL" not in text
@@ -647,8 +739,9 @@ def test_retired_solver_wording_is_gone():
 
 # ---------------------------------------------------------------------------
 # properties of the ported solver benefit, which the weak-identification
-# caveat relies on: the benefit never exceeds the maximum allotment, falls as
-# income rises and rises with shelter costs and deductions.
+# caveat relies on: the benefit stays between the minimum benefit and the
+# maximum allotment, falls as income rises and rises with shelter costs and
+# deductions, so each bound is reached on a flat stretch.
 
 
 @st.composite
@@ -679,21 +772,31 @@ def _benefits(unit: dict, column: str, values: list[float]) -> np.ndarray:
     return audit.solver_benefit(frame).to_numpy()
 
 
+def _terms(unit: dict, column: str, values: list[float]) -> pd.DataFrame:
+    frame = pd.DataFrame([{**unit, column: value} for value in values])
+    return audit.solver_terms(frame)
+
+
 @settings(max_examples=300, deadline=None)
 @given(
     solver_units(),
     st.sampled_from(("rawearn", "rawunearn")),
     st.lists(st.integers(min_value=0, max_value=9000), min_size=2, max_size=30),
 )
-def test_benefit_falls_as_income_rises_and_stays_at_the_maximum_below_break_even(
+def test_benefit_is_the_maximum_exactly_while_net_income_is_not_positive(
     unit, column, incomes
 ):
+    """The mechanism behind the 34: net income never falls as income rises,
+    and the benefit is the maximum allotment exactly when net income is zero
+    or less, so the incomes that yield the maximum run from $0 up to one point."""
     values = sorted(float(v) for v in incomes)
-    benefits = _benefits(unit, column, values)
+    terms = _terms(unit, column, values)
+    benefits, net = terms["benefit"].to_numpy(), terms["net"].to_numpy()
+    assert np.all(np.diff(net) >= 0)
     assert np.all(np.diff(benefits) <= 0)
     assert np.all(benefits <= unit["rawbenmax"])
     assert np.all(benefits >= min(unit["rawminimum_ben"], unit["rawbenmax"]))
-    # Every income at or below one that yields the maximum also yields it.
+    assert np.array_equal(benefits == unit["rawbenmax"], net <= 0)
     at_maximum = benefits == unit["rawbenmax"]
     if at_maximum.any():
         last = np.flatnonzero(at_maximum).max()
