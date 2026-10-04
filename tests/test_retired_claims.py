@@ -198,6 +198,8 @@ def _replay_counts() -> dict[str, int]:
     sub = SLICES["subthreshold_186"]
     outcomes = AUDIT["case_level"]["solver_outcomes"]
     at_maximum = outcomes["income_lowered_rawben_at_maximum"]
+    weak = outcomes["weakly_identified"]
+    moved_misses = outcomes["not_reproduced_solver_moved_input"]
     return {
         "error_cases": co["error_cases"],
         "n": replay["n"],
@@ -219,9 +221,19 @@ def _replay_counts() -> dict[str, int]:
         "above_reproduced": above["outcomes"]["reproduced"]["n"],
         "sub_n": sub["total"]["n"],
         "sub_reproduced": sub["outcomes"]["reproduced"]["n"],
-        "weak": at_maximum["reproduced_n"],
-        "weak_above": at_maximum["reproduced_above_threshold_n"],
-        "reset_off": len(outcomes["utility_reset"]["reset_off_after_step_match_keys"]),
+        "weak": weak["n"],
+        "weak_above": weak["above_threshold_n"],
+        "weak_cap": weak["by_flat_stretch"]["maximum_allotment"],
+        "weak_minimum": weak["by_flat_stretch"]["minimum_benefit"],
+        "weak_shelter": weak["by_flat_stretch"]["shelter_cap"],
+        "weak_income": at_maximum["reproduced_n"],
+        "reset_off": len(moved_misses["reset_off_after_step_match_keys"]),
+        "stopped_short": len(moved_misses["steps_stopped_short_keys"]),
+        "household_miss": len(moved_misses["household_size_keys"]),
+        "layer2_reset_off": len(
+            set(moved_misses["reset_off_after_step_match_keys"])
+            & set(AUDIT["case_level"]["not_reproduced_with_computational_finding_keys"])
+        ),
     }
 
 
@@ -280,8 +292,13 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         ),
         (
             f"In {c['weak']} of the {c['moved']} moved matches, {c['weak_above']} of "
-            "them above the threshold, the issued benefit is the maximum allotment "
-            "and the solver lowered an income."
+            "them above the threshold, the issued benefit sits on a flat stretch of "
+            "the benefit formula in the moved input (at or within $5 of the maximum "
+            f"allotment in {c['weak_cap']}, at the minimum benefit in "
+            f"{c['weak_minimum']} and at the shelter-deduction cap in "
+            f"{c['weak_shelter']}), so the match bounds that input on one side only "
+            f"and is weakly identified. In {c['weak_income']} of them the issued "
+            "benefit is the maximum allotment and the solver lowered an income;"
         ),
         (f"agree on the within-$5 classification for all {c['agree']} cases"),
         (
@@ -291,7 +308,13 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         ),
         (
             f"In {c['reset_off']} more, its $3 steps reached within $3 of the issued "
-            "benefit before the utility reset moved the input off that match."
+            "benefit before the utility reset moved the input off that match; in "
+            f"{c['stopped_short']} a stop rule ended the steps short of it, and in "
+            f"{c['household_miss']} the one-person household-size move missed."
+        ),
+        (
+            f"{c['layer2_reset_off']} of the {c['layer2_not_reproduced']} are among "
+            f"the {c['reset_off']} the utility reset moved off a match."
         ),
         (
             f"Of the {c['layer2']} cases that carry a layer-2 computational finding, "
@@ -311,26 +334,52 @@ def test_facts_quotes_the_solver_outcomes():
     """FACTS D5 and D6 carry the lab audit's solver-outcome counts."""
     facts = _read(FACTS)
     outcomes = AUDIT["case_level"]["solver_outcomes"]
+    weak = outcomes["weakly_identified"]
+    stretches = weak["by_flat_stretch"]
     at_maximum = outcomes["income_lowered_rawben_at_maximum"]
+    at_cap = weak["maximum_allotment_by_correctednotes"]
     moved = outcomes["not_reproduced_solver_moved_input"]
     replay = AUDIT["case_level"]["replay"]
     household = outcomes["household_size"]
+    flagged = outcomes["reproduced_at_max_flag"]
     rule = AUDIT["case_level"]["utility_reset_rule"]
+    farther = outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"]
+    reset_away = sorted(set(farther) - set(household["away_from_rawben_keys"]))
+    computational = AUDIT["case_level"][
+        "not_reproduced_with_computational_finding_keys"
+    ]
+    layer2 = sorted(set(moved["reset_off_after_step_match_keys"]) & set(computational))
+
+    def by_prefix(prefix):
+        return sum(v for k, v in at_cap.items() if k.startswith(prefix))
+
     quotes = [
         (
-            f"in {at_maximum['reproduced_n']} of the "
-            f"{replay['reproduced_solver_moved_input_n']} moved matches "
-            f"({at_maximum['reproduced_above_threshold_n']} above the $56 threshold)"
+            f"in {weak['n']} of the {replay['reproduced_solver_moved_input_n']} moved "
+            f"matches ({weak['above_threshold_n']} above the $56 threshold)"
         ),
         (
-            "ran on to zero income in "
+            f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
+            f"allotment, {stretches['minimum_benefit']} at the $23 minimum benefit of "
+            f"a one- or two-person unit, and {stretches['shelter_cap']} are rent "
+            "increases at the shelter-deduction cap"
+        ),
+        f"In {at_maximum['reproduced_n']} of the {stretches['maximum_allotment']},",
+        (
+            "ran that income down to $0 in "
             f"{at_maximum['reproduced_ended_at_zero_income_n']} and to the "
             f"1,000-step limit in {at_maximum['reproduced_ended_at_step_limit_n']}"
         ),
         (
-            f"marks {outcomes['reproduced_at_max_flag']['n']} of the "
-            f"{replay['reproduced_n']} matches, these {at_maximum['reproduced_n']} "
-            "among them"
+            f"In the other {stretches['maximum_allotment'] - at_maximum['reproduced_n']}"
+            f" the solver moved rent ({by_prefix('rent')}), the utility allowance "
+            f"({by_prefix('util')}) or the medical deduction ({by_prefix('med')})"
+        ),
+        (
+            f"marks {flagged['n']} of the {replay['reproduced_n']} matches: "
+            f"{weak['maximum_allotment_at_max_flag_n']} of the "
+            f"{stretches['maximum_allotment']}, one household-size match and one "
+            "match with nothing moved"
         ),
         (
             f"in the {moved['n']} moved cases that do not reproduce: in "
@@ -339,12 +388,21 @@ def test_facts_quotes_the_solver_outcomes():
             + ", ".join(moved["reset_off_after_step_match_keys"])
             + ")"
         ),
-        f"in {len(moved['household_size_keys'])} the one-person household-size move missed",
+        (
+            f"in {len(moved['household_size_keys'])} the one-person household-size "
+            "move missed"
+        ),
         (
             f"{len(household['away_from_rawben_keys'])} of the {household['n']} "
             "household-size moves ("
             + ", ".join(household["away_from_rawben_keys"])
-            + ") take the benefit away from RAWBEN"
+            + ") take the benefit away from RAWBEN, and the reset does in "
+            + ", ".join(reset_away)
+            + f"; these {len(farther)} are the only moved cases"
+        ),
+        (
+            f"{len(layer2)} of the {len(computational)} non-reproduced cases with a "
+            "layer-2 computational finding (" + ", ".join(layer2) + ")"
         ),
         (
             "reproduces all "
@@ -371,9 +429,18 @@ def test_replay_counts_partition():
     # paragraph quotes them against.
     assert c["weak_above"] <= min(c["weak"], c["above_reproduced"])
     assert c["weak"] <= c["moved"]
+    assert c["weak_cap"] + c["weak_minimum"] + c["weak_shelter"] == c["weak"]
+    assert c["weak_income"] <= c["weak_cap"]
+    # The paragraph accounts for every non-reproduced case exactly once.
     assert (
-        c["reset_off"] + c["miss_no_change"] + c["miss_stopped"] <= c["not_reproduced"]
+        c["miss_no_change"]
+        + c["miss_stopped"]
+        + c["reset_off"]
+        + c["stopped_short"]
+        + c["household_miss"]
+        == c["not_reproduced"]
     )
+    assert c["layer2_reset_off"] <= min(c["reset_off"], c["layer2_not_reproduced"])
     # "nothing moved and the match restates the parity result" needs every
     # unmoved match to sit within $5 of FSBEN already.
     replay = AUDIT["case_level"]["replay"]
@@ -552,7 +619,13 @@ def replay_counts(draw):
     miss_overlap = draw(
         st.integers(0, min(miss_no_change + miss_stopped, layer2_not_reproduced))
     )
-    weak = draw(st.integers(0, reproduced - unmoved))
+    weak_cap = draw(st.integers(0, reproduced - unmoved))
+    weak_minimum = draw(st.integers(0, reproduced - unmoved - weak_cap))
+    weak_shelter = draw(st.integers(0, reproduced - unmoved - weak_cap - weak_minimum))
+    weak = weak_cap + weak_minimum + weak_shelter
+    misses_left = not_reproduced - miss_no_change - miss_stopped
+    reset_off = draw(st.integers(0, misses_left))
+    stopped_short = draw(st.integers(0, misses_left - reset_off))
     return {
         "error_cases": n + draw(st.integers(0, 100)),
         "n": n,
@@ -574,9 +647,14 @@ def replay_counts(draw):
         "sub_reproduced": sub_reproduced,
         "weak": weak,
         "weak_above": draw(st.integers(0, min(weak, above_reproduced))),
-        "reset_off": draw(
-            st.integers(0, not_reproduced - miss_no_change - miss_stopped)
-        ),
+        "weak_cap": weak_cap,
+        "weak_minimum": weak_minimum,
+        "weak_shelter": weak_shelter,
+        "weak_income": draw(st.integers(0, weak_cap)),
+        "reset_off": reset_off,
+        "stopped_short": stopped_short,
+        "household_miss": misses_left - reset_off - stopped_short,
+        "layer2_reset_off": draw(st.integers(0, min(reset_off, layer2_not_reproduced))),
     }
 
 

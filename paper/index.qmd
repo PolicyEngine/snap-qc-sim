@@ -462,7 +462,7 @@ Household size moves once, by one person: one fewer for natures 12, 14
 or 16 and one more for nature 7 (element 150). Earned or unearned income, rent, the utility allowance,
 and the medical, dependent care or child-support deduction move in $3
 steps toward the issued benefit (`RAWBEN`) until a stop rule binds, and
-a stepped utility amount is then reset to a commonly reported
+the utility amount is then reset to a commonly reported
 value.[^solver-rules] When the first finding falls outside those element
 and nature codes, nothing moves. Of 283 deviation cases surviving the
 solver's consistency filters (22 of 305 are excluded), 246 reproduce the
@@ -476,11 +476,15 @@ need the move. The
 rate differs by threshold status: among the 97 above-threshold official
 error cases 76 reproduce (78.4%, binomial standard error about 4
 points), and among the 186 sub-threshold deviations 170 do (91.4%). In
-34 of the 230 moved matches, 19 of them above the threshold, the issued
-benefit is the maximum allotment and the solver lowered an income. Every
-value of that income at or below its break-even point yields the maximum,
-so these matches are weakly identified: they do not pin the income down,
-and the steps ran on to zero income or the step limit. The
+60 of the 230 moved matches, 31 of them above the threshold, the issued
+benefit sits on a flat stretch of the benefit formula in the moved input
+(at or within $5 of the maximum allotment in 53, at the minimum benefit in
+4 and at the shelter-deduction cap in 3), so the match bounds that input
+on one side only and is weakly identified. In 34 of them the issued
+benefit is the maximum allotment and the solver lowered an income; the
+solver pays the maximum whenever net income is zero or less, so every
+value of that income up to the point where net income reaches zero
+yields it. The
 solver's own recomputation and the engine agree on the within-$5
 classification for all 283 cases, two implementations with distinct
 codebases reading the same file.
@@ -493,8 +497,11 @@ non-reproduced case can reflect the solver's limits: it tries one input
 in one direction, and in 17 of the 37 it moved nothing (14 cases whose
 first finding falls outside those codes, and 3 where it stopped before
 moving). In 6 more, its $3 steps reached within $3 of the issued benefit
-before the utility reset moved the input off that match. Of the 26 cases that carry a layer-2 computational
-finding, 13 reproduce, 10 do not and 3 were not replayed. The complete
+before the utility reset moved the input off that match; in 9 a stop rule
+ended the steps short of it, and in 5 the one-person household-size move
+missed. Of the 26 cases that carry a layer-2 computational
+finding, 13 reproduce, 10 do not and 3 were not replayed. 2 of the 10
+are among the 6 the utility reset moved off a match. The complete
 per-case replay output (283 rows), the layer-1 and layer-2
 classification outputs, the reconstruction scripts and
 `audit_claims.py`, which regenerates the replay counts into
@@ -506,9 +513,13 @@ classification outputs, the reconstruction scripts and
     steps also stop when the shelter deduction reaches its cap (when
     raising) or zero (when lowering); income-raising steps stop when the
     uncapped benefit falls below zero; and all steps stop when the
-    benefit reaches $0 or after 1,000 steps. Where `RAWBEN` is the
-    maximum allotment, which the benefit cannot pass, income-lowering
-    steps continue until the income reaches zero or the step limit. Each case
+    benefit reaches $0 or after 1,000 steps. Where `RAWBEN` is at or
+    above the maximum allotment, which the benefit cannot pass,
+    income-lowering steps continue until the income reaches zero or the
+    step limit; where it is at or below a one- or two-person unit's
+    minimum benefit, which the benefit cannot fall below, income-raising
+    steps continue until the uncapped benefit falls below zero or the step
+    limit. Each case
     whose first finding is the utility allowance and whose `RAWBEN`
     differs from `FSBEN` then has its utility amount reset among the
     amounts that more than five filtered cases of any review status in
