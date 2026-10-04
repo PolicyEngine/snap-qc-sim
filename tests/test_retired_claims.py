@@ -137,6 +137,20 @@ def test_js_scan_sees_phrases_split_across_concatenated_lines():
     assert "minimodel's full-formula recomputation" in RETIRED
 
 
+def test_lab_readme_quotes_the_replay_printout():
+    """The lab README quotes amterr_replay.py's summary line verbatim."""
+    readme = (LAB / "README.md").read_text(encoding="utf-8")
+    script = (LAB / "amterr_replay.py").read_text(encoding="utf-8")
+    replay = AUDIT["case_level"]["replay"]
+    n, k = replay["n"], replay["reproduced_n"]
+    assert 'print(f"engine(solver inputs) vs RAWBEN {tol}:' in script
+    assert (
+        f"`engine(solver inputs) vs RAWBEN <=$5: {k}/{n} ({100 * k / n:.1f}%)`"
+        in readme
+    )
+    assert "engine(original)" not in readme
+
+
 def test_facts_records_each_withdrawal():
     """The catalog keeps the retired wording only as a superseded record."""
     facts = _read(FACTS)
