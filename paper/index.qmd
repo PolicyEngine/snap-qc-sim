@@ -115,8 +115,8 @@ the encodings under test and left a residue in issued amounts, which
 
 Second, as raw material for decomposing measured error. QC's own cause
 coding and a finding-nature classification give two estimates of
-how much of the error rate reflects computation failure versus wrong
-facts correctly processed, and a replay of reconstructed case inputs
+how much of the error rate reflects computation failure versus
+information failure, and a replay of reconstructed case inputs
 through the verified engine tests whether one wrong input reproduces
 each issued benefit (@sec-decompose).
 
@@ -393,13 +393,13 @@ engine can compute counterfactual intermediates under alternative policy
 target; they are the subject of @sec-decompose.
 
 Holding tolerance at zero is what made the exercise informative. Early
-runs did not match, and each mismatch class was a finding about
-somebody's rules: two defects in the encodings under test (a regulatory
-dollar literal superseded by statute, and a missing whole-dollar rounding
-step — both fixed in the public repository, with the oracle as the
-detector) and, once the encodings reproduced the file's chain exactly, a
-residue in *issued* amounts attributable to the issuing side, which
-@sec-decompose takes up. The corrections were global
+runs did not match, and each mismatch class traced to a defect in the
+encodings under test (a regulatory dollar literal superseded by statute,
+and a missing whole-dollar rounding step — both fixed in the public
+repository, with the oracle as the detector). Once the encodings
+reproduced the file's chain exactly, what remained was the gap between
+*issued* amounts and that chain, which @sec-decompose takes up. The
+corrections were global
 rule fixes, not case-specific accommodations; still, the exactness result
 is post-correction on the same case set, a reuse the certification
 protocol mitigates but does not eliminate. A confirmatory run on the
@@ -459,13 +459,17 @@ verified engine. The solver starts from the file's edited inputs and
 moves only the input named by the case's first finding (`ELEMENT1`):
 earned or unearned income, rent, the utility allowance, or the medical,
 dependent care or child-support deduction in $3 steps, or household size
-by one person. It stops when its own recomputed benefit reaches or passes
-the issued benefit (`RAWBEN`), when the input hits zero or a cap, or
-after 1,000 steps; a moved utility amount is then reset to the nearest
-value above or below the file's that more than five filtered cases in
-the same state and calendar year use. When the first finding names none
-of those inputs, nothing moves. Of 283 deviation cases surviving the solver's consistency
-filters (22 of 305 are excluded), 246 reproduce the issued amount within
+by one person (element 150 with natures 7, 12, 14 or 16). It stops when
+its own recomputed benefit reaches or passes the issued benefit
+(`RAWBEN`), when the input hits zero or a cap, when the benefit reaches
+$0, or after 1,000 steps. Each case it labels as a utility error then has
+its utility amount set to the nearest value above (or below) the file's
+utility amount that more than five filtered cases in the same state and
+calendar year use, or to zero if none lies below; in 2 cases this moves
+an amount the steps left unchanged. When the first finding falls outside
+those element and nature codes, nothing moves. Of 283 deviation cases
+surviving the solver's consistency filters (22 of 305 are excluded), 246
+reproduce the issued amount within
 the file's $5 editing tolerance, which is consistent with correct
 arithmetic applied to a wrong input. In 230 of the 246 the solver moved an
 input; in the other 16 the issued benefit was already within $5 of
@@ -483,8 +487,8 @@ arithmetic, yields the issued benefit; it does not show which input the
 agency had wrong, and a moved input can absorb a computation error. A
 non-reproduced case can reflect the solver's limits: it tries one input
 in one direction, and in 17 of the 37 it moved nothing (14 cases whose
-first finding names an input it does not adjust, and 3 where it stopped
-before moving). Of the 26 cases that carry a layer-2 computational
+first finding falls outside those codes, and 3 where it stopped before
+moving). Of the 26 cases that carry a layer-2 computational
 finding, 13 reproduce, 10 do not and 3 were not replayed. The complete
 per-case replay output (283 rows), the layer-1 and layer-2
 classification outputs, the reconstruction scripts and

@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +35,7 @@ RENDERED_PDF = ROOT / "app/public/paper/web/index.pdf"
 README = ROOT / "README.md"
 FACTS = ROOT / "paper/FACTS.md"
 SIMULATOR = ROOT / "app/public/index.html"
+SIMULATOR_JS = ROOT / "app/public/app.js"
 
 AUDIT = json.loads((LAB / "claims_audit.json").read_text(encoding="utf-8"))
 SLICES = json.loads((ROOT / "analysis/cause_shares.json").read_text(encoding="utf-8"))[
@@ -65,6 +66,9 @@ RETIRED = (
     "errata in the federal technical documentation",
     "errata in the technical documentation",
     "explained cases have deviations",
+    "minimodel's full-formula recomputation",
+    "minimodel-recomputed",
+    "fna qc minimodel",
 )
 
 
@@ -87,7 +91,9 @@ def _percent(numerator: int, denominator: int) -> str:
 # retired wording
 
 
-@pytest.mark.parametrize("path", [MANUSCRIPT, RENDERED, README, SIMULATOR])
+@pytest.mark.parametrize(
+    "path", [MANUSCRIPT, RENDERED, README, SIMULATOR, SIMULATOR_JS]
+)
 def test_retired_wording_is_gone(path):
     text = _read(path).lower()
     found = [phrase for phrase in RETIRED if phrase in text]
@@ -210,8 +216,8 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         (f"agree on the within-$5 classification for all {c['agree']} cases"),
         (
             f"in {unmoved_misses} of the {c['not_reproduced']} it moved nothing "
-            f"({c['miss_no_change']} cases whose first finding names an input it "
-            f"does not adjust, and {c['miss_stopped']} where it stopped before moving)"
+            f"({c['miss_no_change']} cases whose first finding falls outside those "
+            f"codes, and {c['miss_stopped']} where it stopped before moving)"
         ),
         (
             f"Of the {c['layer2']} cases that carry a layer-2 computational finding, "
@@ -415,6 +421,7 @@ def replay_counts(draw):
     }
 
 
+@settings(deadline=None)
 @given(replay_counts(), st.data())
 def test_lock_detects_any_changed_count(counts, data):
     """Every count is load-bearing: changing one changes the required prose."""
@@ -423,6 +430,7 @@ def test_lock_detects_any_changed_count(counts, data):
     assert replay_quotes(changed) != replay_quotes(counts)
 
 
+@settings(deadline=None)
 @given(replay_counts())
 def test_lock_is_deterministic_and_counts_render_verbatim(counts):
     quotes = replay_quotes(counts)
@@ -432,6 +440,7 @@ def test_lock_is_deterministic_and_counts_render_verbatim(counts):
         assert re.search(rf"(?<![\d.]){counts[key]}(?![\d.])", joined), key
 
 
+@settings(deadline=None)
 @given(st.integers(1, 10_000), st.data())
 def test_complementary_shares_sum_to_100(denominator, data):
     numerator = data.draw(st.integers(0, denominator))
