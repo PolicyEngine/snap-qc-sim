@@ -292,13 +292,15 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
         ),
         (
             f"In {c['weak']} of the {c['moved']} moved matches, {c['weak_above']} of "
-            "them above the threshold, the issued benefit sits on a flat stretch of "
-            "the benefit formula in the moved input (at or within $5 of the maximum "
-            f"allotment in {c['weak_cap']}, at the minimum benefit in "
-            f"{c['weak_minimum']} and at the shelter-deduction cap in "
-            f"{c['weak_shelter']}), so the match bounds that input on one side only "
-            f"and is weakly identified. In {c['weak_income']} of them the issued "
-            "benefit is the maximum allotment and the solver lowered an income;"
+            "them above the threshold, the issued benefit lies within $5 of a "
+            "stretch where the solver's benefit formula is flat in the moved input "
+            f"(the maximum allotment in {c['weak_cap']}, the minimum benefit in "
+            f"{c['weak_minimum']} and rent past the shelter-deduction cap in "
+            f"{c['weak_shelter']}). By that formula every amount of the input on the "
+            "stretch reproduces the issued benefit, so the match bounds the input "
+            f"on one side at most and is weakly identified. In {c['weak_income']} of "
+            f"the {c['weak_cap']} the issued benefit is the maximum allotment and "
+            "the solver lowered an income;"
         ),
         (f"agree on the within-$5 classification for all {c['agree']} cases"),
         (
@@ -313,7 +315,7 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
             f"{c['household_miss']} the one-person household-size move missed."
         ),
         (
-            f"{c['layer2_reset_off']} of the {c['layer2_not_reproduced']} are among "
+            f"Of the {c['layer2_not_reproduced']}, {c['layer2_reset_off']} are among "
             f"the {c['reset_off']} the utility reset moved off a match."
         ),
         (
@@ -360,9 +362,25 @@ def test_facts_quotes_the_solver_outcomes():
         ),
         (
             f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
-            f"allotment, {stretches['minimum_benefit']} at the $23 minimum benefit of "
-            f"a one- or two-person unit, and {stretches['shelter_cap']} are rent "
-            "increases at the shelter-deduction cap"
+            f"allotment, {stretches['minimum_benefit']} at the "
+            f"${weak['minimum_benefit_rawben_values'][0]:.0f} minimum benefit of a "
+            f"one- or two-person unit, and {stretches['shelter_cap']} are rent "
+            "increases that stop within "
+            f"${weak['shelter_cap_largest_gap_dollars']:.0f} of the shelter-deduction "
+            "cap"
+        ),
+        (
+            f"{len(weak['bounded_on_neither_side_keys'])} of the {weak['n']} ("
+            + ", ".join(weak["bounded_on_neither_side_keys"])
+            + ") reproduce at every utility amount and bound it on neither side"
+        ),
+        (
+            "Not counted: "
+            f"{sum(len(v) for v in weak['unnamed_push_holds_keys'].values())} "
+            "matches whose lowered input reaches no flat stretch ("
+            f"{len(weak['unnamed_push_holds_keys']['input_already_zero'])} already at "
+            f"$0, {len(weak['unnamed_push_holds_keys']['band_reaches_zero'])} whose "
+            "band of matching amounts runs down to $0)"
         ),
         f"In {at_maximum['reproduced_n']} of the {stretches['maximum_allotment']},",
         (
