@@ -1,6 +1,12 @@
 project:
   type: manuscript
   output-dir: out
+  # Render the article alone. Otherwise Quarto also renders FACTS.md and
+  # reviews/ as notebook previews and links them from the paper, except
+  # when the checkout's path contains a hidden directory, so the HTML would
+  # depend on where the checkout lives.
+  render:
+    - index.qmd
 
 format:
   html:
