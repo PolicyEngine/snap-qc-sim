@@ -1,0 +1,38 @@
+name: pr100-screenshots
+on:
+  push:
+    branches: [pr100-screenshots]
+permissions:
+  contents: write
+jobs:
+  shoot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Serve before (origin/main) and after (PR head)
+        run: |
+          git worktree add /tmp/before origin/main
+          git fetch origin state-first-front-page
+          git worktree add /tmp/after origin/state-first-front-page
+          for s in before after; do
+            mkdir -p /tmp/srv-$s/us
+            ln -s /tmp/$s/app/public /tmp/srv-$s/us/snap-payment-error-simulator
+          done
+          (cd /tmp/srv-before && python3 -m http.server 8001 --bind 127.0.0.1 >/dev/null 2>&1 &)
+          (cd /tmp/srv-after && python3 -m http.server 8002 --bind 127.0.0.1 >/dev/null 2>&1 &)
+          echo "AFTER_SHA=$(git rev-parse origin/state-first-front-page)" >> "$GITHUB_ENV"
+          echo "BEFORE_SHA=$(git rev-parse origin/main)" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install playwright==1.47.0 && python -m playwright install --with-deps chromium
+      - run: python .github/pr100/shoot.py shots
+      - name: Commit screenshots back to this branch
+        run: |
+          mkdir -p pr100-shots && mv shots/* pr100-shots/
+          printf 'before=%s\nafter=%s\n' "$BEFORE_SHA" "$AFTER_SHA" > pr100-shots/SHAS.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pr100-shots
+          git commit -m "PR #100 screenshots (after ${AFTER_SHA:0:7}, before ${BEFORE_SHA:0:7})"
+          git push origin HEAD:pr100-screenshots
