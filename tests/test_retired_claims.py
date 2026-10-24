@@ -376,6 +376,14 @@ def test_facts_quotes_the_solver_outcomes():
             f"matches ({weak['above_threshold_n']} above the $56 threshold)"
         ),
         (
+            "audit_claims.py pushes the moved input both ways from the solver's "
+            f"amount (up by ${audit.SOLVER_PUSH:,.0f} and down to $0). The benefit "
+            "is monotone in each input, so when a pushed amount still gives a "
+            f"benefit within ${audit.REPLAY_TOLERANCE} of RAWBEN, every amount "
+            "between the solver's and that one does too; a match counts when that "
+            "pushed amount also lies on one of the flat stretches named below."
+        ),
+        (
             "In "
             f"{sum(sides.get('solver', 0) for sides in direction.values())} the "
             "stretch lies in the direction the solver moved the input; in "
