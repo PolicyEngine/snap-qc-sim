@@ -4,18 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SNAP payment error simulator | PolicyEngine</title>
-<meta name="description" content="Simulate a state's SNAP payment error rate distribution, cost-share tier probabilities, and expected dollars — with a case-level model scenario for the standard medical deduction.">
+<meta name="description" content="A state's SNAP payment error rate, cost-share tier and FY 2028 bill, how much sampling noise moves them, and which measurement year is still open — with every state side by side.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="SNAP payment error simulator | PolicyEngine">
-<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show the distribution of its measured payment error rate — and what audit volume and a model-based standard medical deduction scenario do to its FY 2028 cost-share bill.">
+<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show what its payment error rate means for its cost-share bill, how likely a fresh sample is to land it in a different tier, and which year's measurement is still open.">
 <meta property="og:url" content="https://policyengine.org/us/snap-payment-error-simulator/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SNAP payment error simulator | PolicyEngine">
-<meta name="twitter:description" content="The distribution of each state's measured SNAP payment error rate, and what it means in cost-share dollars.">
+<meta name="twitter:description" content="Each state's SNAP payment error rate, its cost-share bill, and how much of it rides on sampling noise.">
 <base href="/us/snap-payment-error-simulator/">
 <link rel="icon" href="pe-logo-teal.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="tokens.css">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=20261024a">
 </head>
 <body>
 <nav class="pe-shell-header" aria-label="PolicyEngine site header">
@@ -36,188 +39,200 @@
   <div class="wrap">
     <h1>SNAP payment error simulator</h1>
     <p class="lede">
-      Beginning fiscal year 2028, a state's SNAP payment error rate sets its
-      share of benefit costs — 0% below a 6% rate, 5% from 6–8, 10% from
-      8–10, 15% at or above 10 — keyed to the state's choice of its FY 2025
-      rate (published June 2026) or its FY 2026 rate, still being measured
-      through September 30. One more twist sits at the top: a rate whose
-      1.5× reaches 20% (above 13.33%) delays the state's first billed year —
-      FY 2025 crossing pushes the start to FY 2029, FY 2026 crossing to
-      FY 2030 — so the highest-error states owe $0 in FY 2028. This
-      simulator draws from the state's own USDA Quality Control sample to
-      show the <em>distribution</em> of a measured rate, the odds its FY 2026
-      election beats its locked FY 2025 rate, the delay odds, and what
-      targeted review of high-risk cases, audit volume, and a model-based
-      standard medical deduction scenario do to the bill.
+      From fiscal year 2028, each state pays a share of its SNAP benefit
+      costs set by its payment error rate: nothing below a 6% rate, 5% from
+      6 to 8%, 10% from 8 to 10%, and 15% at 10% or more. Choose a state to
+      see what it owes, how much a fresh sample could move that, and which
+      year's measurement is still open.
     </p>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="controls" aria-label="Scenario controls">
-    <div class="control">
+  <section class="answer" id="answer" aria-label="Selected state">
+    <div class="answer-pick">
       <label for="state">State</label>
       <select id="state"></select>
-      <div id="verified-badge" class="badge" hidden></div>
     </div>
-    <div class="control">
-      <label for="audits">Additional QC reviews <span class="val" id="audits-val">+0</span></label>
-      <input type="range" id="audits" min="0" max="1000" step="50" value="0">
-      <div class="hint">Beyond the state's FY 2024 sample size</div>
-    </div>
-  </section>
-
-  <section class="chart-card" id="interventions">
-    <h2>Targeted review scenarios</h2>
-    <p class="sub">Cut counted error dollars by a chosen amount inside a targeted group of cases, and see what the measured rate, the tier odds, and the expected bill do. An accounting construction: it prices the arithmetic of a smaller error pool, not any claim about how a state achieves it.</p>
-    <div class="controls" aria-label="Targeted review controls">
-      <div class="control">
-        <label for="intervention-rule">Ranking rule</label>
-        <select id="intervention-rule">
-          <option value="model">Model risk score (out-of-sample)</option>
-          <option value="oracle">Actual error dollars (oracle bound)</option>
-          <option value="self_employment">Self-employment cases</option>
-          <option value="random">Random cases (floor)</option>
-        </select>
-        <div class="hint">Oracle ranks by each case's actual recorded error — the ceiling any targeting method can reach. Random is the floor. The model row uses the fitted error model's out-of-sample FY2024 scores.</div>
-      </div>
-      <div class="control">
-        <label for="intervention-coverage">Coverage</label>
-        <select id="intervention-coverage">
-          <option value="1">1%</option>
-          <option value="5" selected>5%</option>
-          <option value="10">10%</option>
-        </select>
-        <div class="hint">Of weighted caseload; one boundary case can be fractional.</div>
-      </div>
-      <div class="control">
-        <label for="intervention-effectiveness">Effectiveness <span class="val" id="intervention-effectiveness-val">50%</span></label>
-        <input type="range" id="intervention-effectiveness" min="0" max="100" step="5" value="50">
-      </div>
-    </div>
-    <div id="interventions-live"></div>
-    <div class="panel" id="interventions-sustained">
-      <strong>If the cut persists, FY 2028–30</strong>
-      <div class="hint">Sustained-intervention construction: the same rate delta applied to each horizon year of the persistence-anchored path.</div>
-      <div id="interventions-sustained-body"></div>
-    </div>
-  </section>
-
-  <section class="controls" aria-label="Policy levers">
-    <div class="control levers">
-      <span class="label">Policy scenario — case-level model</span>
-      <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
-      <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
-    </div>
-    <div class="control levers">
-      <span class="label">Rules-engine scenario — cause-coded</span>
-      <label><input type="checkbox" id="lever-engine-cut"> <span>Cut computation-caused errors <span class="val" id="engine-cut-val">100%</span></span></label>
-      <input type="range" id="engine-cut-pct" min="0" max="100" step="5" value="100">
-      <div class="hint">Scales each case's error dollars by its share of findings the reviewers coded as computer programming (17), computer-generated mass change (19), or arithmetic computation (20) — the class a correct rules engine removes. Data entry (18) and computer user error (21) stay. Steady-state FY 2024 carries little of it: 2.2% of counted error dollars nationally under this attribution. System transitions are where the class spikes — see the migrations paper in the events section.</div>
-    </div>
-    <div class="control levers">
-      <span class="label">Benefit recomputation</span>
-      <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
-      <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's computed benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
-    </div>
-    <div class="control levers">
-      <span class="label">Uncertainty</span>
-      <label><input type="checkbox" id="lever-drift"> <span>Year-over-year drift band (τ = 1.07pp)</span></label>
-      <div class="hint">Adds process movement on top of sampling noise, calibrated to the single realized FY 2024→2025 transition (robust estimate). Off = sampling noise only, a disclosed lower bound.</div>
-    </div>
-  </section>
-  <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
-
-  <section class="chart-card engine-panel" id="engine-panel" hidden>
-    <h2>Axiom rules engine vs the QC file's benefit chain</h2>
-    <p class="sub">Mathematica computes the QC file's formula benefit (FSBEN) for USDA from each edited case record with the benefit formula of the QC Minimodel, one of the SNAP microsimulation models of the Food and Nutrition Administration (formerly FNS). The Axiom rules engine replays the same reviews through open, per-provision-cited RuleSpec encodings — compared stage by stage below against the file's own recorded values.</p>
-    <div id="engine-body"></div>
-  </section>
-
-  <section class="tiles" aria-label="Headline results">
-    <div class="tile"><div class="k" id="t-official">–</div><div class="l">Official FY 2025 payment error rate (locked election year)</div><div class="d" id="t-official-24"></div></div>
-    <div class="tile"><div class="k" id="t-expected">–</div><div class="l">Expected FY 2028 bill, scenario (elected rate, delay-aware)</div><div class="d" id="t-delta"></div></div>
-    <div class="tile"><div class="k" id="t-tier">–</div><div class="l">Most likely tier, scenario</div><div class="d" id="t-tierp"></div></div>
-    <div class="tile"><div class="k" id="t-sd">–</div><div class="l">Std. dev. of the FY 2028 bill</div><div class="d" id="t-sdd"></div></div>
-  </section>
-
-  <section class="chart-card" id="fy2027">
-    <h2>The FY 2027 measurement year</h2>
-    <div id="fy2027-body"></div>
-  </section>
-
-  <section class="chart-card" id="election">
-    <h2>The FY 2025 vs FY 2026 election</h2>
-    <p class="sub">The FY 2028 cost share keys to the state's FY 2025 <em>or</em> FY 2026 rate, at its election (7 U.S.C. 2013(a)(2)(B)(ii)). FY 2025 is published and locked; FY 2026 is being measured through September 30, 2026. The simulated FY 2026 below is a QC-sized sample centered at the FY 2025 level — sampling noise only, a lower bound on true FY 2026 uncertainty.</p>
-    <ul class="elect">
-      <li><strong>Locked FY 2025:</strong> <span id="elect-locked">–</span></li>
-      <li><strong>P(FY 2026 measurement beats FY 2025):</strong> <span id="elect-pwin">–</span></li>
-      <li><strong>Expected cost electing the better year:</strong> <span id="elect-cost">–</span></li>
-      <li><strong>Delay clause (rate × 1.5 ≥ 20%):</strong> <span id="elect-delay">–</span></li>
-    </ul>
-  </section>
-
-  <section class="chart-card" id="adoption">
-    <h2>Adopting a verified rules engine</h2>
-    <div id="adoption-body"></div>
-  </section>
-
-  <section class="chart-card" id="events">
-    <h2>System replacements in the record</h2>
-    <p class="sub">The adoption panel prices the computing-apparatus cause class by accounting convention. Three state eligibility-system replacements test how that class moves in practice &mdash; each estimated against a synthetic control built from never-treated states, with the decision rule frozen before results.</p>
-    <p><strong>Rhode Island (UHIP, 2016):</strong> strict computing-apparatus error dollars rise $2.90 per weighted case-month against the synthetic control (permutation p = 0.023; the client-caused placebo stays null). The rise concentrates in FY 2017&ndash;19, the window for which FNS billed the state $37.3M &mdash; a descriptive consistency check the frozen protocol designates as verdict-inert.</p>
-    <p><strong>Kentucky (Benefind, 2016):</strong> no protocol-defined signal (&minus;$0.58, p = 0.30), despite a documented troubled launch.</p>
-    <p><strong>Oregon (ONE expansion, 2021):</strong> refused by the placebo rule &mdash; the client-caused placebo fires inside the pandemic window, so attribution is impossible.</p>
-    <p class="sub">The pooled two-state statistic reaches p = 0.093. These estimate bundled system replacements as implemented &mdash; staffing, process, and software together &mdash; never &ldquo;the effect of a rules engine.&rdquo; Frozen protocols and full artifacts: the <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/QUASI_EXPERIMENTS.md">design memo</a>, <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/riky_event_study_results.json">Rhode Island and Kentucky results</a>, <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/event_study_results.json">Oregon results</a>, the <a href="paper-migrations/">migrations paper</a> (the full design, both decomposition estimators, and the limits), and the <a href="paper/">companion measurement paper</a>.</p>
-  </section>
-
-  <section class="chart-card">
-    <h2>Measured-rate distribution</h2>
-    <p class="sub">Scenario draws (filled) vs. baseline (outline); bands mark the cost-share tiers; the dashed line is the official FY 2025 rate.</p>
-    <div id="hist" class="chart" role="img" aria-label="Histogram of simulated measured payment error rates with cost-share tier bands"></div>
-  </section>
-
-  <section class="chart-card">
-    <h2>Cost-share tier probabilities</h2>
-    <div id="tiers" class="chart" role="img" aria-label="Stacked probability bars of landing in each cost-share tier, baseline versus scenario"></div>
+    <p class="answer-lead" id="answer-lead" aria-live="polite">Loading…</p>
+    <figure class="strip-figure">
+      <div id="answer-strip" class="strip" role="img" aria-label="The state's published FY 2024 and FY 2025 rates and the range of a fresh sample, across the cost-share tiers"></div>
+      <figcaption class="strip-key">
+        <span><i class="key-dot"></i>FY 2025 rate</span>
+        <span><i class="key-ring"></i>FY 2024 rate</span>
+        <span><i class="key-bar"></i>Where 90% of fresh same-size samples land</span>
+        <span><i class="key-hatch"></i>Delay band, above 13.33%</span>
+      </figcaption>
+    </figure>
+    <dl class="answer-points" id="answer-points"></dl>
   </section>
 
   <section class="chart-card" id="national">
-    <h2>All states at a glance</h2>
-    <p class="sub">Baseline simulation for every jurisdiction (observed resample) — anchored at the official FY 2025 rate, FY 2024 sample size and composition, no levers. Click a column to sort, a row to load that state above. <span id="nat-note"></span></p>
+    <h2>All states</h2>
+    <p class="sub">Every jurisdiction at its FY 2025 rate and FY 2024 sample size, with no scenario applied. Click a column to sort, or a row to load that state above. <span id="nat-note"></span></p>
+    <p class="nat-takeaway" id="nat-takeaway"></p>
     <div class="table-scroll">
       <table id="nat-table" aria-label="Baseline simulation results for all jurisdictions">
         <thead><tr>
-          <th scope="col"><button data-k="code">State</button></th>
-          <th scope="col" class="num"><button data-k="official">FY 2024</button></th>
-          <th scope="col" class="num"><button data-k="fy2025">FY 2025</button></th>
+          <th scope="col"><button data-k="name">State</button></th>
+          <th scope="col" class="num"><button data-k="official">FY 2024 rate</button></th>
+          <th scope="col" class="num"><button data-k="fy2025">FY 2025 rate</button></th>
           <th scope="col"><button data-k="tier">FY 2025 tier</button></th>
-          <th scope="col" class="num"><button data-k="pmis">P(different tier)</button></th>
-          <th scope="col" class="num"><button data-k="eShare" title="Expected FY 2028 bill electing the better year; delayed states show the FY 2029 bill">Expected bill / yr</button></th>
+          <th scope="col" class="num"><button data-k="pmis">Chance of a different tier</button></th>
+          <th scope="col" class="num"><button data-k="eShare" title="Expected FY 2028 bill electing the better year; delayed states show the FY 2029 bill">Expected bill a year</button></th>
           <th scope="col" class="num"><button data-k="sd">Bill std. dev.</button></th>
         </tr></thead>
         <tbody></tbody>
       </table>
     </div>
-    <p class="hint" id="nat-takeaway"></p>
+    <ul class="nat-key">
+      <li><strong>Chance of a different tier:</strong> how often a fresh QC sample of the same size lands in a tier other than the FY 2025 rate's. Sampling noise only.</li>
+      <li><strong>Expected bill a year:</strong> the expected FY 2028 bill if the state elects the better of its FY 2025 and FY 2026 rates, at FY 2024 benefit levels. States in the delay band show their expected FY 2029 bill instead.</li>
+      <li><strong>Bill std. dev.:</strong> how far that bill swings across fresh samples.</li>
+      <li><span class="vmark">✓</span> The Axiom rules engine reproduces the state's recorded FY 2024 benefit arithmetic for every replayable QC case; eligibility is untested (see the analyst tools).</li>
+    </ul>
   </section>
+
+  <section class="chart-card" id="fy2027">
+    <h2>FY 2027, the year still open</h2>
+    <div id="fy2027-body"></div>
+  </section>
+
+  <details class="analyst" id="analyst">
+    <summary>
+      <span class="analyst-title">Analyst tools</span>
+      <span class="analyst-sub">Scenarios for targeted review, the standard medical deduction and rules engines; extra QC reviews; a year-to-year drift band; and the event studies behind them</span>
+    </summary>
+    <div class="analyst-body">
+      <p class="analyst-intro">The answer and table above use sampling noise only, with no scenario. These tools change those assumptions. Their results appear in the scenario results and charts below; the answer above stays as published.</p>
+      <p class="hint analyst-terms">One term used throughout: the <strong>file rate</strong> is the error rate computed directly from the public QC case file. The official rate adds a layer the file never records case by case — federal re-review integration and ineligible-case error — and every scenario here holds that layer fixed.</p>
+
+      <section class="controls" aria-label="Sample size">
+        <div class="control">
+          <label for="audits">Additional QC reviews <span class="val" id="audits-val">+0</span></label>
+          <input type="range" id="audits" min="0" max="1000" step="50" value="0">
+          <div class="hint">Beyond the state's FY 2024 sample size</div>
+        </div>
+      </section>
+
+      <section class="chart-card" id="interventions">
+        <h2>Targeted review scenarios</h2>
+        <p class="sub">Cut counted error dollars by a chosen amount inside a targeted group of cases, and see what the measured rate, the tier odds, and the expected bill do. An accounting construction: it prices the arithmetic of a smaller error pool, not any claim about how a state achieves it.</p>
+        <div class="controls" aria-label="Targeted review controls">
+          <div class="control">
+            <label for="intervention-rule">Ranking rule</label>
+            <select id="intervention-rule">
+              <option value="model">Model risk score (out-of-sample)</option>
+              <option value="oracle">Actual error dollars (perfect hindsight)</option>
+              <option value="self_employment">Self-employment cases</option>
+              <option value="random">Random cases (floor)</option>
+            </select>
+            <div class="hint">Perfect hindsight ranks cases by their actual recorded error, which no screen knows in advance — the ceiling any targeting method can reach. Random is the floor. The model ranks by the fitted error model's out-of-sample FY 2024 risk scores.</div>
+          </div>
+          <div class="control">
+            <label for="intervention-coverage">Coverage</label>
+            <select id="intervention-coverage">
+              <option value="1">1%</option>
+              <option value="5" selected>5%</option>
+              <option value="10">10%</option>
+            </select>
+            <div class="hint">Of weighted caseload; one boundary case can be fractional.</div>
+          </div>
+          <div class="control">
+            <label for="intervention-effectiveness">Effectiveness <span class="val" id="intervention-effectiveness-val">50%</span></label>
+            <input type="range" id="intervention-effectiveness" min="0" max="100" step="5" value="50">
+          </div>
+        </div>
+        <div id="interventions-live"></div>
+        <div class="panel" id="interventions-sustained">
+          <strong>If the cut persists, FY 2028–30</strong>
+          <div class="hint">Sustained construction: the same rate change, subtracted in each year of the persistence model's FY 2028–30 projection. That projection starts at the state's FY 2025 rate and splits year-to-year movement into a lasting state component and a transitory one that fades, fit to FY 2012–24 state rates. Figures are expected cost shares, as a percent of benefits.</div>
+          <div id="interventions-sustained-body"></div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Policy levers">
+        <div class="control levers">
+          <span class="label">Policy scenario — case-level model</span>
+          <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
+          <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
+        </div>
+        <div class="control levers">
+          <span class="label">Rules-engine scenario — cause-coded</span>
+          <label><input type="checkbox" id="lever-engine-cut"> <span>Cut computation-caused errors <span class="val" id="engine-cut-val">100%</span></span></label>
+          <input type="range" id="engine-cut-pct" min="0" max="100" step="5" value="100">
+          <div class="hint">Scales each case's error dollars by its share of findings the reviewers coded as computer programming (17), computer-generated mass change (19), or arithmetic computation (20) — the class a correct rules engine removes. Data entry (18) and computer user error (21) stay. Steady-state FY 2024 carries little of it: 2.2% of counted error dollars nationally under this attribution. System transitions are where the class spikes — see the system replacements below.</div>
+        </div>
+        <div class="control levers">
+          <span class="label">Benefit recomputation</span>
+          <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
+          <div class="hint">Shows how the open Axiom RuleSpec computation compares with the QC file's recorded benefit chain at six points, from gross income to the benefit, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
+        </div>
+        <div class="control levers">
+          <span class="label">Uncertainty</span>
+          <label><input type="checkbox" id="lever-drift"> <span>Add year-to-year drift (1.07 points)</span></label>
+          <div class="hint">Adds real program movement on top of sampling noise: a normal draw with a standard deviation of 1.07 percentage points, calibrated to the single realized FY 2024→2025 transition (robust estimate). Off = sampling noise only, a disclosed lower bound.</div>
+        </div>
+      </section>
+      <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
+
+      <section class="chart-card engine-panel" id="engine-panel" hidden>
+        <h2>Axiom rules engine vs the QC file's benefit chain</h2>
+        <p class="sub">Mathematica computes the QC file's formula benefit (FSBEN) for USDA from each edited case record with the benefit formula of the QC Minimodel, one of the SNAP microsimulation models of the Food and Nutrition Administration (formerly FNS). The Axiom rules engine replays the same reviews through open, per-provision-cited RuleSpec encodings — compared below with the file's own recorded values at each of six points in the benefit chain.</p>
+        <div id="engine-body"></div>
+      </section>
+
+      <h2 class="analyst-h">Scenario results</h2>
+      <section class="tiles" aria-label="Scenario results">
+        <div class="tile"><div class="l">Expected FY 2028 bill, scenario</div><div class="k" id="t-expected">–</div><div class="d" id="t-delta"></div></div>
+        <div class="tile"><div class="l">Most likely tier, scenario</div><div class="k" id="t-tier">–</div><div class="d" id="t-tierp"></div></div>
+        <div class="tile"><div class="l">Chance FY 2026 beats FY 2025, scenario</div><div class="k" id="t-pwin">–</div><div class="d" id="t-pwind"></div></div>
+        <div class="tile"><div class="l">Std. dev. of the FY 2028 bill, scenario</div><div class="k" id="t-sd">–</div><div class="d" id="t-sdd"></div></div>
+      </section>
+
+      <section class="chart-card">
+        <h2>Measured-rate distribution</h2>
+        <p class="sub">Scenario draws (filled) vs. baseline (outline); bands mark the cost-share tiers; the dashed line is the official FY 2025 rate.</p>
+        <div id="hist" class="chart" role="img" aria-label="Histogram of simulated measured payment error rates with cost-share tier bands"></div>
+      </section>
+
+      <section class="chart-card">
+        <h2>Cost-share tier probabilities</h2>
+        <div id="tiers" class="chart" role="img" aria-label="Stacked probability bars of landing in each cost-share tier, baseline versus scenario"></div>
+      </section>
+
+      <section class="chart-card" id="adoption">
+        <h2>Adopting a verified rules engine</h2>
+        <div id="adoption-body"></div>
+      </section>
+
+      <section class="chart-card" id="events">
+        <h2>System replacements in the record</h2>
+        <p class="sub">The adoption panel prices the computing-apparatus cause class by accounting convention. Three state eligibility-system replacements test how that class moves in practice &mdash; each estimated against a synthetic control built from never-treated states, with the decision rule frozen before results.</p>
+        <p><strong>Rhode Island (UHIP, 2016):</strong> strict computing-apparatus error dollars rise $2.90 per weighted case-month against the synthetic control (permutation p = 0.023; the client-caused placebo stays null). The rise concentrates in FY 2017&ndash;19, the window for which FNS billed the state $37.3M &mdash; a descriptive consistency check the frozen protocol designates as verdict-inert.</p>
+        <p><strong>Kentucky (Benefind, 2016):</strong> no protocol-defined signal (&minus;$0.58, p = 0.30), despite a documented troubled launch.</p>
+        <p><strong>Oregon (ONE expansion, 2021):</strong> refused by the placebo rule &mdash; the client-caused placebo fires inside the pandemic window, so attribution is impossible.</p>
+        <p class="sub">The pooled two-state statistic reaches p = 0.093. These estimate bundled system replacements as implemented &mdash; staffing, process, and software together &mdash; never &ldquo;the effect of a rules engine.&rdquo; Frozen protocols and full artifacts: the <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/QUASI_EXPERIMENTS.md">design memo</a>, <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/riky_event_study_results.json">Rhode Island and Kentucky results</a>, <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/event_study_results.json">Oregon results</a>, the <a href="paper-migrations/">migrations paper</a> (the full design, both decomposition estimators, and the limits), and the <a href="paper/">companion measurement paper</a>.</p>
+      </section>
+    </div>
+  </details>
 
   <section class="fine">
     <details open>
       <summary>Method and caveats</summary>
       <ul>
         <li>Error process from the FY 2024 SNAP QC public-use file, official error-rate universe: adjudicated errors with recorded amounts above the official $56 threshold. Scenarios re-draw QC-style samples and recompute the weighted rate, centered on the state's official FY 2025 published rate (the FY 2024 file is the newest public case file; case composition is held at FY 2024 while the level anchors at FY 2025).</li>
-        <li>The official rate exceeds the file-computable rate by a layer the file never records case-by-case — federal re-review integration and ineligible-case error. Anchoring carries that layer as a fixed offset: across jurisdictions it is a median 31% of the FY 2024 official rate (from −3% to 81%), it contributes no sampling variance to the draws, and no scenario reaches it. The state panel above reports each state's own file-covered share, and a <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/component_targets.json">committed registry</a> decomposes the wedge by the published overpayment and underpayment components — nationally 95% of it sits on the overpayment side, consistent with the excluded ineligible-case error (overpayment by construction) dominating the layer.</li>
-        <li>The simulated distribution carries sampling noise only, and the FY 2024 to FY 2025 transition shows that is a lower bound: 18 of 53 jurisdictions changed cost-share tiers between the two published years while only 10 moved beyond the two-year sampling-noise 95% band (median absolute z 1.38 against the simulated SD; full table in the <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/FY2025_MOVEMENT.md">repository</a>). Election probabilities here are therefore conservative about year-over-year process movement.</li>
+        <li>The official rate exceeds the file-computable rate by a layer the file never records case-by-case — federal re-review integration and ineligible-case error. Anchoring carries that layer as a fixed offset: across jurisdictions it is a median 31% of the FY 2024 official rate (from −3% to 81%), it contributes no sampling variance to the draws, and no scenario reaches it. The adoption panel in the analyst tools reports each state's own file-covered share, and a <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/component_targets.json">committed registry</a> decomposes the wedge by the published overpayment and underpayment components — nationally 95% of it sits on the overpayment side, consistent with the excluded ineligible-case error (overpayment by construction) dominating the layer.</li>
+        <li>The simulated distribution carries sampling noise only, and the FY 2024 to FY 2025 transition shows that is a lower bound: 18 of 53 jurisdictions changed cost-share tiers between the two published years, and 11 of those 18 changes sit inside the two-year sampling-noise 95% band. Ten jurisdictions moved beyond the band, seven of them changing tiers; the median jurisdiction moved 1.38 simulated standard deviations (full table in the <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/FY2025_MOVEMENT.md">repository</a>). Election probabilities here are therefore conservative about year-over-year process movement.</li>
         <li>FY 2025 rates are from the Food and Nutrition Administration's June 24, 2026 release (FNS was renamed FNA effective June 2026); FY 2024 rates and the QC case file are from the predecessor FNS publications.</li>
         <li>The policy scenario re-predicts every case from the fitted error model with the state's standard-medical-deduction documentation feature reversed — per-case deviation probabilities and all nine deviation quantiles, exported with 10,000-draw paired case-bootstrap 95% intervals (model frozen through FY 2022, evaluated on FY 2024). It is a model-implied association from burden features that add +0.006 ROC AUC, not a causal policy effect; states adopt options endogenously. Self-employment, heat-and-eat, and BBCE scenarios are deliberately absent: the fitted features cannot express a defensible policy flip for them (machine-readable reasons ship in <a href="model_scenarios.json">the export</a>).</li>
         <li>The underlying error process is held fixed: no behavioral response, and no corrective-feedback channel from auditing more cases.</li>
         <li>Case bootstrap approximates the stratified monthly QC design; within-state estimates carry wide uncertainty. Comparative statics are more robust than dollar levels.</li>
-        <li>The all-states table runs the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "P(different tier)" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
+        <li>The answer and the all-states table run the same baseline simulation (4,000 draws per jurisdiction, official rate and sample size, no levers); "chance of a different tier" is the chance a fresh QC-style sample lands in a different cost-share tier than the official point rate implies. Expected cost applies the FY 2028 tier shares to FY 2024 issuance — an illustration of stakes, not a forecast of FY 2028 budgets.</li>
         <li>When the scenario is on, both baseline and scenario draw each case's payment deviation from distributions fitted on FY 2017–19 and 2022 QC data (pandemic years excluded), with levels anchored to the official rate; with it off, the simulator resamples observed QC error dollars. Model output is disabled for seven jurisdictions (AK, HI, ID, MN, SD, VI, WY) whose factor-adjusted FY 2024 model-to-observed dollar-rate ratio falls outside [0.7, 1.4]. Validation results — including quantile under-coverage at most levels and under-dispersion of simulated rates — and the adversarial review history are in the <a href="https://github.com/PolicyEngine/snap-qc-sim">repository</a>.</li>
         <li>The delay clause is modeled: if a state's FY 2025 (or FY 2026) payment error rate times 1.5 reaches 20%, its start moves to FY 2029 (or FY 2030) — 7 U.S.C. 2013(a)(2)(B)(ii)–(iii). Expected-bill figures zero delayed years; the FY 2029 bill keys to the FY 2026 rate (the third preceding year). A start pushed to FY 2030 keys to the FY 2027 rate, which this simulator does not model — those draws contribute $0 to the shown FY 2028 and FY 2029 expectations.</li>
-        <li>The Axiom rules engine verification view displays precomputed artifacts only: stage-by-stage parity from the committed <a href="https://github.com/TheAxiomFoundation/axiom-oracles">axiom-oracles</a> comparison reports (byte-identical, SHA-256-pinned copies in <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/oracle-suites">paper/snapshot/oracle-suites</a>) and the formula-benefit divergence catalog from <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/ENGINE_COMPARISON.md">analysis/engine_comparison.py</a>. The browser verifies the artifact's SHA-256 against a committed pin before displaying it. Engine runs never execute in the browser, and this view does not alter the simulation.</li>
-        <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2).</li>
+        <li>The Axiom rules engine verification view displays precomputed artifacts only: parity at each compared value from the committed <a href="https://github.com/TheAxiomFoundation/axiom-oracles">axiom-oracles</a> comparison reports (byte-identical, SHA-256-pinned copies in <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/oracle-suites">paper/snapshot/oracle-suites</a>) and the formula-benefit divergence catalog from <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/ENGINE_COMPARISON.md">analysis/engine_comparison.py</a>. The replay takes QC-adjudicated deductions, utility allowances and eligibility findings from the file as inputs, so it checks benefit arithmetic and leaves eligibility untested. The browser verifies the artifact's SHA-256 against a committed pin before displaying it. Engine runs never execute in the browser, and this view does not alter the simulation.</li>
+        <li>Source code, tests, and data pipeline: <a href="https://github.com/PolicyEngine/snap-qc-sim">PolicyEngine/snap-qc-sim</a>. Data: <a href="https://snapqcdata.net/datafiles">SNAP QC public-use files</a> and FNS's <a href="https://www.fns.usda.gov/snap/qc/per">published payment error rates</a>. Cost-share tiers: 7 U.S.C. 2013(a)(2). Sampling-plan timing: 7 CFR 272.2(e)(4).</li>
       </ul>
     </details>
   </section>
@@ -236,6 +251,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20261004a"></script>
+<script type="module" src="app.js?v=20261024a"></script>
 </body>
 </html>
