@@ -1,0 +1,170 @@
+{
+  "desktop": {
+    "states": 53,
+    "layout_problems": {
+      "AL": [
+        "adoption-body overlap: strict 9.3% | FY25 official 9.52%"
+      ],
+      "AK": [
+        "adoption-body overlap: broad 22.9% | FY25 official 23.15%"
+      ],
+      "AZ": [
+        "adoption-body overlap: strict 10.8% | FY25 official 10.80%"
+      ],
+      "AR": [
+        "adoption-body overlap: strict 8.6% | FY25 official 8.81%"
+      ],
+      "CA": [
+        "adoption-body overlap: strict 10.7% | FY25 official 10.93%"
+      ],
+      "CO": [
+        "adoption-body overlap: strict 9.5% | FY25 official 10.09%"
+      ],
+      "CT": [
+        "adoption-body overlap: strict 8.5% | FY25 official 9.08%"
+      ],
+      "DE": [
+        "adoption-body overlap: broad 14.5% | FY25 official 16.00%"
+      ],
+      "DC": [
+        "adoption-body overlap: strict 18.2% | FY25 official 18.66%"
+      ],
+      "FL": [
+        "adoption-body overlap: strict 12.9% | FY25 official 12.97%"
+      ],
+      "GA": [
+        "adoption-body overlap: strict 14.3% | FY25 official 15.21%"
+      ],
+      "GU": [
+        "adoption-body overlap: strict 11.2% | FY25 official 11.70%"
+      ],
+      "HI": [
+        "adoption-body overlap: strict 10.9% | FY25 official 10.92%"
+      ],
+      "ID": [
+        "adoption-body overlap: strict 3.8% | FY25 official 3.85%"
+      ],
+      "IL": [
+        "adoption-body overlap: strict 14.3% | FY25 official 14.67%"
+      ],
+      "IN": [
+        "adoption-body overlap: strict 9.3% | FY25 official 9.77%"
+      ],
+      "IA": [
+        "adoption-body overlap: strict 5.3% | FY25 official 5.34%"
+      ],
+      "KS": [
+        "adoption-body overlap: strict 9.0% | FY25 official 9.44%"
+      ],
+      "KY": [
+        "adoption-body overlap: strict 4.5% | FY25 official 4.70%"
+      ],
+      "LA": [
+        "adoption-body overlap: strict 7.6% | FY25 official 8.14%"
+      ],
+      "ME": [
+        "adoption-body overlap: strict 10.6% | FY25 official 10.81%"
+      ],
+      "MD": [
+        "adoption-body overlap: strict 12.5% | FY25 official 13.08%"
+      ],
+      "MA": [
+        "adoption-body overlap: strict 12.5% | FY25 official 12.49%"
+      ],
+      "MI": [
+        "adoption-body overlap: strict 9.0% | FY25 official 9.89%"
+      ],
+      "MN": [
+        "adoption-body overlap: strict 12.6% | FY25 official 12.58%"
+      ],
+      "MS": [
+        "adoption-body overlap: strict 9.5% | FY25 official 9.51%"
+      ],
+      "MO": [
+        "adoption-body overlap: strict 8.6% | FY25 official 8.67%"
+      ],
+      "MT": [
+        "adoption-body overlap: strict 8.3% | FY25 official 8.86%"
+      ],
+      "NE": [
+        "adoption-body overlap: strict 5.9% | FY25 official 5.90%"
+      ],
+      "NV": [
+        "adoption-body overlap: strict 6.1% | FY25 official 6.22%"
+      ],
+      "NH": [
+        "adoption-body overlap: strict 8.5% | FY25 official 8.85%"
+      ],
+      "NJ": [
+        "adoption-body overlap: strict 6.8% | FY25 official 6.86%"
+      ],
+      "NM": [
+        "adoption-body overlap: broad 14.9% | FY25 official 16.81%",
+        "adoption-body overlap: strict 15.9% | FY25 official 16.81%"
+      ],
+      "NY": [
+        "adoption-body overlap: strict 13.2% | FY25 official 13.18%"
+      ],
+      "NC": [
+        "adoption-body overlap: strict 7.0% | FY25 official 7.36%"
+      ],
+      "ND": [
+        "adoption-body overlap: strict 9.8% | FY25 official 9.89%"
+      ],
+      "OH": [
+        "adoption-body overlap: strict 6.4% | FY25 official 6.76%"
+      ],
+      "OK": [
+        "adoption-body overlap: strict 10.9% | FY25 official 11.04%"
+      ],
+      "PA": [
+        "adoption-body overlap: strict 9.1% | FY25 official 9.21%"
+      ],
+      "RI": [
+        "adoption-body overlap: strict 11.9% | FY25 official 12.42%"
+      ],
+      "SC": [
+        "adoption-body overlap: strict 8.8% | FY25 official 8.80%"
+      ],
+      "SD": [
+        "adoption-body overlap: strict 2.5% | FY25 official 2.47%"
+      ],
+      "TN": [
+        "adoption-body overlap: strict 9.3% | FY25 official 9.44%"
+      ],
+      "TX": [
+        "adoption-body overlap: strict 9.2% | FY25 official 9.34%"
+      ],
+      "VI": [
+        "adoption-body overlap: strict 5.3% | FY25 official 5.36%"
+      ],
+      "UT": [
+        "adoption-body overlap: strict 5.5% | FY25 official 5.54%"
+      ],
+      "VT": [
+        "adoption-body overlap: strict 5.2% | FY25 official 5.38%"
+      ],
+      "VA": [
+        "adoption-body overlap: strict 12.0% | FY25 official 12.32%"
+      ],
+      "WA": [
+        "adoption-body overlap: strict 6.8% | FY25 official 6.98%"
+      ],
+      "WV": [
+        "adoption-body overlap: strict 6.4% | FY25 official 6.69%"
+      ],
+      "WI": [
+        "adoption-body overlap: strict 5.4% | FY25 official 5.72%"
+      ],
+      "WY": [
+        "adoption-body overlap: strict 3.1% | FY25 official 3.96%"
+      ]
+    },
+    "answer_table_mismatches": {}
+  },
+  "phone": {
+    "states": 53,
+    "layout_problems": {},
+    "answer_table_mismatches": {}
+  }
+}
