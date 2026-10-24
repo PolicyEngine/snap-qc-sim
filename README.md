@@ -163,16 +163,23 @@ the value-lock tests inside the exported package.
 
 ## Deploying
 
-The site is the Vercel project `snap-qc-sim` (team `policy-engine`). It
-has no git integration: production changes only when someone uploads
-`app/public` from a checkout, and policyengine.org serves the same
-deployment at
+The site is the Vercel project `snap-qc-sim` (team `policy-engine`), and
+policyengine.org serves the same deployment at
 [/us/snap-payment-error-simulator](https://www.policyengine.org/us/snap-payment-error-simulator).
-Deploy from an up-to-date `main` after the PR that changes the site or
-either paper merges.
+The project has no git integration, so merging does not deploy.
+Production changes only through the Vercel CLI or dashboard. The steps
+below deploy `app/public` from a fresh checkout of `main`; run them after
+the PR that changes the site or either paper merges. They need the
+Vercel CLI (logged in with access to `policy-engine`), Quarto 1.9.36 with
+a TeX distribution (both papers also build PDFs with lualatex), and
+`pdftotext` from poppler.
 
-1. **Start from a clean `main`.** Use a fresh worktree so nothing
-   unmerged ships:
+When `app.js` or a data file it fetches changes, that PR should bump
+`ASSET_V` in `app/public/app.js` and the matching `app.js?v=` in
+`app/public/index.html`, so browsers drop the cached copy.
+
+1. **Start from a clean `main`.** From the main checkout, make a fresh
+   worktree so nothing unmerged ships:
 
    ```bash
    git fetch origin
@@ -180,58 +187,86 @@ either paper merges.
    cd ../snap-qc-sim-deploy
    ```
 
-2. **Render both papers and sync their assets** (Quarto 1.9.36). Each
-   paper's HTML loads styles and scripts from a gitignored folder
-   (`site_libs/` for the working paper, `index_files/` for the migrations
-   paper), so a fresh checkout has neither and would serve both papers
-   unstyled. The committed HTML and PDF are what ship; the renders supply
-   only those folders. The HTML render is deterministic, so each `cmp`
-   should print nothing. A difference means the PR that changed that paper
-   did not commit its re-render: stop, and fix that in a PR. The PDFs are
-   not compared, because each render stamps its own creation time.
+2. **Render both papers and sync their assets.** Each paper's HTML loads
+   styles and scripts from a gitignored folder (`site_libs/` for the
+   working paper, `index_files/` for the migrations paper), so a fresh
+   checkout has neither and would serve both papers unstyled. The
+   committed HTML and PDF are what ship; the renders supply only those
+   folders. The block first checks each render against the committed
+   file: the HTML must match byte for byte, and since each PDF render
+   stamps its own creation time, the PDFs are compared by their text. A
+   difference means the PR that changed that paper did not commit its
+   re-render, or Quarto is not 1.9.36: stop, and fix that in a PR. The
+   block stops at the first failure and prints `step 2 OK` only when
+   everything matches. The renders do not depend on where the checkout
+   lives. `paper/_quarto.yml` renders only the article, and `paper-causal/`
+   has no project file, so it renders standalone with `index_files/`
+   beside `index.qmd`.
 
    ```bash
-   (cd paper && quarto render index.qmd)
-   cmp paper/out/index.html app/public/paper/web/index.html
-   rsync -a --delete paper/out/site_libs/ app/public/paper/web/site_libs/
-   (cd paper-causal && quarto render index.qmd)
-   cmp paper-causal/index.html app/public/paper-migrations/web/index.html
-   rsync -a --delete paper-causal/index_files/ app/public/paper-migrations/web/index_files/
-   rm paper-causal/index.html paper-causal/index.pdf
-   git status --short
+   test "$(quarto --version)" = 1.9.36 &&
+     (cd paper && quarto render index.qmd) &&
+     (cd paper-causal && quarto render index.qmd) &&
+     cmp paper/out/index.html app/public/paper/web/index.html &&
+     cmp paper-causal/index.html app/public/paper-migrations/web/index.html &&
+     diff <(pdftotext paper/out/index.pdf -) <(pdftotext app/public/paper/web/index.pdf -) >/dev/null &&
+     diff <(pdftotext paper-causal/index.pdf -) <(pdftotext app/public/paper-migrations/web/index.pdf -) >/dev/null &&
+     rsync -a --delete paper/out/site_libs/ app/public/paper/web/site_libs/ &&
+     rsync -a --delete paper-causal/index_files/ app/public/paper-migrations/web/index_files/ &&
+     rm paper-causal/index.html paper-causal/index.pdf &&
+     test -z "$(git status --porcelain)" &&
+     echo "step 2 OK"
    ```
 
-   `git status --short` should print nothing.
-
-3. **Deploy from `app/public`, never from `app/`.** `app/public/vercel.json`
-   holds the rewrites that serve the site and both papers under
-   `/us/snap-payment-error-simulator`, plus the `/paper/index.pdf` alias.
-   The project's root directory is `.`, so a deploy from `app/` makes
-   `app/` the root, where there is no `vercel.json`. That deploy 404s the
-   policyengine.org path (it did on 2026-10-24). `.vercel/` is gitignored,
-   so link each new checkout once. `vercel link` also writes
-   `app/public/.env.local`, holding a short-lived `VERCEL_OIDC_TOKEN`.
-   `app/public/.gitignore` covers it, and the deploy does not serve it;
-   step 4 checks that.
+3. **Deploy `app/public`.** Run this block from the deploy worktree's
+   root. It refuses to deploy anything but a clean `origin/main` with
+   both asset folders in place. A fresh worktree has neither folder, and
+   step 2 syncs them only after every check passes.
+   `app/public/vercel.json` holds the rewrites that serve the site and
+   both papers under `/us/snap-payment-error-simulator`, plus the
+   `/paper/index.pdf` alias. The project sets no root directory
+   (`vercel project inspect` shows `.`), so the directory you deploy from
+   is the root. A deploy from `app/`, which has no `vercel.json`, drops
+   the rewrites. The policyengine.org path then 404s, as it did on
+   2026-10-24. And because `index.html` sets
+   `<base href="/us/snap-payment-error-simulator/">`, the vercel.app front
+   page also loses its CSS, scripts and data. `.vercel/` is gitignored,
+   so the block links each new checkout. `vercel link` also writes
+   `app/public/.env.local`, holding a short-lived `VERCEL_OIDC_TOKEN`. It
+   is gitignored, and the Vercel CLI never uploads it; step 4 checks
+   that.
 
    ```bash
-   cd app/public
-   vercel link --yes --project snap-qc-sim --scope policy-engine
-   vercel deploy --prod
+   test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" &&
+     test -z "$(git status --porcelain)" &&
+     test -f app/public/paper/web/site_libs/quarto-html/quarto.js &&
+     test -f app/public/paper-migrations/web/index_files/libs/quarto-html/quarto.js &&
+     cd app/public &&
+     vercel link --yes --project snap-qc-sim --scope policy-engine &&
+     vercel deploy --prod
    ```
 
-4. **Verify both hosts.** Every page and the two asset files (which
-   only exist if step 2 ran) should return 200. `/vercel.json` and
-   `/.env.local` should return 404:
+4. **Verify both hosts.** Run these from `app/public`, where step 3
+   leaves the shell.
+   - The first loop checks status codes. Every page, the
+     `/paper/index.pdf` alias and the two asset files should return 200;
+     `/vercel.json` and `/.env.local` should return 404.
+   - The second loop compares the served files with `origin/main`; every
+     line should read `same`. The status codes alone would also pass a
+     stale deployment.
+   - The third loop requests every asset the two manuscripts load,
+     hashed stylesheets included; each should return 200.
 
    ```bash
    for url in \
      https://snap-qc-sim.vercel.app/ \
      https://snap-qc-sim.vercel.app/paper/ \
      https://snap-qc-sim.vercel.app/paper/web/index.pdf \
+     https://snap-qc-sim.vercel.app/paper/index.pdf \
      https://snap-qc-sim.vercel.app/paper-migrations/ \
      https://www.policyengine.org/us/snap-payment-error-simulator \
      https://www.policyengine.org/us/snap-payment-error-simulator/paper \
+     https://www.policyengine.org/us/snap-payment-error-simulator/paper/index.pdf \
      https://www.policyengine.org/us/snap-payment-error-simulator/paper-migrations \
      https://www.policyengine.org/us/snap-payment-error-simulator/paper/web/site_libs/quarto-html/quarto.js \
      https://snap-qc-sim.vercel.app/paper-migrations/web/index_files/libs/quarto-html/quarto.js \
@@ -239,16 +274,28 @@ either paper merges.
      https://snap-qc-sim.vercel.app/.env.local; do
      curl -s -o /dev/null -w "%{http_code} $url\n" "$url"
    done
+   B=https://www.policyengine.org/us/snap-payment-error-simulator
+   for f in index.html app.js paper/index.html paper/web/index.html \
+     paper/web/index.pdf paper-migrations/web/index.html; do
+     test "$(curl -s "$B/$f" | shasum -a 256)" = \
+       "$(git show "origin/main:app/public/$f" | shasum -a 256)" &&
+       echo "same $f" || echo "DIFFERS $f"
+   done
+   for p in paper paper-migrations; do
+     grep -oE '(src|href)="(site_libs|index_files)/[^"]+"' "$p/web/index.html" |
+       cut -d'"' -f2 | while read -r r; do
+         curl -s -o /dev/null -w "%{http_code} $p/web/$r\n" "$B/$p/web/$r"
+       done
+   done
    ```
 
-   Then open `/paper` on policyengine.org and check that the manuscript is
-   styled and shows the revision and date in `app/public/paper/index.html`.
-   When `app.js` or another site asset changes, bump `ASSET_V` in
-   `app/public/app.js` and the matching `app.js?v=` in
-   `app/public/index.html` in the PR, so browsers drop the cached copy.
+   Then open `/paper` and `/paper-migrations` on policyengine.org and
+   check that each manuscript is styled and that `/paper` shows the
+   revision and date in `app/public/paper/index.html`.
 
 5. **Remove the deploy worktree** from the main checkout:
 
    ```bash
+   cd "$(git rev-parse --git-common-dir)/.."
    git worktree remove ../snap-qc-sim-deploy
    ```
