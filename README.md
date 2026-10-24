@@ -160,3 +160,78 @@ committed artifacts, and the value-lock tests — from the pinned ref via
 `git archive`, writes a `MANIFEST.json` of SHA-256 hashes, and produces a
 deterministic zip under `dist/` (same ref, same bytes). `--verify` runs
 the value-lock tests inside the exported package.
+
+## Deploying
+
+The site is the Vercel project `snap-qc-sim` (team `policy-engine`). It
+has no git integration: production changes only when someone uploads
+`app/public` from a checkout, and policyengine.org serves the same
+deployment at
+[/us/snap-payment-error-simulator](https://www.policyengine.org/us/snap-payment-error-simulator).
+Deploy from an up-to-date `main` after the PR that changes the site or
+either paper merges.
+
+1. **Start from a clean `main`.** Use a fresh worktree so nothing
+   unmerged ships:
+
+   ```bash
+   git fetch origin
+   git worktree add --detach ../snap-qc-sim-deploy origin/main
+   cd ../snap-qc-sim-deploy
+   ```
+
+2. **Render both papers and sync their assets** (Quarto 1.9.36). Each
+   paper's HTML loads styles and scripts from a gitignored folder
+   (`site_libs/` for the working paper, `index_files/` for the migrations
+   paper), so a fresh checkout has neither and would serve both papers
+   unstyled. The renders are deterministic: on a clean `main` they
+   reproduce the committed HTML byte for byte, so `git status` should show
+   no tracked changes afterwards.
+
+   ```bash
+   (cd paper && quarto render index.qmd)
+   cp paper/out/index.html paper/out/index.pdf app/public/paper/web/
+   rsync -a --delete paper/out/site_libs/ app/public/paper/web/site_libs/
+   (cd paper-causal && quarto render index.qmd)
+   cp paper-causal/index.html paper-causal/index.pdf app/public/paper-migrations/web/
+   rsync -a --delete paper-causal/index_files/ app/public/paper-migrations/web/index_files/
+   rm paper-causal/index.html paper-causal/index.pdf
+   git status --short
+   ```
+
+3. **Deploy from `app/public`, never from `app/`.** `app/public/vercel.json`
+   holds the rewrites that serve the site and both papers under
+   `/us/snap-payment-error-simulator`, plus the `/paper/index.pdf` alias.
+   The project's root directory is `.`, so a deploy from `app/` makes
+   `app/` the root, where there is no `vercel.json`. That deploy 404s the
+   policyengine.org path (it did on 2026-10-24). `.vercel/` is gitignored,
+   so link each new checkout once:
+
+   ```bash
+   cd app/public
+   vercel link --yes --project snap-qc-sim --scope policy-engine
+   vercel deploy --prod
+   ```
+
+4. **Verify both hosts.** Every page should return 200, and
+   `/vercel.json` should return 404:
+
+   ```bash
+   for url in \
+     https://snap-qc-sim.vercel.app/ \
+     https://snap-qc-sim.vercel.app/paper/ \
+     https://snap-qc-sim.vercel.app/paper/web/index.pdf \
+     https://snap-qc-sim.vercel.app/paper-migrations/ \
+     https://www.policyengine.org/us/snap-payment-error-simulator \
+     https://www.policyengine.org/us/snap-payment-error-simulator/paper \
+     https://www.policyengine.org/us/snap-payment-error-simulator/paper-migrations/ \
+     https://snap-qc-sim.vercel.app/vercel.json; do
+     curl -s -o /dev/null -w "%{http_code} $url\n" "$url"
+   done
+   ```
+
+   Then open `/paper` on policyengine.org and check that the manuscript is
+   styled and shows the revision and date in `app/public/paper/index.html`.
+   When `app.js` or another site asset changes, bump `ASSET_V` in
+   `app/public/app.js` and the matching `app.js?v=` in
+   `app/public/index.html` in the PR, so browsers drop the cached copy.
