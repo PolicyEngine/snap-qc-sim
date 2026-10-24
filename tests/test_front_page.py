@@ -44,7 +44,7 @@ def test_research_controls_sit_inside_the_collapsed_analyst_section() -> None:
         r'<details class="analyst" id="analyst">(.*?)</details>', html, re.DOTALL
     )
     assert match, "analyst section missing"
-    assert "<details class=\"analyst\" id=\"analyst\" open" not in html
+    assert '<details class="analyst" id="analyst" open' not in html
     inner = match.group(1)
     for control in (
         'id="interventions"',  # targeted review
@@ -81,7 +81,9 @@ def test_tier_change_copy_matches_movement_artifact() -> None:
         f"{inside} of those {flips} changes sit inside the two-year "
         "sampling-noise 95% band"
     ) in html
-    assert "Ten jurisdictions moved beyond the band, seven of them changing tiers" in html
+    assert (
+        "Ten jurisdictions moved beyond the band, seven of them changing tiers" in html
+    )
     # The retired framing contrasted 18 with 10, two counts of different things.
     assert "only 10 moved" not in js + html
 
@@ -105,7 +107,11 @@ def test_fy2027_parameters_are_the_published_values() -> None:
     and flags the repricing as provisional while its artifact still carries
     the pre-publication projection."""
     helpers = _run_helpers(
-        [["FY27_MAX_4P_PUBLISHED"], ["FY27_TFP_JUNE_2026"], ["FY27_TOLERANCE_PUBLISHED"]]
+        [
+            ["FY27_MAX_4P_PUBLISHED"],
+            ["FY27_TFP_JUNE_2026"],
+            ["FY27_TOLERANCE_PUBLISHED"],
+        ]
     )
     max4, tfp, tol = helpers
     assert max4 == 1023 and tfp == 1023.2
@@ -113,13 +119,26 @@ def test_fy2027_parameters_are_the_published_values() -> None:
     # threshold in the artifact (58, from June 2025's $994.40) checks the rule.
     assert tol == math.floor(37 * tfp / 632.30) == 59
     fy27 = json.loads(FY27.read_bytes())
-    assert math.floor(37 * float(fy27["thresholds"]["2026"]["reference_family_monthly_cost"]) / 632.30) == 58
+    assert (
+        math.floor(
+            37
+            * float(fy27["thresholds"]["2026"]["reference_family_monthly_cost"])
+            / 632.30
+        )
+        == 58
+    )
     js = _app_text()
-    assert "Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U" not in js
+    assert (
+        "Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U"
+        not in js
+    )
     assert "until FNA's official notice" not in js
     assert "hardens when USDA publishes" not in js
     if fy27["fy2027_max_allotment_4p_48dc"]["dollars"] != max4:
-        assert "so this range is provisional until it is rerun on the published values" in js
+        assert (
+            "so this range is provisional until it is rerun on the published values"
+            in js
+        )
 
 
 def test_sampling_only_caveat_matches_the_backtest() -> None:
@@ -169,7 +188,72 @@ def test_axiom_parity_copy_says_eligibility_is_untested() -> None:
     html, js = INDEX.read_text(), _app_text()
     assert "eligibility is untested" in html
     assert "leaves eligibility untested" in html
-    assert js.count("eligibility untested") >= 3  # table mark, engine panel, CTA
+    # Table mark, engine panel (both branches), CTA, adoption note.
+    assert js.count("eligibility untested") + js.count("eligibility is untested") >= 5
+    # Every static paragraph or hint that says the engine reproduces or
+    # replays the file carries the caveat (rendered copy:
+    # tests/test_front_page_render.py).
+    engine = re.compile(r"Axiom|engine|RuleSpec|encoded", re.IGNORECASE)
+    blocks = re.findall(r"<(p|li|div)\b[^>]*>(.*?)</\1>", html, re.DOTALL)
+    claims = [
+        re.sub(r"<[^>]+>", "", body)
+        for _tag, body in blocks
+        if re.search(r"\breproduc(?:e|es|ed|ing)\b|\breplay", body)
+        and engine.search(body)
+    ]
+    assert len(claims) >= 3  # table key, engine panel subtitle, method note
+    for text in claims:
+        assert "eligibility" in text, text[:160]
+
+
+def test_issuance_base_note_matches_the_two_sources() -> None:
+    """Bills use the QC-weighted FY 2024 benefit base; the method note
+    compares it with FNA's issuance tables, state by state."""
+    qc = {
+        k: v["issuance"]
+        for k, v in json.loads((PUBLIC / "data.json").read_bytes())["states"].items()
+    }
+    fna = json.loads((ROOT / "analysis" / "issuance_fy2024.json").read_bytes())[
+        "states"
+    ]
+    assert set(qc) == set(fna)
+    names = {"MN": "Minnesota", "WY": "Wyoming"}
+    gaps = sorted((qc[k] / fna[k] - 1, k) for k in qc)
+    (low, low_k), (high, high_k) = gaps[0], gaps[-1]
+    assert (low_k, high_k) == ("MN", "WY")
+    html = INDEX.read_text()
+    note = (
+        f"${sum(qc.values()) / 1e9:.2f} billion nationally, against "
+        f"${sum(fna.values()) / 1e9:.2f} billion in FNA's FY 2024 issuance tables. "
+        f"By state, the QC-weighted figure runs from {round(-100 * low)}% below the "
+        f"issuance tables ({names[low_k]}) to {round(100 * high)}% above ({names[high_k]}); "
+        f"Colorado's is ${qc['CO'] / 1e9:.2f} billion against ${fna['CO'] / 1e9:.2f} billion."
+    )
+    assert note in html
+
+
+def test_fy2027_timing_cites_the_qc_regulations() -> None:
+    js = re.sub(r"`\s*\+\s*`", "", _app_text())
+    assert (
+        "QC draws about one-twelfth of a state's sample in each month of the year (7 CFR 275.11(c))"
+        in js
+    )
+    assert "Sampling-plan changes are submitted before each annual review period" in js
+    assert "so changes for FY 2027 were due before it began" in js
+    # The retired line implied a state could still change FY 2027's plan.
+    assert "a state can change its QC sampling plan" not in js
+
+
+def test_table_sort_keys_are_the_fields_each_row_shows() -> None:
+    html, js = INDEX.read_text(), APP.read_text()
+    keys = re.findall(r'<button data-k="(\w+)"', html)
+    assert keys == ["name", "official", "fy2025", "tier", "pmis", "bill", "billSd"]
+    row = js[js.index("NAT.set(code, {") :]
+    row = row[: row.index("});")]
+    fields = set(re.findall(r"(?m)^\s+(\w+)(?=[:,])", row))
+    assert set(keys) <= fields
+    cells = js[js.index("function renderNatTable()") :]
+    assert "fmtM(r.bill)" in cells and "fmtM(r.billSd)" in cells
 
 
 def test_file_rate_is_defined_where_the_analyst_tools_begin() -> None:
@@ -197,6 +281,7 @@ HELPERS = (
     "tickStep",
     "textW",
     "edgeLabel",
+    "bandLabel",
     "FY27_MAX_4P_PUBLISHED",
     "FY27_TFP_JUNE_2026",
     "FY27_TOLERANCE_PUBLISHED",
@@ -330,6 +415,36 @@ def test_edge_label_stays_inside_the_right_edge(
     widths = _run_helpers([["textW", s, 10] for _, s, _ in cases])
     for (x, _s, w), tw, attrs in zip(cases, widths, _run_helpers(calls)):
         if 'text-anchor="end"' in attrs:
-            assert float(re.search(r'x="([^"]+)"', attrs).group(1)) == pytest.approx(x - 4)
+            assert float(re.search(r'x="([^"]+)"', attrs).group(1)) == pytest.approx(
+                x - 4
+            )
         else:
             assert x + 4 + tw <= w - 2
+
+
+@settings(max_examples=5, deadline=None)
+@given(
+    st.lists(
+        st.tuples(
+            st.sampled_from([0, 5, 10, 15]),
+            st.floats(0, 400),
+            st.sampled_from([10, 11]),
+        ),
+        min_size=20,
+        max_size=80,
+    )
+)
+def test_band_label_fits_its_band_and_grows_with_it(
+    cases: list[tuple[int, float, int]],
+) -> None:
+    calls = [["bandLabel", t, px, size] for t, px, size in cases]
+    wider = [["bandLabel", t, px + 40, size] for t, px, size in cases]
+    labels, wide = _run_helpers(calls), _run_helpers(wider)
+    widths = _run_helpers(
+        [["textW", label, size] for label, (_, _, size) in zip(labels, cases)]
+    )
+    for (t, px, _size), label, w, lw in zip(cases, labels, widths, wide):
+        assert label in (f"{t}% share", f"{t}%", "")
+        assert label == "" or w + 6 <= px
+        # A wider band never gets a shorter name.
+        assert len(lw) >= len(label)

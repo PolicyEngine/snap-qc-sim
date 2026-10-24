@@ -137,6 +137,7 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
 #nat-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 #nat-table tbody tr { cursor: pointer; }
 #nat-table tbody tr:hover { background: var(--secondary); }
+#nat-table tbody tr:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 #nat-table tbody tr.current { background: color-mix(in srgb, var(--primary) 8%, var(--background)); }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
 .vmark { color: var(--primary); font-weight: 700; }
@@ -293,3 +294,4 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
   .analyst { display: none; }
   #national .table-scroll { max-height: none; overflow: visible; }
 }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
