@@ -171,8 +171,8 @@ certified to receive in the sample month (PDF p. 92).
   202403-40765 and 202404-40803, by that formula reproduce at every amount
   of the moved input and bound it on neither side. 32 of the 64 are above
   the $56 threshold. The 2 household-size matches among the 230 are not
-  assessed: the solver moves household size once, by one person, rather
-  than in steps.
+  assessed: the solver moves household size once, by one person, so
+  there is no range of amounts to scan.
   - 53 are at or within $5 of the maximum allotment, which caps the
     benefit. In 34 of them RAWBEN is the maximum and the solver lowered an
     income. The solver pays the maximum whenever net income is zero or
@@ -194,8 +194,8 @@ certified to receive in the sample month (PDF p. 92).
 
   Not counted: 5 matches whose band of matching amounts runs down to $0
   without reaching a flat stretch on either side, so they too bound the
-  input from above only. In 3 the steps took the input to $0; in 2 the
-  band runs down to $0 from the solver's amount.
+  input on one side only, from above. In 3 the steps took the input to
+  $0; in 2 the band runs down to $0 from the solver's amount.
 
   The solver exports an `at_max` flag to mark capped cases (the uncapped
   benefit on the replayed inputs is at least the maximum allotment less

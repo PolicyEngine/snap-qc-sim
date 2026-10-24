@@ -465,7 +465,8 @@ def test_analysis_quotes_the_audit():
             f"above the ${audit.THRESHOLD_FY2024} threshold. The "
             f"{sum(not_assessed.values())} household-size matches among the "
             f"{counts['reproduced_solver_moved_input_n']} are not assessed: the "
-            "solver moves household size once, by one person, rather than in steps."
+            "solver moves household size once, by one person, so there is no "
+            "range of amounts to scan."
         ),
         (
             f"{stretches['maximum_allotment']} are at or within "
@@ -506,7 +507,8 @@ def test_analysis_quotes_the_audit():
         (
             f"Not counted: {sum(len(v) for v in unnamed.values())} matches whose "
             "band of matching amounts runs down to $0 without reaching a flat "
-            "stretch on either side, so they too bound the input from above only. "
+            "stretch on either side, so they too bound the input on one side "
+            "only, from above. "
             f"In {len(unnamed['input_already_zero'])} the steps took the input to "
             f"$0; in {len(unnamed['band_reaches_zero'])} the band runs down to $0 "
             "from the solver's amount."
