@@ -213,8 +213,9 @@ either paper merges.
    vercel deploy --prod
    ```
 
-4. **Verify both hosts.** Every page should return 200, and
-   `/vercel.json` should return 404:
+4. **Verify both hosts.** Every page and the two asset files (which
+   only exist if step 2 ran) should return 200, and `/vercel.json` should
+   return 404:
 
    ```bash
    for url in \
@@ -224,7 +225,9 @@ either paper merges.
      https://snap-qc-sim.vercel.app/paper-migrations/ \
      https://www.policyengine.org/us/snap-payment-error-simulator \
      https://www.policyengine.org/us/snap-payment-error-simulator/paper \
-     https://www.policyengine.org/us/snap-payment-error-simulator/paper-migrations/ \
+     https://www.policyengine.org/us/snap-payment-error-simulator/paper-migrations \
+     https://www.policyengine.org/us/snap-payment-error-simulator/paper/web/site_libs/quarto-html/quarto.js \
+     https://snap-qc-sim.vercel.app/paper-migrations/web/index_files/libs/quarto-html/quarto.js \
      https://snap-qc-sim.vercel.app/vercel.json; do
      curl -s -o /dev/null -w "%{http_code} $url\n" "$url"
    done
