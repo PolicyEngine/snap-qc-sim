@@ -135,6 +135,6 @@ cd $WORK/axiom-oracles && \
 cmp $WORK/replay/amterr_replay_results.json $LAB/amterr_replay_results.json
 ```
 
-The script prints `engine(original) vs RAWBEN <=$5: 246/283 (86.9%)` and
+The script prints `engine(solver inputs) vs RAWBEN <=$5: 246/283 (86.9%)` and
 `solver within $5: 246/283; engine agrees (<=$5) on 246 of those`. Without
 `AMTERR_LAB_DIR` it reads and writes next to itself.

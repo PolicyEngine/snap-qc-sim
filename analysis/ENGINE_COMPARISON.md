@@ -20,7 +20,7 @@ Stage concepts are pinned per state in the suite reports (Colorado exposes `snap
 
 ## Formula-benefit divergence catalog
 
-`|RAWBEN - BENFIX|` equals the recorded error amount for every official-universe case in the seven states (asserted at build), and nationally for 99.997% of weighted FY2024 cases (n=44,800). The Minimodel's formula benefit taken as the deviation anchor — `|RAWBEN - FSBEN|` — matches the recorded error for only 83.64% weighted, because the formula recomputation conflates recorded allotment adjustments with error. The catalog partitions each state's `FSBEN != BENFIX` cases three ways:
+`|RAWBEN - BENFIX|` equals the recorded error amount for every official-universe case in the seven states (asserted at build), and nationally for 99.997% of weighted FY2024 cases (n=44,800). The formula benefit (FSBEN) taken as the deviation anchor — `|RAWBEN - FSBEN|` — matches the recorded error for only 83.64% weighted, because the formula recomputation conflates recorded allotment adjustments with error. The catalog partitions each state's `FSBEN != BENFIX` cases three ways:
 
 1. **Coded allotment adjustment** — `ALLADJ` records a prorated (2) or other (3) adjustment; the recorded allotment is not the full-month formula amount by design.
 2. **Error-correction arithmetic** — no coded adjustment and `AMTERR > 0`: the reviewer's corrected allotment differs from the full recomputation (about two-thirds within $2, rounding-scale).

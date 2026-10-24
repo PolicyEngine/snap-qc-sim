@@ -9,8 +9,8 @@ emits:
   each state's FY2024 QC public-use reviews through the Axiom RuleSpec
   SNAP composition and compare six recorded stages — gross income,
   standard deduction, excess-shelter deduction, net income, maximum
-  allotment, and the benefit — at zero tolerance against the file's own
-  Minimodel-recomputed values (``FSBEN`` and companions).  This module
+  allotment, and the benefit — at zero tolerance against the file's
+  computed values (``FSBEN`` and companions).  This module
   re-derives the per-state parity counts from those reports and asserts
   the exactness the app displays (every compared case matches at every
   stage; excluded cases are enumerated program-structure classes).
@@ -18,8 +18,8 @@ emits:
 * **The formula-benefit divergence catalog** — the public file records
   three benefit anchors per case: ``RAWBEN`` (the allotment the state
   issued), ``BENFIX`` (the allotment corrected for the reviewer's
-  findings), and ``FSBEN`` (the Minimodel's full-formula recomputation
-  from the edited inputs).  ``|RAWBEN - BENFIX|`` equals the recorded
+  findings), and ``FSBEN`` (the formula benefit Mathematica computes for
+  USDA from the edited inputs).  ``|RAWBEN - BENFIX|`` equals the recorded
   error amount ``AMTERR`` for every official-universe case in the seven
   states; ``FSBEN`` differs from ``BENFIX`` for a catalogued minority,
   so a formula recomputation alone conflates recorded allotment
@@ -495,8 +495,8 @@ def render_report(artifact: dict[str, Any]) -> str:
                 "official-universe case in the seven states (asserted at "
                 "build), and nationally for "
                 f"{100 * national['concordance_weighted']['benfix']:.3f}% of "
-                f"weighted FY2024 cases (n={national['n']:,}). The Minimodel's "
-                "formula benefit taken as the deviation anchor — "
+                f"weighted FY2024 cases (n={national['n']:,}). The formula "
+                "benefit (FSBEN) taken as the deviation anchor — "
                 "`|RAWBEN - FSBEN|` — matches the recorded error for only "
                 f"{100 * national['concordance_weighted']['fsben']:.2f}% "
                 "weighted, because the formula recomputation conflates "
