@@ -184,20 +184,24 @@ either paper merges.
    paper's HTML loads styles and scripts from a gitignored folder
    (`site_libs/` for the working paper, `index_files/` for the migrations
    paper), so a fresh checkout has neither and would serve both papers
-   unstyled. The renders are deterministic: on a clean `main` they
-   reproduce the committed HTML byte for byte, so `git status` should show
-   no tracked changes afterwards.
+   unstyled. The committed HTML and PDF are what ship; the renders supply
+   only those folders. The HTML render is deterministic, so each `cmp`
+   should print nothing. A difference means the PR that changed that paper
+   did not commit its re-render: stop, and fix that in a PR. The PDFs are
+   not compared, because each render stamps its own creation time.
 
    ```bash
    (cd paper && quarto render index.qmd)
-   cp paper/out/index.html paper/out/index.pdf app/public/paper/web/
+   cmp paper/out/index.html app/public/paper/web/index.html
    rsync -a --delete paper/out/site_libs/ app/public/paper/web/site_libs/
    (cd paper-causal && quarto render index.qmd)
-   cp paper-causal/index.html paper-causal/index.pdf app/public/paper-migrations/web/
+   cmp paper-causal/index.html app/public/paper-migrations/web/index.html
    rsync -a --delete paper-causal/index_files/ app/public/paper-migrations/web/index_files/
    rm paper-causal/index.html paper-causal/index.pdf
    git status --short
    ```
+
+   `git status --short` should print nothing.
 
 3. **Deploy from `app/public`, never from `app/`.** `app/public/vercel.json`
    holds the rewrites that serve the site and both papers under
@@ -205,7 +209,10 @@ either paper merges.
    The project's root directory is `.`, so a deploy from `app/` makes
    `app/` the root, where there is no `vercel.json`. That deploy 404s the
    policyengine.org path (it did on 2026-10-24). `.vercel/` is gitignored,
-   so link each new checkout once:
+   so link each new checkout once. `vercel link` also writes
+   `app/public/.env.local`, holding a short-lived `VERCEL_OIDC_TOKEN`.
+   `app/public/.gitignore` covers it, and the deploy does not serve it;
+   step 4 checks that.
 
    ```bash
    cd app/public
@@ -214,8 +221,8 @@ either paper merges.
    ```
 
 4. **Verify both hosts.** Every page and the two asset files (which
-   only exist if step 2 ran) should return 200, and `/vercel.json` should
-   return 404:
+   only exist if step 2 ran) should return 200. `/vercel.json` and
+   `/.env.local` should return 404:
 
    ```bash
    for url in \
@@ -228,7 +235,8 @@ either paper merges.
      https://www.policyengine.org/us/snap-payment-error-simulator/paper-migrations \
      https://www.policyengine.org/us/snap-payment-error-simulator/paper/web/site_libs/quarto-html/quarto.js \
      https://snap-qc-sim.vercel.app/paper-migrations/web/index_files/libs/quarto-html/quarto.js \
-     https://snap-qc-sim.vercel.app/vercel.json; do
+     https://snap-qc-sim.vercel.app/vercel.json \
+     https://snap-qc-sim.vercel.app/.env.local; do
      curl -s -o /dev/null -w "%{http_code} $url\n" "$url"
    done
    ```
@@ -238,3 +246,9 @@ either paper merges.
    When `app.js` or another site asset changes, bump `ASSET_V` in
    `app/public/app.js` and the matching `app.js?v=` in
    `app/public/index.html` in the PR, so browsers drop the cached copy.
+
+5. **Remove the deploy worktree** from the main checkout:
+
+   ```bash
+   git worktree remove ../snap-qc-sim-deploy
+   ```
