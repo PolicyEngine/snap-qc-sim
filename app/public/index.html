@@ -118,7 +118,7 @@
     <div class="control levers">
       <span class="label">Benefit recomputation</span>
       <label><input type="checkbox" id="engine-mode"> <span>Axiom rules engine — verification view</span></label>
-      <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's FNA Minimodel benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
+      <div class="hint">Shows how the open, certified Axiom RuleSpec computation compares against the QC file's computed benefit chain, stage by stage, with the formula-benefit divergence catalog. Precomputed artifacts; the simulation is unchanged.</div>
     </div>
     <div class="control levers">
       <span class="label">Uncertainty</span>
@@ -129,8 +129,8 @@
   <p class="hint mechanism" id="mechanism">Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.</p>
 
   <section class="chart-card engine-panel" id="engine-panel" hidden>
-    <h2>Axiom rules engine vs the FNA QC Minimodel</h2>
-    <p class="sub">The QC file's formula benefit (FSBEN) is recomputed by the QC Minimodel used by the Food and Nutrition Administration (formerly FNS) — a closed model. The Axiom rules engine replays the same reviews through open, per-provision-cited RuleSpec encodings — compared stage by stage below against the file's own recorded values.</p>
+    <h2>Axiom rules engine vs the QC file's benefit chain</h2>
+    <p class="sub">Mathematica computes the QC file's formula benefit (FSBEN) for USDA from each edited case record with the benefit formula of the QC Minimodel, one of the SNAP microsimulation models of the Food and Nutrition Administration (formerly FNS). The Axiom rules engine replays the same reviews through open, per-provision-cited RuleSpec encodings — compared stage by stage below against the file's own recorded values.</p>
     <div id="engine-body"></div>
   </section>
 
@@ -236,6 +236,6 @@
   </nav>
 </div></footer>
 
-<script type="module" src="app.js?v=20261003a"></script>
+<script type="module" src="app.js?v=20261004a"></script>
 </body>
 </html>
