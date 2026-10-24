@@ -122,6 +122,27 @@ def test_fy2027_parameters_are_the_published_values() -> None:
         assert "so this range is provisional until it is rerun on the published values" in js
 
 
+def test_sampling_only_caveat_matches_the_backtest() -> None:
+    summary = json.loads(
+        (ROOT / "analysis" / "persistence_backtest_results.json").read_bytes()
+    )["summary"]
+    static = round(100 * summary["static"]["coverage_90"])
+    widened = round(100 * summary["widened"]["coverage_90"])
+    full = round(100 * summary["rao_yu"]["coverage_90"])
+    assert (static, widened, full) == (48, 81, 85)
+    # Join the JS string concatenations so the sentence reads as one line.
+    js = re.sub(r'"\s*\+\s*"', "", _app_text())
+    assert (
+        f"90% ranges built from sampling noise alone caught the next year's rate "
+        f"{static}% of the time, and adding year-to-year movement raised that to "
+        f"{widened}–{full}%."
+    ) in js
+
+
+def test_lede_names_current_law() -> None:
+    assert "Under current law (P.L. 119-21), from fiscal year 2028" in INDEX.read_text()
+
+
 @pytest.mark.parametrize(
     "phrase",
     [

@@ -1364,7 +1364,12 @@ function renderAnswer(code, st, draws) {
   rateStrip($("answer-strip"), st, q05, q95);
 
   const points = [];
-  const noiseOnly = "That counts sampling noise only; real year-to-year movement adds to it.";
+  // Coverage figures: analysis/persistence_backtest_results.json (static vs
+  // widened and rao_yu), locked by tests/test_front_page.py.
+  const noiseOnly =
+    "That counts sampling noise only, so it understates the uncertainty: in a backtest over FY 2016–2024, " +
+    "90% ranges built from sampling noise alone caught the next year's rate 48% of the time, and adding " +
+    "year-to-year movement raised that to 81–85%. The drift option in the analyst tools adds an estimate of that movement.";
   if (el.delay25) {
     points.push([
       "How sure",
