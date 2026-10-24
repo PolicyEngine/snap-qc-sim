@@ -281,7 +281,7 @@ function electionStats(st, draws) {
   //   preceding year), $0 when FY 2026 itself crosses (start moves to
   //   FY 2030, keyed to the unsimulated FY 2027).
   let win = 0, delay26 = 0;
-  let lock28 = 0, elect28 = 0, elect28sq = 0, bill29 = 0;
+  let lock28 = 0, elect28 = 0, elect28sq = 0, bill29 = 0, bill29sq = 0;
   for (const d of draws) {
     if (d < fy25) win++;
     const crossed = delayMet(d);
@@ -293,6 +293,7 @@ function electionStats(st, draws) {
     elect28 += e;
     elect28sq += e * e;
     bill29 += crossed ? 0 : (tierOf(d) / 100) * st.issuance;
+    bill29sq += crossed ? 0 : ((tierOf(d) / 100) * st.issuance) ** 2;
   }
   const n = draws.length;
   const elect28Mean = elect28 / n;
@@ -305,6 +306,7 @@ function electionStats(st, draws) {
     elect28: elect28Mean,
     sd28: Math.sqrt(Math.max(0, elect28sq / n - elect28Mean * elect28Mean)),
     bill29: bill29 / n,
+    sd29: Math.sqrt(Math.max(0, bill29sq / n - (bill29 / n) ** 2)),
     pWin: win / n,
     pDelay26: delay26 / n,
   };
@@ -466,6 +468,10 @@ function computeNational() {
         eShare: el.elect28,
         bill29: el.bill29,
         sd: el.sd28,
+        // What the row shows: delayed states owe nothing for FY 2028, so
+        // their columns carry the FY 2029 bill and its spread instead.
+        bill: el.delay25 ? el.bill29 : el.elect28,
+        billSd: el.delay25 ? el.sd29 : el.sd28,
         adoptStrict28: adopt ? adopt.strict.el.elect28 : null,
         adoptBroad28: adopt ? adopt.broad.el.elect28 : null,
         verified: !!st.verified,
@@ -498,7 +504,7 @@ function renderNatTakeaway() {
     `At FY 2025 official rates and FY 2024 sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
     `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Expected FY 2028 ` +
     `bills, each jurisdiction electing its better year and net of delayed starts, sum to ${fmtM(totalE)} a year. ${delayed} jurisdictions ` +
-    `above the 13.33% delay threshold owe nothing for FY 2028 and are first billed in FY 2029, keyed to the FY 2026 rate. Between FY 2024 and ` +
+    `above the 13.33% delay threshold owe nothing for FY 2028; their first bill comes in FY 2029, keyed to the FY 2026 rate, or in FY 2030 if that rate also tops 13.33%. Between FY 2024 and ` +
     `FY 2025, 18 jurisdictions changed tiers, and 11 of those 18 changes sit inside the two-year sampling-noise band.` +
     adoptLine;
 }
@@ -516,10 +522,10 @@ function renderNatTable() {
       <th scope="row">${r.name}${r.verified ? ' <span class="vmark" title="Benefit arithmetic reproduced for every replayable FY 2024 QC case; eligibility untested">✓</span>' : ""}</th>
       <td class="num">${r.official.toFixed(2)}%</td>
       <td class="num">${r.fy2025.toFixed(2)}%</td>
-      <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}${r.delay25 ? ' <span class="delaytag" title="Rate × 1.5 ≥ 20%: $0 in FY 2028, first bill FY 2029 keyed to the FY 2026 rate">delayed</span>' : ""}</td>
+      <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}${r.delay25 ? ' <span class="delaytag" title="Rate × 1.5 ≥ 20%: $0 in FY 2028; first bill FY 2029, keyed to the FY 2026 rate, or FY 2030 if that rate also tops 13.33%">delayed</span>' : ""}</td>
       <td class="num">${(r.pmis * 100).toFixed(0)}%</td>
-      <td class="num">${r.delay25 ? `${fmtM(r.bill29)} <span class="muted">FY29</span>` : fmtM(r.eShare)}</td>
-      <td class="num">${fmtM(r.sd)}</td>
+      <td class="num">${fmtM(r.bill)}${r.delay25 ? ' <span class="muted">FY29</span>' : ""}</td>
+      <td class="num">${fmtM(r.billSd)}${r.delay25 ? ' <span class="muted">FY29</span>' : ""}</td>
     </tr>`
     )
     .join("");
@@ -1241,6 +1247,258 @@ function renderAdoption(code, st, elec, drift) {
     verifiedNote +
     `</p>`;
   el.innerHTML = shares + band + dollars + hint;
+}
+
+// ---- Render --------------------------------------------------------------
+
+function interventionGridRows(code) {
+  if (!INTERVENTIONS) return [];
+  const rule = $("intervention-rule").value;
+  const coverage = +$("intervention-coverage").value;
+  const effectiveness = +$("intervention-effectiveness").value;
+  let grid;
+  if (effectiveness === 25 || effectiveness === 50) grid = [effectiveness];
+  else grid = [25, 50];
+  return grid.map((value) => INTERVENTIONS.scenarios.find((scenario) =>
+    scenario.ranking_rule === rule && scenario.coverage_pct === coverage &&
+    scenario.effectiveness_pct === value
+  )).filter(Boolean).map((scenario) => [scenario.effectiveness_pct, scenario.states[code]]);
+}
+
+function renderInterventions(code, st, result) {
+  const effectiveness = +$("intervention-effectiveness").value;
+  $("intervention-effectiveness-val").textContent = effectiveness + "%";
+  const summary = summarize(result.rates, st.issuance);
+  const election = electionStats(st, result.rates);
+  const engineOn = $("lever-engine-cut").checked && !$("lever-engine-cut").disabled;
+  const engineNote = engineOn
+    ? ` The cause-coded cut accounts for ${fmtPP(pointRate(st, engineCutErr(st)) - pointRate(st, st.err))} points of that change.`
+    : "";
+  $("interventions-live").innerHTML =
+    `<p><strong>One measurement with the cut:</strong> the file rate ${result.delta <= 0 ? "falls" : "rises"} by ` +
+    `${Math.abs(result.delta).toFixed(3)} points; the simulated measured rate averages ${summary.mean.toFixed(2)}%; ` +
+    `the expected statutory share is ${(100 * summary.eShare / st.issuance).toFixed(2)}% of benefits; and the expected ` +
+    `FY 2028 bill, counting the FY 2026 election and the delay clause, is ${fmtM(election.elect28)}/yr.${engineNote}</p>`;
+  const rows = interventionGridRows(code);
+  if (!rows.length) {
+    $("interventions-sustained-body").textContent = "Precomputed grid unavailable.";
+    return;
+  }
+  const engineCaveat = engineOn
+    ? '<p class="hint">The sustained grid excludes the cause-coded cut.</p>'
+    : "";
+  const label = rows.length === 2
+    ? "Precomputed at 25% and 50% effectiveness"
+    : `Precomputed at ${rows[0][0]}% effectiveness`;
+  $("interventions-sustained-body").innerHTML = engineCaveat + `<p class="hint">${label}</p>` + rows.map(([grid, value]) => {
+    const years = Object.entries(value.sustained_fy2028_30)
+      .map(([year, item]) => `FY ${year}: ${item.expected_share_pct}%`).join(" · ");
+    return `<p><strong>${grid}%:</strong> ${years} · three-year cost ` +
+      `${fmtM(value.sustained_expected_cost_share_dollars_3yr)}</p>`;
+  }).join("");
+}
+
+// ---- The answer -----------------------------------------------------------
+// The selected state in plain sentences, always at the published baseline:
+// the same draws as the all-states table (sampling noise only, no scenario,
+// no drift), so the two never disagree. The analyst tools change
+// assumptions without touching it.
+
+function rateStrip(el, st, q05, q95) {
+  const fy25 = st.official_fy2025, fy24 = st.official;
+  const W = chartWidth(el, 720), narrow = W < 520;
+  const lo = Math.max(0, Math.min(2, Math.floor(Math.min(fy24, fy25, q05)) - 0.5));
+  const hi = Math.max(16, Math.ceil(Math.max(fy24, fy25, q95)) + 1);
+  const L = 6, R = 6, H = 96, top = 22, bandH = 30, mid = top + bandH / 2;
+  const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
+  const ink = cssVar("--muted-foreground") || "#475569";
+  const fg = cssVar("--foreground") || "#000000";
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s += `<defs><pattern id="delay-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">` +
+    `<line x1="0" y1="0" x2="0" y2="6" stroke="${ink}" stroke-width="1.2" opacity="0.5"/></pattern></defs>`;
+  const xd = x(DELAY_THRESHOLD);
+  const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
+  for (const [a, b, t] of bands) {
+    s += `<rect x="${x(a)}" y="${top}" width="${x(b) - x(a)}" height="${bandH}" fill="var(${TIER_VARS[t]})" opacity="0.2"/>`;
+    // Each tier's name sits under its own stretch of the axis; the 15% name
+    // stops at the delay band, which gets its own.
+    const right = t === 15 ? xd : x(b);
+    s += `<text x="${(x(a) + right) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${ink}">${narrow ? `${t}%` : `${t}% share`}</text>`;
+  }
+  s += `<rect x="${xd}" y="${top}" width="${x(hi) - xd}" height="${bandH}" fill="url(#delay-hatch)"/>`;
+  s += `<text x="${(xd + x(hi)) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${ink}">delay</text>`;
+  for (const v of [6, 8, 10, DELAY_THRESHOLD]) {
+    s += `<line x1="${x(v)}" x2="${x(v)}" y1="${top + bandH}" y2="${top + bandH + 5}" stroke="${ink}"/>`;
+    s += `<text x="${x(v)}" y="${top + bandH + 18}" text-anchor="middle" font-size="11" fill="${ink}">${v === DELAY_THRESHOLD ? "13.33%" : v + "%"}</text>`;
+  }
+  s += `<rect x="${x(q05)}" y="${mid - 5}" width="${Math.max(3, x(q95) - x(q05))}" height="10" rx="5" fill="var(--primary)" opacity="0.45"/>`;
+  s += `<circle cx="${x(fy24)}" cy="${mid}" r="5" fill="var(--background)" stroke="${fg}" stroke-width="1.5"/>`;
+  s += `<circle cx="${x(fy25)}" cy="${mid}" r="6.5" fill="var(--primary)" stroke="var(--background)" stroke-width="1.5"/>`;
+  // Centre the label on the FY 2025 dot, clamped inside the chart (bold
+  // glyphs run a little wider than textW's average).
+  const label = `FY 2024 ${pct2(fy24)} → FY 2025 ${pct2(fy25)}`;
+  const half = (textW(label, 12) * 1.08) / 2;
+  const ax = Math.min(Math.max(x(fy25), L + half), W - R - half);
+  s += `<text x="${ax}" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="${fg}">${label}</text>`;
+  el.innerHTML = s + "</svg>";
+  el.setAttribute(
+    "aria-label",
+    `${nameOf($("state").value)}: FY 2024 rate ${pct2(fy24)}, FY 2025 rate ${pct2(fy25)}; 90% of fresh same-size samples ` +
+      `fall between ${pct2(q05)} and ${pct2(q95)}. Tier boundaries at 6, 8 and 10%; delay band above 13.33%.`
+  );
+}
+
+// Writes only when the markup changes, so a re-render with the same answer
+// does not make the aria-live lead re-announce itself.
+function setHTML(el, html) {
+  if (el.dataset.html === html) return;
+  el.innerHTML = html;
+  el.dataset.html = html;
+}
+
+function renderAnswer(code, st, draws) {
+  const name = nameOf(code), its = possessive(name);
+  const el = electionStats(st, draws);
+  const sm = summarize(draws, st.issuance);
+  const fy25 = st.official_fy2025, fy24 = st.official;
+  const tier = el.lockShare;
+  const q05 = quantile(draws, 0.05), q95 = quantile(draws, 0.95);
+  const cases = st.n.toLocaleString();
+  // st.issuance is FY 2024 benefits as weighted in the QC sample, the base
+  // every bill on this page uses (see the method notes).
+  const base = `${fmtWords(st.issuance)} in FY 2024 benefits that its QC sample represents`;
+
+  setHTML(
+    $("answer-lead"),
+    el.delay25
+      ? `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, above 13.33%, so it owes ` +
+        `<strong>nothing for FY 2028</strong>. Its first bill comes in FY 2029, set by its FY 2026 rate, unless that ` +
+        `rate also tops 13.33%; then the first bill moves to FY 2030, set by its FY 2027 rate. A fresh FY 2026 sample ` +
+        `tops 13.33% <strong>${fmtChance(el.pDelay26)} of the time</strong>.`
+      : tier === 0
+        ? `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, below 6%, so at that rate it pays ` +
+          `<strong>no share</strong> of its SNAP benefit costs.`
+        : `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, in the <strong>${tier}% cost-share ` +
+          `tier</strong>. At that tier it would pay <strong>${fmtWords(el.lockTierCost)} a year</strong>, ${tier}% of ` +
+          `the ${base}.`
+  );
+
+  rateStrip($("answer-strip"), st, q05, q95);
+
+  const points = [];
+  const sample = `a fresh sample the size of ${its} FY 2024 public QC file (${cases} cases)`;
+  // Coverage figures: analysis/persistence_backtest_results.json (static vs
+  // widened and rao_yu), locked by tests/test_front_page.py.
+  const noiseOnly =
+    "That counts sampling noise only, so it understates the uncertainty: in a backtest over FY 2016–2024, " +
+    "90% ranges built from sampling noise alone caught the next year's rate 48% of the time, and adding " +
+    "year-to-year movement raised that to 81–85%. The drift option in the analyst tools adds an estimate of that movement.";
+  if (el.delay25) {
+    points.push([
+      "How sure",
+      `FY 2025 is published, so the FY 2028 delay is settled. The FY 2026 rate is not: ${sample} lands between ` +
+        `${pct2(q05)} and ${pct2(q95)} 90% of the time. ${noiseOnly}`,
+    ]);
+  } else {
+    const nearest = [6, 8, 10].reduce((b, v) => (Math.abs(v - fy25) < Math.abs(b - fy25) ? v : b));
+    const gap = fy25 - nearest;
+    const edge = Math.abs(gap) < 1
+      ? ` ${name} sits ${Math.abs(gap).toFixed(2)} points ${gap >= 0 ? "above" : "below"} the ${nearest}% boundary.`
+      : "";
+    const t24 = tierOf(fy24);
+    const moved = t24 !== tier ? ` Its FY 2024 rate, ${pct2(fy24)}, was in the ${t24}% tier.` : "";
+    // Near the delay line the delay, not the tier, is the live question.
+    const nearDelay = el.pDelay26 >= 0.05
+      ? ` ${fmtChance(el.pDelay26)[0].toUpperCase() + fmtChance(el.pDelay26).slice(1)} of such samples top 13.33%, ` +
+        `which would delay its first bill (see Delay band).`
+      : "";
+    points.push([
+      "How sure",
+      `The published rate comes from a sample of cases. ${sample[0].toUpperCase() + sample.slice(1)} lands in a ` +
+        `different tier <strong>${fmtChance(1 - sm.pt[tier])} of the time</strong>, and 90% of such samples fall ` +
+        `between ${pct2(q05)} and ${pct2(q95)}.${nearDelay}${edge}${moved} ${noiseOnly}`,
+    ]);
+  }
+
+  if (el.delay25) {
+    points.push([
+      "Delay band",
+      `Rates above 13.33% delay the first bill, since 1.5 times the rate then reaches 20% ` +
+        `(7 U.S.C. 2013(a)(2)(B)(iii)). At ${pct2(fy25)}, ${name} is ${(fy25 - DELAY_THRESHOLD).toFixed(2)} points ` +
+        `above that line.`,
+    ]);
+  } else {
+    const cross = el.pDelay26 >= 0.005
+      ? `, and a fresh FY 2026 sample crosses it <strong>${fmtChance(el.pDelay26)} of the time</strong>, which would ` +
+        `move its first bill to FY 2030, set by its FY 2027 rate.`
+      : `; a fresh FY 2026 sample crosses it less than 1% of the time.`;
+    points.push([
+      "Delay band",
+      `Rates above 13.33% delay the first bill, since 1.5 times the rate then reaches 20% ` +
+        `(7 U.S.C. 2013(a)(2)(B)(iii)). ${name} is ${(DELAY_THRESHOLD - fy25).toFixed(2)} points below that line${cross}`,
+    ]);
+  }
+
+  const closed = "FY 2026's sample period ended September 30, 2026, and its rate is not yet published.";
+  if (el.delay25) {
+    points.push([
+      "FY 2026 rate",
+      `${closed} If it stays at or below 13.33%, it sets ${its} first bill, for FY 2029. Counting the chance it ` +
+        `does not, which leaves FY 2029 at $0, the expected FY 2029 bill is <strong>${fmtWords(el.bill29)} a year</strong>.`,
+    ]);
+  } else if (tier === 0) {
+    points.push([
+      "FY 2026 rate",
+      `${name} owes nothing for FY 2028 whichever year it uses. ${closed} That rate sets the FY 2029 bill: ` +
+        `<strong>${fmtWords(el.bill29)} a year</strong> in expectation.`,
+    ]);
+  } else {
+    points.push([
+      "FY 2026 option",
+      `For FY 2028, ${name} can elect its FY 2026 rate instead of its FY 2025 rate (7 U.S.C. 2013(a)(2)(B)(ii)). ` +
+        `${closed} A fresh sample centered on the FY 2025 level comes in below ${pct2(fy25)} ${fmtChance(el.pWin)} of ` +
+        `the time. Counting that option${el.pDelay26 >= 0.005 ? " and the chance of a delay" : ""}, the expected ` +
+        `FY 2028 bill is <strong>${fmtWords(el.elect28)} a year</strong>, against ${fmtWords(el.lock28)} if it kept ` +
+        `its FY 2025 rate. The FY 2026 rate also sets the FY 2029 bill: ${fmtWords(el.bill29)} a year in expectation.`,
+    ]);
+  }
+
+  // The href carries the state so a new-tab open lands on the same answer;
+  // a plain click scrolls in place (see main).
+  points.push([
+    "FY 2027, open now",
+    `FY 2027 began October 1, 2026 and runs through September 30, 2027. Its rate sets ${its} FY 2030 bill, and ` +
+      `most of its monthly QC sample is still to be drawn. ` +
+      `<a href="?state=${code}#fy2027" data-scroll="fy2027">More on FY 2027</a>`,
+  ]);
+
+  setHTML(
+    $("answer-points"),
+    points.map(([k, v]) => `<div class="pt"><dt>${k}</dt><dd>${v}</dd></div>`).join("")
+  );
+}
+
+function renderVerifyCta(code, st) {
+  const cta = $("verify-cta");
+  const name = nameOf(code);
+  if (st.verified) {
+    // verified counts every replayable review; the rest of the file is the
+    // SSI-CAP class (engine_data.json excluded_reasons, locked by tests).
+    const excluded = st.n - st.verified;
+    cta.innerHTML =
+      `${possessive(name)} encoded SNAP benefit computation reproduces its FY 2024 QC file for all ${st.verified} ` +
+      `replayable reviews, exact at every compared stage (gross income, standard and shelter deductions, net income, ` +
+      `maximum allotment, benefit)${excluded ? `; ${excluded} SSI-CAP standardized-benefit cases are excluded as an ` +
+      `enumerated program-structure class` : ""}. QC-adjudicated deductions, utility allowances, and eligibility ` +
+      `findings enter as inputs, so the replay checks benefit arithmetic and leaves eligibility untested. ` +
+      `<a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · ` +
+      `<a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a>`;
+  } else {
+    cta.innerHTML =
+      `Simulation for ${name} uses the public QC file only; its encoded rules have not yet been replayed against ` +
+      `its QC file. Seven states have been (CO, NY, CA, AZ, GA, MD, TX). Interested in this for your state? ` +
+      `<a href="mailto:hello@policyengine.org">hello@policyengine.org</a>`;
+  }
 }
 
 // ---- Render --------------------------------------------------------------
