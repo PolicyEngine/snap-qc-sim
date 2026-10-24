@@ -36,6 +36,16 @@ const ADOPT_DATA_SHA256 =
 const DELAY_THRESHOLD = 20 / 1.5;
 const delayMet = (rate) => rate * 1.5 >= 20;
 
+// Published FY 2027 parameters. The FY 2027 repricing artifact predates them
+// and carries projections; the panel says so while the two disagree.
+// FNA, "SNAP – Fiscal Year 2027 Cost-of-Living Adjustments", August 21, 2026:
+// 48 states and DC, household of four.
+const FY27_MAX_4P_PUBLISHED = 1023;
+// 7 USC 2025(c)(1)(A)(ii): floor(37 × June reference-family Thrifty Food Plan
+// cost / 632.30). USDA's published June 2026 cost is $1,023.20.
+const FY27_TFP_JUNE_2026 = 1023.2;
+const FY27_TOLERANCE_PUBLISHED = Math.floor((37 * FY27_TFP_JUNE_2026) / 632.3);
+
 // Inside the policyengine.org AppPage iframe the site shell provides the
 // PolicyEngine header/footer; hide the standalone wordmark and mirror URL
 // state up to the parent so the address bar stays shareable.
@@ -861,6 +871,9 @@ function renderFy2027(code) {
   const name = nameOf(code);
   const st27 = FY27.states[code];
   const t27 = FY27.thresholds["2027"];
+  const projMax = FY27.fy2027_max_allotment_4p_48dc.dollars;
+  const projected =
+    projMax !== FY27_MAX_4P_PUBLISHED || t27.threshold_dollars_strictly_greater_than !== FY27_TOLERANCE_PUBLISHED;
   // 7 CFR 272.2(e)(4)(ii): major sampling-plan changes go to FNS for approval
   // at least 60 days before implementation, minor ones at least 30.
   const facts =
@@ -868,9 +881,9 @@ function renderFy2027(code) {
     `and two kinds of change still reach it. How a state runs SNAP from here shows up in the months not yet sampled. ` +
     `And a state can change its QC sampling plan with FNA approval, filed at least 60 days before a major change takes effect ` +
     `or 30 days before a minor one (7 CFR 272.2(e)(4)).</p>` +
-    `<p class="sub">FY 2027 is also the first year the 2025 reconciliation law's parameter changes bind the QC arithmetic. ` +
-    `Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U — computed from the published June 2026 index, the 48-state four-person maximum is $${FY27.fy2027_max_allotment_4p_48dc.dollars.toLocaleString()} (${FY27.fy2027_max_allotment_4p_48dc.status} until FNA's official notice) — ` +
-    `and the QC tolerance threshold projects to $${t27.threshold_dollars_strictly_greater_than} (${t27.status}; hardens when USDA publishes the June 2026 food-plan cost).</p>`;
+    `<p class="sub">FNA's FY 2027 cost-of-living notice (August 21, 2026) set the 48-state four-person maximum allotment at ` +
+    `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}. QC disregards FY 2027 errors of $${FY27_TOLERANCE_PUBLISHED} or less ` +
+    `(7 U.S.C. 2025(c)(1)(A)(ii), from the June 2026 Thrifty Food Plan cost of $${FY27_TFP_JUNE_2026.toLocaleString("en-US", { minimumFractionDigits: 2 })}).</p>`;
   if (!st27) {
     el.innerHTML =
       facts +
@@ -882,9 +895,14 @@ function renderFy2027(code) {
   const hiP = Math.max(b27.anchored_fixed_pct, b27.anchored_proportional_pct);
   el.innerHTML =
     facts +
-    `<p class="sub">Repricing ${possessive(name)} FY 2024 cases under FY 2027 parameters and a projected caseload mix, then re-anchoring at its official FY 2025 rate, puts its mechanical FY 2027 rate between <strong>${loP.toFixed(1)}%</strong> and <strong>${hiP.toFixed(1)}%</strong>. ` +
+    `<p class="sub">Repricing ${possessive(name)} FY 2024 cases under ${projected ? "projected " : ""}FY 2027 parameters and a projected caseload mix, then re-anchoring at its official FY 2025 rate, puts its mechanical FY 2027 rate between <strong>${loP.toFixed(1)}%</strong> and <strong>${hiP.toFixed(1)}%</strong>. ` +
     `The range comes from one accounting choice: whether each case's recorded error carries forward as the same dollar amount or in proportion to its repriced benefit. ` +
-    `It is not a confidence interval, and neither end predicts how the state will behave.</p>` +
+    `It is not a confidence interval, and neither end predicts how the state will behave.` +
+    (projected
+      ? ` The projected parameters predate FNA's notice (a $${projMax.toLocaleString()} maximum allotment against the published ` +
+        `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}), so this range is provisional until it is rerun on the published values.`
+      : "") +
+    `</p>` +
     `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers">${fy2027BandSvg(st27, chartWidth(el))}</div>`;
 }
 
@@ -1096,10 +1114,11 @@ function adoptStats(st, code, drift) {
 
 function adoptionBandSvg(official, strict, broad, W = 920) {
   const lo = 0, hi = Math.max(16, Math.ceil(official) + 1);
-  // Narrow charts stack the labels on their own rows: the value pair above
-  // the range bar and the official rate below it, so none of them collide.
+  // Labels sit on their own rows: the value pair above the range bar and the
+  // official rate below it. Side-by-side labels collided whenever a band end
+  // sat near the official rate, which is most states.
   const narrow = W < 560;
-  const H = narrow ? 112 : 96, L = 52, R = 12, T = 8, B = 26;
+  const H = 112, L = 52, R = 12, T = 8, B = 26;
   const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
   const ink = cssVar("--muted-foreground") || "#475569";
   const border = cssVar("--border") || "#E2E8F0";
@@ -1112,28 +1131,22 @@ function adoptionBandSvg(official, strict, broad, W = 920) {
   // The delay threshold drives the panel's nonmonotonicity — draw it like
   // the FY 2027 band chart so crossings are visible at a glance.
   const dth = x(DELAY_THRESHOLD);
+  const dl = narrow ? "delay" : "delay 13.33%";
   s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
-  s += `<text ${edgeLabel(dth, narrow ? "delay" : "delay 13.33%", 9, W, 3)} y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">${narrow ? "delay" : "delay 13.33%"}</text>`;
-  const y = narrow ? 60 : 58;
+  s += `<text ${edgeLabel(dth, dl, 9, W, 3)} y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">${dl}</text>`;
+  const y = 60;
   const a = x(broad), b = x(strict);
   s += `<text x="2" y="${y + 4}" font-size="11" fill="${ink}">FY 2026</text>`;
   s += `<line x1="${Math.min(a, b)}" x2="${Math.max(a, b)}" y1="${y}" y2="${y}" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>`;
   s += `<circle cx="${a}" cy="${y}" r="4" fill="var(--primary)"/><circle cx="${b}" cy="${y}" r="4" fill="var(--primary)"/>`;
+  const pair = `broad ${broad.toFixed(1)}% · strict ${strict.toFixed(1)}%`;
+  const pw = textW(pair, 10);
+  const px = Math.min(Math.max((a + b) / 2, L + pw / 2), W - 2 - pw / 2);
+  s += `<text x="${px}" y="${y - 10}" text-anchor="middle" font-size="10" fill="${ink}">${pair}</text>`;
   const off = x(official);
+  const ol = narrow ? `FY25 ${official.toFixed(2)}%` : `FY25 official ${official.toFixed(2)}%`;
   s += `<line x1="${off}" x2="${off}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-  if (narrow) {
-    const pair = `broad ${broad.toFixed(1)}% · strict ${strict.toFixed(1)}%`;
-    const pw = textW(pair, 10);
-    const px = Math.min(Math.max((a + b) / 2, L + pw / 2), W - 2 - pw / 2);
-    s += `<text x="${px}" y="${y - 10}" text-anchor="middle" font-size="10" fill="${ink}">${pair}</text>`;
-    const ol = `FY25 ${official.toFixed(2)}%`;
-    s += `<text ${edgeLabel(off, ol, 10, W)} y="${H - B - 4}" font-size="10" fill="${ink}">${ol}</text>`;
-  } else {
-    s += `<text x="${Math.min(a, b) - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="${ink}">broad ${broad.toFixed(1)}%</text>`;
-    s += `<text x="${Math.max(a, b) + 6}" y="${y + 4}" font-size="10" fill="${ink}">strict ${strict.toFixed(1)}%</text>`;
-    const ol = `FY25 official ${official.toFixed(2)}%`;
-    s += `<text ${edgeLabel(off, ol, 10, W)} y="${H - B - 4}" font-size="10" fill="${ink}">${ol}</text>`;
-  }
+  s += `<text ${edgeLabel(off, ol, 10, W)} y="${H - B - 4}" font-size="10" fill="${ink}">${ol}</text>`;
   for (let v = lo, step = tickStep(hi - lo, W - L - R); v <= hi; v += step) {
     s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
   }

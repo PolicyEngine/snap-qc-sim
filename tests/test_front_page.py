@@ -2,6 +2,7 @@
 retired jargon, and the pure formatting helpers in app.js."""
 
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -98,6 +99,29 @@ def test_fy2026_is_past_tense() -> None:
     assert "FY 2026's sample period ended September 30, 2026" in text
 
 
+def test_fy2027_parameters_are_the_published_values() -> None:
+    """The FY 2027 panel quotes FNA's August 21, 2026 COLA notice and the
+    tolerance computed from the published June 2026 Thrifty Food Plan cost,
+    and flags the repricing as provisional while its artifact still carries
+    the pre-publication projection."""
+    helpers = _run_helpers(
+        [["FY27_MAX_4P_PUBLISHED"], ["FY27_TFP_JUNE_2026"], ["FY27_TOLERANCE_PUBLISHED"]]
+    )
+    max4, tfp, tol = helpers
+    assert max4 == 1023 and tfp == 1023.2
+    # floor(37 × June TFP / 632.30), 7 USC 2025(c)(1)(A)(ii); the FY 2026
+    # threshold in the artifact (58, from June 2025's $994.40) checks the rule.
+    assert tol == math.floor(37 * tfp / 632.30) == 59
+    fy27 = json.loads(FY27.read_bytes())
+    assert math.floor(37 * float(fy27["thresholds"]["2026"]["reference_family_monthly_cost"]) / 632.30) == 58
+    js = _app_text()
+    assert "Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U" not in js
+    assert "until FNA's official notice" not in js
+    assert "hardens when USDA publishes" not in js
+    if fy27["fy2027_max_allotment_4p_48dc"]["dollars"] != max4:
+        assert "so this range is provisional until it is rerun on the published values" in js
+
+
 @pytest.mark.parametrize(
     "phrase",
     [
@@ -145,7 +169,17 @@ def test_file_rate_is_defined_where_the_analyst_tools_begin() -> None:
 # constants and pure functions only; node evaluates it and returns each
 # helper's output for a batch of inputs.
 
-HELPERS = ("fmtWords", "fmtChance", "quantile", "tickStep", "textW", "edgeLabel")
+HELPERS = (
+    "fmtWords",
+    "fmtChance",
+    "quantile",
+    "tickStep",
+    "textW",
+    "edgeLabel",
+    "FY27_MAX_4P_PUBLISHED",
+    "FY27_TFP_JUNE_2026",
+    "FY27_TOLERANCE_PUBLISHED",
+)
 
 
 def _run_helpers(calls: list[list]) -> list:
@@ -159,7 +193,8 @@ def _run_helpers(calls: list[list]) -> list:
         + prelude
         + f"\nconst H = {{{', '.join(HELPERS)}}};\n"
         + "const calls = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
-        + "process.stdout.write(JSON.stringify(calls.map(([f, ...a]) => H[f](...a))));\n"
+        + "const call = ([f, ...a]) => (typeof H[f] === 'function' ? H[f](...a) : H[f]);\n"
+        + "process.stdout.write(JSON.stringify(calls.map(call)));\n"
     )
     out = subprocess.run(
         [node, "-e", harness],
