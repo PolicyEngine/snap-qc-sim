@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20261004a"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20261024a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
@@ -36,6 +36,16 @@ const ADOPT_DATA_SHA256 =
 const DELAY_THRESHOLD = 20 / 1.5;
 const delayMet = (rate) => rate * 1.5 >= 20;
 
+// Published FY 2027 parameters. The FY 2027 repricing artifact predates them
+// and carries projections; the panel says so while the two disagree.
+// FNA, "SNAP – Fiscal Year 2027 Cost-of-Living Adjustments", August 21, 2026:
+// 48 states and DC, household of four.
+const FY27_MAX_4P_PUBLISHED = 1023;
+// 7 USC 2025(c)(1)(A)(ii): floor(37 × June reference-family Thrifty Food Plan
+// cost / 632.30). USDA's published June 2026 cost is $1,023.20.
+const FY27_TFP_JUNE_2026 = 1023.2;
+const FY27_TOLERANCE_PUBLISHED = Math.floor((37 * FY27_TFP_JUNE_2026) / 632.3);
+
 // Inside the policyengine.org AppPage iframe the site shell provides the
 // PolicyEngine header/footer; hide the standalone wordmark and mirror URL
 // state up to the parent so the address bar stays shareable.
@@ -47,6 +57,58 @@ const fmtM = (v) => {
 };
 const fmtPP = (v, digits = 3) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(digits)}`;
 const tierOf = (r) => { for (const [cut, s] of TIERS) if (r < cut) return s; return 15; };
+// Prose forms for the plain-language answer. Both round first and pick the
+// wording from the rounded value, so they never print "$1000 million",
+// "0%" or "100%" (tests/test_front_page.py).
+const fmtWords = (v) => {
+  if (v <= 0) return "$0";
+  const m = Math.round(v / 1e6);
+  if (m < 1) return "under $1 million";
+  return m >= 1000 ? `$${(v / 1e9).toFixed(2)} billion` : `$${m} million`;
+};
+const fmtChance = (p) => {
+  const k = Math.round(100 * p);
+  return k < 1 ? "less than 1%" : k > 99 ? "more than 99%" : `${k}%`;
+};
+const pct2 = (r) => r.toFixed(2) + "%";
+
+const STATE_NAMES = {
+  AK: "Alaska", AL: "Alabama", AR: "Arkansas", AZ: "Arizona", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DC: "District of Columbia", DE: "Delaware",
+  FL: "Florida", GA: "Georgia", GU: "Guam", HI: "Hawaii", IA: "Iowa", ID: "Idaho",
+  IL: "Illinois", IN: "Indiana", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+  MA: "Massachusetts", MD: "Maryland", ME: "Maine", MI: "Michigan", MN: "Minnesota",
+  MO: "Missouri", MS: "Mississippi", MT: "Montana", NC: "North Carolina",
+  ND: "North Dakota", NE: "Nebraska", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NV: "Nevada", NY: "New York", OH: "Ohio", OK: "Oklahoma",
+  OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VA: "Virginia",
+  VI: "U.S. Virgin Islands", VT: "Vermont", WA: "Washington", WI: "Wisconsin",
+  WV: "West Virginia", WY: "Wyoming",
+};
+const nameOf = (code) => STATE_NAMES[code] ?? code;
+const possessive = (name) => name + (name.endsWith("s") ? "'" : "'s");
+
+function quantile(draws, q) {
+  const s = Float64Array.from(draws).sort();
+  const i = (s.length - 1) * q;
+  const lo = Math.floor(i);
+  const hi = Math.min(lo + 1, s.length - 1);
+  return s[lo] + (s[hi] - s[lo]) * (i - lo);
+}
+
+// Charts draw at the container's own pixel width, so labels keep a
+// readable size on phones; a closed <details> reports 0 and gets the
+// fallback until it opens and re-renders.
+const chartWidth = (el, fallback = 920) => Math.round(el.clientWidth) || fallback;
+// Rough SVG text width for label placement (Inter averages ~0.56em a glyph).
+const textW = (str, size) => str.length * size * 0.56;
+// Axis tick step (in rate points) that keeps tick labels at least ~30px apart.
+const tickStep = (span, px) => [1, 2, 4, 5, 10].find((d) => (px * d) / span >= 30) ?? 10;
+// A start-anchored label at x that would run past the right edge flips to end
+// at the left of x instead. Returns the x and anchor attributes to splice in.
+const edgeLabel = (x, str, size, W, gap = 4) =>
+  x + gap + textW(str, size) > W - 2 ? `x="${x - gap}" text-anchor="end"` : `x="${x + gap}"`;
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -272,7 +334,8 @@ const cssVar = (name) =>
 function histogram(el, base, scen, official) {
   const lo = Math.min(4, Math.floor(Math.min(...base, ...scen)) - 0.5);
   const hi = Math.max(12, Math.ceil(Math.max(...base, ...scen)) + 0.5);
-  const bins = 60, W = 920, H = 260, L = 42, R = 12, T = 12, B = 30;
+  const W = chartWidth(el), narrow = W < 560;
+  const bins = narrow ? 40 : 60, H = narrow ? 200 : 260, L = 34, R = 12, T = 12, B = 30;
   const bw = (hi - lo) / bins;
   const count = (rates) => {
     const c = new Array(bins).fill(0);
@@ -295,7 +358,7 @@ function histogram(el, base, scen, official) {
     if (b <= lo || a >= hi) continue;
     const xa = x(Math.max(a, lo)), xb = x(Math.min(b, hi));
     s += `<rect x="${xa}" y="${T}" width="${xb - xa}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
-    s += `<text x="${(xa + xb) / 2}" y="${T + 13}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
+    s += `<text x="${(xa + xb) / 2}" y="${T + 13}" text-anchor="middle" font-size="10" fill="${ink}">${narrow ? `${t}%` : TIER_LABELS[t]}</text>`;
   }
   for (let b = 0; b < bins; b++) {
     if (cs[b] === 0) continue;
@@ -309,13 +372,16 @@ function histogram(el, base, scen, official) {
   }
   s += `<path d="${path}" fill="none" stroke="${ink}" stroke-width="1.6" opacity="0.9"/>`;
   s += `<line x1="${x(official)}" x2="${x(official)}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-  s += `<text x="${x(official) + 4}" y="${H - B - 6}" font-size="10" fill="${ink}">FY25 official ${official.toFixed(2)}%</text>`;
+  const offLabel = `FY25 official ${official.toFixed(2)}%`;
+  s += `<text class="halo" ${edgeLabel(x(official), offLabel, 10, W)} y="${H - B - 6}" font-size="10" fill="${ink}">${offLabel}</text>`;
   if (hi > DELAY_THRESHOLD) {
     const xd = x(DELAY_THRESHOLD);
     s += `<line x1="${xd}" x2="${xd}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
-    s += `<text x="${xd + 4}" y="${T + 12}" font-size="10" fill="${ink}" opacity="0.85">delay ≥13.34% → $0 in FY28</text>`;
+    const dl = narrow ? "delay" : "delay ≥13.34% → $0 in FY28";
+    s += `<text ${edgeLabel(xd, dl, 10, W)} y="${T + 26}" font-size="10" fill="${ink}" opacity="0.85">${dl}</text>`;
   }
-  for (let v = Math.ceil(lo); v <= hi; v += 2) {
+  const step = tickStep(hi - lo, W - L - R);
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
     s += `<line x1="${x(v)}" x2="${x(v)}" y1="${H - B}" y2="${H - B + 4}" stroke="${border}"/>`;
     s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
   }
@@ -336,7 +402,7 @@ function histogram(el, base, scen, official) {
 }
 
 function tierBars(el, rows, issuance) {
-  const W = 920, H = 46 * rows.length + 8, L = 78, R = 12;
+  const W = chartWidth(el), H = 46 * rows.length + 8, L = 70, R = 12;
   const ink = cssVar("--muted-foreground") || "#475569";
   let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
   rows.forEach(([name, pt], i) => {
@@ -347,10 +413,10 @@ function tierBars(el, rows, issuance) {
       const w = pt[t] * (W - L - R);
       if (w <= 0) continue;
       s += `<rect class="seg" data-t="${t}" data-p="${pt[t]}" data-row="${name}" x="${xacc}" y="${y0}" width="${Math.max(0, w - 2)}" height="30" rx="3" fill="var(${TIER_VARS[t]})"/>`;
-      if (pt[t] >= 0.07) {
+      if (pt[t] >= 0.07 && w >= 64) {
         const darkMode = document.documentElement.classList.contains("dark");
         const light = darkMode ? t >= 10 : t <= 5;
-        const cost = t > 0 && pt[t] >= 0.18 ? ` · ${fmtM((t / 100) * issuance)}/yr` : "";
+        const cost = t > 0 && pt[t] >= 0.18 && w >= 150 ? ` · ${fmtM((t / 100) * issuance)}/yr` : "";
         s += `<text x="${xacc + w / 2}" y="${y0 + 20}" text-anchor="middle" font-size="11" fill="${light ? "#1E293B" : "white"}">${TIER_LABELS[t].split(" ")[0]} · ${(pt[t] * 100).toFixed(0)}%${cost}</text>`;
       }
       xacc += w;
@@ -391,6 +457,7 @@ function computeNational() {
       const adopt = adoptStats(st, code, null);
       NAT.set(code, {
         code,
+        name: nameOf(code),
         official: st.official,
         fy2025: st.official_fy2025,
         tier,
@@ -421,15 +488,18 @@ function renderNatTakeaway() {
     withAdopt.length === rows.length
       ? ` If every jurisdiction adopted a verified rules engine, the same sum falls to ` +
         `${fmtM(withAdopt.reduce((a, r) => a + r.adoptBroad28, 0))}–` +
-        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))}/yr under the broad-to-strict ` +
-        `accounting scenarios in the adoption panel above.`
+        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))} a year under the broad-to-strict ` +
+        `accounting scenarios in the adoption panel of the analyst tools.`
       : "";
+  // The FY 2024→2025 counts come from analysis/fy2025_movement.json (18
+  // tier changes, 7 of them among the 10 moves beyond the two-year noise
+  // band); tests/test_front_page.py locks this copy to that artifact.
   $("nat-takeaway").textContent =
     `At FY 2025 official rates and FY 2024 sample sizes, ${flip} of ${rows.length} jurisdictions have at least a 40% chance ` +
-    `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Summed expected FY 2028 ` +
-    `bills across all jurisdictions — each electing its better year, net of delayed starts: ${fmtM(totalE)}/yr. ${delayed} jurisdictions ` +
-    `above the 13.33% delay threshold owe $0 in FY 2028 and are first billed in FY 2029, keyed to the FY 2026 rate. Between FY 2024 and ` +
-    `FY 2025, 18 jurisdictions changed tiers while only 10 moved beyond two-year sampling noise.` +
+    `that a QC-sized FY 2026 measurement lands in a different cost-share tier than their locked FY 2025 rate. Expected FY 2028 ` +
+    `bills, each jurisdiction electing its better year and net of delayed starts, sum to ${fmtM(totalE)} a year. ${delayed} jurisdictions ` +
+    `above the 13.33% delay threshold owe nothing for FY 2028 and are first billed in FY 2029, keyed to the FY 2026 rate. Between FY 2024 and ` +
+    `FY 2025, 18 jurisdictions changed tiers, and 11 of those 18 changes sit inside the two-year sampling-noise band.` +
     adoptLine;
 }
 
@@ -443,7 +513,7 @@ function renderNatTable() {
   body.innerHTML = rows
     .map(
       (r) => `<tr data-code="${r.code}" class="${r.code === $("state").value ? "current" : ""}">
-      <td>${r.code}${r.verified ? ' <span class="vmark" title="Benefit computation verified against every replayable FY 2024 QC case">✓</span>' : ""}</td>
+      <th scope="row">${r.name}${r.verified ? ' <span class="vmark" title="Benefit arithmetic reproduced for every replayable FY 2024 QC case; eligibility untested">✓</span>' : ""}</th>
       <td class="num">${r.official.toFixed(2)}%</td>
       <td class="num">${r.fy2025.toFixed(2)}%</td>
       <td><span class="dot" style="background:var(${TIER_VARS[r.tier]})"></span>${TIER_LABELS[r.tier]}${r.delay25 ? ' <span class="delaytag" title="Rate × 1.5 ≥ 20%: $0 in FY 2028, first bill FY 2029 keyed to the FY 2026 rate">delayed</span>' : ""}</td>
@@ -463,7 +533,7 @@ function renderNatTable() {
     tr.addEventListener("click", () => {
       $("state").value = tr.dataset.code;
       $("state").dispatchEvent(new Event("change"));
-      document.querySelector(".controls").scrollIntoView({ behavior: "smooth" });
+      $("answer").scrollIntoView({ behavior: "smooth" });
     });
   });
 }
@@ -479,7 +549,11 @@ function readUrl() {
   // Legacy accounting-lever params (levers, eff, mode) are ignored: those
   // scenarios suppressed observed error dollars by finding category, which
   // is an accounting bound, not a prediction, and were removed 2026-08-07.
-  return { smd: p.get("smd") === "1", engine: p.get("engine") === "1" };
+  const smd = p.get("smd") === "1", engine = p.get("engine") === "1";
+  // A shared link that carries any analyst setting opens the analyst tools.
+  if (smd || engine || p.get("drift") === "1" || +p.get("audits") || location.hash === "#analyst")
+    $("analyst").open = true;
+  return { smd, engine };
 }
 
 function writeUrl() {
@@ -737,7 +811,7 @@ function mechanismLine(scenarioOn, driftOn) {
     : "Sampling engine: resamples the state's observed FY 2024 QC error dollars, centered on the official rate.";
   return driftOn
     ? engine +
-        " Drift band on: each draw adds year-over-year process movement, N(0, 1.07pp²), calibrated to the single realized FY 2024→2025 transition."
+        " Drift on: each draw adds year-to-year program movement, a normal draw with a 1.07-point standard deviation, calibrated to the single realized FY 2024→2025 transition."
     : engine;
 }
 
@@ -745,11 +819,16 @@ function mechanismLine(scenarioOn, driftOn) {
 // Static repriced bands from the committed FY2027-mode payload: the
 // mechanical rate under future-year parameters and composition, re-anchored
 // at the official FY 2025 level, bracketed by the two deviation-carry
-// accounting conventions. Verified states only; no case-level repricing
-// exists for the other 46.
+// accounting conventions (each case's recorded deviation carried as fixed
+// dollars, or in proportion to its repriced benefit). Verified states only;
+// no case-level repricing exists for the other 46.
 
-function fy2027BandSvg(st27) {
-  const lo = 4, hi = 16, W = 920, H = 128, L = 42, R = 12, T = 8, B = 26;
+function fy2027BandSvg(st27, W = 920) {
+  // Widen past 16% when a band end or the official rate runs higher, leaving
+  // two points of room for the value label beside the dot.
+  const vals = ["2026", "2027"].flatMap((y) => [st27.bands[y].anchored_fixed_pct, st27.bands[y].anchored_proportional_pct]);
+  const lo = 4, hi = Math.max(16, Math.ceil(Math.max(...vals, st27.official_fy2025_pct)) + 2);
+  const H = 128, L = 52, R = 12, T = 8, B = 26;
   const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
   const ink = cssVar("--muted-foreground") || "#475569";
   const border = cssVar("--border") || "#E2E8F0";
@@ -757,7 +836,7 @@ function fy2027BandSvg(st27) {
   const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
   for (const [a, b, t] of bands) {
     s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
-    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
+    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${W < 560 ? `${t}%` : TIER_LABELS[t]}</text>`;
   }
   const dth = x(DELAY_THRESHOLD);
   s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
@@ -777,8 +856,9 @@ function fy2027BandSvg(st27) {
   }
   const off = x(st27.official_fy2025_pct);
   s += `<line x1="${off}" x2="${off}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-  s += `<text x="${off + 4}" y="${H - B - 4}" font-size="10" fill="${ink}">FY25 official ${st27.official_fy2025_pct.toFixed(2)}%</text>`;
-  for (let v = lo; v <= hi; v += 2) {
+  const ol = `FY25 official ${st27.official_fy2025_pct.toFixed(2)}%`;
+  s += `<text ${edgeLabel(off, ol, 10, W)} y="${H - B - 4}" font-size="10" fill="${ink}">${ol}</text>`;
+  for (let v = lo, step = tickStep(hi - lo, W - L - R); v <= hi; v += step) {
     s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
   }
   s += `<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="${border}"/>`;
@@ -788,17 +868,26 @@ function fy2027BandSvg(st27) {
 function renderFy2027(code) {
   const el = $("fy2027-body");
   if (!FY27) { el.textContent = "FY 2027 payload unavailable."; return; }
+  const name = nameOf(code);
   const st27 = FY27.states[code];
   const t27 = FY27.thresholds["2027"];
+  const projMax = FY27.fy2027_max_allotment_4p_48dc.dollars;
+  const projected =
+    projMax !== FY27_MAX_4P_PUBLISHED || t27.threshold_dollars_strictly_greater_than !== FY27_TOLERANCE_PUBLISHED;
+  // 7 CFR 272.2(e)(4)(ii): major sampling-plan changes go to FNS for approval
+  // at least 60 days before implementation, minor ones at least 30.
   const facts =
-    `<p class="sub">FY 2027 is the first measurement year still open to policy and sampling-plan choices — it sets the FY 2030 bill. ` +
-    `Sampling-plan changes go to the regional office before the review period, 60 days ahead for major changes and 30 for minor ones. ` +
-    `Under OBBBA §10101, FY 2027 maximum allotments index by June-to-June CPI-U — computed from the published June 2026 index, the 48-state four-person maximum is $${FY27.fy2027_max_allotment_4p_48dc.dollars.toLocaleString()} (${FY27.fy2027_max_allotment_4p_48dc.status} until FNA's official notice) — ` +
-    `and the QC tolerance threshold projects to $${t27.threshold_dollars_strictly_greater_than} (${t27.status}; hardens when USDA publishes the June 2026 food-plan cost).</p>`;
+    `<p>FY 2027 began October 1, 2026 and runs through September 30, 2027. Its rate sets each state's FY 2030 bill, ` +
+    `and two kinds of change still reach it. How a state runs SNAP from here shows up in the months not yet sampled. ` +
+    `And a state can change its QC sampling plan with FNA approval, filed at least 60 days before a major change takes effect ` +
+    `or 30 days before a minor one (7 CFR 272.2(e)(4)).</p>` +
+    `<p class="sub">FNA's FY 2027 cost-of-living notice (August 21, 2026) set the 48-state four-person maximum allotment at ` +
+    `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}. QC disregards FY 2027 errors of $${FY27_TOLERANCE_PUBLISHED} or less ` +
+    `(7 U.S.C. 2025(c)(1)(A)(ii), from the June 2026 Thrifty Food Plan cost of $${FY27_TFP_JUNE_2026.toLocaleString("en-US", { minimumFractionDigits: 2 })}).</p>`;
   if (!st27) {
     el.innerHTML =
       facts +
-      `<p class="sub">Repriced projections require verified encodings; this state's rules are not yet independently verified, so no case-level repricing exists for it. Parameter-scaling inputs ship in the committed artifacts.</p>`;
+      `<p class="sub">Repriced FY 2027 projections need a verified encoding of the state's rules. ${possessive(name)} rules are not yet independently verified, so no case-level repricing exists for it. Parameter-scaling inputs ship in the committed artifacts.</p>`;
     return;
   }
   const b27 = st27.bands["2027"];
@@ -806,8 +895,15 @@ function renderFy2027(code) {
   const hiP = Math.max(b27.anchored_fixed_pct, b27.anchored_proportional_pct);
   el.innerHTML =
     facts +
-    `<p class="sub">Repricing this state's FY 2024 cases under FY 2027 parameters and forward composition, re-anchored at the official FY 2025 level, puts its mechanical FY 2027 rate between <strong>${loP.toFixed(1)}%</strong> and <strong>${hiP.toFixed(1)}%</strong> — the band is the gap between the two deviation-carry accounting conventions (fixed dollars vs proportional), not a confidence interval, and neither end is a behavioral prediction.</p>` +
-    `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers">${fy2027BandSvg(st27)}</div>`;
+    `<p class="sub">Repricing ${possessive(name)} FY 2024 cases under ${projected ? "projected " : ""}FY 2027 parameters and a projected caseload mix, then re-anchoring at its official FY 2025 rate, puts its mechanical FY 2027 rate between <strong>${loP.toFixed(1)}%</strong> and <strong>${hiP.toFixed(1)}%</strong>. ` +
+    `The range comes from one accounting choice: whether each case's recorded error carries forward as the same dollar amount or in proportion to its repriced benefit. ` +
+    `It is not a confidence interval, and neither end predicts how the state will behave.` +
+    (projected
+      ? ` The projected parameters predate FNA's notice (a $${projMax.toLocaleString()} maximum allotment against the published ` +
+        `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}), so this range is provisional until it is rerun on the published values.`
+      : "") +
+    `</p>` +
+    `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers">${fy2027BandSvg(st27, chartWidth(el))}</div>`;
 }
 
 // ---- Axiom rules-engine comparison mode ----------------------------------
@@ -859,7 +955,8 @@ function enginePanelBody(code) {
     `<p class="engine-prov">Suite reports committed in ` +
     `<a href="https://github.com/TheAxiomFoundation/axiom-oracles">axiom-oracles</a> @ ${prov.oracle_commit.slice(0, 12)} ` +
     `(byte-identical copies and SHA-256 pins in <a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/oracle-suites">this repository</a>); ` +
-    `QC source archive ${prov.qc_archive_sha256.slice(0, 12)}…; certified toolchain (Colorado probe): ` +
+    `QC source archive ${prov.qc_archive_sha256.slice(0, 12)}…; toolchain pinned by the Colorado reproducibility probe ` +
+    `(<a href="https://github.com/PolicyEngine/snap-qc-sim/tree/main/paper/snapshot/cert">paper/snapshot/cert</a>): ` +
     `engine ${prov.certified_toolchain.engine_commit.slice(0, 12)} × rulespec-us ${prov.certified_toolchain.rulespec_us_commit.slice(0, 12)}. ` +
     `Catalog: <a href="https://github.com/PolicyEngine/snap-qc-sim/blob/main/analysis/ENGINE_COMPARISON.md">analysis/ENGINE_COMPARISON.md</a> · ` +
     `<a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a></p>`;
@@ -903,7 +1000,7 @@ function enginePanelBody(code) {
     `<p><strong>${code}: the engine reproduces the file's recorded benefit chain for all ` +
     `${st.compared} replayable FY 2024 reviews</strong> — every stage below exact at zero tolerance.${excl} ` +
     `QC-adjudicated deductions, utility allowances, and eligibility findings enter as inputs, so parity ` +
-    `certifies the downstream benefit arithmetic given those intermediates.</p>` +
+    `checks the downstream benefit arithmetic given those intermediates and leaves eligibility untested.</p>` +
     `<div class="stage-chips">${chips}</div>` +
     conflates +
     `<p>In ${code}, the formula benefit differs from the corrected allotment for ` +
@@ -1015,9 +1112,13 @@ function adoptStats(st, code, drift) {
   return out;
 }
 
-function adoptionBandSvg(official, strict, broad) {
+function adoptionBandSvg(official, strict, broad, W = 920) {
   const lo = 0, hi = Math.max(16, Math.ceil(official) + 1);
-  const W = 920, H = 96, L = 42, R = 12, T = 8, B = 26;
+  // Labels sit on their own rows: the value pair above the range bar and the
+  // official rate below it. Side-by-side labels collided whenever a band end
+  // sat near the official rate, which is most states.
+  const narrow = W < 560;
+  const H = 112, L = 52, R = 12, T = 8, B = 26;
   const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
   const ink = cssVar("--muted-foreground") || "#475569";
   const border = cssVar("--border") || "#E2E8F0";
@@ -1025,24 +1126,28 @@ function adoptionBandSvg(official, strict, broad) {
   const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
   for (const [a, b, t] of bands) {
     s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
-    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${TIER_LABELS[t]}</text>`;
+    s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${narrow ? `${t}%` : TIER_LABELS[t]}</text>`;
   }
   // The delay threshold drives the panel's nonmonotonicity — draw it like
   // the FY 2027 band chart so crossings are visible at a glance.
   const dth = x(DELAY_THRESHOLD);
+  const dl = narrow ? "delay" : "delay 13.33%";
   s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
-  s += `<text x="${dth + 3}" y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">delay 13.33%</text>`;
-  const y = 58;
+  s += `<text ${edgeLabel(dth, dl, 9, W, 3)} y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">${dl}</text>`;
+  const y = 60;
   const a = x(broad), b = x(strict);
   s += `<text x="2" y="${y + 4}" font-size="11" fill="${ink}">FY 2026</text>`;
   s += `<line x1="${Math.min(a, b)}" x2="${Math.max(a, b)}" y1="${y}" y2="${y}" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>`;
   s += `<circle cx="${a}" cy="${y}" r="4" fill="var(--primary)"/><circle cx="${b}" cy="${y}" r="4" fill="var(--primary)"/>`;
-  s += `<text x="${Math.min(a, b) - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="${ink}">broad ${broad.toFixed(1)}%</text>`;
-  s += `<text x="${Math.max(a, b) + 6}" y="${y + 4}" font-size="10" fill="${ink}">strict ${strict.toFixed(1)}%</text>`;
+  const pair = `broad ${broad.toFixed(1)}% · strict ${strict.toFixed(1)}%`;
+  const pw = textW(pair, 10);
+  const px = Math.min(Math.max((a + b) / 2, L + pw / 2), W - 2 - pw / 2);
+  s += `<text x="${px}" y="${y - 10}" text-anchor="middle" font-size="10" fill="${ink}">${pair}</text>`;
   const off = x(official);
+  const ol = narrow ? `FY25 ${official.toFixed(2)}%` : `FY25 official ${official.toFixed(2)}%`;
   s += `<line x1="${off}" x2="${off}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-  s += `<text x="${off + 4}" y="${H - B - 4}" font-size="10" fill="${ink}">FY25 official ${official.toFixed(2)}%</text>`;
-  for (let v = lo; v <= hi; v += 2) {
+  s += `<text ${edgeLabel(off, ol, 10, W)} y="${H - B - 4}" font-size="10" fill="${ink}">${ol}</text>`;
+  for (let v = lo, step = tickStep(hi - lo, W - L - R); v <= hi; v += step) {
     s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${ink}">${v}%</text>`;
   }
   s += `<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="${border}"/>`;
@@ -1076,7 +1181,7 @@ function renderAdoption(code, st, elec, drift) {
     `against the ${st.official_fy2025.toFixed(2)}% official FY 2025 level.` +
     (strictZero ? " This state's file codes no strict-class dollars, so the strict bound equals the baseline." : "") +
     `</p>`;
-  const band = `<div class="chart" role="img" aria-label="Simulated FY 2026 rate under rules-engine adoption, broad and strict accounting scenarios across cost-share tiers">${adoptionBandSvg(st.official_fy2025, s.center, b.center)}</div>`;
+  const band = `<div class="chart" role="img" aria-label="Simulated FY 2026 rate under rules-engine adoption, broad and strict accounting scenarios across cost-share tiers">${adoptionBandSvg(st.official_fy2025, s.center, b.center, chartWidth(el))}</div>`;
   let dollars;
   if (elec.delay25) {
     dollars =
@@ -1161,36 +1266,202 @@ function renderInterventions(code, st, result) {
   const election = electionStats(st, result.rates);
   const engineOn = $("lever-engine-cut").checked && !$("lever-engine-cut").disabled;
   const engineNote = engineOn
-    ? ` The cause-coded cut contributes ${fmtPP(pointRate(st, engineCutErr(st)) - pointRate(st, st.err))}pp of the delta.`
+    ? ` The cause-coded cut accounts for ${fmtPP(pointRate(st, engineCutErr(st)) - pointRate(st, st.err))} points of that change.`
     : "";
   $("interventions-live").innerHTML =
-    `<p><strong>Live single measurement:</strong> ${fmtPP(result.delta)}pp file-rate delta; ` +
-    `mean ${summary.mean.toFixed(2)}%; expected statutory share ` +
-    `${(100 * summary.eShare / st.issuance).toFixed(2)}%; delay-aware FY 2028 bill ` +
-    `${fmtM(election.elect28)}/yr.${engineNote}</p>`;
+    `<p><strong>One measurement with the cut:</strong> the file rate ${result.delta <= 0 ? "falls" : "rises"} by ` +
+    `${Math.abs(result.delta).toFixed(3)} points; the simulated measured rate averages ${summary.mean.toFixed(2)}%; ` +
+    `the expected statutory share is ${(100 * summary.eShare / st.issuance).toFixed(2)}% of benefits; and the expected ` +
+    `FY 2028 bill, counting the FY 2026 election and the delay clause, is ${fmtM(election.elect28)}/yr.${engineNote}</p>`;
   const rows = interventionGridRows(code);
   if (!rows.length) {
     $("interventions-sustained-body").textContent = "Precomputed grid unavailable.";
     return;
   }
-  const engineCaveat = $("lever-engine-cut").checked && !$("lever-engine-cut").disabled
-    ? '<p class="hint">Sustained grid excludes the cause-coded cut.</p>'
+  const engineCaveat = engineOn
+    ? '<p class="hint">The sustained grid excludes the cause-coded cut.</p>'
     : "";
-  const label = rows.length === 2 ? "grid: 25% / 50%" : `grid: ${rows[0][0]}%`;
+  const label = rows.length === 2
+    ? "Precomputed at 25% and 50% effectiveness"
+    : `Precomputed at ${rows[0][0]}% effectiveness`;
   $("interventions-sustained-body").innerHTML = engineCaveat + `<p class="hint">${label}</p>` + rows.map(([grid, value]) => {
     const years = Object.entries(value.sustained_fy2028_30)
-      .map(([year, item]) => `${year}: ${item.expected_share_pct}%`).join(" · ");
+      .map(([year, item]) => `FY ${year}: ${item.expected_share_pct}%`).join(" · ");
     return `<p><strong>${grid}%:</strong> ${years} · three-year cost ` +
       `${fmtM(value.sustained_expected_cost_share_dollars_3yr)}</p>`;
   }).join("");
 }
 
-function render() {
-  const code = $("state").value;
-  const st = DATA.states[code];
+// ---- The answer -----------------------------------------------------------
+// The selected state in plain sentences, always at the published baseline:
+// the same draws as the all-states table (sampling noise only, no scenario,
+// no drift), so the two never disagree. The analyst tools change
+// assumptions without touching it.
+
+function rateStrip(el, st, q05, q95) {
+  const fy25 = st.official_fy2025, fy24 = st.official;
+  const W = chartWidth(el, 720), narrow = W < 520;
+  const lo = Math.max(0, Math.min(2, Math.floor(Math.min(fy24, fy25, q05)) - 0.5));
+  const hi = Math.max(16, Math.ceil(Math.max(fy24, fy25, q95)) + 1);
+  const L = 6, R = 6, H = 96, top = 22, bandH = 30, mid = top + bandH / 2;
+  const x = (r) => L + ((Math.min(Math.max(r, lo), hi) - lo) / (hi - lo)) * (W - L - R);
+  const ink = cssVar("--muted-foreground") || "#475569";
+  const fg = cssVar("--foreground") || "#000000";
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s += `<defs><pattern id="delay-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">` +
+    `<line x1="0" y1="0" x2="0" y2="6" stroke="${ink}" stroke-width="1.2" opacity="0.5"/></pattern></defs>`;
+  const xd = x(DELAY_THRESHOLD);
+  const bands = [[lo, 6, 0], [6, 8, 5], [8, 10, 10], [10, hi, 15]];
+  for (const [a, b, t] of bands) {
+    s += `<rect x="${x(a)}" y="${top}" width="${x(b) - x(a)}" height="${bandH}" fill="var(${TIER_VARS[t]})" opacity="0.2"/>`;
+    // Each tier's name sits under its own stretch of the axis; the 15% name
+    // stops at the delay band, which gets its own.
+    const right = t === 15 ? xd : x(b);
+    s += `<text x="${(x(a) + right) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${ink}">${narrow ? `${t}%` : `${t}% share`}</text>`;
+  }
+  s += `<rect x="${xd}" y="${top}" width="${x(hi) - xd}" height="${bandH}" fill="url(#delay-hatch)"/>`;
+  s += `<text x="${(xd + x(hi)) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${ink}">delay</text>`;
+  for (const v of [6, 8, 10, DELAY_THRESHOLD]) {
+    s += `<line x1="${x(v)}" x2="${x(v)}" y1="${top + bandH}" y2="${top + bandH + 5}" stroke="${ink}"/>`;
+    s += `<text x="${x(v)}" y="${top + bandH + 18}" text-anchor="middle" font-size="11" fill="${ink}">${v === DELAY_THRESHOLD ? "13.33%" : v + "%"}</text>`;
+  }
+  s += `<rect x="${x(q05)}" y="${mid - 5}" width="${Math.max(3, x(q95) - x(q05))}" height="10" rx="5" fill="var(--primary)" opacity="0.45"/>`;
+  s += `<circle cx="${x(fy24)}" cy="${mid}" r="5" fill="var(--background)" stroke="${fg}" stroke-width="1.5"/>`;
+  s += `<circle cx="${x(fy25)}" cy="${mid}" r="6.5" fill="var(--primary)" stroke="var(--background)" stroke-width="1.5"/>`;
+  // Centre the label on the FY 2025 dot, clamped inside the chart (bold
+  // glyphs run a little wider than textW's average).
+  const label = `FY 2024 ${pct2(fy24)} → FY 2025 ${pct2(fy25)}`;
+  const half = (textW(label, 12) * 1.08) / 2;
+  const ax = Math.min(Math.max(x(fy25), L + half), W - R - half);
+  s += `<text x="${ax}" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="${fg}">${label}</text>`;
+  el.innerHTML = s + "</svg>";
+  el.setAttribute(
+    "aria-label",
+    `${nameOf($("state").value)}: FY 2024 rate ${pct2(fy24)}, FY 2025 rate ${pct2(fy25)}; 90% of fresh same-size samples ` +
+      `fall between ${pct2(q05)} and ${pct2(q95)}. Tier boundaries at 6, 8 and 10%; delay band above 13.33%.`
+  );
+}
+
+function renderAnswer(code, st, draws) {
+  const name = nameOf(code), its = possessive(name);
+  const el = electionStats(st, draws);
+  const sm = summarize(draws, st.issuance);
+  const fy25 = st.official_fy2025, fy24 = st.official;
+  const tier = el.lockShare;
+  const q05 = quantile(draws, 0.05), q95 = quantile(draws, 0.95);
+  const cases = st.n.toLocaleString();
+
+  $("answer-lead").innerHTML = el.delay25
+    ? `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, in the delay band: it owes ` +
+      `<strong>nothing for FY 2028</strong>, and its first bill, for FY 2029, is set by its FY 2026 rate.`
+    : tier === 0
+      ? `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, below 6%, so at that rate it pays ` +
+        `<strong>no share</strong> of its SNAP benefit costs.`
+      : `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, in the <strong>${tier}% cost-share ` +
+        `tier</strong>. At that tier it would pay <strong>${fmtWords(el.lockTierCost)} a year</strong>, ${tier}% of the ` +
+        `${fmtWords(st.issuance)} in SNAP benefits it issued in FY 2024.`;
+
+  rateStrip($("answer-strip"), st, q05, q95);
+
+  const points = [];
+  // Coverage figures: analysis/persistence_backtest_results.json (static vs
+  // widened and rao_yu), locked by tests/test_front_page.py.
+  const noiseOnly =
+    "That counts sampling noise only, so it understates the uncertainty: in a backtest over FY 2016–2024, " +
+    "90% ranges built from sampling noise alone caught the next year's rate 48% of the time, and adding " +
+    "year-to-year movement raised that to 81–85%. The drift option in the analyst tools adds an estimate of that movement.";
+  if (el.delay25) {
+    points.push([
+      "How sure",
+      `FY 2025 is published, so the FY 2028 delay is settled. The FY 2026 rate is not: a fresh QC sample the size ` +
+        `of ${its} FY 2024 one (${cases} cases) lands between ${pct2(q05)} and ${pct2(q95)} 90% of the time. ${noiseOnly}`,
+    ]);
+  } else {
+    const nearest = [6, 8, 10].reduce((b, v) => (Math.abs(v - fy25) < Math.abs(b - fy25) ? v : b));
+    const gap = fy25 - nearest;
+    const edge = Math.abs(gap) < 1
+      ? ` ${name} sits ${Math.abs(gap).toFixed(2)} points ${gap >= 0 ? "above" : "below"} the ${nearest}% boundary.`
+      : "";
+    const t24 = tierOf(fy24);
+    const moved = t24 !== tier ? ` Its FY 2024 rate, ${pct2(fy24)}, was in the ${t24}% tier.` : "";
+    points.push([
+      "How sure",
+      `The published rate comes from a sample of cases. A fresh QC sample the size of ${its} FY 2024 one ` +
+        `(${cases} cases) lands in a different tier <strong>${fmtChance(1 - sm.pt[tier])} of the time</strong>, and 90% ` +
+        `of such samples fall between ${pct2(q05)} and ${pct2(q95)}.${edge}${moved} ${noiseOnly}`,
+    ]);
+  }
+
+  if (el.delay25) {
+    points.push([
+      "Delay band",
+      `At ${pct2(fy25)}, 1.5 times the rate reaches 20%, so ${its} first bill moves from FY 2028 to FY 2029. ` +
+        `A fresh FY 2026 sample lands in the delay band too ${fmtChance(el.pDelay26)} of the time, which would move ` +
+        `the first bill to FY 2030, set by the FY 2027 rate.`,
+    ]);
+  } else {
+    const cross = el.pDelay26 >= 0.005
+      ? `, and a fresh FY 2026 sample crosses it <strong>${fmtChance(el.pDelay26)} of the time</strong>, which would ` +
+        `move its first bill to FY 2030, set by its FY 2027 rate.`
+      : `; a fresh FY 2026 sample crosses it less than 1% of the time.`;
+    points.push([
+      "Delay band",
+      `Rates above 13.33% delay the first bill, since 1.5 times the rate then reaches 20%. ${name} is ` +
+        `${(DELAY_THRESHOLD - fy25).toFixed(2)} points below that line${cross}`,
+    ]);
+  }
+
+  const closed = "FY 2026's sample period ended September 30, 2026, and its rate is not yet published.";
+  if (el.delay25) {
+    points.push([
+      "FY 2026 rate",
+      `${closed} It sets ${its} first bill, for FY 2029: <strong>${fmtWords(el.bill29)} a year</strong> in ` +
+        `expectation, counting the chance it lands in the delay band again.`,
+    ]);
+  } else if (tier === 0) {
+    points.push([
+      "FY 2026 rate",
+      `${name} owes nothing for FY 2028 whichever year it uses. ${closed} That rate sets the FY 2029 bill: ` +
+        `<strong>${fmtWords(el.bill29)} a year</strong> in expectation.`,
+    ]);
+  } else {
+    points.push([
+      "FY 2026 option",
+      `For FY 2028, ${name} can elect its FY 2026 rate instead of its FY 2025 rate (7 U.S.C. 2013(a)(2)(B)(ii)). ` +
+        `${closed} A fresh sample centered on the FY 2025 level comes in below ${pct2(fy25)} ${fmtChance(el.pWin)} of ` +
+        `the time. Counting that option${el.pDelay26 >= 0.005 ? " and the chance of a delay" : ""}, the expected ` +
+        `FY 2028 bill is <strong>${fmtWords(el.elect28)} a year</strong>. The FY 2026 rate also sets the FY 2029 bill: ` +
+        `${fmtWords(el.bill29)} a year in expectation.`,
+    ]);
+  }
+
+  points.push([
+    "FY 2027, open now",
+    `FY 2027 began October 1, 2026 and runs through September 30, 2027. Its rate sets ${its} FY 2030 bill, and ` +
+      `the months still to be sampled reflect how the state runs SNAP from here. ` +
+      `<a href="#fy2027" data-scroll="fy2027">What can still change</a>`,
+  ]);
+
+  $("answer-points").innerHTML = points
+    .map(([k, v]) => `<div class="pt"><dt>${k}</dt><dd>${v}</dd></div>`)
+    .join("");
+}
+
+function renderVerifyCta(code, st) {
+  const cta = $("verify-cta");
+  const name = nameOf(code);
+  if (st.verified) {
+    cta.innerHTML = `${possessive(name)} encoded SNAP benefit computation is verified against its FY 2024 QC file — ${st.verified} of ${st.n} replayable reviews, each exact at every compared stage (gross income, standard and shelter deductions, net income, maximum allotment, benefit). QC-adjudicated deductions, utility allowances, and eligibility findings enter as inputs, so the replay checks benefit arithmetic and leaves eligibility untested; excluded cases are enumerated program-structure classes. <a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · <a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a>`;
+  } else {
+    cta.innerHTML = `Simulation for ${name} uses the public QC file only — its encoded rules are not yet independently verified. Seven states are (CO, NY, CA, AZ, GA, MD, TX). Interested in verification for your state? <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>`;
+  }
+}
+
+// ---- Render --------------------------------------------------------------
+
+function renderAnalyst(code, st, plain) {
   const extra = +$("audits").value;
   $("audits-val").textContent = "+" + extra;
-  syncScenarioControl();
   const scenarioOn = $("lever-smd").checked && SCEN && !scenarioInfo(code)?.gated;
   const engineCutOn = $("lever-engine-cut").checked && !scenarioOn;
   const engineErr = engineCutOn ? engineCutErr(st) : st.err;
@@ -1205,11 +1476,11 @@ function render() {
     base = shiftRates(anchor.rates, anchor.shift);
     scen = shiftRates(simulateModel(prepPatchedState(code), { extra }), anchor.shift);
   } else if (MODEL) {
-    base = simulate(st, {});
+    base = plain;
     interventionResult = interventionDraws(code, st, extra, engineErr);
     scen = interventionResult.rates;
   } else {
-    base = simulate(st, {});
+    base = plain;
     scen = extra || engineCutOn
       ? simulate({ ...st, err: engineErr }, {
           extra,
@@ -1223,7 +1494,7 @@ function render() {
   const scenIsBase = scen === base;
   base = addDrift(base, drift);
   scen = scenIsBase ? base : addDrift(scen, drift);
-  const observed = scenarioOn ? addDrift(simulate(st, {}), drift) : base;
+  const observed = scenarioOn ? addDrift(plain, drift) : base;
   const elec = electionStats(st, observed);
   const elecB = electionStats(st, base);
   const elecS = electionStats(st, scen);
@@ -1232,61 +1503,45 @@ function render() {
   const ss = summarize(scen, issuance);
   if (interventionResult) renderInterventions(code, st, interventionResult);
 
-  $("t-official").textContent = st.official_fy2025.toFixed(2) + "%";
-  $("t-official-24").textContent = "FY 2024: " + st.official.toFixed(2) + "%";
   $("t-expected").textContent = fmtM(elecS.elect28) + "/yr";
   if (elecS.delay25) {
     $("t-delta").textContent = `delayed start — first bill FY 2029: ${fmtM(elecS.bill29)}/yr`;
     $("t-delta").className = "d";
   } else {
     const d = elecB.elect28 - elecS.elect28;
-    $("t-delta").textContent = (d >= 0 ? "−" : "+") + fmtM(Math.abs(d)).slice(1) + " vs baseline";
+    $("t-delta").textContent = `${d >= 0 ? "−" : "+"}${fmtM(Math.abs(d))} vs baseline`;
     $("t-delta").className = "d " + (d >= 0 ? "delta-good" : "delta-bad");
   }
   const top = Object.entries(ss.pt).sort((a, b) => b[1] - a[1])[0];
   $("t-tier").textContent = TIER_LABELS[top[0]];
   $("t-tierp").textContent = (top[1] * 100).toFixed(0) + "% of draws";
+  $("t-pwin").textContent = (100 * elecS.pWin).toFixed(0) + "%";
+  $("t-pwind").textContent = elecS.delay25
+    ? "FY 2028 is $0 either way (delay)"
+    : `baseline ${(100 * elecB.pWin).toFixed(0)}%`;
   $("t-sd").textContent = fmtM(elecS.sd28);
   $("t-sdd").textContent = "baseline " + fmtM(elecB.sd28);
 
   histogram($("hist"), base, scen, st.official_fy2025);
   tierBars($("tiers"), [["Baseline", sb.pt], ["Scenario", ss.pt]], st.issuance);
-
-  const lockTier = TIER_LABELS[elec.lockShare];
-  $("elect-locked").textContent =
-    `${elec.fy25.toFixed(2)}% — ${lockTier} (${fmtM(elec.lockTierCost)}/yr if billed)` +
-    (elec.delay25 ? " · delay clause met: $0 in FY 2028, first bill FY 2029" : "");
-  $("elect-pwin").textContent = (100 * elec.pWin).toFixed(0) + "%";
-  $("elect-cost").textContent = elec.delay25
-    ? `$0 in FY 2028 (delayed start); the FY 2029 bill keys to the FY 2026 rate — ` +
-      `${fmtM(elec.bill29)}/yr expected`
-    : `${fmtM(elec.elect28)}/yr vs ${fmtM(elec.lock28)}/yr locking FY 2025 ` +
-      `(saves ${fmtM(Math.max(0, elec.lock28 - elec.elect28))}/yr in expectation)`;
-  $("elect-delay").textContent =
-    (elec.delay25
-      ? "met at FY 2025 (start moves to FY 2029); "
-      : "not met at FY 2025; ") +
-    (100 * elec.pDelay26).toFixed(0) +
-    "% chance the simulated FY 2026 rate meets it — that pushes the start to " +
-    "FY 2030 and zeroes both FY 2028 and FY 2029";
-  renderFy2027(code);
   renderAdoption(code, st, elec, drift);
-  writeUrl();
   renderEnginePanel();
+}
+
+function render() {
+  const code = $("state").value;
+  const st = DATA.states[code];
+  syncScenarioControl();
+  const plain = simulate(st, {});
+  renderAnswer(code, st, plain);
+  renderFy2027(code);
+  renderVerifyCta(code, st);
   document.querySelectorAll("#nat-table tbody tr").forEach((tr) =>
     tr.classList.toggle("current", tr.dataset.code === code)
   );
-
-  const badge = $("verified-badge");
-  const cta = $("verify-cta");
-  if (st.verified) {
-    badge.hidden = false;
-    badge.textContent = `Benefit computation verified: ${st.verified} of ${st.n} FY 2024 QC cases exact`;
-    cta.innerHTML = `This state's encoded SNAP benefit computation is verified against its FY 2024 QC file — ${st.verified} of ${st.n} replayable reviews, each exact at every compared stage (gross income, standard and shelter deductions, net income, maximum allotment, benefit). QC-adjudicated deductions, utility allowances, and eligibility findings enter as inputs; excluded cases are enumerated program-structure classes. <a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · <a href="https://axiom.org/reports/colorado-snap-qc-fy2024">example state report</a>`;
-  } else {
-    badge.hidden = true;
-    cta.innerHTML = `Simulation for this state uses the public QC file only — its encoded rules are not yet independently verified. Seven states are (CO, NY, CA, AZ, GA, MD, TX). Interested in verification for your state? <a href="mailto:hello@policyengine.org">hello@policyengine.org</a>`;
-  }
+  // Closed analyst tools skip their simulations; opening them re-renders.
+  if ($("analyst").open) renderAnalyst(code, st, plain);
+  writeUrl();
 }
 
 async function main() {
@@ -1304,10 +1559,11 @@ async function main() {
     ADOPT_ERROR = err; // renderAdoption surfaces the message; never a silent fallback
   }
   const sel = $("state");
-  for (const [code, st] of Object.entries(DATA.states)) {
+  const codes = Object.keys(DATA.states).sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+  for (const code of codes) {
     const o = document.createElement("option");
     o.value = code;
-    o.textContent = code + (st.verified ? " ✓" : "");
+    o.textContent = nameOf(code);
     sel.appendChild(o);
   }
   sel.value = "CO";
@@ -1334,7 +1590,18 @@ async function main() {
   }
   let pending = 0;
   const queue = () => { clearTimeout(pending); pending = setTimeout(render, 16); };
+  let resizing = 0;
+  window.addEventListener("resize", () => { clearTimeout(resizing); resizing = setTimeout(render, 150); });
   sel.addEventListener("change", queue);
+  $("analyst").addEventListener("toggle", queue);
+  // In-page links scroll instead of navigating: <base href> would resolve a
+  // bare #fragment against the base path and drop the ?state= query.
+  $("answer-points").addEventListener("click", (ev) => {
+    const a = ev.target.closest("a[data-scroll]");
+    if (!a) return;
+    ev.preventDefault();
+    $(a.dataset.scroll).scrollIntoView({ behavior: "smooth" });
+  });
   $("lever-drift").addEventListener("change", queue);
   $("audits").addEventListener("input", queue);
   $("intervention-rule").addEventListener("change", queue);
@@ -1372,7 +1639,7 @@ async function main() {
   document.querySelectorAll("#nat-table th button").forEach((b) => {
     b.addEventListener("click", () => {
       const k = b.dataset.k;
-      natSort = { k, dir: natSort.k === k ? -natSort.dir : k === "code" ? 1 : -1 };
+      natSort = { k, dir: natSort.k === k ? -natSort.dir : k === "name" ? 1 : -1 };
       renderNatTable();
     });
   });
