@@ -2,7 +2,8 @@
 
 The committed ``claims_audit.json`` recomputes every figure in the lab's
 ANALYSIS.md. Most tests here need only committed files. The regeneration test
-also needs both FY2024 QC postings and skips without them.
+and the dense-scan differential also need both FY2024 QC postings and skip
+without them.
 """
 
 from __future__ import annotations
@@ -300,14 +301,45 @@ def test_solver_outcome_counts_are_consistent():
         for key in outside
     )
     assert kinds == ["hhsize", "unmoved"]
+    # Each named stretch was reached by exactly one push: the solver's
+    # direction or the opposite one.
+    direction = weak["by_flat_stretch_and_direction"]
+    assert {name: sum(sides.values()) for name, sides in direction.items()} == (
+        by_stretch
+    )
+    assert all(set(sides) <= {"solver", "opposite"} for sides in direction.values())
+    opposite = set(weak["opposite_direction_keys"])
+    assert opposite <= weak_keys
+    assert len(opposite) == sum(s.get("opposite", 0) for s in direction.values())
     # Bounded on neither side, and pushes that hold without a flat stretch.
-    assert set(weak["bounded_on_neither_side_keys"]) <= weak_keys
-    for key in weak["bounded_on_neither_side_keys"]:
-        assert replay.loc[key, "correctednotes"] in audit.UTILITY_RESET_NOTES
+    neither = weak["bounded_on_neither_side_keys"]
+    assert set(neither) <= weak_keys
+    assert sum(weak["bounded_on_neither_side_by_correctednotes"].values()) == len(
+        neither
+    )
+    assert sorted(replay.loc[neither, "correctednotes"]) == sorted(
+        note
+        for note, count in weak["bounded_on_neither_side_by_correctednotes"].items()
+        for _ in range(count)
+    )
     unnamed = set().union(*map(set, weak["unnamed_push_holds_keys"].values()))
     assert unnamed.isdisjoint(weak_keys) and unnamed.isdisjoint(missed)
-    assert len(weak["minimum_benefit_rawben_values"]) == 1
+    # Every unnamed push is the one to $0, so the input was lowered.
+    assert weak["unnamed_push_holds_raised_n"] == 0
+    for key in unnamed:
+        assert not replay.loc[key, "correctednotes"].endswith("_up"), key
+    # The minimum-benefit stretch: one minimum, and RAWBEN at or within $5 of it.
+    (minimum,) = weak["minimum_benefit_amounts"]
+    for value in weak["minimum_benefit_rawben_values"]:
+        assert minimum <= value <= minimum + audit.REPLAY_TOLERANCE
     assert 0 < weak["shelter_cap_largest_gap_dollars"] <= audit.SHELTER_CAP_FY2024
+    assert (
+        sum(weak["shelter_cap_by_correctednotes"].values()) == by_stretch["shelter_cap"]
+    )
+    zero_shelter = weak["zero_shelter_deduction_by_correctednotes"]
+    assert sum(zero_shelter.values()) == by_stretch["zero_shelter_deduction"]
+    assert all(note.split("_")[0] in ("rent", "util") for note in zero_shelter)
+    assert 0 < weak["zero_shelter_largest_gap_dollars"] <= audit.SHELTER_CAP_FY2024
 
     farther = set(outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"])
     assert set(household["away_from_rawben_keys"]) <= farther <= missed
@@ -354,7 +386,22 @@ def test_analysis_quotes_the_audit():
     flagged = outcomes["reproduced_at_max_flag"]
     neither = weak["bounded_on_neither_side_keys"]
     unnamed = weak["unnamed_push_holds_keys"]
-    (minimum,) = weak["minimum_benefit_rawben_values"]
+    # "lowered input": every unnamed push is the one to $0.
+    assert weak["unnamed_push_holds_raised_n"] == 0
+    direction = weak["by_flat_stretch_and_direction"]
+    opposite = weak["opposite_direction_keys"]
+    solver_side = sum(sides.get("solver", 0) for sides in direction.values())
+    # "every further amount in the same direction" for the cap stretch.
+    assert direction["maximum_allotment"] == {"solver": stretches["maximum_allotment"]}
+    (minimum,) = weak["minimum_benefit_amounts"]
+    assert weak["minimum_benefit_rawben_values"][0] == minimum
+    unit_words = {1: "one-person", 2: "two-person"}
+    (unit_size,) = weak["minimum_benefit_unit_sizes"]
+    # "rent increases" and "rent amounts".
+    assert set(weak["shelter_cap_by_correctednotes"]) == {"rent_up"}
+    assert {
+        n.split("_")[0] for n in weak["zero_shelter_deduction_by_correctednotes"]
+    } == {"rent"}
     farther = outcomes["moved_benefit_farther_from_rawben_than_fsben_keys"]
     reset_away = sorted(set(farther) - set(household["away_from_rawben_keys"]))
     computational_reset_off = sorted(
@@ -391,46 +438,62 @@ def test_analysis_quotes_the_audit():
         ),
         (
             f"{weak['n']} of the {counts['reproduced_solver_moved_input_n']} are "
-            "weakly identified. In each, the issued benefit lies within $5 of a "
-            "stretch where the solver's benefit formula is flat in the moved input: "
-            "the maximum allotment, the minimum benefit, or the benefit past the "
-            "shelter-deduction cap. By the solver's formula, every amount of the "
-            "input on that stretch reproduces the issued benefit, so the match "
-            f"bounds the input on one side at most. {len(neither)} of the "
-            f"{weak['n']}, {_keys(neither)}, reproduce at every utility amount and "
-            f"bound it on neither side. {weak['above_threshold_n']} of the "
-            f"{weak['n']} are above the ${audit.THRESHOLD_FY2024} threshold."
+            "weakly identified. In each, the issued benefit lies within "
+            f"${audit.REPLAY_TOLERANCE} of a stretch where the solver's benefit "
+            "formula is flat in the moved input: the maximum allotment, the minimum "
+            "benefit, the benefit past the shelter-deduction cap, or the benefit "
+            "where the shelter deduction is zero. By the solver's formula, every "
+            "amount of the input on that stretch reproduces the issued benefit, so "
+            "the match bounds the input on one side at most. In "
+            f"{solver_side} the stretch lies in the direction the solver moved the "
+            f"input; in {len(opposite)}, {_keys(opposite)}, it lies on the other side "
+            f"of the match. {len(neither)} of the {weak['n']}, {_keys(neither)}, "
+            "reproduce at every amount of the moved input and bound it on neither "
+            f"side. {weak['above_threshold_n']} of the {weak['n']} are above the "
+            f"${audit.THRESHOLD_FY2024} threshold."
         ),
         (
-            f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
-            f"allotment, which caps the benefit. In {at_maximum['reproduced_n']} of them RAWBEN is the "
+            f"{stretches['maximum_allotment']} are at or within "
+            f"${audit.REPLAY_TOLERANCE} of the maximum allotment, which caps the "
+            f"benefit. In {at_maximum['reproduced_n']} of them RAWBEN is the "
             "maximum and the solver lowered an income."
         ),
         (
-            "The steps, which cannot pass RAWBEN, ran that income down to $0 in "
+            "so by the solver's formula every value of that income up to the point "
+            "where net income reaches zero yields the maximum. The steps, which "
+            "cannot pass RAWBEN, ran that income down to $0 in "
             f"{at_maximum['reproduced_ended_at_zero_income_n']} and to the "
             f"{audit.SOLVER_MAX_STEPS:,}-step limit in "
             f"{at_maximum['reproduced_ended_at_step_limit_n']}. "
             f"In the other {cap_other} the solver moved rent ({cap_rent}), the "
             f"utility allowance ({cap_util}) or the medical deduction ({cap_med}), "
-            "and every further amount in the same direction keeps the benefit within "
-            f"${audit.REPLAY_TOLERANCE} of RAWBEN."
+            "and by the solver's formula every further amount in the same direction "
+            f"keeps the benefit within ${audit.REPLAY_TOLERANCE} of RAWBEN."
         ),
         (
-            f"{stretches['minimum_benefit']} are at the ${minimum:.0f} minimum benefit "
-            "of a one- or two-person unit."
+            f"{stretches['minimum_benefit']} are at or within "
+            f"${audit.REPLAY_TOLERANCE} of the ${minimum:.0f} minimum benefit, all "
+            f"in {unit_words[unit_size]} units."
         ),
         (
             f"{stretches['shelter_cap']} are rent increases that stop within "
             f"${weak['shelter_cap_largest_gap_dollars']:.0f} of the shelter-deduction "
-            "cap. Past the cap, rent no longer changes the benefit, which stays "
-            f"within ${audit.REPLAY_TOLERANCE} of RAWBEN."
+            "cap. Past the cap, rent no longer changes the solver's benefit, which "
+            f"stays within ${audit.REPLAY_TOLERANCE} of RAWBEN."
+        ),
+        (
+            f"{stretches['zero_shelter_deduction']} are rent amounts within "
+            f"${weak['zero_shelter_largest_gap_dollars']:.0f} of where the shelter "
+            "deduction reaches zero. Below that point, rent no longer changes the "
+            f"solver's benefit, which stays within ${audit.REPLAY_TOLERANCE} of "
+            "RAWBEN."
         ),
         (
             f"Not counted: {sum(len(v) for v in unnamed.values())} matches whose "
-            "lowered input reaches no flat stretch, because the steps took it to $0 "
-            f"({len(unnamed['input_already_zero'])}) or its band of matching amounts "
-            f"runs down to $0 ({len(unnamed['band_reaches_zero'])})."
+            "lowered input reaches no flat stretch on either side, because the steps "
+            f"took it to $0 ({len(unnamed['input_already_zero'])}) or its band of "
+            "matching amounts runs down to $0 "
+            f"({len(unnamed['band_reaches_zero'])})."
         ),
         (
             f"It is set for {flagged['n']} of the {counts['reproduced_n']} matches: "
@@ -628,6 +691,94 @@ def _postings_available() -> bool:
 @pytest.mark.skipif(not _postings_available(), reason="FY2024 QC postings absent")
 def test_audit_regenerates_from_postings(assert_artifact_values_match):
     assert_artifact_values_match(json.loads(audit.render(audit.build())), AUDIT)
+
+
+def _scan_band(unit: pd.DataFrame, name: str, rawben: float) -> dict:
+    """The band of the moved input's amounts, at every dollar, whose solver
+    benefit stays within $5 of RAWBEN around the solver's amount, and whether
+    the formula is flat at each end the band reaches."""
+    amount = float(unit[name].iloc[0])
+    grid = np.unique(np.concatenate([np.arange(0.0, amount + 20_001), [amount, 1e7]]))
+    rows = pd.concat([unit] * len(grid), ignore_index=True)
+    rows[name] = grid
+    terms = audit.solver_terms(rows)
+    ok = ((terms["benefit"] - rawben).abs() <= audit.REPLAY_TOLERANCE).to_numpy()
+    at = int(np.flatnonzero(grid == amount)[0])
+    assert ok[at]
+    low = at
+    while low > 0 and ok[low - 1]:
+        low -= 1
+    high = at
+    while high < len(grid) - 1 and ok[high + 1]:
+        high += 1
+    shelter_input = name in ("rawrent", "rawutil")
+
+    def flat(index: int, shelter_bound: float, label: str) -> str | None:
+        benefit = terms["benefit"].iloc[index]
+        if benefit == unit["rawbenmax"].iloc[0]:
+            return "maximum_allotment"
+        if benefit == unit["rawminimum_ben"].iloc[0]:
+            return "minimum_benefit"
+        if shelter_input and terms["shelter"].iloc[index] == shelter_bound:
+            return label
+        return None
+
+    reaches_top = high == len(grid) - 1
+    return {
+        "reaches_zero": low == 0,
+        "reaches_top": reaches_top,
+        "zero_end": flat(0, 0.0, "zero_shelter_deduction") if low == 0 else None,
+        "top_end": flat(len(grid) - 1, unit["shelter_cap"].iloc[0], "shelter_cap")
+        if reaches_top
+        else None,
+    }
+
+
+@pytest.mark.skipif(not _postings_available(), reason="FY2024 QC postings absent")
+def test_flat_stretches_agree_with_a_dense_scan():
+    """Differential check of ``flat_stretch``: instead of pushing the moved
+    input to $0 and up by ``SOLVER_PUSH`` and leaning on monotonicity, scan it
+    at every dollar and read the stretch off the band's ends."""
+    joined = audit.join_replay(
+        audit.load_replay(), audit.load_posting(audit.LEGACY_POSTING)
+    )
+    inputs = joined[list(audit.SOLVER_BENEFIT_INPUTS)].astype(float)
+    inputs["shelter_cap"] = np.where(
+        (joined["FSNELDER"] + joined["FSNDIS"]) > 0,
+        np.inf,
+        audit.SHELTER_CAP_FY2024,
+    )
+    column = (
+        joined["correctednotes"].str.split("_").str[0].map(audit.SOLVER_NOTE_INPUTS)
+    )
+    candidate = joined["reproduced"] & joined["solver_moved_input"] & column.notna()
+    assert candidate.sum() > 200
+    for index in joined.index[candidate]:
+        name = column[index]
+        band = _scan_band(inputs.loc[[index]], name, float(joined.at[index, "RAWBEN"]))
+        start = joined.at[index, audit.REPLAY_INPUTS[name]]
+        raised = inputs.at[index, name] > (0.0 if pd.isna(start) else float(start))
+        solver_end, other_end = (
+            (band["top_end"], band["zero_end"])
+            if raised
+            else (band["zero_end"], band["top_end"])
+        )
+        expected = solver_end or other_end
+        key = joined.at[index, "key"]
+        named = joined.at[index, "flat_stretch"]
+        assert (None if pd.isna(named) else named) == expected, key
+        if expected is not None:
+            assert joined.at[index, "flat_stretch_direction"] == (
+                "solver" if solver_end else "opposite"
+            ), key
+        neither = band["reaches_zero"] and band["reaches_top"]
+        assert bool(joined.at[index, "bounded_on_neither_side"]) == (
+            neither and expected is not None
+        ), key
+        unnamed = expected is None and (band["reaches_zero"] or band["reaches_top"])
+        assert pd.notna(joined.at[index, "unnamed_push_holds"]) == unnamed, key
+        if unnamed:
+            assert band["reaches_zero"] and not band["reaches_top"], key
 
 
 # ---------------------------------------------------------------------------

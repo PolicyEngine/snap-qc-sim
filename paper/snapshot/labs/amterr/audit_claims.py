@@ -647,87 +647,122 @@ def flat_stretch(
     """Where a reproduced match sits near a flat stretch of the benefit formula.
 
     All benefits here come from the solver's formula (``solver_terms``); the
-    engine was not run at the pushed points. The moved input is pushed in the
-    solver's direction: to $0 when the solver lowered it, up by
-    ``SOLVER_PUSH`` when it raised it. The benefit is monotone in each input,
-    so if the pushed benefit still lies within $5 of RAWBEN, every amount
-    between the solver's and the pushed one does too. Where the formula is
-    already flat at the pushed amount (the benefit at the maximum allotment
-    or the minimum benefit, or the shelter deduction at its cap), every
+    engine was not run at the pushed points. The moved input is pushed both
+    ways from the solver's amount: up by ``SOLVER_PUSH`` and down to $0. The
+    benefit is monotone in each input, so if a pushed benefit still lies
+    within $5 of RAWBEN, every amount between the solver's and the pushed one
+    does too. Where the formula is already flat at the pushed amount, every
     amount beyond it gives the same benefit, so the match bounds the input on
-    one side at most. The stretch is named by what makes the formula flat:
-    ``maximum_allotment``, ``minimum_benefit`` or, for a raised rent or
-    utility amount, ``shelter_cap``.
+    one side at most. The stretch is named by what makes the formula flat
+    there: ``maximum_allotment`` or ``minimum_benefit`` (the benefit at
+    either bound), or, for rent or the utility amount, ``shelter_cap`` (the
+    shelter deduction at its cap, pushed up) or ``zero_shelter_deduction``
+    (the shelter deduction at zero, pushed down). The solver's direction is
+    tried first; the stretch can also lie on the other side of the match.
 
     Columns returned:
 
     * ``flat_stretch``: that name, or None;
-    * ``opposite_push_holds``: for a named row, pushing the other way (up by
-      ``SOLVER_PUSH`` or to $0) also stays within $5 of RAWBEN, so the match
-      bounds the input on neither side;
-    * ``unnamed_push_holds``: the push stays within $5 but no flat stretch is
-      reached: ``input_already_zero`` (a lowered input the steps took to $0)
-      or ``band_reaches_zero`` (a lowered input whose band of matching
-      amounts runs down to $0);
+    * ``flat_stretch_direction``: ``solver`` or ``opposite``, the push that
+      reached the named stretch;
+    * ``bounded_on_neither_side``: for a named row, both pushes stay within
+      $5 of RAWBEN, so the match bounds the input on neither side;
+    * ``unnamed_push_holds``: a push stays within $5 but neither reaches a
+      flat stretch. Every such push is the one to $0: the input was already
+      at $0 (``input_already_zero``) or its band of matching amounts runs
+      down to $0 (``band_reaches_zero``);
     * ``shelter_cap_gap``: for a ``shelter_cap`` row, the cap less the
-      shelter deduction at the solver's amount.
+      shelter deduction at the solver's amount;
+    * ``zero_shelter_gap``: for a ``zero_shelter_deduction`` row, the shelter
+      deduction at the solver's amount, which is how far rent or the utility
+      amount would have to fall to reach the stretch.
 
     Household-size moves are not stepped and are left out.
     """
     notes = joined["correctednotes"]
     column = notes.str.split("_").str[0].map(SOLVER_NOTE_INPUTS)
     candidate = joined["reproduced"] & joined["solver_moved_input"] & column.notna()
-    pushed, opposite = inputs.copy(), inputs.copy()
+    rawben = joined["RAWBEN"].astype(float)
+    if ((rawben - final).abs() > REPLAY_TOLERANCE)[candidate].any():
+        raise AssertionError("a reproduced match is not within $5 by the solver")
+    up, down = inputs.copy(), inputs.copy()
     raised = pd.Series(False, index=joined.index)
-    at_zero = pd.Series(False, index=joined.index)
     for name in set(column.dropna()):
         rows = candidate & column.eq(name)
         start = joined[REPLAY_INPUTS[name]].fillna(0).astype(float)
-        up = rows & (inputs[name] > start)
-        raised |= up
-        at_zero |= rows & ~up & inputs[name].eq(0)
-        far = inputs.loc[rows, name] + SOLVER_PUSH
-        pushed.loc[rows, name] = np.where(up[rows], far, 0.0)
-        opposite.loc[rows, name] = np.where(up[rows], 0.0, far)
-    rawben = joined["RAWBEN"].astype(float)
-    terms = solver_terms(pushed)
-    holds = candidate & (rawben - terms["benefit"]).abs().le(REPLAY_TOLERANCE)
-    back = solver_terms(opposite)["benefit"]
+        raised |= rows & (inputs[name] > start)
+        up.loc[rows, name] = inputs.loc[rows, name] + SOLVER_PUSH
+        down.loc[rows, name] = 0.0
     shelter_input = column.isin(["rawrent", "rawutil"])
-    named = pd.Series(
+
+    def reach(pushed: pd.DataFrame, pushed_up: bool) -> tuple[pd.Series, pd.Series]:
+        """Whether the push stays within $5, and the flat stretch it reaches."""
+        terms = solver_terms(pushed)
+        holds = candidate & (rawben - terms["benefit"]).abs().le(REPLAY_TOLERANCE)
+        shelter_bound = inputs["shelter_cap"] if pushed_up else 0.0
+        named = pd.Series(
+            np.select(
+                [
+                    holds & terms["benefit"].eq(inputs["rawbenmax"]),
+                    holds & terms["benefit"].eq(inputs["rawminimum_ben"]),
+                    holds & shelter_input & terms["shelter"].eq(shelter_bound),
+                ],
+                [
+                    "maximum_allotment",
+                    "minimum_benefit",
+                    "shelter_cap" if pushed_up else "zero_shelter_deduction",
+                ],
+                default=None,
+            ),
+            index=joined.index,
+            dtype=object,
+        )
+        return holds, named
+
+    up_holds, up_named = reach(up, pushed_up=True)
+    down_holds, down_named = reach(down, pushed_up=False)
+    # Pushed up without limit, an income drives the benefit to the minimum
+    # and rent, utilities or a deduction drive it to the cap or the maximum,
+    # so a push up that holds always reaches a stretch.
+    if (up_holds & up_named.isna()).any():
+        raise AssertionError("a push up holds without reaching a flat stretch")
+    solver_named = up_named.where(raised, down_named)
+    opposite_named = down_named.where(raised, up_named)
+    named = solver_named.where(solver_named.notna(), opposite_named)
+    direction = pd.Series(
         np.select(
-            [
-                holds & terms["benefit"].eq(inputs["rawbenmax"]),
-                holds & terms["benefit"].eq(inputs["rawminimum_ben"]),
-                holds
-                & raised
-                & shelter_input
-                & terms["shelter"].eq(inputs["shelter_cap"]),
-            ],
-            ["maximum_allotment", "minimum_benefit", "shelter_cap"],
+            [solver_named.notna(), opposite_named.notna()],
+            ["solver", "opposite"],
             default=None,
         ),
         index=joined.index,
         dtype=object,
     )
-    unnamed = holds & named.isna()
+    unnamed = down_holds & named.isna()
+    at_zero = pd.Series(False, index=joined.index)
+    for name in set(column.dropna()):
+        at_zero |= column.eq(name) & inputs[name].eq(0)
     shelter_at_solver = solver_terms(inputs)["shelter"]
     return pd.DataFrame(
         {
             "flat_stretch": named,
-            "opposite_push_holds": named.notna()
-            & (rawben - back).abs().le(REPLAY_TOLERANCE),
+            "flat_stretch_direction": direction,
+            "bounded_on_neither_side": named.notna() & up_holds & down_holds,
             "unnamed_push_holds": pd.Series(
                 np.select(
-                    [unnamed & at_zero, unnamed & ~at_zero],
+                    [unnamed & at_zero, unnamed],
                     ["input_already_zero", "band_reaches_zero"],
                     default=None,
                 ),
                 index=joined.index,
                 dtype=object,
             ),
+            "solver_raised_input": raised,
             "shelter_cap_gap": (inputs["shelter_cap"] - shelter_at_solver).where(
                 named.eq("shelter_cap")
+            ),
+            "zero_shelter_gap": shelter_at_solver.where(
+                named.eq("zero_shelter_deduction")
             ),
         }
     )
@@ -764,8 +799,10 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
     flagged = joined["solver_at_max"].astype(bool) & reproduced
     above = joined["AMTERR"].gt(THRESHOLD_FY2024)
     stretch = joined["flat_stretch"]
+    direction = joined["flat_stretch_direction"]
     weak = stretch.notna()
     at_cap = stretch.eq("maximum_allotment")
+    at_minimum = stretch.eq("minimum_benefit")
     rawben = joined["RAWBEN"].astype(float)
     moved = joined["solver_moved_input"]
     from_fsben = (rawben - joined["FSBEN"].astype(float)).abs()
@@ -829,21 +866,67 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
                 for note, count in sorted(notes[at_cap].value_counts().items())
             },
             "maximum_allotment_at_max_flag_n": int((at_cap & flagged).sum()),
+            "by_flat_stretch_and_direction": {
+                name: {
+                    side: int(count)
+                    for side, count in sorted(
+                        direction[stretch.eq(name)].value_counts().items()
+                    )
+                }
+                for name in sorted(set(stretch.dropna()))
+            },
+            "opposite_direction_keys": sorted(keys[direction.eq("opposite")]),
             "bounded_on_neither_side_keys": sorted(
-                keys[weak & joined["opposite_push_holds"]]
+                keys[weak & joined["bounded_on_neither_side"]]
             ),
+            "bounded_on_neither_side_by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(
+                    notes[weak & joined["bounded_on_neither_side"]]
+                    .value_counts()
+                    .items()
+                )
+            },
             "minimum_benefit_rawben_values": sorted(
-                {float(v) for v in rawben[stretch.eq("minimum_benefit")]}
+                {float(v) for v in rawben[at_minimum]}
             ),
+            "minimum_benefit_amounts": sorted(
+                {float(v) for v in joined.loc[at_minimum, "rawminimum_ben"]}
+            ),
+            "minimum_benefit_unit_sizes": sorted(
+                {int(v) for v in joined.loc[at_minimum, "rawusize"]}
+            ),
+            "shelter_cap_by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(
+                    notes[stretch.eq("shelter_cap")].value_counts().items()
+                )
+            },
             "shelter_cap_largest_gap_dollars": float(
                 joined["shelter_cap_gap"].max(skipna=True)
             )
             if joined["shelter_cap_gap"].notna().any()
             else None,
+            "zero_shelter_deduction_by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(
+                    notes[stretch.eq("zero_shelter_deduction")].value_counts().items()
+                )
+            },
+            "zero_shelter_largest_gap_dollars": float(
+                joined["zero_shelter_gap"].max(skipna=True)
+            )
+            if joined["zero_shelter_gap"].notna().any()
+            else None,
             "unnamed_push_holds_keys": {
                 reason: sorted(keys[joined["unnamed_push_holds"].eq(reason)])
                 for reason in ("input_already_zero", "band_reaches_zero")
             },
+            "unnamed_push_holds_raised_n": int(
+                (
+                    joined["unnamed_push_holds"].notna() & joined["solver_raised_input"]
+                ).sum()
+            ),
             "keys": {
                 name: sorted(keys[stretch.eq(name)])
                 for name in sorted(set(stretch.dropna()))

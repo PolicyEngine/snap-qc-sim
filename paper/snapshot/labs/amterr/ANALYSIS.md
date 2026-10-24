@@ -159,32 +159,40 @@ certified to receive in the sample month (PDF p. 92).
 - 246 of 283 (86.9% of cases, 72.0% of the $99.1M replayed error dollars)
   reproduce the issued benefit within $5. In 230 the solver moved an input;
   in 16 nothing moved and |RAWBEN − FSBEN| ≤ $5 already.
-- 60 of the 230 are weakly identified. In each, the issued benefit lies
+- 64 of the 230 are weakly identified. In each, the issued benefit lies
   within $5 of a stretch where the solver's benefit formula is flat in the
-  moved input: the maximum allotment, the minimum benefit, or the benefit
-  past the shelter-deduction cap. By the solver's formula, every amount of
-  the input on that stretch reproduces the issued benefit, so the match
-  bounds the input on one side at most. 2 of the 60, 202403-40765 and
-  202404-40803, reproduce at every utility amount and bound it on neither
-  side. 31 of the 60 are above the $56 threshold.
+  moved input: the maximum allotment, the minimum benefit, the benefit
+  past the shelter-deduction cap, or the benefit where the shelter
+  deduction is zero. By the solver's formula, every amount of the input on
+  that stretch reproduces the issued benefit, so the match bounds the input
+  on one side at most. In 61 the stretch lies in the direction the solver
+  moved the input; in 3, 202311-40394, 202312-40496 and 202406-40989, it
+  lies on the other side of the match. 3 of the 64, 202311-40394,
+  202403-40765 and 202404-40803, reproduce at every amount of the moved
+  input and bound it on neither side. 32 of the 64 are above the $56
+  threshold.
   - 53 are at or within $5 of the maximum allotment, which caps the
     benefit. In 34 of them RAWBEN is the maximum and the solver lowered an
     income. The solver pays the maximum whenever net income is zero or
-    less, and net income never falls as income rises, so every value of
-    that income up to the point where net income reaches zero yields the
-    maximum. The steps, which cannot pass RAWBEN, ran that income down to
-    $0 in 32 and to the 1,000-step limit in 2. In the other 19 the solver
-    moved rent (15), the utility allowance (3) or the medical deduction (1),
-    and every further amount in the same direction keeps the benefit within
-    $5 of RAWBEN.
-  - 4 are at the $23 minimum benefit of a one- or two-person unit.
+    less, and net income never falls as income rises, so by the solver's
+    formula every value of that income up to the point where net income
+    reaches zero yields the maximum. The steps, which cannot pass RAWBEN,
+    ran that income down to $0 in 32 and to the 1,000-step limit in 2. In
+    the other 19 the solver moved rent (15), the utility allowance (3) or
+    the medical deduction (1), and by the solver's formula every further
+    amount in the same direction keeps the benefit within $5 of RAWBEN.
+  - 6 are at or within $5 of the $23 minimum benefit, all in one-person
+    units.
   - 3 are rent increases that stop within $14 of the shelter-deduction cap.
-    Past the cap, rent no longer changes the benefit, which stays within $5
-    of RAWBEN.
+    Past the cap, rent no longer changes the solver's benefit, which stays
+    within $5 of RAWBEN.
+  - 2 are rent amounts within $8 of where the shelter deduction reaches
+    zero. Below that point, rent no longer changes the solver's benefit,
+    which stays within $5 of RAWBEN.
 
-  Not counted: 7 matches whose lowered input reaches no flat stretch,
-  because the steps took it to $0 (4) or its band of matching amounts runs
-  down to $0 (3).
+  Not counted: 5 matches whose lowered input reaches no flat stretch on
+  either side, because the steps took it to $0 (3) or its band of matching
+  amounts runs down to $0 (2).
 
   The solver exports an `at_max` flag to mark capped cases (the uncapped
   benefit on the replayed inputs is at least the maximum allotment less
@@ -465,6 +473,6 @@ P.L. 119-21 sec. 10105. Rerun instructions and pins: `README.md`.
     moved the input off that match; in 5 the household-size move missed.
   - The `correctedamount` note now covers household-size moves and all 15
     utility rows.
-  - Added: 60 of the 230 moved matches are weakly identified, 34 of them
+  - Added: 64 of the 230 moved matches are weakly identified, 34 of them
     because RAWBEN is the maximum allotment and the solver lowered an
     income.

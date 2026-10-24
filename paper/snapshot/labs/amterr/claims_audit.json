@@ -194,12 +194,13 @@
     ]
    },
    "weakly_identified": {
-    "n": 60,
-    "above_threshold_n": 31,
+    "n": 64,
+    "above_threshold_n": 32,
     "by_flat_stretch": {
      "maximum_allotment": 53,
-     "minimum_benefit": 4,
-     "shelter_cap": 3
+     "minimum_benefit": 6,
+     "shelter_cap": 3,
+     "zero_shelter_deduction": 2
     },
     "maximum_allotment_by_correctednotes": {
      "earn_down": 19,
@@ -210,27 +211,69 @@
      "util_up": 2
     },
     "maximum_allotment_at_max_flag_n": 52,
+    "by_flat_stretch_and_direction": {
+     "maximum_allotment": {
+      "solver": 53
+     },
+     "minimum_benefit": {
+      "opposite": 2,
+      "solver": 4
+     },
+     "shelter_cap": {
+      "solver": 3
+     },
+     "zero_shelter_deduction": {
+      "opposite": 1,
+      "solver": 1
+     }
+    },
+    "opposite_direction_keys": [
+     "202311-40394",
+     "202312-40496",
+     "202406-40989"
+    ],
     "bounded_on_neither_side_keys": [
+     "202311-40394",
      "202403-40765",
      "202404-40803"
     ],
+    "bounded_on_neither_side_by_correctednotes": {
+     "earn_down": 1,
+     "util_down": 1,
+     "util_up": 1
+    },
     "minimum_benefit_rawben_values": [
+     23.0,
+     26.0,
+     28.0
+    ],
+    "minimum_benefit_amounts": [
      23.0
     ],
+    "minimum_benefit_unit_sizes": [
+     1
+    ],
+    "shelter_cap_by_correctednotes": {
+     "rent_up": 3
+    },
     "shelter_cap_largest_gap_dollars": 14.0,
+    "zero_shelter_deduction_by_correctednotes": {
+     "rent_down": 1,
+     "rent_up": 1
+    },
+    "zero_shelter_largest_gap_dollars": 8.0,
     "unnamed_push_holds_keys": {
      "input_already_zero": [
-      "202311-40394",
       "202312-40465",
       "202402-40675",
       "202406-41017"
      ],
      "band_reaches_zero": [
       "202310-40275",
-      "202405-40902",
       "202406-41007"
      ]
     },
+    "unnamed_push_holds_raised_n": 0,
     "keys": {
      "maximum_allotment": [
       "202310-40260",
@@ -289,6 +332,8 @@
      ],
      "minimum_benefit": [
       "202310-40276",
+      "202311-40394",
+      "202312-40496",
       "202403-40717",
       "202403-40756",
       "202408-41258"
@@ -297,6 +342,10 @@
       "202402-40643",
       "202403-40772",
       "202404-40790"
+     ],
+     "zero_shelter_deduction": [
+      "202405-40902",
+      "202406-40989"
      ]
     }
    },
