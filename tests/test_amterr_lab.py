@@ -301,8 +301,8 @@ def test_solver_outcome_counts_are_consistent():
         for key in outside
     )
     assert kinds == ["hhsize", "unmoved"]
-    # Each named stretch was reached by exactly one push: the solver's
-    # direction or the opposite one.
+    # Each weakly identified match carries one direction label: the push
+    # (the solver's direction, or the opposite one) whose stretch names it.
     direction = weak["by_flat_stretch_and_direction"]
     assert {name: sum(sides.values()) for name, sides in direction.items()} == (
         by_stretch
@@ -328,6 +328,16 @@ def test_solver_outcome_counts_are_consistent():
     assert weak["unnamed_push_holds_raised_n"] == 0
     for key in unnamed:
         assert not replay.loc[key, "correctednotes"].endswith("_up"), key
+    # "the steps took the input to $0": no utility row the reset set to $0.
+    for key in weak["unnamed_push_holds_keys"]["input_already_zero"]:
+        assert replay.loc[key, "correctednotes"] not in audit.UTILITY_RESET_NOTES
+    # Only household-size matches go unassessed.
+    not_assessed = weak["moved_matches_not_assessed_by_correctednotes"]
+    assert all(note.startswith("hhsize") for note in not_assessed)
+    assert (
+        weak["assessed_n"] + sum(not_assessed.values())
+        == CASES["replay"]["reproduced_solver_moved_input_n"]
+    )
     # The minimum-benefit stretch: one minimum, and RAWBEN at or within $5 of it.
     (minimum,) = weak["minimum_benefit_amounts"]
     for value in weak["minimum_benefit_rawben_values"]:
@@ -397,6 +407,8 @@ def test_analysis_quotes_the_audit():
     assert weak["minimum_benefit_rawben_values"][0] == minimum
     unit_words = {1: "one-person", 2: "two-person"}
     (unit_size,) = weak["minimum_benefit_unit_sizes"]
+    not_assessed = weak["moved_matches_not_assessed_by_correctednotes"]
+    assert all(note.startswith("hhsize") for note in not_assessed)
     # "rent increases" and "rent amounts".
     assert set(weak["shelter_cap_by_correctednotes"]) == {"rent_up"}
     assert {
@@ -448,9 +460,12 @@ def test_analysis_quotes_the_audit():
             f"{solver_side} the stretch lies in the direction the solver moved the "
             f"input; in {len(opposite)}, {_keys(opposite)}, it lies on the other side "
             f"of the match. {len(neither)} of the {weak['n']}, {_keys(neither)}, "
-            "reproduce at every amount of the moved input and bound it on neither "
-            f"side. {weak['above_threshold_n']} of the {weak['n']} are above the "
-            f"${audit.THRESHOLD_FY2024} threshold."
+            "by that formula reproduce at every amount of the moved input and bound "
+            f"it on neither side. {weak['above_threshold_n']} of the {weak['n']} are "
+            f"above the ${audit.THRESHOLD_FY2024} threshold. The "
+            f"{sum(not_assessed.values())} household-size matches among the "
+            f"{counts['reproduced_solver_moved_input_n']} are not assessed: the "
+            "solver moves household size once, by one person, rather than in steps."
         ),
         (
             f"{stretches['maximum_allotment']} are at or within "
@@ -490,10 +505,11 @@ def test_analysis_quotes_the_audit():
         ),
         (
             f"Not counted: {sum(len(v) for v in unnamed.values())} matches whose "
-            "lowered input reaches no flat stretch on either side, because the steps "
-            f"took it to $0 ({len(unnamed['input_already_zero'])}) or its band of "
-            "matching amounts runs down to $0 "
-            f"({len(unnamed['band_reaches_zero'])})."
+            "band of matching amounts runs down to $0 without reaching a flat "
+            "stretch on either side, so they too bound the input from above only. "
+            f"In {len(unnamed['input_already_zero'])} the steps took the input to "
+            f"$0; in {len(unnamed['band_reaches_zero'])} the band runs down to $0 "
+            "from the solver's amount."
         ),
         (
             f"It is set for {flagged['n']} of the {counts['reproduced_n']} matches: "
@@ -725,6 +741,9 @@ def _scan_band(unit: pd.DataFrame, name: str, rawben: float) -> dict:
 
     reaches_top = high == len(grid) - 1
     return {
+        "amount": amount,
+        "grid": grid,
+        "shelter": terms["shelter"].to_numpy(),
         "reaches_zero": low == 0,
         "reaches_top": reaches_top,
         "zero_end": flat(0, 0.0, "zero_shelter_deduction") if low == 0 else None,
@@ -779,6 +798,20 @@ def test_flat_stretches_agree_with_a_dense_scan():
         assert pd.notna(joined.at[index, "unnamed_push_holds"]) == unnamed, key
         if unnamed:
             assert band["reaches_zero"] and not band["reaches_top"], key
+            reason = (
+                "input_already_zero" if band["amount"] == 0 else "band_reaches_zero"
+            )
+            assert joined.at[index, "unnamed_push_holds"] == reason, key
+        # The gaps the text quotes: dollars of rent or utilities from the
+        # solver's amount to the edge of the shelter stretch.
+        grid, shelter, amount = band["grid"], band["shelter"], band["amount"]
+        if expected == "shelter_cap":
+            cap = inputs.at[index, "shelter_cap"]
+            edge = grid[(grid >= amount) & (shelter == cap)].min()
+            assert joined.at[index, "shelter_cap_gap"] == edge - amount, key
+        if expected == "zero_shelter_deduction":
+            edge = grid[(grid <= amount) & (shelter == 0)].max()
+            assert joined.at[index, "zero_shelter_gap"] == amount - edge, key
 
 
 # ---------------------------------------------------------------------------

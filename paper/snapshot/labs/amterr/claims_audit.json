@@ -194,6 +194,10 @@
     ]
    },
    "weakly_identified": {
+    "assessed_n": 228,
+    "moved_matches_not_assessed_by_correctednotes": {
+     "hhsize_up": 2
+    },
     "n": 64,
     "above_threshold_n": 32,
     "by_flat_stretch": {

@@ -677,7 +677,8 @@ def flat_stretch(
       deduction at the solver's amount, which is how far rent or the utility
       amount would have to fall to reach the stretch.
 
-    Household-size moves are not stepped and are left out.
+    Household-size moves are not stepped and are left out (``assessed``
+    marks the rows that are checked).
     """
     notes = joined["correctednotes"]
     column = notes.str.split("_").str[0].map(SOLVER_NOTE_INPUTS)
@@ -685,14 +686,19 @@ def flat_stretch(
     rawben = joined["RAWBEN"].astype(float)
     if ((rawben - final).abs() > REPLAY_TOLERANCE)[candidate].any():
         raise AssertionError("a reproduced match is not within $5 by the solver")
-    up, down = inputs.copy(), inputs.copy()
+    up, down, farther = inputs.copy(), inputs.copy(), inputs.copy()
     raised = pd.Series(False, index=joined.index)
     for name in set(column.dropna()):
         rows = candidate & column.eq(name)
         start = joined[REPLAY_INPUTS[name]].fillna(0).astype(float)
         raised |= rows & (inputs[name] > start)
         up.loc[rows, name] = inputs.loc[rows, name] + SOLVER_PUSH
+        farther.loc[rows, name] = inputs.loc[rows, name] + 2 * SOLVER_PUSH
         down.loc[rows, name] = 0.0
+    # The push up must pass every kink: the formula is already flat there.
+    pushed_benefit = solver_terms(up)["benefit"]
+    if not pushed_benefit.eq(solver_terms(farther)["benefit"])[candidate].all():
+        raise AssertionError("SOLVER_PUSH does not reach a flat stretch")
     shelter_input = column.isin(["rawrent", "rawutil"])
 
     def reach(pushed: pd.DataFrame, pushed_up: bool) -> tuple[pd.Series, pd.Series]:
@@ -757,6 +763,7 @@ def flat_stretch(
                 index=joined.index,
                 dtype=object,
             ),
+            "flat_stretch_assessed": candidate,
             "solver_raised_input": raised,
             "shelter_cap_gap": (inputs["shelter_cap"] - shelter_at_solver).where(
                 named.eq("shelter_cap")
@@ -803,6 +810,7 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
     weak = stretch.notna()
     at_cap = stretch.eq("maximum_allotment")
     at_minimum = stretch.eq("minimum_benefit")
+    assessed = joined["flat_stretch_assessed"]
     rawben = joined["RAWBEN"].astype(float)
     moved = joined["solver_moved_input"]
     from_fsben = (rawben - joined["FSBEN"].astype(float)).abs()
@@ -855,6 +863,13 @@ def solver_outcomes(joined: pd.DataFrame) -> dict[str, Any]:
             "reproduced_keys": sorted(keys[matched]),
         },
         "weakly_identified": {
+            "assessed_n": int(assessed.sum()),
+            "moved_matches_not_assessed_by_correctednotes": {
+                note: int(count)
+                for note, count in sorted(
+                    notes[reproduced & moved & ~assessed].value_counts().items()
+                )
+            },
             "n": int(weak.sum()),
             "above_threshold_n": int((weak & above).sum()),
             "by_flat_stretch": {

@@ -6,7 +6,7 @@ Giannella/Molin raw-variable reconstruction (github.com/giannella/snap_qc,
 run for FY2024 in this lab: `reconstruct_co_fy2024.R`). Revised 2026-10-03:
 layer 3, the software-cause split and the cost-share comparison were
 recomputed and corrected, and the weight vintage is now stated. Revised
-2026-10-04: the solver description was corrected against the R code, and
+2026-10-24: the solver description was corrected against the R code, and
 layer 3 now says what the solver's moves did in each non-reproduced case
 and flags the weakly identified matches (see
 [revision history](#revision-history)). Every figure below that is computed
@@ -168,9 +168,11 @@ certified to receive in the sample month (PDF p. 92).
   on one side at most. In 61 the stretch lies in the direction the solver
   moved the input; in 3, 202311-40394, 202312-40496 and 202406-40989, it
   lies on the other side of the match. 3 of the 64, 202311-40394,
-  202403-40765 and 202404-40803, reproduce at every amount of the moved
-  input and bound it on neither side. 32 of the 64 are above the $56
-  threshold.
+  202403-40765 and 202404-40803, by that formula reproduce at every amount
+  of the moved input and bound it on neither side. 32 of the 64 are above
+  the $56 threshold. The 2 household-size matches among the 230 are not
+  assessed: the solver moves household size once, by one person, rather
+  than in steps.
   - 53 are at or within $5 of the maximum allotment, which caps the
     benefit. In 34 of them RAWBEN is the maximum and the solver lowered an
     income. The solver pays the maximum whenever net income is zero or
@@ -190,9 +192,10 @@ certified to receive in the sample month (PDF p. 92).
     zero. Below that point, rent no longer changes the solver's benefit,
     which stays within $5 of RAWBEN.
 
-  Not counted: 5 matches whose lowered input reaches no flat stretch on
-  either side, because the steps took it to $0 (3) or its band of matching
-  amounts runs down to $0 (2).
+  Not counted: 5 matches whose band of matching amounts runs down to $0
+  without reaching a flat stretch on either side, so they too bound the
+  input from above only. In 3 the steps took the input to $0; in 2 the
+  band runs down to $0 from the solver's amount.
 
   The solver exports an `at_max` flag to mark capped cases (the uncapped
   benefit on the replayed inputs is at least the maximum allotment less
@@ -450,7 +453,7 @@ P.L. 119-21 sec. 10105. Rerun instructions and pins: `README.md`.
     that FY2025 was still being measured.
   - Paths in the scripts are configurable; `README.md` gives pins and
     commands. `phase_a_classification.json` lives one directory up.
-- **2026-10-04.** The solver description now matches
+- **2026-10-24.** The solver description now matches
   `reconstruct_co_fy2024.R`. `audit_claims.py` ports the solver's benefit
   formula and re-applies the utility reset, and the new counts below come
   from it. Changes:
