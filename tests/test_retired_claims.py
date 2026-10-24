@@ -226,6 +226,7 @@ def _replay_counts() -> dict[str, int]:
         "weak_cap": weak["by_flat_stretch"]["maximum_allotment"],
         "weak_minimum": weak["by_flat_stretch"]["minimum_benefit"],
         "weak_shelter": weak["by_flat_stretch"]["shelter_cap"],
+        "weak_zero_shelter": weak["by_flat_stretch"]["zero_shelter_deduction"],
         "weak_income": at_maximum["reproduced_n"],
         "reset_off": len(moved_misses["reset_off_after_step_match_keys"]),
         "stopped_short": len(moved_misses["steps_stopped_short_keys"]),
@@ -295,9 +296,10 @@ def replay_quotes(c: dict[str, int]) -> list[str]:
             "them above the threshold, the issued benefit lies within $5 of a "
             "stretch where the solver's benefit formula is flat in the moved input "
             f"(the maximum allotment in {c['weak_cap']}, the minimum benefit in "
-            f"{c['weak_minimum']} and rent past the shelter-deduction cap in "
-            f"{c['weak_shelter']}). By that formula every amount of the input on the "
-            "stretch reproduces the issued benefit, so the match bounds the input "
+            f"{c['weak_minimum']}, rent past the shelter-deduction cap in "
+            f"{c['weak_shelter']} and rent low enough for a zero shelter deduction in "
+            f"{c['weak_zero_shelter']}). By that formula every amount of the input on "
+            "the stretch reproduces the issued benefit, so the match bounds the input "
             f"on one side at most and is weakly identified. In {c['weak_income']} of "
             f"the {c['weak_cap']} the issued benefit is the maximum allotment and "
             "the solver lowered an income;"
@@ -351,6 +353,19 @@ def test_facts_quotes_the_solver_outcomes():
         "not_reproduced_with_computational_finding_keys"
     ]
     layer2 = sorted(set(moved["reset_off_after_step_match_keys"]) & set(computational))
+    direction = weak["by_flat_stretch_and_direction"]
+    opposite = weak["opposite_direction_keys"]
+    unit_words = {1: "one-person", 2: "two-person"}
+    (minimum,) = weak["minimum_benefit_amounts"]
+    (unit_size,) = weak["minimum_benefit_unit_sizes"]
+    # The words D5 uses for the shelter stretches and the unnamed pushes.
+    assert set(weak["shelter_cap_by_correctednotes"]) == {"rent_up"}
+    assert {
+        note.split("_")[0] for note in weak["zero_shelter_deduction_by_correctednotes"]
+    } == {"rent"}
+    assert weak["unnamed_push_holds_raised_n"] == 0
+    not_assessed = weak["moved_matches_not_assessed_by_correctednotes"]
+    assert all(note.startswith("hhsize") for note in not_assessed)
 
     def by_prefix(prefix):
         return sum(v for k, v in at_cap.items() if k.startswith(prefix))
@@ -361,26 +376,41 @@ def test_facts_quotes_the_solver_outcomes():
             f"matches ({weak['above_threshold_n']} above the $56 threshold)"
         ),
         (
+            "In "
+            f"{sum(sides.get('solver', 0) for sides in direction.values())} the "
+            "stretch lies in the direction the solver moved the input; in "
+            f"{len(opposite)} (" + ", ".join(opposite) + ") it lies on the other "
+            "side of the match."
+        ),
+        (
             f"{stretches['maximum_allotment']} are at or within $5 of the maximum "
-            f"allotment, {stretches['minimum_benefit']} at the "
-            f"${weak['minimum_benefit_rawben_values'][0]:.0f} minimum benefit of a "
-            f"one- or two-person unit, and {stretches['shelter_cap']} are rent "
-            "increases that stop within "
+            f"allotment, {stretches['minimum_benefit']} at or within $5 of the "
+            f"${minimum:.0f} minimum benefit (all {unit_words[unit_size]} units), "
+            f"{stretches['shelter_cap']} are rent increases that stop within "
             f"${weak['shelter_cap_largest_gap_dollars']:.0f} of the shelter-deduction "
-            "cap"
+            "cap, past which rent no longer changes the benefit, and "
+            f"{stretches['zero_shelter_deduction']} are rent amounts within "
+            f"${weak['zero_shelter_largest_gap_dollars']:.0f} of where the shelter "
+            "deduction reaches zero, below which rent no longer changes the benefit."
         ),
         (
             f"{len(weak['bounded_on_neither_side_keys'])} of the {weak['n']} ("
             + ", ".join(weak["bounded_on_neither_side_keys"])
-            + ") reproduce at every utility amount and bound it on neither side"
+            + ") by that formula reproduce at every amount of the moved input and "
+            "bound it on neither side. The "
+            f"{sum(not_assessed.values())} household-size matches among the "
+            f"{replay['reproduced_solver_moved_input_n']} are not assessed (the solver "
+            "moves household size once, by one person, rather than in steps)."
         ),
         (
             "Not counted: "
             f"{sum(len(v) for v in weak['unnamed_push_holds_keys'].values())} "
-            "matches whose lowered input reaches no flat stretch ("
-            f"{len(weak['unnamed_push_holds_keys']['input_already_zero'])} already at "
-            f"$0, {len(weak['unnamed_push_holds_keys']['band_reaches_zero'])} whose "
-            "band of matching amounts runs down to $0)"
+            "matches whose band of matching amounts runs down to $0 without reaching "
+            "a flat stretch on either side, so they too bound the input from above "
+            f"only (in {len(weak['unnamed_push_holds_keys']['input_already_zero'])} "
+            "the steps took the input to $0, in "
+            f"{len(weak['unnamed_push_holds_keys']['band_reaches_zero'])} the band "
+            "runs down to $0 from the solver's amount)."
         ),
         f"In {at_maximum['reproduced_n']} of the {stretches['maximum_allotment']},",
         (
@@ -447,7 +477,10 @@ def test_replay_counts_partition():
     # paragraph quotes them against.
     assert c["weak_above"] <= min(c["weak"], c["above_reproduced"])
     assert c["weak"] <= c["moved"]
-    assert c["weak_cap"] + c["weak_minimum"] + c["weak_shelter"] == c["weak"]
+    assert (
+        c["weak_cap"] + c["weak_minimum"] + c["weak_shelter"] + c["weak_zero_shelter"]
+        == c["weak"]
+    )
     assert c["weak_income"] <= c["weak_cap"]
     # The paragraph accounts for every non-reproduced case exactly once.
     assert (
@@ -640,7 +673,10 @@ def replay_counts(draw):
     weak_cap = draw(st.integers(0, reproduced - unmoved))
     weak_minimum = draw(st.integers(0, reproduced - unmoved - weak_cap))
     weak_shelter = draw(st.integers(0, reproduced - unmoved - weak_cap - weak_minimum))
-    weak = weak_cap + weak_minimum + weak_shelter
+    weak_zero_shelter = draw(
+        st.integers(0, reproduced - unmoved - weak_cap - weak_minimum - weak_shelter)
+    )
+    weak = weak_cap + weak_minimum + weak_shelter + weak_zero_shelter
     misses_left = not_reproduced - miss_no_change - miss_stopped
     reset_off = draw(st.integers(0, misses_left))
     stopped_short = draw(st.integers(0, misses_left - reset_off))
@@ -668,6 +704,7 @@ def replay_counts(draw):
         "weak_cap": weak_cap,
         "weak_minimum": weak_minimum,
         "weak_shelter": weak_shelter,
+        "weak_zero_shelter": weak_zero_shelter,
         "weak_income": draw(st.integers(0, weak_cap)),
         "reset_off": reset_off,
         "stopped_short": stopped_short,
