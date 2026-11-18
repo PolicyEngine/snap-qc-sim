@@ -584,7 +584,7 @@ function renderNatTable() {
       }
     });
   });
-  // preventScroll: a click's smooth scroll to the answer keeps going.
+  // preventScroll: a keyboard pick's smooth scroll to the answer keeps going.
   if (focused) body.querySelector(`tr[data-code="${focused}"]`)?.focus?.({ preventScroll: true });
 }
 
@@ -894,7 +894,9 @@ function fy2027BandSvg(st27, W = 920) {
   // Only FY 2025 and FY 2026 rates can delay a bill (7 U.S.C.
   // 2013(a)(2)(B)(iii)), so the delay line stops above the FY 2027 row.
   const dth = x(DELAY_THRESHOLD);
+  const dl = W < 560 ? "delay" : "delay 13.33%";
   s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="62" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
+  s += `<text ${edgeLabel(dth, dl, 9, W, 3)} y="${T + 24}" font-size="9" fill="${ink}" opacity="0.85">${dl}</text>`;
   const rows = [
     ["FY 2026", st27.bands["2026"], 46],
     ["FY 2027", st27.bands["2027"], 78],
@@ -970,7 +972,7 @@ function renderFy2027(code) {
         `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}), so this range is provisional until it is rerun on the published values.`
       : "") +
     `</p>` +
-    `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers">${fy2027BandSvg(st27, chartWidth(el))}</div>`;
+    `<div class="chart" role="img" aria-label="Anchored FY 2026 and FY 2027 repriced bands across cost-share tiers, with the 13.33% delay line drawn through the FY 2026 row only, since an FY 2027 rate cannot delay a bill">${fy2027BandSvg(st27, chartWidth(el))}</div>`;
 }
 
 // ---- Axiom rules-engine comparison mode ----------------------------------
@@ -1040,7 +1042,7 @@ function enginePanelBody(code) {
   if (!st) {
     return (
       `<p>An encoding of this jurisdiction's rules has not yet been replayed against its QC file. ` +
-      `Across the seven states whose encodings have been (${VERIFIED_STATE_NAMES}), the Axiom RuleSpec ` +
+      `Across the seven states whose encodings have been replayed (${VERIFIED_STATE_NAMES}), the Axiom RuleSpec ` +
       `computation reproduces the QC file's recorded ` +
       `benefit chain for all ${totals.compared.toLocaleString()} replayable FY 2024 reviews — ` +
       `${totals.stage_cells.toLocaleString()} stage comparisons, zero tolerance, ` +
@@ -1083,7 +1085,8 @@ function enginePanelBody(code) {
     `<li><strong>Error-correction arithmetic:</strong> ${corr.n} cases where the reviewer's corrected allotment ` +
     `differs from the full recomputation (${corr.within_rounding_band_n} within $2, rounding-scale)</li>` +
     `<li><strong>Recorded-correct issuance outside the formula chain:</strong> ${rec.n} cases the review judged ` +
-    `correct as issued (${rec.ssi_cap_coded_n} SSI-CAP-coded, ${rec.minimum_benefit_n} minimum-benefit)</li>` +
+    `correct as issued (${rec.ssi_cap_coded_n} coded as Supplemental Security Income Combined Application Project ` +
+    `(SSI-CAP) cases, ${rec.minimum_benefit_n} minimum-benefit)</li>` +
     `</ul>` +
     `<p class="hint">Counts are accounting classes recorded in the public file (ALLADJ, AMTERR, SSI_CAP, FSMINBEN), ` +
     `not causal attributions. The Monte Carlo simulation above is unchanged in this view: engine runs are ` +
@@ -1538,13 +1541,20 @@ function renderAnswer(code, st, draws) {
         `<strong>${fmtWords(el.bill29)} a year</strong> in expectation.`,
     ]);
   } else {
+    // lock28 nets any delay chance, so it can differ from the lead's tier
+    // cost even when that chance is under 0.5%; say why when it does.
+    const lockNote = el.pDelay26 >= 0.005
+      ? ", counting the same delay chance"
+      : fmtWords(el.lock28) !== fmtWords(el.lockTierCost)
+        ? ", counting its small chance of a delay"
+        : "";
     points.push([
       "FY 2026 option",
       `For FY 2028, ${name} can elect its FY 2026 rate instead of its FY 2025 rate (7 U.S.C. 2013(a)(2)(B)(ii)). ` +
         `${closed} A fresh sample centered on the FY 2025 level comes in below ${pct2(fy25)} ${fmtChance(el.pWin)} of ` +
         `the time. Counting that option${el.pDelay26 >= 0.005 ? " and the chance of a delay" : ""}, the expected ` +
         `FY 2028 bill is <strong>${fmtWords(el.elect28)} a year</strong>, against ${fmtWords(el.lock28)} if it kept ` +
-        `its FY 2025 rate${el.pDelay26 >= 0.005 ? ", counting the same delay chance" : ""}. The FY 2026 rate also ` +
+        `its FY 2025 rate${lockNote}. The FY 2026 rate also ` +
         `sets the FY 2029 bill: ${fmtWords(el.bill29)} a year in expectation.`,
     ]);
   }

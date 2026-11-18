@@ -218,6 +218,8 @@ for (const code of Object.keys(T.DATA().states)) {
       pDelay26Raw: el.pDelay26,
       elect28: T.fmtWords(el.elect28),
       bill29: T.fmtWords(el.bill29),
+      lock28: T.fmtWords(el.lock28),
+      lockTierCost: T.fmtWords(el.lockTierCost),
     },
     row: { ...row, pmisWords: T.fmtChance(row.pmis), billWords: T.fmtWords(row.bill) },
     ...(SHOW_ANALYST

@@ -9,7 +9,8 @@ and the delay wording switches at its thresholds.
 The default run covers states chosen to reach every branch of the answer
 (tier 0 near and far from 6%, each tier, a zero-noise state, the verified
 states with and without exclusions, near the delay line, and delayed with
-partial and certain odds). SNAPQC_RENDER_ALL=1 renders all 53 jurisdictions,
+partial and certain odds, and a delay chance under 0.5% that still moves
+the keep-FY-2025 bill). SNAPQC_RENDER_ALL=1 renders all 53 jurisdictions,
 which takes several minutes in node.
 """
 
@@ -28,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "app" / "public"
 HARNESS = ROOT / "tests" / "render_harness.mjs"
 ALL = os.environ.get("SNAPQC_RENDER_ALL") == "1"
-BASELINE_STATES = "SD,NE,NV,LA,CO,HI,GU,MD,NY,OR,GA,AK"
+BASELINE_STATES = "SD,NE,NV,LA,CO,HI,GU,MD,NY,OR,GA,AK,OK"
 ANALYST_STATES = "LA,CO,NY,GA"
 # Every analyst setting a shared link can carry, on states with and without
 # an ungated model scenario (SD and HI are gated).
@@ -171,6 +172,15 @@ def test_delay_wording_follows_the_simulated_delay_odds() -> None:
             assert "chance that rate tops 13.33%" not in s["lead"], code
         # Near the line the "How sure" point raises the delay too.
         assert ("of such samples top 13.33%" in s["points"]) == (p >= 0.05), code
+        # The keep-FY-2025 bill nets the delay chance; when that moves it off
+        # the lead's tier cost, the point says why.
+        if s["tier"] > 0:
+            moved = s["expect"]["lock28"] != s["expect"]["lockTierCost"]
+            labelled = (
+                ", counting the same delay chance" in s["points"]
+                or ", counting its small chance of a delay" in s["points"]
+            )
+            assert labelled == (p >= 0.005 or moved), code
 
 
 def test_delay_rule_names_the_two_years_it_covers() -> None:
@@ -406,7 +416,9 @@ def test_every_element_the_app_reads_is_in_the_page() -> None:
     known |= set(re.findall(r'\bid="([^"$]+)"', js))
     ids = set(_render(390, False)["ids"]) | set(_render(920, True)["ids"])
     ids |= set(_render(920, True, LEVERS, states=LEVER_STATES)["ids"])
-    # Ids read only inside event handlers, which the harness never fires.
+    # Ids read only inside event handlers, which the harness never fires,
+    # and ids the app selects with querySelector.
     static = set(re.findall(r'\$\("([^"]+)"\)', js))
+    static |= set(re.findall(r'querySelector(?:All)?\("#([\w-]+)', js))
     assert len(static) > 30
     assert (ids | static) - known == set()

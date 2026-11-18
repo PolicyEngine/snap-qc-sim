@@ -560,9 +560,10 @@ def test_cta_names_the_replayed_states() -> None:
     word = words[len(engine)]
     assert f"Encodings for {word} states have been replayed" in js
     assert (
-        f"Across the {word} states whose encodings have been (${{VERIFIED_STATE_NAMES}})"
-        in js
+        f"Across the {word} states whose encodings have been replayed "
+        "(${VERIFIED_STATE_NAMES})" in js
     )
+    assert f"in the {word} verified states" in js
     assert "(CO, NY, CA, AZ, GA, MD, TX)" not in js
     assert "encoded rules have not yet been replayed" not in js
 
@@ -570,7 +571,8 @@ def test_cta_names_the_replayed_states() -> None:
 def test_adoption_total_stays_out_of_the_front_page_takeaway() -> None:
     """The all-adoption total is an accounting scenario; it sits in the
     analyst tools beside the caveat, not in the takeaway above the table."""
-    js = _app_text()
+    # Join template pieces split across lines ("…at ` +\n `baseline…").
+    js = re.sub(r"`\s*\+\s*`", "", _app_text())
     start = js.index("function renderNatTakeaway")
     body = js[start : js.index("\n}\n", start)]
     takeaway = body[body.index('$("nat-takeaway")') :]
