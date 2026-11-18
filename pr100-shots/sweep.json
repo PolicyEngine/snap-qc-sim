@@ -1,21 +1,37 @@
 {
   "desktop": {
     "states": 53,
+    "comparisons": {
+      "tier_chance": 46,
+      "bill": 36
+    },
     "layout_problems": {},
     "answer_table_mismatches": {}
   },
   "phone": {
     "states": 53,
+    "comparisons": {
+      "tier_chance": 46,
+      "bill": 36
+    },
     "layout_problems": {},
     "answer_table_mismatches": {}
   },
   "small-tablet": {
     "states": 53,
+    "comparisons": {
+      "tier_chance": 46,
+      "bill": 36
+    },
     "layout_problems": {},
     "answer_table_mismatches": {}
   },
   "tablet": {
     "states": 53,
+    "comparisons": {
+      "tier_chance": 46,
+      "bill": 36
+    },
     "layout_problems": {},
     "answer_table_mismatches": {}
   }
