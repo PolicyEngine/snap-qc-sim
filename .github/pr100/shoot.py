@@ -99,6 +99,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(500)
         codes = page.eval_on_selector_all("#state option", "os => os.map(o => o.value)")
         problems, mismatches = {}, {}
+        compared = {"tier_chance": 0, "bill": 0}
         for code in codes:
             page.select_option("#state", code)
             page.wait_for_function(f"new URLSearchParams(location.search).get('state') === '{code}' && document.getElementById('answer-lead').innerText.length > 0")
@@ -117,10 +118,13 @@ with sync_playwright() as p:
                 diffs.append("no highlighted table row")
             else:
                 m = re.search(r"lands in a different tier (less than 1%|more than 99%|\d+%) of the time", r["points"])
+                if m:
+                    compared["tier_chance"] += 1
                 if m and not chance_matches(m.group(1), cells[3]):
                     diffs.append(f"tier chance: answer {m.group(1)} vs table {cells[3]}")
                 b = re.search(r"expected FY 2028 bill is (\$[\d.]+ (?:million|billion))", r["points"])
                 if b and "FY29" not in cells[4]:
+                    compared["bill"] += 1
                     a, t = money(b.group(1)), money(cells[4])
                     # Each side rounds to its own display precision.
                     tol = (0.5e6 if b.group(1).endswith("million") else 5e6) + (
@@ -130,7 +134,15 @@ with sync_playwright() as p:
                         diffs.append(f"bill: answer {b.group(1)} vs table {cells[4]}")
             if diffs:
                 mismatches[code] = diffs
-        report[size] = {"states": len(codes), "layout_problems": problems, "answer_table_mismatches": mismatches}
+        # A regex that stops matching the copy would skip every comparison.
+        if not all(compared.values()):
+            mismatches["_sweep"] = [f"no comparisons ran: {compared}"]
+        report[size] = {
+            "states": len(codes),
+            "comparisons": compared,
+            "layout_problems": problems,
+            "answer_table_mismatches": mismatches,
+        }
         ctx.close()
     (OUT / "sweep.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
