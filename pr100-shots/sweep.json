@@ -8,5 +8,15 @@
     "states": 53,
     "layout_problems": {},
     "answer_table_mismatches": {}
+  },
+  "small-tablet": {
+    "states": 53,
+    "layout_problems": {},
+    "answer_table_mismatches": {}
+  },
+  "tablet": {
+    "states": 53,
+    "layout_problems": {},
+    "answer_table_mismatches": {}
   }
 }
