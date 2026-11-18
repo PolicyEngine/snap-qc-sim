@@ -24,6 +24,24 @@ def test_wrapper_embeds_versioned_manuscript():
     assert 'sandbox="allow-same-origin' in html
 
 
+def test_revision_label_matches_the_manuscript_date():
+    # The tag, the description and the cache key name one revision, dated
+    # as the manuscript is.
+    html = (PAPER / "index.html").read_text()
+    (tag,) = re.findall(r"Revision (\d+) · (\d{4}-\d{2}-\d{2})", html)
+    (described,) = re.findall(
+        r"This page embeds revision (\d+) \((\d{4}-\d{2}-\d{2})\)", html
+    )
+    keys = set(re.findall(r"web/index\.html\?v=r(\d+)-(\d{8})", html))
+    (date,) = re.findall(
+        r"^date: (\d{4}-\d{2}-\d{2})$",
+        (ROOT / "paper/index.qmd").read_text(),
+        flags=re.MULTILINE,
+    )
+    assert tag == described == (tag[0], date)
+    assert keys == {(tag[0], date.replace("-", ""))}
+
+
 def test_manuscript_and_pdf_exist_under_web():
     assert (PAPER / "web/index.html").exists()
     assert (PAPER / "web/index.pdf").exists()

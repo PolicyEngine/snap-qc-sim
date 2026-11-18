@@ -1,6 +1,6 @@
 # snap-qc-sim
 
-**Interactive tool: https://snap-qc-sim.vercel.app** — pick a state, adjust
+**Interactive tool: https://policyengine.org/us/snap-payment-error-simulator** — pick a state, adjust
 audit volume and simplification options, watch the measured-rate
 distribution and the cost-share bill respond. States whose encoded benefit
 computation is verified case-by-case against the FY 2024 QC file (CO, NY,
