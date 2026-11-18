@@ -55,6 +55,8 @@
 - F53 | Certification-vintage method ceiling | `YRMONTH - LASTCERT`; `CERTMTH` not used; recorded vintage, not observed conversion status | `analysis/UHIP_DECOMPOSITION_DEVIATIONS.md:16-30`; `analysis/uhip_decomposition_results.json:certification_vintage_split`
 - F54 | Fixed-donor protocol | parent three-outcome fit held fixed across channels; expected parent placebo reproduction +3.964, p 0.233, rank 10/43; both estimators required | `origin/fixed-donor-protocol:analysis/FIXED_DONOR_PROTOCOL.md:13-38,63-69`
 - F55 | Fixed-donor results (MERGED to main, PR #72, 2026-08-16) | reproduction check PASS (client +3.964202, p 0.232558, rank 10/43, all four checks true); mass_change +2.1415, p 0.023256, rank 1/43, `signal` and `signal_family_adjusted`; defect_or_mass_change +2.5294, p 0.023256, rank 1/43, `signal` and family; disregard +1.3733, p 0.511628, rank 22/43, no signal; descriptive: defect +0.6137, entry +0.5673, arithmetic +0.4326, user +0.2482; every channel's consequence-window gap exceeds its later-post gap | `analysis/fixed_donor_decomposition_results.json:side_by_side.fixed_donor`, `:reproduction_check` (main @ 4aafd06)
+- F56 | Pooled placebo identity (revision 4) | for strict, client and total outcomes, the RI and KY `placebo_effects` dictionaries are identical (42 of 42 donors), and the pooled `placebo_effects` equal them; rank denominator 43; the pooled statistic, a two-state mean, is ranked against single-state placebo effects, so its p-value is not a two-unit calibration; no pairs-of-donors reference is run | `analysis/riky_event_study_results.json:units.RI.permutation_inference.*.placebo_effects`; `.units.KY.permutation_inference.*.placebo_effects`; `.pooled.permutation_inference.*.placebo_effects`; `tests/test_riky_event_study.py::test_committed_pooled_placebos_equal_single_state_placebos`
+- F57 | Wu and Meyer (2023), Indiana IBM modernization (revision 4) | 10-year, $1.3 billion IBM contract (December 2006); state kept final eligibility determinations, IBM assisted with applications and recertifications; waves October 2007 (12 counties), March 2008 (27), May 2008 (20), expansion halted; four quarters after automation, treated counties 15% fewer SNAP individuals; more needy screened out at exit, less needy at entry; QC overpayment share (share of cases) charted Indiana vs U.S., FY2002–13, descriptively | NBER Working Paper 31437 (July 2023), Section 2 and Appendix Figure A8; DOI 10.3386/w31437; AEJ: Economic Policy forthcoming
 
 # Story beats
 
@@ -65,7 +67,7 @@
 - NC registry context | NC FAST FNS module | vendor `[NEEDS CITATION]` | county rollout 2012-05–2013-03; July 2013 technical failure; >1-month slowdown; backlog | https://www.wral.com/nc-fast-rollout-continues-amid-myriad-of-challenges/13864953/ ; https://webservices.ncleg.gov/ViewDocSiteFile/19790 | `analysis/system_migrations.json:events[4]`
 - FL registry context | ACCESS modernization | vendor/date `[NEEDS CITATION]`; ~$205M; reported start 2022; ~30-year-old mainframe | https://www.pew.org/en/research-and-analysis/articles/2026/01/14/as-snap-changes-shift-food-assistance-costs-states-face-new-choices | `analysis/system_migrations.json:events[5]`
 - NM registry context | ASPEN | vendor/date/problems/billing `[NEEDS CITATION]`; mid-2010s replacement `[UNSOURCED]` | `analysis/system_migrations.json:events[6]`
-- IN registry context | FSSA modernization | IBM | 2007–09 modernization/cancellation/litigation `[UNSOURCED]`; exact go-live `[NEEDS CITATION]` | `analysis/system_migrations.json:events[7]`
+- IN registry context | FSSA modernization | IBM | 2007–09 modernization/cancellation/litigation `[UNSOURCED]`; exact go-live `[NEEDS CITATION]`; rollout waves and contract per Wu and Meyer at F57 | `analysis/system_migrations.json:events[7]`
 - CO registry context | CBMS | 2004 go-live/trouble `[UNSOURCED]`; vendor/date/billing `[NEEDS CITATION]` | `analysis/system_migrations.json:events[8]`
 
 # Quotes
@@ -75,7 +77,7 @@
 # Arguments
 
 1. P1: RI satisfies the frozen unit-level signal rule; Kentucky and Oregon do not. | F15, F20, F24
-2. P2: pooled RI/KY satisfies the frozen pooled rule; pooled inference does not replace unit-level verdicts. | F23; `analysis/RIKY_EVENT_STUDY_PROTOCOL.md:99-102,121-131`
+2. P2: pooled RI/KY satisfies the frozen pooled rule; pooled inference does not replace unit-level verdicts; the pooled reference is the single-state placebo distribution. | F23; F56; `analysis/RIKY_EVENT_STUDY_PROTOCOL.md:99-102,121-131`
 3. P3: parent-design placebo status depends on the outcome set sharing the donor fit. | F40, F46
 4. P4: joint-fit mass-change and defect-or-mass-change estimates have low channel p-values but fail the parent rule because the run-level client placebo fires. | F41, F43, F47
 5. P5: mass-change code 19 carries the largest inferential portion of the joint-fit strict-channel rise; disregard does not differ detectably from its donor under the same run. | F41–F43

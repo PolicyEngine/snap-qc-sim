@@ -15,7 +15,9 @@ def test_wrapper_frames_versioned_manuscript() -> None:
     html = WRAPPER.read_text()
     versions = set(re.findall(r"web/index\.html\?v=([A-Za-z0-9-]+)", html))
     assert len(versions) == 1, versions
-    assert "Revision 3 · 2026-08-17" in html
+    date = re.search(r"^date: (\S+)$", QMD.read_text(), re.M).group(1)
+    assert f"Revision 4 · {date}" in html
+    assert versions == {"m4-" + date.replace("-", "")}
     assert (WEB / "index.html").is_file() and (WEB / "index.pdf").is_file()
     assert "three SNAP eligibility-system migrations" in html
 

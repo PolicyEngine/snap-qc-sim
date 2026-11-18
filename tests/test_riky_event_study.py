@@ -161,6 +161,28 @@ def test_committed_riky_artifact_locks_paper_quoted_numbers() -> None:
     assert profile["changes_verdict"] is False
 
 
+def test_committed_pooled_placebos_equal_single_state_placebos() -> None:
+    """@sec-pooled says the pooled reference is the single-state distribution.
+
+    Each donor's pseudo-effect is the same under the Rhode Island and
+    Kentucky procedures, so the pooled placebo (their average) equals it.
+    """
+    result = json.loads(event_study.RIKY_OUT.read_bytes())
+    outcomes = result["pooled"]["permutation_inference"]
+    assert set(outcomes) == {
+        "strict_computing_dollars_per_case_month",
+        "client_dollars_per_case_month",
+        "total_error_rate",
+    }
+    for outcome, pooled in outcomes.items():
+        ri = result["units"]["RI"]["permutation_inference"][outcome]
+        ky = result["units"]["KY"]["permutation_inference"][outcome]
+        assert len(ri["placebo_effects"]) == 42
+        assert ri["placebo_effects"] == ky["placebo_effects"]
+        assert pooled["placebo_effects"] == ri["placebo_effects"]
+        assert pooled["rank_denominator"] == 43
+
+
 def test_riky_serializer_reproduces_committed_bytes() -> None:
     """serialize_results must rebuild the committed bytes from parsed values.
 
