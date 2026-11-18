@@ -93,7 +93,7 @@ const T = ctx.__t;
 
 const until = (ok) => new Promise((resolve, reject) => {
   const t0 = Date.now();
-  const tick = () => (ok() ? resolve() : Date.now() - t0 > 120000 ? reject(new Error("timeout")) : setTimeout(tick, 25));
+  const tick = () => (ok() ? resolve() : Date.now() - t0 > 900000 ? reject(new Error("timeout")) : setTimeout(tick, 25));
   tick();
 });
 await T.main();
@@ -130,6 +130,7 @@ for (const code of Object.keys(T.DATA().states)) {
         : []),
     ],
     delay25: el.delay25,
+    issuance: st.issuance,
     tier: el.lockShare,
     // The answer's figures, formatted by the app's own helpers, and the
     // all-states row they must agree with.

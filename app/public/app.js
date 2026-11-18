@@ -7,7 +7,7 @@ const TIERS = [[6, 0], [8, 5], [10, 10], [Infinity, 15]];
 const TIER_LABELS = { 0: "0% share", 5: "5% share", 10: "10% share", 15: "15% share" };
 const TIER_VARS = { 0: "--tier-0", 5: "--tier-5", 10: "--tier-10", 15: "--tier-15" };
 const DRAWS = 4000;
-const ASSET_V = "20261024a"; // bump with index.html's app.js?v= on every deploy that changes any asset
+const ASSET_V = "20261118a"; // bump with index.html's app.js?v= on every deploy that changes any asset
 const SCEN_SCHEMA = "snap_qc_sim.model_scenarios.v1";
 const ENGINE_SCHEMA = "snap_qc_sim.engine_comparison.v1";
 const INTERVENTIONS_SCHEMA = "snap_qc_sim.interventions.v1";
@@ -112,6 +112,17 @@ const edgeLabel = (x, str, size, W, gap = 4) =>
 // A tier name that fits its band: "5% share", else "5%", else nothing.
 const bandLabel = (t, px, size) =>
   [TIER_LABELS[t], `${t}%`].find((str) => textW(str, size) + 6 <= px) ?? "";
+// FY 2027's sample months (October 2026 through September 2027) that have
+// not begun on date d. QC samples every month of the year (7 CFR 275.11(c)),
+// so this is the share of the year's sample still to come.
+const fy27MonthsAhead = (d) =>
+  Math.min(12, Math.max(0, 12 - ((d.getFullYear() - 2026) * 12 + d.getMonth() - 8)));
+const fy27Ended = (d) => d >= new Date(2027, 9, 1);
+const monthsAheadWords = (k, whose = "its") =>
+  k === 12 ? `none of ${whose} 12 sample months has begun yet`
+    : k === 1 ? `1 of ${whose} 12 sample months has not begun yet`
+      : k === 0 ? `${whose} last sample month, September 2027, is under way`
+        : `${k} of ${whose} 12 sample months have not begun yet`;
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -906,11 +917,14 @@ function renderFy2027(code) {
   // The tolerance floor is the rounding that reproduces the published
   // FY 2022-26 thresholds (paper/FACTS.md J6).
   const facts =
-    `<p>FY 2027 began October 1, 2026 and runs through September 30, 2027, and its rate sets each state's FY 2030 ` +
-    `bill. QC draws about one-twelfth of a state's sample in each month of the year (7 CFR 275.11(c)), so most ` +
-    `FY 2027 sample months are still ahead. Sampling-plan changes are submitted before each annual review period, ` +
-    `at least 60 days ahead for a major change and 30 for a minor one (7 CFR 272.2(e)(4)), so changes for FY 2027 ` +
-    `were due before it began.</p>` +
+    `<p>FY 2027 runs from October 1, 2026 through September 30, 2027, and its rate sets each state's FY 2030 ` +
+    `bill. QC draws about one-twelfth of a state's sample in each month of the year (7 CFR 275.11(c)); ` +
+    (fy27Ended(new Date())
+      ? `the FY 2027 sample period has ended. `
+      : `${monthsAheadWords(fy27MonthsAhead(new Date()), "FY 2027's")}. `) +
+    `Before each annual review period a state submits any changes to its QC sampling plan for FNA approval, or a ` +
+    `statement that there are none, at least 60 days before a major change takes effect and 30 days before a ` +
+    `minor one (7 CFR 272.2(e)(4)).</p>` +
     `<p class="sub">FNA's FY 2027 cost-of-living notice (August 21, 2026) set the 48-state four-person maximum allotment at ` +
     `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}. The FY 2027 error tolerance works out to $${FY27_TOLERANCE_PUBLISHED}: ` +
     `QC disregards errors of that size or less (7 U.S.C. 2025(c)(1)(A)(ii)). That figure comes from the June 2026 ` +
@@ -1504,12 +1518,21 @@ function renderAnswer(code, st, draws) {
 
   // The href carries the state so a new-tab open lands on the same answer;
   // a plain click scrolls in place (see main).
-  points.push([
-    "FY 2027, open now",
-    `FY 2027 began October 1, 2026 and runs through September 30, 2027. Its rate sets ${its} FY 2030 bill, and ` +
-      `most of its monthly QC sample is still to be drawn. ` +
-      `<a href="?state=${code}#fy2027" data-scroll="fy2027">More on FY 2027</a>`,
-  ]);
+  const today = new Date();
+  points.push(
+    fy27Ended(today)
+      ? [
+          "FY 2027",
+          `FY 2027's sample period ended September 30, 2027. Its rate sets ${its} FY 2030 bill. ` +
+            `<a href="?state=${code}#fy2027" data-scroll="fy2027">More on FY 2027</a>`,
+        ]
+      : [
+          "FY 2027, open now",
+          `FY 2027 began October 1, 2026 and runs through September 30, 2027. Its rate sets ${its} FY 2030 bill, ` +
+            `and ${monthsAheadWords(fy27MonthsAhead(today))}. ` +
+            `<a href="?state=${code}#fy2027" data-scroll="fy2027">More on FY 2027</a>`,
+        ]
+  );
 
   setHTML(
     $("answer-points"),

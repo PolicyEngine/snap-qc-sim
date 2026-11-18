@@ -238,10 +238,37 @@ def test_fy2027_timing_cites_the_qc_regulations() -> None:
         "QC draws about one-twelfth of a state's sample in each month of the year (7 CFR 275.11(c))"
         in js
     )
-    assert "Sampling-plan changes are submitted before each annual review period" in js
-    assert "so changes for FY 2027 were due before it began" in js
-    # The retired line implied a state could still change FY 2027's plan.
+    # 7 CFR 272.2(e)(4)(i)-(ii), as the text reads; the page draws no
+    # conclusion about mid-year changes, which the text does not address.
+    assert (
+        "Before each annual review period a state submits any changes to its QC "
+        "sampling plan for FNA approval, or a statement that there are none, at least "
+        "60 days before a major change takes effect and 30 days before a minor one "
+        "(7 CFR 272.2(e)(4))."
+    ) in js
+    assert "were due before it began" not in js
     assert "a state can change its QC sampling plan" not in js
+    # Relative "still ahead" claims go stale; the month count comes from the date.
+    assert "most of its monthly QC sample is still to be drawn" not in js
+    assert "most FY 2027 sample months are still ahead" not in js
+
+
+def test_verified_exclusions_are_the_ssi_cap_class_in_every_state() -> None:
+    """The verification note calls every unreplayed case in a verified state
+    an SSI-CAP standardized-benefit case; the engine artifact must agree."""
+    data = json.loads((PUBLIC / "data.json").read_bytes())["states"]
+    engine = json.loads((PUBLIC / "engine_data.json").read_bytes())
+    verified = {k for k, v in data.items() if v["verified"]}
+    assert (
+        verified == set(engine["states"]) == {"CO", "NY", "CA", "AZ", "GA", "MD", "TX"}
+    )
+    for code in verified:
+        st, en = data[code], engine["states"][code]
+        assert st["verified"] == en["compared"] == en["matched"], code
+        excluded = st["n"] - st["verified"]
+        assert excluded == en["excluded"] == sum(en["excluded_reasons"].values()), code
+        assert set(en["excluded_reasons"]) <= {"ssi_cap"}, code
+    assert set(engine["totals"]["excluded_reasons"]) == {"ssi_cap"}
 
 
 def test_table_sort_keys_are_the_fields_each_row_shows() -> None:
@@ -285,6 +312,7 @@ HELPERS = (
     "FY27_MAX_4P_PUBLISHED",
     "FY27_TFP_JUNE_2026",
     "FY27_TOLERANCE_PUBLISHED",
+    "monthsAheadWords",
 )
 
 
@@ -298,6 +326,8 @@ def _run_helpers(calls: list[list]) -> list:
         "globalThis.window = {};\n"
         + prelude
         + f"\nconst H = {{{', '.join(HELPERS)}}};\n"
+        + "H.fy27MonthsAheadAt = (y, m, d) => fy27MonthsAhead(new Date(y, m, d));\n"
+        + "H.fy27EndedAt = (y, m, d) => fy27Ended(new Date(y, m, d));\n"
         + "const calls = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
         + "const call = ([f, ...a]) => (typeof H[f] === 'function' ? H[f](...a) : H[f]);\n"
         + "process.stdout.write(JSON.stringify(calls.map(call)));\n"
@@ -448,3 +478,28 @@ def test_band_label_fits_its_band_and_grows_with_it(
         assert label == "" or w + 6 <= px
         # A wider band never gets a shorter name.
         assert len(lw) >= len(label)
+
+
+def test_fy2027_month_count_follows_the_calendar() -> None:
+    """Months of FY 2027 not yet begun: 12 before October 2026, one fewer
+    each month after, 0 from September 2027; ended from October 1, 2027."""
+    months = [(y, m) for y in (2025, 2026, 2027, 2028) for m in range(12)]
+    days = [1, 15, 28]
+    calls = [["fy27MonthsAheadAt", y, m, d] for y, m in months for d in days]
+    ended = [["fy27EndedAt", y, m, d] for y, m in months for d in days]
+    counts, ends = _run_helpers(calls), _run_helpers(ended)
+    by_month = {}
+    for (_, y, m, _d), k, e in zip(calls, counts, ends):
+        by_month.setdefault((y, m), set()).add(k)
+        assert e == ((y, m) >= (2027, 9))
+    for (y, m), ks in by_month.items():
+        assert len(ks) == 1, (y, m)  # the count changes only at month starts
+        index = (y - 2026) * 12 + m - 9  # October 2026 = 0
+        (k,) = ks
+        assert k == max(0, min(12, 11 - index)), (y, m, k)
+    words = _run_helpers([["monthsAheadWords", k] for k in range(13)])
+    assert words[12] == "none of its 12 sample months has begun yet"
+    assert words[1] == "1 of its 12 sample months has not begun yet"
+    assert words[0] == "its last sample month, September 2027, is under way"
+    for k in range(2, 12):
+        assert words[k] == f"{k} of its 12 sample months have not begun yet"

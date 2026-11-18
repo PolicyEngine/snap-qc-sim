@@ -92,6 +92,17 @@ def test_answer_bill_matches_the_table_row() -> None:
             ), code
 
 
+def test_bill_spread_is_bounded() -> None:
+    """A bill that is 0 or a tier share (at most 15%) of the base has a
+    standard deviation of at most 7.5% of the base, and none when the
+    FY 2026 delay is certain (every draw bills $0 for FY 2029)."""
+    for code, s in _states().items():
+        sd, base = s["row"]["billSd"], s["issuance"]
+        assert 0 <= sd <= 0.075 * base + 1e-6, code
+        if s["delay25"] and s["expect"]["pDelay26Raw"] == 1:
+            assert sd == 0 and s["row"]["bill"] == 0, code
+
+
 def test_delay_wording_follows_the_simulated_delay_odds() -> None:
     for code, s in _states().items():
         p, words = s["expect"]["pDelay26Raw"], s["expect"]["pDelay26"]
