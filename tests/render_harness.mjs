@@ -5,7 +5,8 @@
 // the output.
 //
 //   node tests/render_harness.mjs <app/public> <width> [--analyst] [--toggle]
-//        [--search=?drift=1] [--states=CO,NY]
+//        [--search=?drift=1] [--states=CO,NY] [--today=2027-06-15]
+//        [--pdelay=0.0049,0.005]
 //
 // --analyst opens the tools from a shared engine link (?engine=1).
 // --toggle loads the page closed, then opens the tools the way a reader
@@ -13,6 +14,12 @@
 // --search sets location.search (overriding --analyst's ?engine=1).
 // --states keeps only those jurisdictions in data.json, so the all-states
 //   pass simulates just them (a full run takes minutes in node).
+// --today fixes the app's clock (new Date() with no arguments) at noon
+//   local time on that date, so date-dependent copy renders on both sides
+//   of each switch.
+// --pdelay also renders each answer with the FY 2026 delay chance set to
+//   each listed value, so the wording thresholds are tested even where no
+//   jurisdiction's simulated odds fall.
 import fs from "node:fs";
 import vm from "node:vm";
 
@@ -22,6 +29,8 @@ const ANALYST = flags.includes("--analyst");
 const TOGGLE = flags.includes("--toggle");
 const SEARCH = flags.find((f) => f.startsWith("--search="))?.slice(9);
 const ONLY = flags.find((f) => f.startsWith("--states="))?.slice(9).split(",");
+const TODAY = flags.find((f) => f.startsWith("--today="))?.slice(8);
+const PDELAY = flags.find((f) => f.startsWith("--pdelay="))?.slice(9).split(",").map(Number);
 
 // Every id the app asks for, and every file it fetches.
 const requested = new Set();
@@ -105,22 +114,49 @@ const ctx = {
     };
   },
 };
+if (TODAY) {
+  const [y, m, d] = TODAY.split("-").map(Number);
+  const fixed = new Date(y, m - 1, d, 12).getTime();
+  ctx.Date = class extends Date {
+    constructor(...a) {
+      if (a.length) super(...a);
+      else super(fixed);
+    }
+    static now() {
+      return fixed;
+    }
+  };
+}
 ctx.window = ctx;
 ctx.self = ctx;
 ctx.top = ctx;
 vm.createContext(ctx);
 const src = fs.readFileSync(PUB + "/app.js", "utf8").replace(/\nmain\(\);\s*$/, "\n") + `
+// --pdelay: report a set FY 2026 delay chance while __P is set.
+electionStats = ((orig) => (st, d) => {
+  const r = orig(st, d);
+  return globalThis.__P == null ? r : { ...r, pDelay26: globalThis.__P };
+})(electionStats);
 globalThis.__t = {
   main, render, electionStats, simulate, fmtWords, fmtChance,
   NAT: () => NAT, DATA: () => DATA, INTERVENTIONS: () => INTERVENTIONS, ENGINE: () => ENGINE,
   SCEN: () => SCEN,
+  errors: () => ({ INTERVENTIONS_ERROR, ARTIFACT_ERROR, ENGINE_ERROR, ADOPT_ERROR }),
 };`;
 vm.runInContext(src, ctx);
 const T = ctx.__t;
 
+// An artifact that fails its integrity check stops the run at once,
+// naming the artifact, instead of waiting out the timeout.
 const until = (ok) => new Promise((resolve, reject) => {
   const t0 = Date.now();
-  const tick = () => (ok() ? resolve() : Date.now() - t0 > 900000 ? reject(new Error("timeout")) : setTimeout(tick, 25));
+  const tick = () => {
+    const bad = Object.entries(T.errors()).find(([, e]) => e);
+    if (bad) return reject(new Error(`${bad[0]}: ${bad[1].message}`));
+    if (ok()) return resolve();
+    if (Date.now() - t0 > 900000) return reject(new Error("timeout"));
+    setTimeout(tick, 25);
+  };
   tick();
 });
 await T.main();
@@ -192,10 +228,30 @@ for (const code of Object.keys(T.DATA().states)) {
           engine: text($("engine-body").innerHTML),
           tiles: ["t-expected", "t-delta", "t-tier", "t-tierp", "t-pwin", "t-pwind", "t-sd", "t-sdd"].map((k) => $(k).textContent),
           mechanism: $("mechanism").textContent,
+          auditsVal: $("audits-val").textContent,
           smdOn: $("lever-smd").checked,
         }
       : {}),
   };
+}
+if (PDELAY) {
+  out.synthetic = {};
+  for (const p of PDELAY) {
+    ctx.__P = p;
+    const rows = {};
+    for (const code of Object.keys(T.DATA().states)) {
+      $("state").value = code;
+      T.render();
+      rows[code] = {
+        lead: text($("answer-lead").innerHTML),
+        points: text($("answer-points").innerHTML),
+        delay25: out.states[code].delay25,
+        tier: out.states[code].tier,
+      };
+    }
+    out.synthetic[String(p)] = { words: T.fmtChance(p), states: rows };
+  }
+  ctx.__P = null;
 }
 out.ids = [...requested].sort();
 out.fetched = fetched;

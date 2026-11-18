@@ -54,6 +54,7 @@ def test_research_controls_sit_inside_the_collapsed_analyst_section() -> None:
         'id="engine-mode"',
         'id="lever-drift"',  # the drift band
         'id="adoption"',  # rules-engine adoption panel
+        'id="adopt-national"',  # its national total
         'id="audits"',
     ):
         assert control in inner, control
@@ -106,7 +107,9 @@ def test_fy2027_parameters_are_the_published_values() -> None:
     """The FY 2027 panel quotes FNA's August 21, 2026 COLA notice and the
     tolerance computed from the published June 2026 Thrifty Food Plan cost,
     and flags the repricing as provisional while its artifact still carries
-    the pre-publication projection."""
+    the pre-publication projection. The published values are pinned here
+    from the notice (fna.snap-cola2027.pdf); no committed artifact carries
+    them yet."""
     helpers = _run_helpers(
         [
             ["FY27_MAX_4P_PUBLISHED"],
@@ -194,7 +197,7 @@ def test_axiom_parity_copy_says_eligibility_is_untested() -> None:
     # Every static paragraph or hint that says the engine reproduces or
     # replays the file carries the caveat (rendered copy:
     # tests/test_front_page_render.py).
-    engine = re.compile(r"Axiom|engine|RuleSpec|encoded", re.IGNORECASE)
+    engine = re.compile(r"Axiom|engine|RuleSpec|encod", re.IGNORECASE)
     blocks = re.findall(r"<(p|li|div)\b[^>]*>(.*?)</\1>", html, re.DOTALL)
     claims = [
         re.sub(r"<[^>]+>", "", body)
@@ -547,9 +550,21 @@ def test_cta_names_the_replayed_states() -> None:
     }
     engine = json.loads((PUBLIC / "engine_data.json").read_bytes())["states"]
     assert set(engine) == set(names)
-    line = re.search(r'VERIFIED_STATE_NAMES = "([^"]+)"', _app_text()).group(1)
+    js = _app_text()
+    line = re.search(r'VERIFIED_STATE_NAMES = "([^"]+)"', js).group(1)
     listed = re.split(r", | and ", line)
     assert sorted(listed) == sorted(names.values())
+    # The count words beside the list follow the artifact, and the engine
+    # panel names the states from the same constant.
+    words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"]
+    word = words[len(engine)]
+    assert f"Encodings for {word} states have been replayed" in js
+    assert (
+        f"Across the {word} states whose encodings have been (${{VERIFIED_STATE_NAMES}})"
+        in js
+    )
+    assert "(CO, NY, CA, AZ, GA, MD, TX)" not in js
+    assert "encoded rules have not yet been replayed" not in js
 
 
 def test_adoption_total_stays_out_of_the_front_page_takeaway() -> None:
@@ -560,5 +575,7 @@ def test_adoption_total_stays_out_of_the_front_page_takeaway() -> None:
     body = js[start : js.index("\n}\n", start)]
     takeaway = body[body.index('$("nat-takeaway")') :]
     assert "rules engine" not in takeaway
-    assert "not estimates of what adoption would cause" in body
-    assert 'id="adopt-national"' in INDEX.read_text()
+    for name in ("adoptBroad28", "adoptStrict28", "withAdopt"):
+        assert name not in takeaway, name
+    assert "not estimates of what adopting a rules engine would cause" in body
+    assert "at baseline, with no drift" in body

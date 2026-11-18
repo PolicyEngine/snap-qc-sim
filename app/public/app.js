@@ -521,11 +521,12 @@ function renderNatTakeaway() {
   // analyst tools, not on the front page.
   $("adopt-national").textContent =
     withAdopt.length === rows.length
-      ? `Summed over all ${rows.length} jurisdictions, expected FY 2028 bills of ${fmtM(totalE)} a year would ` +
-        `fall to ${fmtM(withAdopt.reduce((a, r) => a + r.adoptBroad28, 0))}–` +
-        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))} a year if every jurisdiction adopted a ` +
-        `rules engine, under the broad-to-strict accounting scenarios below. These are accounting scenarios, ` +
-        `not estimates of what adoption would cause.`
+      ? `Summed over all ${rows.length} jurisdictions, expected FY 2028 bills come to ${fmtM(totalE)} a year at ` +
+        `baseline, with no drift. Removing, in every jurisdiction, the error dollars QC reviewers coded to the ` +
+        `broad or strict cause classes defined below puts that sum at ` +
+        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptBroad28, 0))} (broad) to ` +
+        `${fmtM(withAdopt.reduce((a, r) => a + r.adoptStrict28, 0))} (strict) a year. These are accounting ` +
+        `scenarios, not estimates of what adopting a rules engine would cause.`
       : "";
   // The FY 2024→2025 counts come from analysis/fy2025_movement.json (18
   // tier changes, 7 of them among the 10 moves beyond the two-year noise
@@ -572,7 +573,10 @@ function renderNatTable() {
       $("state").dispatchEvent(new Event("change"));
       $("answer").scrollIntoView({ behavior: "smooth" });
     };
-    tr.addEventListener("click", pick);
+    tr.addEventListener("click", () => {
+      pick();
+      tr.blur();
+    });
     tr.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -887,8 +891,10 @@ function fy2027BandSvg(st27, W = 920) {
     s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" fill="var(${TIER_VARS[t]})" opacity="0.10"/>`;
     s += `<text x="${(x(a) + x(b)) / 2}" y="${T + 12}" text-anchor="middle" font-size="10" fill="${ink}">${bandLabel(t, x(b) - x(a), 10)}</text>`;
   }
+  // Only FY 2025 and FY 2026 rates can delay a bill (7 U.S.C.
+  // 2013(a)(2)(B)(iii)), so the delay line stops above the FY 2027 row.
   const dth = x(DELAY_THRESHOLD);
-  s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="${H - B}" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
+  s += `<line x1="${dth}" x2="${dth}" y1="${T}" y2="62" stroke="${ink}" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>`;
   const rows = [
     ["FY 2026", st27.bands["2026"], 46],
     ["FY 2027", st27.bands["2027"], 78],
@@ -1033,8 +1039,9 @@ function enginePanelBody(code) {
     `BENFIX, and the engine exposes the full six-stage chain rather than one formula number.</p>`;
   if (!st) {
     return (
-      `<p>This jurisdiction's encoded rules have not yet been replayed against its QC file. Across the seven states ` +
-      `that have been (CO, NY, CA, AZ, GA, MD, TX), the Axiom RuleSpec computation reproduces the QC file's recorded ` +
+      `<p>An encoding of this jurisdiction's rules has not yet been replayed against its QC file. ` +
+      `Across the seven states whose encodings have been (${VERIFIED_STATE_NAMES}), the Axiom RuleSpec ` +
+      `computation reproduces the QC file's recorded ` +
       `benefit chain for all ${totals.compared.toLocaleString()} replayable FY 2024 reviews — ` +
       `${totals.stage_cells.toLocaleString()} stage comparisons, zero tolerance, ` +
       `${totals.excluded} enumerated exclusions. QC-adjudicated deductions, utility allowances, and eligibility ` +
@@ -1057,7 +1064,9 @@ function enginePanelBody(code) {
     )
     .join("");
   const excl = st.excluded
-    ? ` ${st.excluded} SSI-CAP standardized-benefit cases are excluded — an enumerated program-structure class using a separate benefit procedure (NYSCAP units follow the regular chain and are in scope).`
+    ? ` ${st.excluded} SSI-CAP (Supplemental Security Income Combined Application Project) standardized-benefit cases are ` +
+      `excluded as an enumerated program-structure class: their allotments follow a demonstration schedule outside the ` +
+      `computed benefit chain.${code === "NY" ? " New York's own NYSCAP project units follow the regular chain and are in scope." : ""}`
     : "";
   return (
     `<p><strong>${code}: the engine reproduces the file's recorded benefit chain for all ` +
@@ -1284,7 +1293,7 @@ function renderAdoption(code, st, elec, drift) {
     ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit arithmetic case-exactly (verification view above), ` +
       `with eligibility findings taken from the file as inputs, so eligibility is untested. Adoption means computing benefits ` +
       `through the engine, not only replaying them.`
-    : `This state's encoded rules have not yet been replayed against its QC file; the scenario above uses its own file's ` +
+    : `An encoding of this state's rules has not yet been replayed against its QC file; the scenario above uses its own file's ` +
       `cause coding, and a replay is the first step toward claiming it.`;
   // Quantify the fixed layer for THIS state so the reach of every scenario
   // is legible: the FY 2024 file-computable rate vs the FY 2024 official.
@@ -1469,7 +1478,7 @@ function renderAnswer(code, st, draws) {
   if (el.delay25) {
     points.push([
       "How sure",
-      `FY 2025 is published, so the FY 2028 delay is settled. The FY 2026 rate is not: ${sample} lands between ` +
+      `FY 2025 is published, so the FY 2028 delay is settled. For FY 2026 this page simulates the rate: ${sample} lands between ` +
         `${pct2(q05)} and ${pct2(q95)} 90% of the time. ${noiseOnly}`,
     ]);
   } else {
@@ -1535,7 +1544,8 @@ function renderAnswer(code, st, draws) {
         `${closed} A fresh sample centered on the FY 2025 level comes in below ${pct2(fy25)} ${fmtChance(el.pWin)} of ` +
         `the time. Counting that option${el.pDelay26 >= 0.005 ? " and the chance of a delay" : ""}, the expected ` +
         `FY 2028 bill is <strong>${fmtWords(el.elect28)} a year</strong>, against ${fmtWords(el.lock28)} if it kept ` +
-        `its FY 2025 rate. The FY 2026 rate also sets the FY 2029 bill: ${fmtWords(el.bill29)} a year in expectation.`,
+        `its FY 2025 rate${el.pDelay26 >= 0.005 ? ", counting the same delay chance" : ""}. The FY 2026 rate also ` +
+        `sets the FY 2029 bill: ${fmtWords(el.bill29)} a year in expectation.`,
     ]);
   }
 
@@ -1573,7 +1583,8 @@ function renderVerifyCta(code, st) {
     // SSI-CAP class (engine_data.json excluded_reasons, locked by tests).
     const excluded = st.n - st.verified;
     cta.innerHTML =
-      `Axiom's encoding of ${possessive(name)} SNAP benefit rules reproduces the state's FY 2024 QC file for all ${st.verified} ` +
+      `Axiom's encoding of ${possessive(name)} SNAP benefit rules reproduces the benefit chain recorded in the state's ` +
+      `FY 2024 QC file for all ${st.verified} ` +
       `replayable reviews, exact at every compared stage (gross income, standard and shelter deductions, net income, ` +
       `maximum allotment, benefit)${excluded ? `; ${excluded} SSI-CAP standardized-benefit cases are excluded as an ` +
       `enumerated program-structure class (Supplemental Security Income Combined Application Project units, whose ` +
@@ -1585,7 +1596,7 @@ function renderVerifyCta(code, st) {
   } else {
     cta.innerHTML =
       `Simulation for ${name} uses the public QC file only; an encoding of its rules has not yet been replayed ` +
-      `against its QC file. Encodings for seven states have been: ${VERIFIED_STATE_NAMES}. Interested in this for ` +
+      `against its QC file. Encodings for seven states have been replayed: ${VERIFIED_STATE_NAMES}. Interested in this for ` +
       `your state? ` +
       `<a href="mailto:hello@policyengine.org">hello@policyengine.org</a>`;
   }
@@ -1691,8 +1702,10 @@ function render() {
 
 async function main() {
   if (FRAMED) document.documentElement.classList.add("framed");
-  // The answer, the table and the FY 2027 section need only these three; the
-  // analyst artifacts (about 4 MB) load when the tools first open.
+  // The answer, the table and the FY 2027 section load with the page, with
+  // the adoption artifact (186 KB), since computeNational sums its national
+  // total for the analyst tools.
+  // The other analyst artifacts (about 4 MB) load when the tools first open.
   DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
   const [fy27, adopt] = await Promise.allSettled([
     fetch("fy2027_data.json?v=" + ASSET_V).then((r) => r.json()),
