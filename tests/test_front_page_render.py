@@ -253,12 +253,20 @@ def test_analyst_settings_leave_the_answer_unchanged() -> None:
     with."""
     plain = _states()
     levered = _render(920, True, LEVERS)["states"]
+    scenarios = json.loads((PUBLIC / "model_scenarios.json").read_bytes())["states"]
     for code, s in levered.items():
-        for key in ("lead", "points", "cta"):
-            assert s[key] == plain[code][key], (code, key)
+        if code in plain:
+            for key in ("lead", "points", "cta"):
+                assert s[key] == plain[code][key], (code, key)
+        # The scenario runs wherever the state has an ungated SMD lever.
+        sc = scenarios.get(code) or {}
+        ungated = bool((sc.get("levers") or {}).get("smd")) and not sc.get("level_flag")
+        assert s["smdOn"] == ungated, code
         if s["smdOn"]:
             assert "turn off the standard medical deduction scenario" in s["live"], code
             assert s["sustained"] == "", code
+        else:
+            assert s["live"].startswith("One measurement with the cut"), code
     assert any(s["smdOn"] for s in levered.values())
 
 

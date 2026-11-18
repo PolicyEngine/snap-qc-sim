@@ -580,7 +580,8 @@ function renderNatTable() {
       }
     });
   });
-  if (focused) body.querySelector(`tr[data-code="${focused}"]`)?.focus?.();
+  // preventScroll: a click's smooth scroll to the answer keeps going.
+  if (focused) body.querySelector(`tr[data-code="${focused}"]`)?.focus?.({ preventScroll: true });
 }
 
 // ---- URL state -----------------------------------------------------------
@@ -608,8 +609,9 @@ function writeUrl() {
   if ($("lever-smd").checked) p.set("smd", "1");
   if ($("lever-drift").checked) p.set("drift", "1");
   if ($("engine-mode").checked) p.set("engine", "1");
-  // #analyst reopens the tools from a copied link (readUrl).
-  const hash = $("analyst").open ? "#analyst" : location.hash === "#analyst" ? "" : location.hash;
+  // Keep the fragment the reader arrived with (#analyst reopens the tools,
+  // see readUrl), dropping #analyst once they close them.
+  const hash = location.hash === "#analyst" && !$("analyst").open ? "" : location.hash;
   history.replaceState(null, "", "?" + p.toString() + hash);
   if (FRAMED) {
     // The AppPage shell listens for urlUpdate and mirrors the params onto
@@ -936,7 +938,8 @@ function renderFy2027(code) {
     `Before each annual review period a state submits any changes to its QC sampling plan for FNA approval, or a ` +
     `statement that there are none, at least 60 days before a major change takes effect and 30 days before a ` +
     `minor one (7 CFR 272.2(e)(4)).</p>` +
-    `<p class="sub"><a href="https://www.fna.usda.gov/snap/allotment/cola">FNA's FY 2027 cost-of-living notice</a> ` +
+    `<p class="sub"><a href="https://www.usda.gov/sites/default/files/guidance-documents/fna.snap-cola2027.pdf">` +
+    `FNA's FY 2027 cost-of-living notice</a> ` +
     `(August 21, 2026) set the 48-state four-person maximum allotment at ` +
     `$${FY27_MAX_4P_PUBLISHED.toLocaleString()}. The FY 2027 error tolerance works out to $${FY27_TOLERANCE_PUBLISHED}: ` +
     `QC disregards errors of that size or less (7 U.S.C. 2025(c)(1)(A)(ii)). That figure comes from the June 2026 ` +
@@ -1573,8 +1576,8 @@ function renderVerifyCta(code, st) {
       `Axiom's encoding of ${possessive(name)} SNAP benefit rules reproduces the state's FY 2024 QC file for all ${st.verified} ` +
       `replayable reviews, exact at every compared stage (gross income, standard and shelter deductions, net income, ` +
       `maximum allotment, benefit)${excluded ? `; ${excluded} SSI-CAP standardized-benefit cases are excluded as an ` +
-      `enumerated program-structure class (cases in a Supplemental Security Income Combined Application Project ` +
-      `that receive a standardized benefit instead of the regular calculation)` : ""}. QC-adjudicated ` +
+      `enumerated program-structure class (Supplemental Security Income Combined Application Project units, whose ` +
+      `allotments follow a demonstration schedule outside the computed benefit chain)` : ""}. QC-adjudicated ` +
       `deductions, utility allowances, and eligibility ` +
       `findings enter as inputs, so the replay checks benefit arithmetic and leaves eligibility untested. ` +
       `<a href="https://github.com/TheAxiomFoundation/axiom-oracles">Verification harness</a> · ` +

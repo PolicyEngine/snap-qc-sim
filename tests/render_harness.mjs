@@ -149,6 +149,9 @@ const out = {
 };
 for (const code of Object.keys(T.DATA().states)) {
   $("state").value = code;
+  // A ?smd=1 link to this state checks the box; the app unchecks it where
+  // the state has no ungated scenario.
+  if (search.get("smd") === "1") $("lever-smd").checked = true;
   T.render();
   const st = T.DATA().states[code];
   const el = T.electionStats(st, T.simulate(st, {}));
