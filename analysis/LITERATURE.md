@@ -117,7 +117,7 @@ either paper rests a sentence on an unmarked row, re-open the source.
 | Sunstein, "Sludge Audits", *Behavioural Public Policy* 6(4): 654–673 (issue 2022; online 2020-01-06), DOI [10.1017/bpp.2019.32](https://doi.org/10.1017/bpp.2019.32) | From the abstract: proposes regular audits of excessive or unjustified procedural frictions | An established audit concept. No SNAP rate effect |
 | OECD, *Fixing Frictions: "Sludge Audits" around the World*, Public Governance Policy Paper 48 (2024-06-12), DOI [10.1787/5e9bb35c-en](https://www.oecd.org/en/publications/fixing-frictions-sludge-audits-around-the-world_5e9bb35c-en.html) | Ten case studies and nine practice principles. New South Wales maps steps, waiting, effort and inclusion without one aggregate score, and treats justified eligibility checks as legitimate | Burden measurement beyond payment errors |
 | Sunstein & Gosset, "Optimal Sludge? The Price of Program Integrity", *Duke Law Journal Online* 70: 74–90 (2020). [Record](https://scholarship.law.duke.edu/dlj_online/74/) | From the abstract: eligibility requirements screen out eligible as well as ineligible applicants; reviews competing normative approaches and a pilot survey | The access–integrity tradeoff predates OBBBA |
-| Wu & Meyer, "Certification and Recertification in Welfare Programs: What Happens When Automation Goes Wrong?", *AEJ: Economic Policy*, forthcoming; NBER WP 31437 (2023). [AEA record](https://www.aeaweb.org/articles?id=10.1257/pol.20250309) † | An Indiana county rollout of automated caseworker assistance cut SNAP enrollment by 15%. Needier recipients exited, while less needy applicants were screened out at entry. The AEA page lists DOI 10.1257/pol.20250309, which was not yet registered on 2026-11-18 | The events paper's closest predecessor on eligibility-system change and participation. The events paper's QC outcomes and decomposition remain distinct |
+| Wu & Meyer, "Certification and Recertification in Welfare Programs: What Happens When Automation Goes Wrong?", *AEJ: Economic Policy*, forthcoming; NBER WP 31437 (2023). [AEA record](https://www.aeaweb.org/articles?id=10.1257/pol.20250309) † | From October 2007, Indiana rolled out IBM's automated processing of applications and recertifications in three county waves, reaching 59 of 92 counties before the rollout halted in January 2009. The system automated caseworker assistance, and the state kept final eligibility determinations. Four quarters after rollout, treated counties had 15% fewer SNAP individuals. Needier recipients exited at recertification, while less needy applicants were screened out at entry. Appendix Figure A8 shows, descriptively, Indiana's QC overpayment rate falling sharply after 2008 relative to the U.S. The AEA page lists DOI 10.1257/pol.20250309, which was not yet registered on 2026-11-18 | The events paper's closest predecessor on automated welfare processing and participation, and it already charts QC overpayment trends. The events paper's synthetic-control estimates on QC outcomes and its decomposition remain distinct |
 | Cook, Cox & East, "SNAP Work Requirements, Administrative Burden, and Procedural Denials", *AEA Papers and Proceedings* 116: 309–313 (2026), DOI [10.1257/pandp.20261086](https://www.aeaweb.org/articles?id=10.1257/pandp.20261086) | In one state's administrative data, removing ABAWD work requirements reduced procedural denials | Procedural denials as an observable for rival prediction 2 |
 
 ### Queue 5: public-sector IT implementation failure
@@ -274,15 +274,17 @@ Not citable until read.
    administrative statistics, including public commit-versioned model
    forecasts (Nosek et al. 2018; Cramer et al. 2022); the delay's
    perverse incentive (Brookings 2025; CBPP 2026 on New Jersey); and
-   eligibility-system change and participation (Wu & Meyer). Lane D
+   automated caseworker assistance and participation, with a
+   descriptive QC overpayment chart (Wu & Meyer). Lane D
    found no explicit priority claim in the main paper's abstract or
    introduction, but both papers' related-work sections should cite
    these. Those are paper edits, outside this file.
 2. **Comparators that key to confidence bounds exist.** The 2002 SNAP
    rule required a 95% probability of exceeding 105% of the national
    measure, and today's PERM disallowance subtracts 3% from the lower
-   bound of a 95% interval. SNAP's 2025 tiers key to the point
-   estimate on CRS's reading, and USDA has issued no guidance. TANF's
+   bound of a 95% interval. Whether SNAP's 2025 tiers key to the point
+   estimate is open: CRS's figure assumes they do, and CRS notes USDA
+   has issued no regulations or guidance. TANF's
    penalty escalates with persistence, and UI's rules forbid
    error-rate incentives outright.
 3. **The rival predictions need more rivals.** Operational
