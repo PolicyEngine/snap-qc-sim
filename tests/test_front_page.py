@@ -3,6 +3,7 @@ retired jargon, and the pure formatting helpers in app.js."""
 
 import json
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -203,7 +204,7 @@ def test_axiom_parity_copy_says_eligibility_is_untested() -> None:
     ]
     assert len(claims) >= 3  # table key, engine panel subtitle, method note
     for text in claims:
-        assert "eligibility" in text, text[:160]
+        assert re.search(r"\beligibility (?:is )?untested\b", text), text[:160]
 
 
 def test_issuance_base_note_matches_the_two_sources() -> None:
@@ -319,6 +320,8 @@ HELPERS = (
 def _run_helpers(calls: list[list]) -> list:
     node = shutil.which("node")
     if not node:
+        if os.environ.get("CI"):
+            pytest.fail("node is required in CI")
         pytest.skip("node not available")
     src = APP.read_text()
     prelude = src[: src.index("let DATA = null;")]
@@ -328,6 +331,7 @@ def _run_helpers(calls: list[list]) -> list:
         + f"\nconst H = {{{', '.join(HELPERS)}}};\n"
         + "H.fy27MonthsAheadAt = (y, m, d) => fy27MonthsAhead(new Date(y, m, d));\n"
         + "H.fy27EndedAt = (y, m, d) => fy27Ended(new Date(y, m, d));\n"
+        + "H.fy26RateMayBeOutAt = (y, m, d) => fy26RateMayBeOut(new Date(y, m, d));\n"
         + "const calls = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
         + "const call = ([f, ...a]) => (typeof H[f] === 'function' ? H[f](...a) : H[f]);\n"
         + "process.stdout.write(JSON.stringify(calls.map(call)));\n"
@@ -503,3 +507,58 @@ def test_fy2027_month_count_follows_the_calendar() -> None:
     assert words[0] == "its last sample month, September 2027, is under way"
     for k in range(2, 12):
         assert words[k] == f"{k} of its 12 sample months have not begun yet"
+
+
+def test_fy2026_rate_is_called_unpublished_only_before_june_2027() -> None:
+    """FNA published FY 2025 rates on June 24, 2026; from June 1, 2027 the
+    answer stops saying the FY 2026 rate is unpublished."""
+    dates = [(y, m, d) for y in (2026, 2027, 2028) for m in range(12) for d in (1, 28)]
+    out = _run_helpers([["fy26RateMayBeOutAt", *t] for t in dates])
+    for (y, m, _d), may in zip(dates, out):
+        assert may == ((y, m) >= (2027, 5)), (y, m)
+    js = _app_text()
+    assert "its rate is not yet published" in js
+    assert (
+        "this page still simulates its rate rather than using a published figure" in js
+    )
+
+
+def test_delay_rule_names_the_fy2025_and_fy2026_rates() -> None:
+    """7 U.S.C. 2013(a)(2)(B)(iii) delays the start only for an FY 2025 or
+    FY 2026 rate; no other year's rate delays a bill."""
+    html, js = INDEX.read_text(), _app_text()
+    assert "An FY 2025 or FY 2026 rate above 13.33%" in re.sub(r"\s+", " ", html)
+    assert (
+        js.count("An FY 2025 or FY 2026 rate above 13.33% delays the first bill") == 2
+    )
+    assert "Rates above 13.33% delay" not in js
+    assert "A rate above 13.33%" not in html
+
+
+def test_cta_names_the_replayed_states() -> None:
+    names = {
+        "CO": "Colorado",
+        "NY": "New York",
+        "CA": "California",
+        "AZ": "Arizona",
+        "GA": "Georgia",
+        "MD": "Maryland",
+        "TX": "Texas",
+    }
+    engine = json.loads((PUBLIC / "engine_data.json").read_bytes())["states"]
+    assert set(engine) == set(names)
+    line = re.search(r'VERIFIED_STATE_NAMES = "([^"]+)"', _app_text()).group(1)
+    listed = re.split(r", | and ", line)
+    assert sorted(listed) == sorted(names.values())
+
+
+def test_adoption_total_stays_out_of_the_front_page_takeaway() -> None:
+    """The all-adoption total is an accounting scenario; it sits in the
+    analyst tools beside the caveat, not in the takeaway above the table."""
+    js = _app_text()
+    start = js.index("function renderNatTakeaway")
+    body = js[start : js.index("\n}\n", start)]
+    takeaway = body[body.index('$("nat-takeaway")') :]
+    assert "rules engine" not in takeaway
+    assert "not estimates of what adoption would cause" in body
+    assert 'id="adopt-national"' in INDEX.read_text()

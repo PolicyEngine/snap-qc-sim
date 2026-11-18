@@ -12,10 +12,10 @@
   gtag('config', 'G-2YHG89FY0N');
 </script>
 <title>SNAP payment error simulator | PolicyEngine</title>
-<meta name="description" content="A state's SNAP payment error rate, cost-share tier and FY 2028 bill, how much sampling noise moves them, and which measurement year is still open — with every state side by side.">
+<meta name="description" content="A state's SNAP payment error rate, cost-share tier and FY 2028 bill, how much sampling noise moves them, and how FY 2027 sets the FY 2030 bill — with every state side by side.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="SNAP payment error simulator | PolicyEngine">
-<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show what its payment error rate means for its cost-share bill, how likely a fresh sample is to land it in a different tier, and which year's measurement is still open.">
+<meta property="og:description" content="Draws from each state's own USDA Quality Control sample to show what its payment error rate means for its cost-share bill, how likely a fresh sample is to land it in a different tier, and how FY 2027 sets the FY 2030 bill.">
 <meta property="og:url" content="https://policyengine.org/us/snap-payment-error-simulator/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SNAP payment error simulator | PolicyEngine">
@@ -49,9 +49,11 @@
     <p class="lede">
       Under current law (P.L. 119-21), from fiscal year 2028 each state pays a share of its SNAP benefit
       costs set by its payment error rate: nothing below a 6% rate, 5% from
-      6 to 8%, 10% from 8 to 10%, and 15% at 10% or more. A rate above 13.33%
+      6 to 8%, 10% from 8 to 10%, and 15% at 10% or more. The rate is the share of benefit dollars
+      paid in error, estimated from federal quality control (QC) reviews of a sample of cases.
+      An FY 2025 or FY 2026 rate above 13.33%
       delays the first bill. Choose a state to see what it owes, how much a
-      fresh sample could move that, and which year's measurement is still open.
+      fresh sample could move that, and how FY 2027 sets its FY 2030 bill.
     </p>
   </div>
 </header>
@@ -103,7 +105,7 @@
   </section>
 
   <section class="chart-card" id="fy2027">
-    <h2>FY 2027, the year still open</h2>
+    <h2 id="fy2027-h">FY 2027, the year still open</h2>
     <div id="fy2027-body"></div>
   </section>
 
@@ -113,7 +115,7 @@
       <span class="analyst-sub">Scenarios for targeted review, the standard medical deduction and rules engines; extra QC reviews; a year-to-year drift band; and the event studies behind them</span>
     </summary>
     <div class="analyst-body">
-      <p class="analyst-intro">The answer and table above use sampling noise only, with no scenario. These tools change those assumptions. Their results appear in the scenario results and charts below; the answer above stays as published.</p>
+      <p class="analyst-intro">The answer and table above use sampling noise only, with no scenario. These tools change those assumptions. Their results appear in the scenario results and charts below; the answer above stays as published. Most scenarios price the FY 2028 bill through a simulated FY 2026 measurement; FY 2026's sample period has closed, so read them as showing how each lever moves a bill, not as choices still open for FY 2026.</p>
       <p class="hint analyst-terms">One term used throughout: the <strong>file rate</strong> is the error rate computed directly from the public QC case file. The official rate differs from it by a layer the file never records case by case — federal re-review integration and ineligible-case error — and every scenario here holds that layer fixed.</p>
 
       <section class="controls" aria-label="Sample size">
@@ -164,7 +166,7 @@
         <div class="control levers">
           <span class="label">Policy scenario — case-level model</span>
           <label><input type="checkbox" id="lever-smd"> <span id="smd-label">Flip the standard medical deduction</span></label>
-          <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. Loads the model on first use.</div>
+          <div class="hint" id="smd-hint">Re-predicts every case from the fitted error model with the state's SMD documentation feature reversed. The model loads with the analyst tools.</div>
         </div>
         <div class="control levers">
           <span class="label">Rules-engine scenario — cause-coded</span>
@@ -212,6 +214,7 @@
 
       <section class="chart-card" id="adoption">
         <h2>Adopting a verified rules engine</h2>
+        <p class="hint" id="adopt-national"></p>
         <div id="adoption-body"></div>
       </section>
 
