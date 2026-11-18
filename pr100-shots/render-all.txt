@@ -1,26 +1,24 @@
 Using CPython 3.14.4 interpreter at: /usr/bin/python3.14
 Creating virtual environment at: .venv
    Building snap-qc-sim @ file:///tmp/after
-Downloading ruff (10.9MiB)
 Downloading pygments (1.2MiB)
-Downloading numpy (15.9MiB)
+Downloading scipy (33.6MiB)
 Downloading pandas (11.8MiB)
+Downloading ruff (10.9MiB)
+Downloading numpy (15.9MiB)
+Downloading pyreadstat (2.5MiB)
 Downloading hypothesis (1.1MiB)
 Downloading scikit-learn (8.5MiB)
-Downloading scipy (33.6MiB)
-Downloading pyreadstat (2.5MiB)
-   Building quantile-forest==1.4.1
- Downloaded hypothesis
  Downloaded pygments
+ Downloaded hypothesis
       Built snap-qc-sim @ file:///tmp/after
  Downloaded pyreadstat
  Downloaded scikit-learn
  Downloaded ruff
- Downloaded pandas
  Downloaded numpy
+ Downloaded pandas
  Downloaded scipy
-      Built quantile-forest==1.4.1
-Installed 22 packages in 48ms
-............                                                             [100%]
-12 passed in 700.55s (0:11:40)
+Installed 22 packages in 56ms
+..................                                                       [100%]
+18 passed in 1732.97s (0:28:52)
 exit 0
