@@ -16,6 +16,14 @@ OUT.mkdir(parents=True, exist_ok=True)
 SITES = {"before": "http://127.0.0.1:8001", "after": "http://127.0.0.1:8002"}
 PATH = "/us/snap-payment-error-simulator/"
 SIZES = {"desktop": (1280, 900, 1), "phone": (390, 844, 2)}
+# The chart sweep adds the widths where tier labels used to collide.
+SWEEP_SIZES = {**SIZES, "small-tablet": (600, 900, 1), "tablet": (768, 1024, 1)}
+# The analyst artifacts load when the tools open; wait until the targeted
+# review panel has left its loading line.
+ANALYST_READY = (
+    "(() => { const t = document.getElementById('interventions-live').textContent;"
+    " return t.length > 0 && !t.startsWith('Loading'); })()"
+)
 
 CHECK = """() => {
   const res = [];
@@ -65,6 +73,7 @@ with sync_playwright() as p:
             page.screenshot(path=str(OUT / f"{site}-{size}-full.png"), full_page=True)
             if site == "after":
                 page.evaluate("document.getElementById('analyst').open = true")
+                page.wait_for_function(ANALYST_READY, timeout=120_000)
                 page.wait_for_timeout(800)
                 page.screenshot(path=str(OUT / f"{site}-{size}-analyst-full.png"), full_page=True)
             ctx.close()
@@ -78,14 +87,15 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f"after-{size}-dark-fold.png"))
         ctx.close()
 
-    # Sweep every jurisdiction at both widths with the analyst tools open.
+    # Sweep every jurisdiction at each width with the analyst tools open.
     report = {}
-    for size, (w, h, _) in SIZES.items():
+    for size, (w, h, _) in SWEEP_SIZES.items():
         ctx = browser.new_context(viewport={"width": w, "height": h})
         page = ctx.new_page()
         page.goto(SITES["after"] + PATH + "?state=CO", wait_until="networkidle")
         settle(page)
         page.evaluate("document.getElementById('analyst').open = true")
+        page.wait_for_function(ANALYST_READY, timeout=120_000)
         page.wait_for_timeout(500)
         codes = page.eval_on_selector_all("#state option", "os => os.map(o => o.value)")
         problems, mismatches = {}, {}

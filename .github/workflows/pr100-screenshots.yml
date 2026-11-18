@@ -27,6 +27,15 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install playwright==1.47.0 && python -m playwright install --with-deps chromium
       - run: python .github/pr100/shoot.py shots
+      # The render tests cover 12 states by default; this run covers all 53.
+      - uses: astral-sh/setup-uv@v5
+      - name: Render-test every jurisdiction on the PR head
+        run: |
+          cd /tmp/after
+          set +e
+          SNAPQC_RENDER_ALL=1 uv run --frozen --extra dev --extra analysis pytest -q tests/test_front_page_render.py > "$GITHUB_WORKSPACE/shots/render-all.txt" 2>&1
+          echo "exit $?" >> "$GITHUB_WORKSPACE/shots/render-all.txt"
+          tail -5 "$GITHUB_WORKSPACE/shots/render-all.txt"
       - name: Commit screenshots back to this branch
         run: |
           mkdir -p pr100-shots && mv shots/* pr100-shots/
