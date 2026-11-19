@@ -2,7 +2,7 @@
 
 Status: living document, started 2026-08-13; developments section
 added 2026-10-24; October queue sweep added and status rows refreshed
-2026-11-18. Discipline: a work enters
+2026-11-18; independent-review fixes 2026-11-19. Discipline: a work enters
 the VERIFIED table only after its existence, venue, and claim were
 confirmed against a primary source this session (link recorded); the
 TO-VERIFY queues hold candidate works named from memory, which MUST NOT
@@ -39,7 +39,7 @@ treatment forces:
 | GAO, *Food Stamp Program: Error Rate Adjustments and Sanctions* (report to House Agriculture subcommittee; HathiTrust 011421420) | GAO reviewed the error-rate adjustment and sanction machinery in the earlier regime | Primary-source record of the first sanctions era; pair with the 2002 Farm Bill revision that narrowed penalties to persistently high-error states. https://catalog.hathitrust.org/Record/011421420 |
 | DellaVigna & Pope, "Predicting Experimental Results: Who Knows What?", *Journal of Political Economy* 126(6): 2410–2456 (2018) | Collected 314 academics' forecasts of 18 experimental treatments before results; average forecast beat 96% of individuals | The pre-registration note's novelty must be stated against this line (and its JDE registered-report extension): our contribution is model-derived regime predictions with hash pins, not expert elicitation. https://www.journals.uchicago.edu/doi/10.1086/699976 |
 | DellaVigna, Otis & Vivalt, "Forecasting the Results of Experiments: Piloting an Elicitation Strategy", *AEA Papers & Proceedings* 110: 75–79 (2020) — authorship Crossref-verified 2026-08-14 (not Pope) | Registered-report forecasting methodology piloted at JDE | Same as above; the venue precedent for registration-then-results publishing. https://www.aeaweb.org/articles?id=10.1257%2Fpandp.20201080 |
-| GAO, "Food Stamp Program: Payment Errors and Trafficking Have Declined despite Increased Program Participation", GAO-07-422T, testimony 2007-01-31 | Pre-2002, states above the national average were sanctioned — about half of states each year; the 2002 Farm Bill moved to liability only at 95% statistical probability of exceeding 105% of the national average for 2 consecutive years, pay-or-reinvest, plus $48M/yr performance bonuses | Full text read (govinfo) 2026-08-14. THE primary source for the 2002 narrowing sentence in @sec-related — and for the observation that the 2002 design priced sampling noise into the liability rule while the 2025 tiers price point estimates. https://www.gao.gov/products/gao-07-422t |
+| GAO, "Food Stamp Program: Payment Errors and Trafficking Have Declined despite Increased Program Participation", GAO-07-422T, testimony 2007-01-31 | Pre-2002, states above the national average were sanctioned — about half of states each year; the 2002 Farm Bill moved to liability only at 95% statistical probability of exceeding 105% of the national average for 2 consecutive years, pay-or-reinvest, plus $48M/yr performance bonuses | Full text read (govinfo) 2026-08-14. The paper's source for the 2002 narrowing sentence in @sec-related; since 2026-11-19 the §4118 and 2003-rule rows in the sweep table below supersede it for the enacted mechanics. Also the source for the observation that the 2002 design priced sampling noise into the liability rule while the 2025 tiers price point estimates. https://www.gao.gov/products/gao-07-422t |
 | Goldstein & Spiegelhalter, "League Tables and Their Limitations: Statistical Issues in Comparisons of Institutional Performance", *JRSS-A* 159(3): 385–409 (1996), DOI 10.2307/2983325 | The canonical treatment of ranking institutions under sampling noise: interval estimates, shrinkage, and the instability of league-table positions | Verified 2026-08-14 (Oxford Academic + RePEc + full-text PDFs). Pairs with Kane–Staiger as the second anchor for the tier-persistence rival prediction. https://academic.oup.com/jrsssa/article/159/3/385/7102490 |
 | Peeters & Widlak, "The digital cage: Administrative exclusion through information architecture", *Government Information Quarterly* 35(2): 175–183 (2018), DOI 10.1016/j.giq.2018.02.003 | System architecture itself as an administrative-exclusion mechanism (Dutch civil registry case) | Verified 2026-08-14 (Crossref). Frames UHIP/Benefind as members of a documented class for the event-study paper, not one-off anecdotes. |
 | Peeters & Widlak, "Administrative exclusion in the infrastructure-level bureaucracy: The case of the Dutch daycare benefit scandal", *Public Administration Review* 83(4): 863–877 (2023), DOI 10.1111/puar.13615 | The consequence side: automated error attribution driving wrongful clawbacks at scale | Verified 2026-08-14 (Crossref). Bib-verified only — read before citing content claims. |
@@ -49,16 +49,23 @@ treatment forces:
 | Homonoff & Somerville, "Program Recertification Costs: Evidence from SNAP", *AEJ: Economic Policy* 13(4): 271–298 (2021) | Random assignment of recertification interview dates in San Francisco: late-month dates cut recertification by over 20%, average $600 lost benefits, quarter off SNAP over a year | Anchor for burden-driven churn as an error-process channel; frames Kentucky's Benefind mitigation (6→12-month recertification) as itself error-relevant; source of rival predictions for design 2. https://www.nber.org/papers/w27311 |
 | Abadie, "Using Synthetic Controls: Feasibility, Data Requirements, and Methodological Aspects", *Journal of Economic Literature* 59(2): 391–425 (2021) | The methodological survey: where synthetic controls are reliable and where they fail | The formal citation behind the event-study machinery; its reliability conditions are the checklist our Oregon run and the coming RI/KY runs must be argued against. https://www.aeaweb.org/articles?id=10.1257%2Fjel.20191450 |
 | Abadie, Diamond & Hainmueller, "Synthetic Control Methods for Comparative Case Studies: Estimating the Effect of California's Tobacco Control Program", *JASA* 105(490): 493–505 (2010) | The canonical single-treated-unit method with placebo-in-space permutation inference | The direct methodological ancestor of the design-1 estimator; permutation inference as implemented is theirs. |
-
 | GAO, *Federal and State Liability for Inaccurate Payments of Food Stamp, AFDC, and SSI Program Benefits* (RCED-84-155, 1984) | Documents the first sanction regime: food stamp error-rate thresholds of 9% (FY1983), 7% (FY1984), 5% (FY1985); state liability tied to federally reimbursed administrative costs; waiver and reinvestment machinery | The direct precedent for cost sharing keyed to noisy error rates — thresholds stepping down while measurement noise stayed put; the NRC 1987 panel is its institutional response, and the paper's OBBBA analysis inherits this lineage. https://gao.justia.com/social-security-administration/1984/4/federal-and-state-liability-for-inaccurate-payments-of-food-stamp-afdc-and-ssi-program-benefits-rced-84-155 |
 | DOJ False Claims Act settlements over SNAP QC manipulation (2016–2021): Virginia, Wisconsin, Alaska, Texas ($15M+), Mississippi, Louisiana, Florida ($17.5M), Tennessee ($6.85M); Osnes Consulting ($751,571); $67M+ recovered | A USDA-OIG nationwide audit found third-party consultants advised states to diminish identified QC errors (2008–2013); states and the consultant settled FCA liability | The paper's "documented manipulation history" now cites named federal records rather than a gloss; the bunching design (design 4) has its motivating episode — discretion demonstrably responded to the measurement system. https://www.justice.gov/opa/pr/texas-health-and-human-services-commission-agrees-pay-over-15-million-resolve-false-claims · https://justice.gov/opa/pr/florida-department-children-and-families-agrees-pay-175-million-resolve-false-claims-act · https://www.justice.gov/usao-edwa/pr/consultant-agrees-pay-751571-settle-false-claims-act-liability-alleged-falsification |
 | CRS, *Errors and Fraud in the Supplemental Nutrition Assistance Program* (R45147) | The Congressional Research Service synthesis of the error-measurement and manipulation episode | The neutral secondary source tying the QC system, the OIG audit, and the sanction history together for a policy audience. https://www.everycrsreport.com/reports/R45147.html |
 
-## Developments since 2026-08-14 (verified 2026-10-24; status rows refreshed 2026-11-18)
+## Developments added after 2026-08-14 (verified 2026-10-24; status rows refreshed 2026-11-18)
 
-Policy, state-law, and tool developments after the anchor table was
-built. Same discipline: each row was read at the primary source linked
+Policy, state-law, and tool developments added after the anchor table was
+built; some, such as the FY2025 rates (2026-06-24), predate it. Same discipline: each row was read at the primary source linked
 in it; claims seen only in secondary coverage sit in queue 9 below.
+
+A note on the delay threshold (2026-11-19): CRS, Brookings and Corinth
+write it as a rate of 13.33% or higher. The enacted test is the rate
+multiplied by 1.5 being equal to or above 20 percent (7 U.S.C.
+2013(a)(2)(B)(iii), from P.L. 119-21 §10105), so the cutoff is
+13.333…%: a published two-decimal rate of 13.33% does not qualify and
+13.34% does, as `app/public/app.js` encodes. Rows below keep each
+source's own wording.
 
 | Work | Verified claim | Bears on |
 |---|---|---|
@@ -67,8 +74,8 @@ in it; claims seen only in secondary coverage sit in queue 9 below.
 | CRS, *Senate Committee Reports a Farm Bill That Would Delay Onset of States Sharing SNAP Benefit Costs* (IN12723, updated 2026-10-05; still the current version on 2026-11-18) | S. 5526 would start benefit cost sharing in FY2029, keyed to the lower of the FY2026 or FY2027 rate; delay to FY2030 states at 13.33% or higher in both FY2025 and FY2026; and raise the top share from 15% to 20% from FY2031. The House-passed H.R. 7567 keeps current law. USDA has issued no regulations or guidance, and CRS's figure assumes cost sharing keys to the point estimate | The statute the simulator encodes could change before the first bill: the election pair moves from {FY2025, FY2026} to {FY2026, FY2027}, the delay test becomes a two-year conjunction, and a 20% tier enters. CRS's point-estimate assumption matches the statute: §10105 adopts the section 16(c)(2) definition (7 U.S.C. 2025(c)(2)(A)), "the sum of the point estimates" of the over- and underpayment rates, which P.L. 119-21 leaves unamended (checked 2026-11-18). What USDA has not yet set out is implementation. https://www.everycrsreport.com/reports/IN12723.html |
 | Bergh & Rosenbaum (CBPP), "New Data Underscore SNAP Cost Shift's Harm to Low-Income Families and State Budgets" (2026-07-23) | On FY2025 point estimates: 9 states and the Virgin Islands below 6%; 6 states at 5%; 16 at 10%; 13 and Guam at 15%; 6 states and DC delayed. About $9 billion shifts to states in FY2028, priced on annualized first-half FY2026 issuance. New Jersey fell from 14.33% to 6.86%, leaving the delay group for a 5% share | Independent cross-check: CBPP's delay roster (AK, DE, DC, GA, IL, NM, OR) and New York at 13.18% match the paper's. The simulator prices on FY2024 issuance (`analysis/INTERVENTIONS.md`) and reports expectations over tier odds, so reconcile issuance bases before setting CBPP's $9 billion beside the paper's summed expected bill. https://www.cbpp.org/sites/default/files/7-23-26fa.pdf |
 | Corinth (AEI COSM), "How Fixing SNAP's Payment Error Rate Formula Would Change State Cost Shares" (2026-08-19) | The rate divides error dollars by benefits paid, so an overpayment also enlarges the denominator. For a household eligible for $300, a $400 payment scores 0.25 and a $200 payment 0.50; dividing by correctly computed benefits scores both 0.33. Approximated from published FY2025 figures, every state's rate rises (0.04–5.09pp) and 16 states' FY2028 shares change, 7 of them by crossing 13.33% into the delay | A definitional sensitivity separate from sampling noise, with a perverse sign at the delay cliff: the stricter definition lowers FY2028 state bills by a net $2.70 billion. The worked example and the approximation (corrected rate = rate / (1 − over + under)) were checked by hand. The simulator encodes the statutory definition; a definitional lens is a candidate extension. https://cosm.aei.org/how-fixing-snaps-payment-error-rate-formula-would-change-state-cost-shares/ |
-| North Carolina S.L. 2026-41 (S.B. 257), §9J.14, approved 2026-07-07, creating G.S. 108A-52.2 | Passes any state benefit cost share to counties by withholding sales-tax distributions. Each county pays a flat 0.75% of its base-year sales-tax allocation plus a proportional assessment scaled by its "penalty factor", its portion of the statewide PER dollar amount. §9J.14(b) writes the FY2028 election into statute: FY2025 unless FY2026 yields a lesser obligation. Nickodem (UNC SOG, 2026-08-17) puts the FY2025 rate at 7.36% and the FY2028 share at about $150 million | The first verified sub-state pass-through, and a second measurement layer. The statute does not say how PER dollars are attributed to counties; if from QC cases, the repo's FY2024 NC file has 955 cases and 127 with errors across 100 counties, so the tier lottery recurs at the county level on one or two error cases each. The statutory election matches the simulator's minimum-obligation election semantics. https://www.ncleg.gov/EnactedLegislation/SessionLaws/PDF/2025-2026/SL2026-41.pdf · https://canons.sog.unc.edu/blog/2026/08/17/state-appropriations-act-shifts-potential-federal-snap-benefit-cost-sharing-to-north-carolina-counties/ |
-| McClurg, SNAP payment error rate tool (released 2026-06-24) | State liabilities from point estimates on FY2023 issuance, with timeliness and PAI correlations and CAPER profiles; no sampling uncertainty, election, or delay modeling | A nearby public tool. Correction (2026-11-18): this row first called tier odds under sampling noise the simulator's distinct contribution, but Bauer and Schanzenbach (Brookings, 2026-08-25, Appendix B) already compute one-year tier odds from published FY2023 rates and standard errors (sweep table below). Brookings' fifth bin is the 13.33% delay threshold, but each of its probabilities is for a single year. What remains distinct from both: resampling QC cases instead of drawing from published standard errors; the two-year structure of the FY2028 election and delay test; and the pre-registration's committed drift variants. The drift variants matter because the repo's backtest finds sampling-only nominal 90% intervals cover 48% of realized next-year rates (`analysis/PERSISTENCE_BACKTEST.md`, reconstructed-rate scale). https://snap-per.joelmcclurg.ai |
+| North Carolina S.L. 2026-41 (S.B. 257), §9J.14, approved 2026-07-07, creating G.S. 108A-52.2 | Passes any state benefit cost share to counties by withholding sales-tax distributions. Each county pays a flat 0.75% of its base-year sales-tax allocation plus a proportional assessment scaled by its "penalty factor", its portion of the statewide PER dollar amount. §9J.14(b) writes the FY2028 election into statute: FY2025 unless FY2026 yields a lesser obligation. Nickodem (UNC SOG, 2026-08-17) puts the FY2025 rate at 7.36% and the FY2028 share at about $150 million | The first sub-state pass-through this file has verified, and a second measurement layer. The statute does not say how PER dollars are attributed to counties. If DHHS attributes them from QC cases, county shares inherit sampling noise from few cases: the repo's FY2024 file has 955 North Carolina cases, 127 with counted errors, for 100 counties. The public file carries no county identifier, so how those cases fall across counties is unknown. The county assessment described here is proportional, with no county-level tier cutoffs. The statutory election matches the simulator's minimum-obligation election semantics. https://www.ncleg.gov/EnactedLegislation/SessionLaws/PDF/2025-2026/SL2026-41.pdf · https://canons.sog.unc.edu/blog/2026/08/17/state-appropriations-act-shifts-potential-federal-snap-benefit-cost-sharing-to-north-carolina-counties/ |
+| McClurg, SNAP payment error rate tool (released 2026-06-24) | State liabilities from point estimates on FY2023 issuance, with timeliness and PAI correlations and CAPER profiles; no sampling uncertainty, election, or delay modeling | A nearby public tool. Correction (2026-11-18): this row first called tier odds under sampling noise the simulator's distinct contribution, but Bauer and Schanzenbach (Brookings, 2026-08-25, Appendix B) already compute one-year tier odds from published FY2023 rates and standard errors (sweep table below). Brookings' fifth bin, 13.33% or higher, is its stand-in for the delay test (see the note above this table), and each of its probabilities is for a single year. Source by source: McClurg uses point estimates only; Brookings draws each state's rate from Normal(PER, SE) for one year; the simulator resamples QC cases and carries the draws through the two-year FY2028 election and delay test; and the pre-registration adds committed drift variants. The drift variants answer the repo's backtest, where the sampling-only (`static`) specification's nominal 90% intervals cover 48% of realized next-year rates on the reconstructed-rate scale, and 78% with SDs set to the published ~1.1pp average (`static_official_1p1`; `analysis/PERSISTENCE_BACKTEST.md`). https://snap-per.joelmcclurg.ai |
 
 ## October 2026 queue sweep (verified 2026-10-25; checked 2026-11-18)
 
@@ -81,10 +88,11 @@ requested the 91 links in this section as committed: 57 opened and 34
 refused automated clients or redirected without opening (GAO, CBPP,
 CBO and most journal publishers). Earlier browser spot-checks of a
 sample of refused links opened. None returned 404; the one dead lane
-URL, the RI Auditor General's report, is noted in its row without a
-link. Rows marked † were re-read at the primary source during
-integration. Apart from Herd & Moynihan (`herd2018burden`), none of
-these works is cited in `paper/references.bib` or
+URL, the RI Auditor General's report, was left out. On 2026-11-19 two
+links were added: that report's Wayback Machine copy and 42 CFR
+431.958, both read. Rows marked † were re-read at the primary source
+during integration. Apart from Herd & Moynihan (`herd2018burden`), none
+of the sweep tables' entries is cited in `paper/references.bib` or
 `paper-causal/references.bib` on origin/main as of 2026-11-18. Before
 either paper rests a sentence on an unmarked row, re-open the source.
 
@@ -93,8 +101,8 @@ either paper rests a sentence on an unmarked row, re-open the source.
 | Work | Verified claim | Bears on |
 |---|---|---|
 | National Research Council, *From Quality Control to Quality Improvement in AFDC and Medicaid: Summary and Recommendations*, F. D. Kramer, ed. (National Academy Press, 1988). [NAP catalog 19102](https://nap.nationalacademies.org/catalog/19102/from-quality-control-to-quality-improvement-in-afdc-and-medicaid) | Bibliographic only: title, editor, year and a 25-page summary. The scanned contents were unreadable, and the DOI the lane recorded (10.17226/19102) did not resolve on 2026-11-18 | The AFDC/Medicaid companion volume the Press–Tanur anchor row was looking for. Its recommendations remain unread |
-| Hand, "A Resampling Analysis of Federal Family Assistance Program Quality Control Data: An Application of the Bootstrap", *Evaluation Review* 14(4): 391–410 (1990), DOI [10.1177/0193841X9001400404](https://journals.sagepub.com/doi/10.1177/0193841X9001400404) † | Bootstraps Oregon Food Stamp QC data to study the regression estimator's efficiency when its assumptions fail. Abstract and references only; the numerical results were not accessible | Bootstrapping SNAP QC data dates to 1990. What the simulator adds is carrying resampled rates through the statutory tiers |
-| HHS Departmental Grant Appeals Board, *FY 1981 Medicaid Quality Control Disallowances*, Decision No. 948 (1988-04-18). [Full text](https://www.hhs.gov/sites/default/files/static/dab/decisions/board-decisions/1988/dab948.html) | Remands excess-resource error calculations, separating legal ineligibility from avoidable program loss. Footnote 8 cites the NAS AFDC/Medicaid study (ch. 7, p. 44) | Rival prediction 3: a case where adjudicating how errors are valued changed fiscal liability without changing the eligibility finding. Legitimate adjudication, not manipulation |
+| Hand, "A Resampling Analysis of Federal Family Assistance Program Quality Control Data: An Application of the Bootstrap", *Evaluation Review* 14(4): 391–410 (1990), DOI [10.1177/0193841X9001400404](https://journals.sagepub.com/doi/10.1177/0193841X9001400404) † | Bootstraps Oregon Food Stamp QC data to study the regression estimator's efficiency when its assumptions fail. Abstract and references only; the numerical results were not accessible | Bootstrapping SNAP QC data dates to 1990. Its abstract targets the regression estimator's efficiency; whether the full text links resampled rates to the sanction rules of its time is unread |
+| HHS Departmental Grant Appeals Board, *FY 1981 Medicaid Quality Control Disallowances*, Decision No. 948 (1988-04-18). [Full text](https://www.hhs.gov/sites/default/files/static/dab/decisions/board-decisions/1988/dab948.html) | Remands excess-resource error calculations, separating legal ineligibility from avoidable program loss. Footnote 8 cites the NAS AFDC/Medicaid study (ch. 7, p. 44) | Rival prediction 3: a dispute over how errors are valued, sent back for recalculation, through which liability could move without a change in the eligibility finding. The outcome on remand was not read |
 | Matt & Cook, "The War on Fraud and Error in the Food Stamp Program: An Evaluation of Its Effects in the Carter and Reagan Administrations", *Evaluation Review* 17(1): 4–26 (1993), DOI [10.1177/0193841X9301700102](https://journals.sagepub.com/doi/10.1177/0193841X9301700102) | From the abstract: payment accuracy and eligible participation improved together under Carter, while the first Reagan administration's fall in overpaid cases came with falling eligible participation | Rival prediction 2: an early precedent for scoring accuracy and access together. Observational |
 | P.L. 107-171 §4118, *Farm Security and Rural Investment Act of 2002*, 116 Stat. 317–319. [Enacted text](https://www.govinfo.gov/content/pkg/PLAW-107publ171/pdf/PLAW-107publ171.pdf) † | From FY2004, liability attaches when there is a 95% statistical probability that a state's rate exceeds 105% of the national performance measure, for a second or subsequent consecutive year. Amount: allotments × (rate − 6%) × 10%. The Secretary may waive it, require up to 50% as new investment with no federal match, or designate up to 50% at risk, payable if liability is established the next year | Replaces the reliance on GAO-07-422T's summary with the enacted formula, and separates establishing liability from collecting it |
 | FNS, "Food Stamp Program: Non-Discretionary Quality Control Provisions of Title IV of Public Law 107-171", interim rule, 68 FR 59519–59524 (2003-10-16). [Full text](https://www.govinfo.gov/content/pkg/FR-2003-10-16/pdf/03-26176.pdf) | FY2003 is the first comparison year, and the national measure is weighted by issuance. Implements waiver, reinvestment and conditional collection. Corrective action applies at rates of 6% or more, separately from liability | "Pay or reinvest" understates the 2002 mechanics |
@@ -103,7 +111,7 @@ either paper rests a sentence on an unmarked row, re-open the source.
 | USDA OIG, *Semiannual Report to Congress*, No. 80, FY2018 second half (2018-11). [Full text](https://www.oig.usda.gov/sites/default/files/reports/2026-07/sarc2018_2nd_half_508.pdf) | Recommendations 1 and 11 of the 2015 audit were still awaiting final action | Recommendation tracking, not a new audit |
 | Mills, Laliberty & Rodger, *Food Stamp Certification Periods and Payment Accuracy: State Experience During 1997–2001*, ERS E-FAN-04-012 (2004-11). [Full text](https://ers.usda.gov/sites/default/files/_laserfiche/publications/43574/33355_efan04012.pdf) | A QC-based Markov model predicts lower participation from more frequent recertification of earnings cases. The case error-rate response flips sign across base years. Simulations, not causal estimates | Rival prediction 2's pairing of falling participation with an ambiguous error direction has a 2004 modeling ancestor |
 | Logan, Rhodes & Sabia, *Food Stamp Program Costs and Error Rates, 1989–2001*, ERS CCR-15 (2006-01). [Full text](https://ers.usda.gov/sites/default/files/_laserfiche/publications/86030/CCR-15.pdf) | Models administrative effort against an index combining positive and negative case errors. Cost measurement is inconsistent, and automation effects could not be isolated | Earlier QC-based production research. Motivates using concrete system events over spending proxies |
-| Logan, Kling & Rhodes, *Food Stamp Program Certification Costs and Errors, 1989–2005*, ERS CCR-45 (2008-06). [Full text](https://www.govinfo.gov/content/pkg/GOVPUB-A93-PURL-gpo16513/pdf/GOVPUB-A93-PURL-gpo16513.pdf) | Short certification periods and simplification both go with a lower composite error index (not official dollar rates). Automation spending failed as a proxy; the report proposes studying specific automation changes | Accuracy gains need not raise household burden. Supports the events paper's system-migration design |
+| Logan, Kling & Rhodes, *Food Stamp Program Certification Costs and Errors, 1989–2005*, ERS CCR-45 (2008-06). [Full text](https://www.govinfo.gov/content/pkg/GOVPUB-A93-PURL-gpo16513/pdf/GOVPUB-A93-PURL-gpo16513.pdf) | Short certification periods and simplification both go with a lower composite error index (not official dollar rates). Automation spending failed as a proxy; the report proposes studying specific automation changes | Associations only, and burden is not measured: shorter certification periods, which add household burden, and simplification, which reduces it, both go with lower measured error. Supports the events paper's system-migration design |
 | McGill, Thorn, Cody, Wagner, Ramaswamy & Cunnyngham, *Feasibility of Revising the SNAP Quality Control Review Process* (Insight Policy Research for FNS, 2019-12), Appendix F. [Full text](https://fns-prod.azureedge.us/sites/default/files/resource-files/SNAPQC_Feasibility.pdf) † | Draws 200 replicate files per sample-reduction scenario from 2016 QC data and finds substantial added state-level uncertainty. The estimator uses weighted household error proportions, so it measures the uncertainty that smaller samples add, not total uncertainty in the dollar rate | A second QC-resampling predecessor, from inside FNS |
 
 ### Queue 3: administrative burden and churn
@@ -117,7 +125,7 @@ either paper rests a sentence on an unmarked row, re-open the source.
 | Sunstein, "Sludge Audits", *Behavioural Public Policy* 6(4): 654–673 (issue 2022; online 2020-01-06), DOI [10.1017/bpp.2019.32](https://doi.org/10.1017/bpp.2019.32) | From the abstract: proposes regular audits of excessive or unjustified procedural frictions | An established audit concept. No SNAP rate effect |
 | OECD, *Fixing Frictions: "Sludge Audits" around the World*, Public Governance Policy Paper 48 (2024-06-12), DOI [10.1787/5e9bb35c-en](https://www.oecd.org/en/publications/fixing-frictions-sludge-audits-around-the-world_5e9bb35c-en.html) | Ten case studies and nine practice principles. New South Wales maps steps, waiting, effort and inclusion without one aggregate score, and treats justified eligibility checks as legitimate | Burden measurement beyond payment errors |
 | Sunstein & Gosset, "Optimal Sludge? The Price of Program Integrity", *Duke Law Journal Online* 70: 74–90 (2020). [Record](https://scholarship.law.duke.edu/dlj_online/74/) | From the abstract: eligibility requirements screen out eligible as well as ineligible applicants; reviews competing normative approaches and a pilot survey | The access–integrity tradeoff predates OBBBA |
-| Wu & Meyer, "Certification and Recertification in Welfare Programs: What Happens When Automation Goes Wrong?", *AEJ: Economic Policy*, forthcoming; NBER WP 31437 (2023). [AEA record](https://www.aeaweb.org/articles?id=10.1257/pol.20250309) † | From October 2007, Indiana rolled out IBM's automated processing of applications and recertifications in three county waves, reaching 59 of 92 counties before the rollout halted in January 2009. The system automated caseworker assistance, and the state kept final eligibility determinations. Four quarters after rollout, treated counties had 15% fewer SNAP individuals. Needier recipients exited at recertification, while less needy applicants were screened out at entry. Appendix Figure A8 shows, descriptively, Indiana's QC overpayment rate falling sharply after 2008 relative to the U.S. The AEA page lists DOI 10.1257/pol.20250309, which was not yet registered on 2026-11-18 | The events paper's closest predecessor on automated welfare processing and participation, and it already charts QC overpayment trends. The events paper's synthetic-control estimates on QC outcomes and its decomposition remain distinct |
+| Wu & Meyer, "Certification and Recertification in Welfare Programs: What Happens When Automation Goes Wrong?", *AEJ: Economic Policy*, forthcoming; NBER WP 31437 (2023). [AEA record](https://www.aeaweb.org/articles?id=10.1257/pol.20250309) † | From October 2007, Indiana rolled out IBM's automated processing of applications and recertifications in three county waves, reaching 59 of 92 counties before the rollout halted in January 2009. The system automated caseworker assistance, and the state kept final eligibility determinations. Four quarters after rollout, treated counties had 15% fewer SNAP individuals. Needier recipients exited at recertification, while less needy applicants were screened out at entry. Appendix Figure A8 shows, descriptively, Indiana's QC overpayment rate falling sharply after 2008 relative to the U.S. The AEA page lists DOI 10.1257/pol.20250309, which was not yet registered on 2026-11-18 | A predecessor on automated welfare processing and participation. Its QC overpayment chart is descriptive; the events paper estimates synthetic-control effects on QC outcomes and decomposes them |
 | Cook, Cox & East, "SNAP Work Requirements, Administrative Burden, and Procedural Denials", *AEA Papers and Proceedings* 116: 309–313 (2026), DOI [10.1257/pandp.20261086](https://www.aeaweb.org/articles?id=10.1257/pandp.20261086) | In one state's administrative data, removing ABAWD work requirements reduced procedural denials | Procedural denials as an observable for rival prediction 2 |
 
 ### Queue 5: public-sector IT implementation failure
@@ -129,7 +137,7 @@ either paper rests a sentence on an unmarked row, re-open the source.
 | HHS OIG, *HealthCare.gov: Case Study of CMS Management of the Federal Marketplace*, OEI-06-14-00350 (2016-02). [Record](https://oig.hhs.gov/reports/all/2016/healthcaregov-case-study-of-cms-management-of-the-federal-marketplace/) | Drawing on 86 interviews: unclear leadership, poor policy–technical coordination and contract-management failures. Recovery took organizational changes as well as technical repairs | Recovery measures compete as explanations for change after a launch |
 | GAO-15-290, *High-Risk Series: An Update* (2015-02-11), and GAO-25-107852, *High-Risk Series: Critical Actions Needed to Urgently Address IT Acquisition and Management Challenges* (2025-01-23). [2015](https://www.gao.gov/products/gao-15-290) · [2025](https://www.gao.gov/products/gao-25-107852) | IT acquisition and operations entered GAO's high-risk list in 2015 and remained there in 2025, with nine critical actions | The institutional setting for eligibility-system migrations |
 | Beane, *An Assessment of the Unified Health Infrastructure Project: A Report to Governor Gina M. Raimondo* (RI DHS, 2017-02-15). [Full text](https://transparency.ri.gov/uhip/documents/assessments/UHIP%2030-day%20assessment.pdf) | Incorrectly encoded rules, missing interfaces, conversion problems and inadequate training. More than 60 staff were laid off. SNAP lacked wage verification, and the problems impaired overpayment recovery and QC. Some applications were expedited despite expected errors | The events paper's RI event mixes computation, information, staffing and access |
-| Hoyle, *UHIP/RIBridges and HealthSource RI Project Costs: Review Report* (RI Auditor General, 2017-05). Lane URL `oag.ri.gov/reports/UHIP_RIB_HSRI_CostsReport2017.PDF` returned 404 on 2026-11-18 | Weak state project management, unclear contract acceptance and unresolved verification warnings. Required sample eligibility tests were delayed. The $407.3 million total combines UHIP/RIBridges and HealthSource RI | Testing eligibility software against case samples predates the oracle. The lane read this on 2026-10-25; find an archived copy before citing |
+| Hoyle, *UHIP/RIBridges and HealthSource RI Project Costs: Review Report* (RI Auditor General, 2017-05-25). The live URL returned 404 on 2026-11-18; [Wayback Machine copy](https://web.archive.org/web/20260105165749/https://www.oag.ri.gov/reports/UHIP_RIB_HSRI_CostsReport2017.PDF), captured 2026-01-05 | Weak state project management, unclear contract acceptance, and repeated warnings from the verification contractor with no clear record of resolution. Required sample eligibility tests were delayed. The $407.3 million total combines UHIP/RIBridges and HealthSource RI | Required sample testing of eligibility systems predates the oracle. Lane read 2026-10-25; re-read from the Wayback Machine copy 2026-11-19 |
 | Kentucky Program Review and Investigations Committee, *Minutes*, 2016-07-14. [Minutes](https://apps.legislature.ky.gov/minutes/prog_rev/160714OK.HTM) | Postponed launches, February 29 implementation, weak training and pilot, and erroneous notices. Deloitte testified that March benefits used the old system and Benefind-based decisions began April 1. Testimony, not audit findings | Treatment-date sensitivity for Kentucky: the launch date and the first decision date differ |
 | *Gemmell v. Beane*, C.A. 16-00650 (D.R.I.): stipulation (signed 2017-02-24) and Special Master Report #1 (2017-12-01). [Stipulation](https://transparency.ri.gov/uhip/documents/additional/Stipulation%20-%20final%20for%20filing.pdf) · [Report](https://transparency.ri.gov/uhip/documents/fns-reports/snap-special-master-reports/SNAP%20-%20Special%20Master%20Report%201%2012-1.pdf) | Timeliness targets rising to 96%, monthly reporting and sample audits. The consent order was entered 2017-02-28. The report describes missing documents, inbox failures, understaffing and incorrect notices | Court supervision is an intervention inside the post-launch window. Timeliness is a separate outcome from payment accuracy |
 | RI Governor's Office, "Governor Raimondo Extends Contract with Deloitte, Secures Millions for Rhode Island" (2019-03-15). [Announcement](https://www.ri.gov/press/view/35447) | A $50 million payment, discounted services, an operations extension through June 2021 and a waiver of claims. The "more than $210 million" total combines cash and discounts | Announced terms only |
@@ -139,8 +147,8 @@ either paper rests a sentence on an unmarked row, re-open the source.
 
 | Work | Verified claim | Bears on |
 |---|---|---|
-| HHS OIG, *Eligibility Errors Resulting in Misspent Funds in the Medicaid Program*, OAI-04-87-00014 (1988-05). [Full text](https://oig.hhs.gov/documents/evaluation/1384/OAI-04-87-00014-Complete%20Report.pdf) | Interviews with 151 respondents: disallowance threats raised management attention and accuracy effort. Respondents also described volatility from high-dollar sampled cases and resistance to sampling changes that might raise measured rates. Not a representative design | Historical evidence for both operational improvement and measurement-side responses under noisy penalties |
-| 42 CFR 431.1010 and the 431.958 definitions (PERM eligibility disallowance; final rule CMS-6068-F, 82 FR 31158, 2017). [eCFR](https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-C/part-431/subpart-Q/section-431.1010) † | Disallowance equals federal medical assistance funds × (lower limit − 3%), where the lower limit is the lower bound of the 95% confidence interval for the state's eligibility improper payment rate, excluding underpayments. A good-faith waiver requires MEQC pilot participation and corrective action plans | A comparator in force today that keys to a confidence bound. Read it with the enforcement record in the next two rows |
+| HHS OIG, *Eligibility Errors Resulting in Misspent Funds in the Medicaid Program*, OAI-04-87-00014 (1988-05). [Full text](https://oig.hhs.gov/documents/evaluation/1384/OAI-04-87-00014-Complete%20Report.pdf) | Interviews with 151 respondents, who reported that disallowance threats raised management attention and accuracy effort. They also described volatility from high-dollar sampled cases and resistance to sampling changes that might raise measured rates. Not a representative design | Respondents' reports, under Medicaid's 1980s disallowance regime, of both operational improvement and measurement-side responses to noisy penalties |
+| 42 CFR 431.1010 and the 431.958 definitions (PERM eligibility disallowance; final rule CMS-6068-F, 82 FR 31158, 2017). [eCFR](https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-C/part-431/subpart-Q/section-431.1010) † | CMS subtracts the 3 percent threshold from the lower limit of the state's eligibility improper payment rate, excluding underpayments; if the difference is positive, the disallowance is the period's federal medical assistance funds times that difference. The lower limit is the lower bound of the 95% confidence interval ([431.958](https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-C/part-431/subpart-Q/section-431.958)). A good-faith waiver requires MEQC pilot participation and corrective action plans | A comparator in force today that keys to a confidence bound. Read it with the enforcement record in the next two rows |
 | GAO-20-157, *Medicaid Eligibility: Accuracy of Determinations and Efforts to Recoup Federal Funds Due to Errors* (2020-01-13). [Record](https://www.gao.gov/products/gao-20-157) | CMS had not imposed eligibility-error disallowances for decades. Some audit errors were incomplete documentation for applicants later found eligible | Legal exposure is not enforcement, and missing documentation is not ineligibility |
 | GAO-26-108017, *Medicaid: Improved Oversight Needed of State Eligibility Error Corrective Action Plans* (2026-08-18; released 2026-09-17). [Record](https://www.gao.gov/products/gao-26-108017) | CMS reported no eligibility-error withholding in the period reviewed, and accepted incomplete corrective plans | Current enforcement record. Released after the August pre-registration |
 | P.L. 119-21 §71106, *Payment Reduction Related to Certain Erroneous Excess Payments under Medicaid*, 139 Stat. 295–296 (2025). [Enacted text](https://www.govinfo.gov/content/pkg/PLAW-119publ21/html/PLAW-119publ21.htm) | From FY2030, limits good-faith waiver relief and expands the treatment of payments with insufficient eligibility information | Same law as the SNAP provision (§10105). A Medicaid comparison must separate today's regulation from the FY2030 change |
@@ -160,7 +168,7 @@ either paper rests a sentence on an unmarked row, re-open the source.
 |---|---|---|
 | Chambers & Tzavella, "The past, present and future of Registered Reports", *Nature Human Behaviour* 6: 29–42 (2022), DOI [10.1038/s41562-021-01193-7](https://www.nature.com/articles/s41562-021-01193-7) | Registered Reports combine peer review before results with in-principle acceptance | A repository registration does not have Registered Report status |
 | Arpinon & Espinosa, "A practical guide to Registered Reports for economists", *Journal of the Economic Science Association* 9(1): 90–122 (2023), DOI [10.1007/s40881-022-00123-1](https://link.springer.com/article/10.1007/s40881-022-00123-1) | Covers pre-results review, conditional acceptance, analysis plans, power and multiple testing | Commit adjudication rules and power alongside predictions |
-| Nosek, Ebersole, DeHaven & Mellor, "The preregistration revolution", *PNAS* 115(11): 2600–2606 (2018), DOI [10.1073/pnas.1708274114](https://www.pnas.org/doi/full/10.1073/pnas.1708274114) † | Its "Challenge 3: Data Are Preexisting" discusses economists preregistering predictions of government data that exist but are not yet released, and stresses disclosing prior knowledge | Preregistering forecasts of unreleased administrative statistics is established methodology |
+| Nosek, Ebersole, DeHaven & Mellor, "The preregistration revolution", *PNAS* 115(11): 2600–2606 (2018), DOI [10.1073/pnas.1708274114](https://www.pnas.org/doi/full/10.1073/pnas.1708274114) † | Its "Challenge 3: Data Are Preexisting" gives, as one example of pure preregistration still being possible, an economist predicting government data that exist but have not been released, and stresses disclosing what was known in advance | Treating predictions of unreleased government data as preregistration has a methodological precedent, stated as a one-line example |
 | Mellers, Hertwig & Kahneman, "Do Frequency Representations Eliminate Conjunction Effects? An Exercise in Adversarial Collaboration", *Psychological Science* 12(4): 269–275 (2001), DOI [10.1111/1467-9280.00350](https://journals.sagepub.com/doi/abs/10.1111/1467-9280.00350); erratum DOI 10.1111/1467-9280.00399 | Opposing researchers agreed on tests in advance, with an arbiter. The erratum withdraws the novelty claim and credits an earlier collaboration | Our process is adversarial review; scientific opponents did not jointly design tests |
 | IARPA, "IARPA Announces Publication of Data from the Good Judgment Project" (2017-04-28). [Release](https://www.iarpa.gov/newsroom/article/iarpa-announces-publication-of-data-from-the-good-judgment-project) | Millions of forecasts across four years of the ACE program, later released publicly | Policy-relevant forecasting tournaments exist. No evidence the forecasts were hash-committed |
 | Metaculus, FAQ, and question 7346 on July 2021 initial jobless claims. [FAQ](https://www.metaculus.com/faq/) · [Question](https://www.metaculus.com/questions/7346/initial-jobless-claims-july-2021/) | Probabilistic forecasts with resolution criteria and revision until close, including an administrative statistic | Public forecasting of policy statistics exists |
@@ -186,8 +194,8 @@ effects.
 
 | Work | Verified claim | Bears on |
 |---|---|---|
-| Molin, "Is SNAP Screener Accurate? Testing the Calculator Against the SNAP Quality Control Data", SNAP Screener (2025-10-17; updated 2026-07). [Post](https://www.snapscreener.com/blog/qc-data) † | Tests an independent benefit calculator against 37,009 FY2023 QC records, skipping eligibility screening: 98.64% agree within $2. The validation surfaced corrections to historical utility and medical-deduction parameters | Validating benefit code against QC records predates the oracle. The six-stage, zero-tolerance protocol remains distinct. Separate from the cited `@giannella_snapqc` software |
-| Bauer & Schanzenbach, "The SNAP state cost-shift policy leaves the program's existence to chance", Brookings (2026-08-25). [Article](https://www.brookings.edu/articles/the-snap-state-cost-shift-policy-leaves-the-programs-existence-to-chance/) † | Appendix B computes the probability of each of the five OBBBA bins from FY2023 published rates and standard errors under a Normal(PER, SE) sampling distribution, without shrinkage. The fifth bin is 13.33% or higher, the delay threshold. Each probability is for a single year's draw | Overlaps the tier-lottery result, using published standard errors where the simulator resamples cases. The two-year FY2028 election and delay test are outside its calculation. This file makes no priority claim either way |
+| Molin, "Is SNAP Screener Accurate? Testing the Calculator Against the SNAP Quality Control Data", SNAP Screener (2025-10-17; updated 2026-07). [Post](https://www.snapscreener.com/blog/qc-data) † | Tests an independent benefit calculator against 37,009 FY2023 QC records, skipping eligibility screening: 98.64% agree within $2. The validation surfaced corrections to historical utility and medical-deduction parameters | Validating benefit code against QC records predates the oracle. Molin compares final benefits within $2 and skips eligibility screening; the main paper requires zero-dollar agreement at six computation stages per case (`paper/index.qmd`). Separate from the cited `@giannella_snapqc` software |
+| Bauer & Schanzenbach, "The SNAP state cost-shift policy leaves the program's existence to chance", Brookings (2026-08-25). [Article](https://www.brookings.edu/articles/the-snap-state-cost-shift-policy-leaves-the-programs-existence-to-chance/) † | Appendix B computes the probability of each of the five OBBBA bins from FY2023 published rates and standard errors under a Normal(PER, SE) sampling distribution, without shrinkage. The fifth bin is 13.33% or higher, Brookings' stand-in for the delay test (see the note above the developments table). Each probability is for a single year's draw | Overlaps the tier-lottery result, using published standard errors where the simulator resamples cases. The two-year FY2028 election and delay test are outside its calculation. This file makes no priority claim either way |
 | Bauer & Schanzenbach, "SNAP cuts in the One Big Beautiful Bill Act will significantly impair recession response", Brookings (2025-10-08). [Article](https://www.brookings.edu/articles/snap-cuts-in-the-one-big-beautiful-bill-act-will-significantly-impair-recession-response/) | Describes how a state with a high, delayed rate moves into positive cost sharing when its rate falls | The delay's perverse incentive was described in 2025 |
 | Bauer, Cole, Patt & Powell, "SNAP payment error rates by state, FY 2003–25", Brookings interactive (2026-06-25). [Interactive](https://www.brookings.edu/articles/snap-payment-error-rates-by-state-fy-2003-24/) | Historical state rates, cost-share boundaries and FY2025 placements | The June Brookings item, distinct from the August analysis |
 | Bleich, Hamad & Plata-Nino, "The Challenges of Linking SNAP State Cost Sharing to Payment Error Rates", *JAMA Health Forum* 7(10): e264880 (2026-10-15), DOI [10.1001/jamahealthforum.2026.4880](https://jamanetwork.com/journals/jama-health-forum/fullarticle/2855585) | A qualitative critique: small QC samples, random annual variation, budget unpredictability, review and coding changes, and access incentives | The measurement argument, made qualitatively |
@@ -213,7 +221,7 @@ effects.
 | NASBO, *Summaries of Fiscal Year 2027 Proposed Budgets* (2026-04-07; updated 06-02). [PDF](https://higherlogicdownload.s3.amazonaws.com/NASBO/9d2d2db1-c943-4f1b-b750-0fca152d64c2/UploadedImages/Issue%20Briefs%20/Proposed_Budget_Summaries_FY27_6_2__S_.pdf) | Proposed SNAP administrative backfills, payment-accuracy tools, staffing, systems and QC funding across states | Budget observables for operational responses |
 | Code for America, "Reducing Payment Error Rates for SNAP" (2025-12-11). [Post](https://codeforamerica.org/news/reducing-payment-error-rates-for-snap/) | Recommends targeted QA, worker tools, better change reporting and separate evaluation, while watching timeliness and procedural denials | Practitioner alternatives to tightening |
 | Nava PBC, "Nava awarded contract to reduce SNAP payment error rate in Pennsylvania" (2025-12-23). [Announcement](https://www.navapbc.com/news/pennsylvania-snap-hr1) | Automation and tools for Pennsylvania DHS | An intervention in progress, with no evaluated effect |
-| Vardr Partners, Benefits Gateway exposure table and FY2028 projection brief (2026-09). [Table](https://vardrpartners.com/products/benefits-gateway) | Lane: FY2025 rates × annualized issuance, deferrals marked, $8.32 billion first-year exposure. A static fetch on 2026-11-18 did not show the figure (the page may render it in the browser) | A commercial exposure interface on point rates |
+| Vardr Partners, Benefits Gateway exposure table and FY2028 projection brief (2026-09). [Table](https://vardrpartners.com/products/benefits-gateway) | FY2025 rates × April 2026 issuance × 12, with deferrals marked. The lane recorded $8.32 billion first-year exposure on 2026-10-25. A static fetch on 2026-11-18 showed no figure. A static fetch on 2026-11-19 showed $8.31 billion across 46 non-deferred jurisdictions, plus $1.51 billion deferred to FY2029 for 7 | A commercial exposure interface on point rates |
 | Higgins Strategy, *Every State Dollar*, Study XIX (2026-10-12). [Study](https://higginsstrategy.com/studies/every-state-dollar/) † | Exhibit 9: $11.1 billion a year at FY2025 benefit levels and rates, labeled arithmetic rather than a forecast | A point-rate baseline, not comparable to delay-adjusted expected bills |
 | Rachidi, "SNAP's New Cost Share Requirement Is a Blunt, But Necessary Tool", AEI COSM (2026-07-28). [Commentary](https://cosm.aei.org/snaps-new-cost-share-requirement-is-a-blunt-but-necessary-tool/) † | Argues that states should cut errors by improving operations rather than by restricting eligibility or raising costs, and calls the cost share a blunt but necessary integrity tool | The integrity case for the policy. Queue 9 had attributed this piece to Corinth |
 
@@ -227,8 +235,8 @@ Not citable until read.
 
 - Antwi-Wiafe, Sykuta, Mukembo & Giwa-Daramola, "Evaluating State
   Fiscal Exposure Under OBBBA's SNAP Cost-Share Reform", SSRN 7542138
-  (Crossref record exists; content unread). The closest unread fiscal
-  competitor.
+  (Crossref record exists; content unread). A fiscal-exposure paper on
+  the same reform; how it compares is unknown until read.
 - Corinth, "Paying for Payment Errors: State Incentives and Caseload
   Responses to SNAP Cost Sharing" (AEI working paper, 2026; title
   confirmed on the author's page, text unread). Bears directly on the
@@ -270,9 +278,10 @@ Not citable until read.
    resampling SNAP QC data (Hand 1990; FNS 2019, Appendix F); one-year
    tier odds under sampling noise (Bauer & Schanzenbach 2026, Appendix
    B, from published standard errors); validating benefit code against
-   QC records (Molin 2025); preregistering forecasts of unreleased
-   administrative statistics, including public commit-versioned model
-   forecasts (Nosek et al. 2018; Cramer et al. 2022); the delay's
+   QC records (Molin 2025); predictions of unreleased government data as
+   preregistration (Nosek et al. 2018, one example); public, timestamped,
+   Git-versioned model forecasts of later-released administrative
+   statistics (Cramer et al. 2022); the delay's
    perverse incentive (Brookings 2025; CBPP 2026 on New Jersey); and
    automated caseworker assistance and participation, with a
    descriptive QC overpayment chart (Wu & Meyer). Lane D
@@ -281,31 +290,37 @@ Not citable until read.
    these. Those are paper edits, outside this file.
 2. **Comparators that key to confidence bounds exist.** The 2002 SNAP
    rule required a 95% probability of exceeding 105% of the national
-   measure, and today's PERM disallowance subtracts 3% from the lower
-   bound of a 95% interval. SNAP's 2025 tiers key to the point estimate
+   measure, and today's PERM disallowance subtracts three percentage
+   points from the lower bound of a 95% interval and, when the result
+   is positive, withholds that share of federal medical assistance
+   funds. SNAP's 2025 tiers key to the point estimate
    by statute: §10105 adopts the section 16(c)(2) definition, "the sum
    of the point estimates" of the over- and underpayment rates (7
    U.S.C. 2025(c)(2)(A)), which P.L. 119-21 leaves unamended. CRS notes
    USDA has issued no regulations or guidance. TANF's
-   penalty escalates with persistence, and UI's rules forbid
-   error-rate incentives outright.
+   penalty escalates with persistence, and UI's rules bar DOL from
+   using sanctions or funding incentives to influence the achievement
+   of specified error rates.
 3. **The rival predictions need more rivals.** Operational
    improvement (HHS OIG 1988; APHSA, NASBO and Code for America in
    2025–26), reporting rules that change what counts as an error
    (Fannin 2025), denominator responses (GAO-10-525) and selection into
    completed reviews (McGill et al. 2016) all compete with tightening
    and measurement pressure. Dated notes on predictions 1–3 below
-   record this.
+   carry most of these; GAO-10-525's denominator response and Code for
+   America appear only in this list.
 4. **The events paper's pooled test needs a wording fix.** The RI and
-   KY donor-placebo dictionaries are identical (42 of 42 entries),
-   because the donor pools, years and fitting procedure coincide. So
-   the pooled routine compares a two-state mean effect with
-   single-state placebos, and its p = 0.093 is not a two-treated-unit
-   calibration. `paper-causal/index.qmd` describes this as ranking
-   "against pooled placebos built the same way". Pair-mean placebos
-   would likely be less dispersed, which would make the current test
-   conservative; that direction is inferred, not computed. The fix
-   belongs in the paper, outside this file.
+   KY donor-placebo dictionaries are identical (42 of 42 entries for
+   each outcome), because the donor pools, years and fitting procedure
+   coincide. So the pooled routine compares a two-state mean effect
+   with single-state placebos, and its strict-outcome p = 0.093 (rank
+   4 of 43, strict computing dollars per case-month) is not a
+   two-treated-unit calibration. `paper-causal/index.qmd` describes
+   this as ranking "against pooled placebos built the same way".
+   Whether pair-mean placebos would raise or lower that p was not
+   computed: averaging pairs narrows the spread, but refitting with two
+   pseudo-treated donors changes the fits. The fix belongs in the
+   paper, outside this file.
 
 ## Field map and TO-VERIFY queues
 
@@ -317,8 +332,8 @@ above.
    Osnes consultant settlement (the manipulation episode's primary
    sources), CRS R45147 (synthesis). Queue: the CNSTAT panel's
    companion volumes; the 2002 Farm Bill sanction redesign's
-   legislative analyses (GAO-07-422T now verified and promoted — the
-   mechanics; PL 107-171 Title IV and FR 2003-10-16 located, unread); the underlying USDA-OIG audit reports
+   legislative analyses (GAO-07-422T now verified and promoted — a summary of the
+   mechanics; PL 107-171 Title IV and FR 2003-10-16 located then, and read and promoted in the sweep); the underlying USDA-OIG audit reports
    themselves; ERS/FNS-commissioned error-rate studies. Sweep
    (2026-10-25): §4118, the 2003 rule, the 2015 OIG audit, Hand 1990,
    DAB 948 and the ERS/FNS studies (Mills 2004; Logan 2006 and 2008;
@@ -398,22 +413,37 @@ persistence absent any behavioral response.
 
 Statements to commit before any fiscal 2027 outcome publishes; each
 rests only on the anchor table above plus this repository's artifacts.
+*Note (2026-11-19):* prediction 1 is scored on the fiscal 2026 rates,
+which the pre-registration expects around mid-2027 by precedent, so it
+must be committed before they publish. The dated notes below
+(2026-11-18) also draw on the sweep tables.
 
 1. **Ranking-stability null (Goldstein–Spiegelhalter; Kane–Staiger).**
    Absent any behavioral response, sampling variation alone reshuffles
    tier positions year to year: the simulator's FY2028 election lens
    already quantifies this repository's version (per-state tier
    probabilities under the no-response null). The rival prediction to
-   beat: observed FY2027 tier assignments are statistically
-   indistinguishable from draws under the committed no-response nulls.
-   *Note (2026-11-18):* Bauer and Schanzenbach compute the same kind of
-   one-year tier odds from published standard errors. The repo's
-   backtest finds sampling-only nominal 90% intervals cover 48% of
-   realized next-year rates (`analysis/PERSISTENCE_BACKTEST.md`), so
-   on that evidence rejecting the sampling-only baseline is likely
-   even with no response; the pre-registration also commits drift
-   variants. Rejection alone cannot say whether drift, burden or
-   measurement produced it (lane C).
+   beat: observed fiscal 2026 rates, and the tiers they imply, are
+   statistically indistinguishable from draws under the committed
+   no-response nulls. *Correction (2026-11-19):* the first draft named
+   FY2027 tier assignments; the pre-registration's committed nulls are
+   for fiscal 2026 rates.
+   *Note (2026-11-18; corrected 2026-11-19):* Bauer and Schanzenbach
+   compute the same kind of one-year tier odds from published standard
+   errors. In the repo's backtest the sampling-only (`static`)
+   specification's nominal 90% intervals cover 48% of realized
+   next-year rates on the reconstructed-rate scale, and 78% with SDs
+   at the published ~1.1pp average (`analysis/PERSISTENCE_BACKTEST.md`).
+   No registered test takes this prediction's all-state form. The
+   closest registered check is the tail-share drift trigger, which
+   classifies the year as drifted when 8 or more of 53 jurisdictions
+   fall outside their two-year band. The confirmatory test compares
+   above-cut with below-cut window states; in the pre-registration's
+   committed drift worlds its false-positive rate is 10.5% and 11.4%
+   (delay test 9.15% and 11.15%). The first version of this note said
+   rejection was likely with no response; the committed simulations do
+   not support that for the registered tests. A rejection alone cannot
+   say whether drift, burden or measurement produced it (lane C).
 2. **Burden-response direction (Homonoff–Somerville; Herd–Moynihan).**
    If states respond to cost sharing by tightening verification and
    recertification, participation falls among high-churn cases while
@@ -440,9 +470,10 @@ rests only on the anchor table above plus this repository's artifacts.
    *Note (2026-11-18):* "first, because cheapest" is not established.
    The 2015 OIG audit and the 2016 completion study verify measurement
    margins, but neither establishes their cost or timing, and DAB 948
-   shows adjudication can move liability legitimately. HHS OIG's 1988
-   inspection supports operational improvement as a rival response
-   under the same penalties. So the observable should also track
+   shows a dispute over how errors are valued being sent back for
+   recalculation. In HHS OIG's 1988 inspection, respondents under
+   Medicaid's disallowance regime reported operational improvement;
+   for SNAP's cost share that rival response is a hypothesis. So the observable should also track
    training, staffing and corrective investment (APHSA, NASBO) next
    to adjudication-stage shifts.
 
@@ -459,4 +490,7 @@ rests only on the anchor table above plus this repository's artifacts.
 Adjudication protocol: the fiscal 2026 pre-registration's committed
 nulls arbitrate 1; 2 and 3 are directional and need the FY2026-27
 files plus elections data — state them now, score them when the files
-publish.
+publish. *Note (2026-11-19):* those nulls are for fiscal 2026 rates.
+The registered tests compare above-cut with below-cut window states
+(confirmatory) and test the delay window (secondary); the note under
+prediction 1 says how they map to it.
