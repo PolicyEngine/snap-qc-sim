@@ -2,8 +2,9 @@
   "desktop": {
     "states": 53,
     "comparisons": {
-      "tier_chance": 46,
-      "bill": 36
+      "tier_chance": 53,
+      "bill": 36,
+      "bill_fy29": 7
     },
     "layout_problems": {},
     "answer_table_mismatches": {}
@@ -11,8 +12,9 @@
   "phone": {
     "states": 53,
     "comparisons": {
-      "tier_chance": 46,
-      "bill": 36
+      "tier_chance": 53,
+      "bill": 36,
+      "bill_fy29": 7
     },
     "layout_problems": {},
     "answer_table_mismatches": {}
@@ -20,8 +22,9 @@
   "small-tablet": {
     "states": 53,
     "comparisons": {
-      "tier_chance": 46,
-      "bill": 36
+      "tier_chance": 53,
+      "bill": 36,
+      "bill_fy29": 7
     },
     "layout_problems": {},
     "answer_table_mismatches": {}
@@ -29,8 +32,9 @@
   "tablet": {
     "states": 53,
     "comparisons": {
-      "tier_chance": 46,
-      "bill": 36
+      "tier_chance": 53,
+      "bill": 36,
+      "bill_fy29": 7
     },
     "layout_problems": {},
     "answer_table_mismatches": {}
