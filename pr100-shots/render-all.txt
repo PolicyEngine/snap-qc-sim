@@ -1,42 +1,24 @@
 Using CPython 3.14.4 interpreter at: /usr/bin/python3.14
 Creating virtual environment at: .venv
    Building snap-qc-sim @ file:///tmp/after
-Downloading pygments (1.2MiB)
-Downloading ruff (10.9MiB)
-Downloading numpy (15.9MiB)
 Downloading pandas (11.8MiB)
-Downloading scikit-learn (8.5MiB)
+Downloading pygments (1.2MiB)
+Downloading numpy (15.9MiB)
+Downloading ruff (10.9MiB)
 Downloading scipy (33.6MiB)
+Downloading scikit-learn (8.5MiB)
 Downloading pyreadstat (2.5MiB)
 Downloading hypothesis (1.1MiB)
  Downloaded hypothesis
  Downloaded pygments
  Downloaded pyreadstat
- Downloaded ruff
  Downloaded scikit-learn
       Built snap-qc-sim @ file:///tmp/after
+ Downloaded ruff
  Downloaded pandas
  Downloaded numpy
  Downloaded scipy
-Installed 22 packages in 42ms
-................F...........                                             [100%]
-=================================== FAILURES ===================================
-____________ test_sustained_grid_prices_delayed_states_from_fy_2029 ____________
-
-    def test_sustained_grid_prices_delayed_states_from_fy_2029() -> None:
-        out = _states(920, analyst=True)
-        assert any(s["delay25"] for s in out.values())
-        for code, s in out.items():
-            sus = s["sustained"]
-            assert "Not shown for" not in sus, code
-            assert "statutory share" not in sus, code
->           assert "before the FY 2026 election and the delay clause" in sus, code
-E           AssertionError: AK
-E           assert 'before the FY 2026 election and the delay clause' in "Alaska's FY 2025 rate tops 13.33%, so the delay clause sets its FY 2028 bill to $0, and the grid does not model the d...mputed at 50% effectiveness 50%: FY 2028: $0 (delayed by statute) · FY 2029: 15% · FY 2030: 15% · FY 2029–30 cost $75M"
-
-tests/test_front_page_render.py:362: AssertionError
-=========================== short test summary info ============================
-FAILED tests/test_front_page_render.py::test_sustained_grid_prices_delayed_states_from_fy_2029 - AssertionError: AK
-assert 'before the FY 2026 election and the delay clause' in "Alaska's FY 2025 rate tops 13.33%, so the delay clause sets its FY 2028 bill to $0, and the grid does not model the d...mputed at 50% effectiveness 50%: FY 2028: $0 (delayed by statute) · FY 2029: 15% · FY 2030: 15% · FY 2029–30 cost $75M"
-1 failed, 27 passed in 976.07s (0:16:16)
-exit 1
+Installed 22 packages in 32ms
+..............................                                           [100%]
+30 passed in 659.64s (0:10:59)
+exit 0
