@@ -39,13 +39,23 @@ LEVER_STATES = "LA,CO,NY,GA,SD,HI"
 SWITCH_STATES = "CO,LA,SD,GA"
 # Each side of the 0.5% and 5% delay-wording thresholds.
 SYNTHETIC_ODDS = "0.0049,0.005,0.049,0.05"
-# Today, after FY 2026 rates may be out, after FY 2027 ends.
-CLOCK = ("2026-11-18", "2027-06-15", "2027-10-02")
+# Today, after USDA's FY 2026 deadline, after FY 2027 ends.
+CLOCK = ("2026-11-18", "2027-07-15", "2027-10-02")
 # The large artifacts only the analyst tools use.
 ANALYST_FILES = {"interventions_data.json", "model_data.json", "model_scenarios.json"}
 # "reproduces", not "reproducibility" (the toolchain probe's name).
 CLAIM = re.compile(r"\breproduc(?:e|es|ed|ing)\b")
 UNTESTED = re.compile(r"\beligibility (?:is )?untested\b")
+# The FY 2026 status the answer gives on every date (7 U.S.C. 2025(c)(8)(C)).
+FY26_STATUS = (
+    "FY 2026's sample period ended September 30, 2026, and the law gives USDA until "
+    "June 30, 2027 to determine FY 2026 error rates (7 U.S.C. 2025(c)(8)(C)). This page "
+    "simulates that rate rather than using a published figure; once USDA publishes it, "
+    "the published rate settles what these odds estimate."
+)
+# The answer's chance wording and the table's short form of it.
+CHANCE = re.compile(r"different tier (less than 1%|more than 99%|\d+%) of the time")
+SHORT = {"less than 1%": "<1%", "more than 99%": ">99%"}
 
 
 @cache
@@ -57,6 +67,7 @@ def _render(
     states: str | None = None,
     today: str | None = None,
     pdelay: str | None = None,
+    stall: str | None = None,
 ) -> dict:
     node = shutil.which("node")
     if not node:
@@ -78,6 +89,8 @@ def _render(
         args.append(f"--today={today}")
     if pdelay:
         args.append(f"--pdelay={pdelay}")
+    if stall:
+        args.append(f"--stall={stall}")
     out = subprocess.run(
         args, capture_output=True, text=True, timeout=1800, check=False
     )
@@ -103,26 +116,59 @@ def test_nothing_renders_as_nan_or_undefined(analyst: bool) -> None:
 
 
 def test_answer_tier_chance_matches_the_table_row() -> None:
+    """The rendered table cell and the answer give the same chance of a
+    different tier, delayed states included, in the same rounding."""
     for code, s in _states().items():
-        if s["delay25"]:
-            continue
-        assert f"different tier {s['row']['pmisWords']} of the time" in s["points"], (
-            code
-        )
+        words = CHANCE.findall(s["points"])
+        assert len(words) == 1, code
+        assert s["cells"][4] == SHORT.get(words[0], words[0]), (code, s["cells"])
+        assert s["cells"][4] not in ("0%", "100%"), code
+        if s["tier"] > 0:
+            assert f"in the {s['tier']}% cost-share tier" in s["lead"], code
+
+
+def _words_value(s: str) -> tuple[float, float]:
+    """A fmtWords figure as (value, rounding half-width)."""
+    if s == "$0":
+        return 0.0, 0.0
+    if s == "under $1 million":
+        return 0.25e6, 0.25e6
+    m = re.fullmatch(r"\$(\d+(?:\.\d+)?) (million|billion)", s)
+    assert m, s
+    unit = 1e6 if m.group(2) == "million" else 1e9
+    half = 0.5e6 if unit == 1e6 else 0.005e9
+    return float(m.group(1)) * unit, half
+
+
+def _cell_value(s: str) -> tuple[float, float]:
+    """A table bill cell (fmtM) as (value, rounding half-width)."""
+    m = re.fullmatch(r"\$(\d+(?:\.\d+)?)(M|B)", s)
+    assert m, s
+    if m.group(2) == "M":
+        return float(m.group(1)) * 1e6, 0.5e6
+    return float(m.group(1)) * 1e9, 0.005e9
+
+
+def _agree(words: str, cell: str, value: float) -> None:
+    """The answer's words and the table's cell both round the row's value."""
+    for v, half in (_words_value(words), _cell_value(cell)):
+        assert abs(v - value) <= half + 1e-6 * max(value, 1), (words, cell, value)
 
 
 def test_answer_bill_matches_the_table_row() -> None:
     for code, s in _states().items():
-        row = s["row"]
+        row, cells, expect = s["row"], s["cells"], s["expect"]
         if s["delay25"]:
             # Delayed states owe nothing for FY 2028; the row shows FY 2029.
             assert row["bill"] == row["bill29"] and row["eShare"] == 0, code
             assert "owes nothing for FY 2028" in s["lead"], code
             assert (
-                f"expected FY 2029 bill is {row['billWords']} a year" in s["points"]
+                f"expected FY 2029 bill is {expect['bill29']} a year" in s["points"]
             ), code
+            assert cells[5].endswith(" FY29") and cells[6].endswith(" FY29"), code
+            _agree(expect["bill29"], cells[5].removesuffix(" FY29"), row["bill"])
         elif s["tier"] == 0:
-            assert row["bill"] == 0, code
+            assert row["bill"] == 0 and cells[5] == "$0M", code
             assert (
                 "owes nothing for FY 2028, since it can use its FY 2025 rate"
                 in s["points"]
@@ -130,23 +176,26 @@ def test_answer_bill_matches_the_table_row() -> None:
         else:
             assert row["bill"] == row["eShare"], code
             # The lead gives the bill the table shows, not only the tier cost.
-            assert (
-                f"its expected FY 2028 bill is {row['billWords']} a year" in s["lead"]
-            ), code
-            assert (
-                f"expected FY 2028 bill is {row['billWords']} a year" in s["points"]
-            ), code
+            words = expect["elect28"]
+            assert f"its expected FY 2028 bill is {words} a year" in s["lead"], code
+            assert f"expected FY 2028 bill is {words} a year" in s["points"], code
+            _agree(words, cells[5], row["bill"])
 
 
 def test_bill_spread_is_bounded() -> None:
-    """A bill that is 0 or a tier share (at most 15%) of the base has a
-    standard deviation of at most 7.5% of the base, and none when the
-    FY 2026 delay is certain (every draw bills $0 for FY 2029)."""
+    """Each draw bills 0, 5, 10 or 15% of the base, so the spread is at most
+    7.5% of the base, and at least that of the two tier costs either side
+    of the mean (h = 5% of the base, theta the mean's fraction of a step:
+    sd >= h * sqrt(theta * (1 - theta))). None when the FY 2026 delay is
+    certain (every draw bills $0 for FY 2029)."""
     for code, s in _states().items():
-        sd, base = s["row"]["billSd"], s["issuance"]
+        sd, bill, base = s["row"]["billSd"], s["row"]["bill"], s["issuance"]
         assert 0 <= sd <= 0.075 * base + 1e-6, code
+        h = 0.05 * base
+        theta = (bill / h) % 1
+        assert sd >= h * (theta * (1 - theta)) ** 0.5 * (1 - 1e-6) - 1e-6, code
         if s["delay25"] and s["expect"]["pDelay26Raw"] == 1:
-            assert sd == 0 and s["row"]["bill"] == 0, code
+            assert sd == 0 and bill == 0, code
 
 
 def test_delay_wording_follows_the_simulated_delay_odds() -> None:
@@ -154,7 +203,8 @@ def test_delay_wording_follows_the_simulated_delay_odds() -> None:
         p, words = s["expect"]["pDelay26Raw"], s["expect"]["pDelay26"]
         if s["delay25"]:
             assert (
-                f"A fresh FY 2026 sample tops 13.33% {words} of the time" in s["lead"]
+                f"A fresh FY 2026 sample reaches the delay line {words} of the time"
+                in s["lead"]
             ), code
             assert "unless that rate also tops 13.33%" in s["lead"], code
             assert "points above that line" in s["points"], code
@@ -162,16 +212,22 @@ def test_delay_wording_follows_the_simulated_delay_odds() -> None:
         assert "points below that line" in s["points"], code
         if p >= 0.005:
             assert (
-                f"crosses it {words} of the time, which would move its first bill to FY 2030"
+                f"reaches it {words} of the time, which would move its first bill to FY 2030"
                 in s["points"]
             ), code
             if s["tier"] > 0:
-                assert f"the {words} chance that rate tops 13.33%" in s["lead"], code
+                assert (
+                    f"the {words} chance that rate reaches the delay line" in s["lead"]
+                ), code
         else:
-            assert "crosses it less than 1% of the time" in s["points"], code
-            assert "chance that rate tops 13.33%" not in s["lead"], code
+            assert "reaches it less than 1% of the time" in s["points"], code
+            assert "chance that rate reaches the delay line" not in s["lead"], code
+        # Simulated rates are continuous: the copy names the line, not 13.33%.
+        assert "tops 13.33%" not in s["points"], code
         # Near the line the "How sure" point raises the delay too.
-        assert ("of such samples top 13.33%" in s["points"]) == (p >= 0.05), code
+        assert ("of such samples reach the delay line" in s["points"]) == (p >= 0.05), (
+            code
+        )
         # The keep-FY-2025 bill nets the delay chance; when that moves it off
         # the lead's tier cost, the point says why.
         if s["tier"] > 0:
@@ -186,8 +242,9 @@ def test_delay_wording_follows_the_simulated_delay_odds() -> None:
 def test_delay_rule_names_the_two_years_it_covers() -> None:
     for code, s in _states().items():
         assert (
-            "An FY 2025 or FY 2026 rate above 13.33% delays the first bill"
-            in s["points"]
+            "An FY 2025 or FY 2026 rate delays the first bill if 1.5 times it reaches "
+            "20% (7 U.S.C. 2013(a)(2)(B)(iii)): at the two decimals USDA publishes, any "
+            "rate above 13.33%." in s["points"]
         ), code
 
 
@@ -208,25 +265,20 @@ def test_fy2027_heading_follows_the_calendar() -> None:
         ), code
 
 
-def test_fy2026_status_follows_the_calendar() -> None:
-    # From June 1, 2027 the FY 2026 rate may be out; the answer stops
-    # calling it unpublished.
-    before = datetime.datetime.now().astimezone().date() < datetime.date(2027, 6, 1)
+def test_fy2026_status_states_the_deadline() -> None:
+    """The page cannot know whether USDA has published, so every answer
+    gives the statutory deadline instead of a guess from the date."""
     for code, s in _states().items():
-        assert ("its rate is not yet published" in s["points"]) == before, code
-        assert (
-            "this page still simulates its rate rather than using a published figure"
-            in s["points"]
-        ) == (not before), code
+        assert FY26_STATUS in s["points"], code
+        assert "not yet published" not in s["points"], code
+        assert "being measured through" not in _reader_text(s), code
 
 
 @pytest.mark.parametrize("today", CLOCK)
 def test_date_switches_render_on_both_sides(today: str) -> None:
-    """Render with the app's clock fixed on each side of each switch:
-    June 1, 2027 for the FY 2026 status, October 1, 2027 for the end of
-    FY 2027."""
+    """Render with the app's clock fixed on each side of October 1, 2027,
+    the end of FY 2027; the FY 2026 status reads the same on every date."""
     day = datetime.date.fromisoformat(today)
-    rate_may_be_out = day >= datetime.date(2027, 6, 1)
     fy27_ended = day >= datetime.date(2027, 10, 1)
     for code, s in _render(390, False, states=SWITCH_STATES, today=today)[
         "states"
@@ -234,13 +286,7 @@ def test_date_switches_render_on_both_sides(today: str) -> None:
         text = _reader_text(s)
         for bad in ("NaN", "undefined", "Infinity", "[object"):
             assert bad not in text, (today, code, bad)
-        assert ("its rate is not yet published" in s["points"]) == (
-            not rate_may_be_out
-        ), (today, code)
-        assert ("still simulates its rate" in s["points"]) == rate_may_be_out, (
-            today,
-            code,
-        )
+        assert FY26_STATUS in s["points"], (today, code)
         # Delayed states' "How sure" point never calls FY 2026 unsettled.
         assert "The FY 2026 rate is not" not in s["points"], (today, code)
         if s["delay25"]:
@@ -271,18 +317,21 @@ def test_delay_wording_switches_at_its_thresholds() -> None:
             pts, lead = s["points"], s["lead"]
             crosses = p >= 0.005
             assert (
-                f"crosses it {words} of the time, which would move its first bill to FY 2030"
+                f"reaches it {words} of the time, which would move its first bill to FY 2030"
                 in pts
             ) == crosses, (p, code)
-            assert ("crosses it less than 1% of the time." in pts) == (not crosses), (
+            assert ("reaches it less than 1% of the time." in pts) == (not crosses), (
                 p,
                 code,
             )
-            assert ("of such samples top 13.33%" in pts) == (p >= 0.05), (p, code)
+            assert ("of such samples reach the delay line" in pts) == (p >= 0.05), (
+                p,
+                code,
+            )
             if s["tier"] > 0:
                 assert (
-                    f"the {words} chance that rate tops 13.33% and delays its first bill"
-                    in lead
+                    f"the {words} chance that rate reaches the delay line and delays "
+                    "its first bill" in lead
                 ) == crosses, (p, code)
                 assert ("Counting that option and the chance of a delay" in pts) == (
                     crosses
@@ -303,12 +352,46 @@ def test_every_reproduction_claim_says_eligibility_is_untested(analyst: bool) ->
     assert checked > 0
 
 
-def test_sustained_grid_is_withheld_for_delayed_states() -> None:
-    for code, s in _states(920, analyst=True).items():
+def test_sustained_grid_prices_delayed_states_from_fy_2029() -> None:
+    out = _states(920, analyst=True)
+    assert any(s["delay25"] for s in out.values())
+    for code, s in out.items():
+        sus = s["sustained"]
+        assert "Not shown for" not in sus, code
+        assert "statutory share" not in sus, code
+        assert "before the FY 2026 election and the delay clause" in sus, code
         if s["delay25"]:
-            assert s["sustained"].startswith("Not shown for"), code
+            assert "FY 2028: $0 (delayed by statute)" in sus, code
+            assert "FY 2029:" in sus and "FY 2029–30 cost" in sus, code
+            assert "three-year cost" not in sus, code
+            # The tile says when the first bill moves, never a bare
+            # "first bill FY 2029".
+            assert "first bill FY 2029" not in s["tiles"][1], code
+            assert "expected FY 2029 bill" in s["tiles"][1], code
         else:
-            assert "FY 2028:" in s["sustained"], code
+            assert "FY 2028:" in sus and "three-year cost" in sus, code
+
+
+def test_adoption_note_counts_the_replayed_cases() -> None:
+    data = json.loads((PUBLIC / "data.json").read_bytes())["states"]
+    checked = set()
+    for code, s in _states(920, analyst=True).items():
+        st = data[code]
+        if not st["verified"]:
+            assert "has not yet been replayed" in s["adoption"], code
+            continue
+        checked.add(bool(st["n"] - st["verified"]))
+        assert f"for all {st['verified']} replayable reviews" in s["adoption"], code
+        if st["n"] > st["verified"]:
+            assert (
+                f"{st['verified']} of the file's {st['n']}; the other "
+                f"{st['n'] - st['verified']} are SSI-CAP standardized-benefit cases"
+            ) in s["adoption"], code
+        else:
+            assert "every case in its file" in s["adoption"], code
+        assert "eligibility is untested" in s["adoption"], code
+    # States with and without SSI-CAP exclusions.
+    assert checked == {True, False}
 
 
 def test_unreplayed_states_are_not_called_verified() -> None:
@@ -364,20 +447,38 @@ def test_analyst_settings_leave_the_answer_unchanged() -> None:
     model scenario clears the targeted-review panels it does not compose
     with."""
     plain = _states()
-    levered = _render(920, True, LEVERS, states=LEVER_STATES)["states"]
+    run = _render(920, True, LEVERS, states=LEVER_STATES)
+    levered = run["states"]
+    # The link's SMD setting survives the scenario load: the box comes back
+    # checked and every URL the app wrote while loading keeps smd=1.
+    assert run["smdRestored"]
+    assert run["urlsAtLoad"] and all("smd=1" in u for u in run["urlsAtLoad"])
+    # Clearing the scenario frees the cause-coded cut on the next render.
+    assert run["cutFreedOnRender"]
     scenarios = json.loads((PUBLIC / "model_scenarios.json").read_bytes())["states"]
     assert set(levered) <= set(plain)
     for code, s in levered.items():
         # The FY 2027 chart labels follow the width, so fy27 is not compared.
-        for key in ("lead", "points", "cta", "row"):
+        for key in ("lead", "points", "cta", "row", "cells"):
             assert s[key] == plain[code][key], (code, key)
-        # The other levers took effect too.
+        # The other levers took effect too, and drift restates the FY 2026
+        # election at the published-rate baseline.
         assert "Drift on" in s["mechanism"], code
+        assert "With drift, at the published-rate baseline" in s["mechanism"], code
+        assert "reach the delay line" in s["mechanism"], code
+        if not s["delay25"] and s["tier"] > 0:
+            assert re.search(
+                r"is \$[\d.]+[MB]/yr, against \$[\d.]+[MB]/yr keeping its FY 2025 rate "
+                r"\(an expected saving of \$[\d.]+[MB]/yr\)",
+                s["mechanism"],
+            ), code
         assert s["auditsVal"] == "+500", code
         # The scenario runs wherever the state has an ungated SMD lever.
         sc = scenarios.get(code) or {}
         ungated = bool((sc.get("levers") or {}).get("smd")) and not sc.get("level_flag")
         assert s["smdOn"] == ungated, code
+        # The cut and the scenario do not compose: one disables the other.
+        assert s["cutDisabled"] == s["smdOn"], code
         if s["smdOn"]:
             assert "turn off the standard medical deduction scenario" in s["live"], code
             assert s["sustained"] == "", code
@@ -385,6 +486,29 @@ def test_analyst_settings_leave_the_answer_unchanged() -> None:
             assert s["live"].startswith("One measurement with the cut"), code
     assert any(s["smdOn"] for s in levered.values())
     assert not all(s["smdOn"] for s in levered.values())
+
+
+@pytest.mark.parametrize("stall", ["engine_scenario_data.json", "fy2027_data.json"])
+def test_answer_and_table_render_before_the_side_artifacts(stall: str) -> None:
+    """Neither the adoption nor the FY 2027 artifact holds up the answer or
+    the table; each panel says it is loading until its file arrives."""
+    out = _render(920, True, states="CO,GA", stall=stall)
+    for code, s in out["states"].items():
+        assert not s["lead"].startswith("Loading"), code
+        assert len(s["cells"]) == 7, code
+        if stall == "engine_scenario_data.json":
+            assert s["adoption"] == "Loading the adoption scenario artifact…", code
+            assert out["adoptNational"] == "", code
+        else:
+            assert s["fy27"] == "Loading the FY 2027 projections…", code
+            assert "Loading" not in s["adoption"], code
+
+
+def test_a_prototype_key_in_the_link_falls_back_to_colorado() -> None:
+    out = _render(390, False, "?state=constructor", states="CO,GA")
+    assert out["urlsAtLoad"]
+    assert all("state=CO" in u for u in out["urlsAtLoad"])
+    assert not any("constructor" in u for u in out["urlsAtLoad"])
 
 
 def test_analyst_artifacts_load_only_when_the_tools_open() -> None:

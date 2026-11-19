@@ -49,7 +49,7 @@
     <p class="lede">
       Under current law (P.L. 119-21), from fiscal year 2028 each state pays a share of its SNAP benefit
       costs set by its payment error rate: nothing below a 6% rate, 5% from
-      6 to 8%, 10% from 8 to 10%, and 15% at 10% or more. The rate is the share of benefit dollars
+      6% to under 8%, 10% from 8% to under 10%, and 15% at 10% or more. The rate is the share of benefit dollars
       overpaid or underpaid, estimated from quality control (QC) reviews of a sample of cases.
       An FY 2025 or FY 2026 rate above 13.33%
       delays the first bill. Choose a state to see what it owes, how much a
@@ -59,7 +59,7 @@
 </header>
 
 <main class="wrap">
-  <section class="answer" id="answer" aria-labelledby="answer-h">
+  <section class="answer" id="answer" aria-labelledby="answer-h" tabindex="-1">
     <h2 class="sr-only" id="answer-h">The selected state</h2>
     <div class="answer-pick">
       <label for="state">State</label>
@@ -67,11 +67,11 @@
     </div>
     <p class="answer-lead" id="answer-lead" aria-live="polite">Loading…</p>
     <figure class="strip-figure">
-      <div id="answer-strip" class="strip" role="img" aria-label="The state's published FY 2024 and FY 2025 rates and the range of a fresh sample, across the cost-share tiers"></div>
+      <div id="answer-strip" class="strip" role="img" aria-label="The state's published FY 2024 and FY 2025 rates and the middle 90% of simulated same-size samples (sampling noise only), across the cost-share tiers"></div>
       <figcaption class="strip-key">
         <span><i class="key-dot"></i>FY 2025 rate</span>
         <span><i class="key-ring"></i>FY 2024 rate</span>
-        <span><i class="key-bar"></i>Where 90% of fresh same-size samples land</span>
+        <span><i class="key-bar"></i>Middle 90% of simulated samples, sampling noise only</span>
         <span><i class="key-hatch"></i>Delay band, above 13.33%</span>
       </figcaption>
     </figure>
@@ -104,7 +104,7 @@
     </ul>
   </section>
 
-  <section class="chart-card" id="fy2027">
+  <section class="chart-card" id="fy2027" aria-labelledby="fy2027-h" tabindex="-1">
     <h2 id="fy2027-h">FY 2027, the year still open</h2>
     <div id="fy2027-body"></div>
   </section>
@@ -157,7 +157,7 @@
         <div id="interventions-live"></div>
         <div class="panel" id="interventions-sustained">
           <strong>If the cut persists, FY 2028–30</strong>
-          <div class="hint">Sustained construction: the same rate change, subtracted in each year from FY 2028 to FY 2030. Each year's rate comes from the persistence model, fit to reconstructed FY 2012–24 state rates with FY 2021 dropped: a state's gap from the national mean splits into a lasting component and a transitory one that fades, the path is shifted to start at the state's FY 2025 rate, and national means stay at FY 2025. Each year is priced on its own simulated rate. The FY 2026 election, the delay clause and third-preceding-year keying are not modeled, so the grid overstates exposure for states near or above 13.33%. Figures are expected cost shares, as a percent of benefits; the three-year cost uses FNA's FY 2024 issuance tables.</div>
+          <div class="hint">Sustained construction: the same rate change, subtracted in each year from FY 2028 to FY 2030. Each year's rate comes from the persistence model, fit to reconstructed FY 2012–24 state rates with FY 2021 dropped: a state's gap from the national mean splits into a lasting component and a transitory one that fades, the path is shifted to start at the state's FY 2025 rate, and national means stay at FY 2025. Each year is priced on its own simulated rate. The FY 2026 election, the delay clause and third-preceding-year keying are not modeled, so the grid overstates exposure for states near or above 13.33%. Figures are expected cost shares, as a percent of benefits; the three-year cost (FY 2029–30 for states delayed by their FY 2025 rate) uses FNA's FY 2024 issuance tables.</div>
           <div id="interventions-sustained-body"></div>
         </div>
       </section>

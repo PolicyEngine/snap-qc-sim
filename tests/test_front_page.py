@@ -33,7 +33,7 @@ def test_answer_leads_then_table_then_fy2027_then_analyst() -> None:
     order = [
         html.index('<section class="answer" id="answer"'),
         html.index('<section class="chart-card" id="national">'),
-        html.index('<section class="chart-card" id="fy2027">'),
+        html.index('<section class="chart-card" id="fy2027"'),
         html.index('<details class="analyst" id="analyst">'),
     ]
     assert order == sorted(order)
@@ -149,21 +149,46 @@ def test_sampling_only_caveat_matches_the_backtest() -> None:
     summary = json.loads(
         (ROOT / "analysis" / "persistence_backtest_results.json").read_bytes()
     )["summary"]
-    static = round(100 * summary["static"]["coverage_90"])
-    widened = round(100 * summary["widened"]["coverage_90"])
-    full = round(100 * summary["rao_yu"]["coverage_90"])
-    assert (static, widened, full) == (48, 81, 85)
+    cov = {
+        k: round(100 * summary[k]["coverage_90"])
+        for k in ("static", "static_fair", "widened", "rao_yu")
+    }
+    assert cov == {"static": 48, "static_fair": 64, "widened": 81, "rao_yu": 85}
+    # The backtest's target years: FY 2016-2020 and FY 2022-2024.
+    years = json.loads(
+        (ROOT / "analysis" / "persistence_backtest_results.json").read_bytes()
+    )["target_years"]
+    assert [int(y) for y in years] == [2016, 2017, 2018, 2019, 2020, 2022, 2023, 2024]
     # Join the JS string concatenations so the sentence reads as one line.
     js = re.sub(r'"\s*\+\s*"', "", _app_text())
     assert (
-        f"90% ranges built from sampling noise alone caught the next year's rate "
-        f"{static}% of the time, and adding year-to-year movement raised that to "
-        f"{widened}–{full}%."
+        "In a backtest on reconstructed FY 2016–2024 state rates (FY 2021 excluded), "
+        "90% ranges around the prior year's rate built from one year's sampling noise "
+        f"caught the next year's rate {cov['static']}% of the time. Counting both "
+        f"years' sampling noise raised that to {cov['static_fair']}%; adding a modeled "
+        f"year-to-year movement term to one year's noise, to {cov['widened']}%; and a "
+        "model that also uses each state's own history, to "
+        f"{cov['rao_yu']}%."
+    ) in js
+    # The drift option's 1.07-point SD is fitted to one year's change and
+    # was not backtested; the page says so beside the backtest.
+    tau = json.loads((PUBLIC / "fy2027_data.json").read_bytes())["drift_tau_pp"]
+    assert f"{tau['robust']:.2f}" == "1.07"
+    assert (
+        "a 1.07-point standard deviation fitted to the FY 2024→2025 change alone, "
+        "which the backtest did not test."
     ) in js
 
 
 def test_lede_names_current_law() -> None:
-    assert "Under current law (P.L. 119-21), from fiscal year 2028" in INDEX.read_text()
+    html = re.sub(r"\s+", " ", INDEX.read_text())
+    assert "Under current law (P.L. 119-21), from fiscal year 2028" in html
+    # The tier edges as tierOf applies them: a rate on a boundary is in
+    # the higher tier.
+    assert (
+        "5% from 6% to under 8%, 10% from 8% to under 10%, and 15% at 10% or more"
+        in html
+    )
 
 
 @pytest.mark.parametrize(
@@ -238,18 +263,28 @@ def test_issuance_base_note_matches_the_two_sources() -> None:
 
 def test_fy2027_timing_cites_the_qc_regulations() -> None:
     js = re.sub(r"`\s*\+\s*`", "", _app_text())
+    # 7 CFR 275.11(c): about one-twelfth a month unless FNA approved other
+    # monthly numbers.
     assert (
-        "QC draws about one-twelfth of a state's sample in each month of the year (7 CFR 275.11(c))"
-        in js
-    )
-    # 7 CFR 272.2(e)(4)(i)-(ii), as the text reads; the page draws no
-    # conclusion about mid-year changes, which the text does not address.
-    assert (
-        "Before each annual review period a state submits any changes to its QC "
-        "sampling plan for FNA approval, or a statement that there are none, at least "
-        "60 days before a major change takes effect and 30 days before a minor one "
-        "(7 CFR 272.2(e)(4))."
+        "QC selects cases for review in each month of the year, about one-twelfth of a "
+        "state's required sample a month unless FNA has approved other monthly numbers "
+        "in its sampling plan (7 CFR 275.11(c))"
     ) in js
+    # 7 CFR 272.2(e)(4), as the text reads; the page draws no conclusion
+    # about mid-year changes, which the text does not address.
+    assert (
+        "The sampling plan, signed by the head of the state agency, goes to FNA for "
+        "approval. Before each annual review period a state submits any changes to it, "
+        "or a statement that there are none. Initial plans, major changes and changes "
+        "that follow from general changes in procedure go in at least 60 days before "
+        "they take effect, and minor changes to an approved plan at least 30 days "
+        "before (7 CFR 272.2(e)(4))."
+    ) in js
+    assert "QC draws about one-twelfth of a state's sample" not in js
+    assert (
+        "60 days before a major change takes effect and 30 days before a minor one"
+        not in js
+    )
     assert "were due before it began" not in js
     assert "a state can change its QC sampling plan" not in js
     # Relative "still ahead" claims go stale; the month count comes from the date.
@@ -308,6 +343,7 @@ def test_file_rate_is_defined_where_the_analyst_tools_begin() -> None:
 HELPERS = (
     "fmtWords",
     "fmtChance",
+    "fmtChanceShort",
     "quantile",
     "tickStep",
     "textW",
@@ -334,7 +370,6 @@ def _run_helpers(calls: list[list]) -> list:
         + f"\nconst H = {{{', '.join(HELPERS)}}};\n"
         + "H.fy27MonthsAheadAt = (y, m, d) => fy27MonthsAhead(new Date(y, m, d));\n"
         + "H.fy27EndedAt = (y, m, d) => fy27Ended(new Date(y, m, d));\n"
-        + "H.fy26RateMayBeOutAt = (y, m, d) => fy26RateMayBeOut(new Date(y, m, d));\n"
         + "const calls = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
         + "const call = ([f, ...a]) => (typeof H[f] === 'function' ? H[f](...a) : H[f]);\n"
         + "process.stdout.write(JSON.stringify(calls.map(call)));\n"
@@ -401,6 +436,28 @@ def test_fmt_chance_never_claims_certainty(ps: list[float]) -> None:
         else:
             k = int(s.rstrip("%"))
             assert 1 <= k <= 99 and abs(k - 100 * p) <= 0.5 + 1e-9, (p, s)
+
+
+@settings(max_examples=5, deadline=None)
+@given(
+    st.lists(
+        st.one_of(
+            st.floats(0, 1, allow_nan=False),
+            st.sampled_from([0.0, 0.0049, 0.005, 0.5, 0.9949, 0.995, 0.9951, 1.0]),
+        ),
+        min_size=50,
+        max_size=200,
+    )
+)
+def test_table_chance_matches_the_answer_wording(ps: list[float]) -> None:
+    """The table's short form rounds exactly as the answer does, so a row
+    never reads 0% where the answer reads less than 1%."""
+    longs = _run_helpers([["fmtChance", p] for p in ps])
+    shorts = _run_helpers([["fmtChanceShort", p] for p in ps])
+    short_of = {"less than 1%": "<1%", "more than 99%": ">99%"}
+    for p, long, short in zip(ps, longs, shorts):
+        assert short == short_of.get(long, long), (p, long, short)
+        assert short not in ("0%", "100%"), p
 
 
 @settings(max_examples=5, deadline=None)
@@ -487,6 +544,22 @@ def test_band_label_fits_its_band_and_grows_with_it(
         assert len(lw) >= len(label)
 
 
+def test_fy2027_tolerance_applies_to_eligible_households_only() -> None:
+    """7 CFR 275.12(f)(1)-(2): the tolerance drops small over- and
+    underissuances to eligible households; an ineligible household's whole
+    allotment is still reported."""
+    js = re.sub(r"`\s*\+\s*`", "", _app_text())
+    assert (
+        "An over- or underissuance to an eligible household of that amount or less is "
+        "left out of the payment error rate; an ineligible household's whole allotment "
+        "is still coded and reported as an eligibility error (7 U.S.C. 2025(c)(1)(A)(ii); "
+        "7 CFR 275.12(f))."
+    ) in js
+    assert "Policy Memo 26-05" in js
+    assert "https://www.fna.usda.gov/snap/qc/ett" in js
+    assert "disregards" not in js
+
+
 def test_fy2027_month_count_follows_the_calendar() -> None:
     """Months of FY 2027 not yet begun: 12 before October 2026, one fewer
     each month after, 0 from September 2027; ended from October 1, 2027."""
@@ -512,30 +585,64 @@ def test_fy2027_month_count_follows_the_calendar() -> None:
         assert words[k] == f"{k} of its 12 sample months have not begun yet"
 
 
-def test_fy2026_rate_is_called_unpublished_only_before_june_2027() -> None:
-    """FNA published FY 2025 rates on June 24, 2026; from June 1, 2027 the
-    answer stops saying the FY 2026 rate is unpublished."""
-    dates = [(y, m, d) for y in (2026, 2027, 2028) for m in range(12) for d in (1, 28)]
-    out = _run_helpers([["fy26RateMayBeOutAt", *t] for t in dates])
-    for (y, m, _d), may in zip(dates, out):
-        assert may == ((y, m) >= (2027, 5)), (y, m)
-    js = _app_text()
-    assert "its rate is not yet published" in js
+def test_fy2026_status_states_the_deadline_not_a_guess() -> None:
+    """The page cannot know whether USDA has published FY 2026 rates, so it
+    states the statutory deadline (7 U.S.C. 2025(c)(8)(C)) on every date
+    instead of guessing publication from the calendar."""
+    js = re.sub(r'"\s*\+\s*"', "", _app_text())
     assert (
-        "this page still simulates its rate rather than using a published figure" in js
-    )
+        "FY 2026's sample period ended September 30, 2026, and the law gives USDA until "
+        "June 30, 2027 to determine FY 2026 error rates (7 U.S.C. 2025(c)(8)(C)). This "
+        "page simulates that rate rather than using a published figure; once USDA "
+        "publishes it, the published rate settles what these odds estimate."
+    ) in js
+    assert "fy26RateMayBeOut" not in js
+    assert "not yet published" not in js
+    assert "being measured through September 30, 2026" not in js
 
 
 def test_delay_rule_names_the_fy2025_and_fy2026_rates() -> None:
     """7 U.S.C. 2013(a)(2)(B)(iii) delays the start only for an FY 2025 or
     FY 2026 rate; no other year's rate delays a bill."""
     html, js = INDEX.read_text(), _app_text()
+    joined = re.sub(r"`\s*\+\s*`", "", js)
     assert "An FY 2025 or FY 2026 rate above 13.33%" in re.sub(r"\s+", " ", html)
+    # The statute's test (rate x 1.5 >= 20%), then its two-decimal reading;
+    # simulated draws are continuous, so the draw copy says "the delay line".
     assert (
-        js.count("An FY 2025 or FY 2026 rate above 13.33% delays the first bill") == 2
-    )
+        "An FY 2025 or FY 2026 rate delays the first bill if 1.5 times it reaches 20% "
+        "(7 U.S.C. 2013(a)(2)(B)(iii)): at the two decimals USDA publishes, any rate "
+        "above 13.33%. This page applies the same test to each simulated rate."
+    ) in joined
     assert "Rates above 13.33% delay" not in js
     assert "A rate above 13.33%" not in html
+    # Simulated rates never "cross 13.33%": the copy names the line.
+    assert "cross the 13.33%" not in js
+    assert "crossing 13.33%" not in js
+
+
+def test_keyboard_jumps_focus_the_section() -> None:
+    """goTo moves focus to the target section, then scrolls; the sections
+    take focus without a tab stop of their own."""
+    html, js = INDEX.read_text(), APP.read_text()
+    for sid in ("answer", "fy2027"):
+        tag = re.search(rf'<section[^>]*\bid="{sid}"[^>]*>', html).group(0)
+        assert 'tabindex="-1"' in tag, sid
+    body = js[js.index("function goTo(id)") :]
+    body = body[: body.index("\n}\n")]
+    assert body.index("focus?.({ preventScroll: true })") < body.index("scrollIntoView")
+
+
+def test_phone_header_keeps_its_links_and_print_skips_closed_analyst() -> None:
+    css = (PUBLIC / "app.css").read_text()
+    # No rule hides the header links at any width.
+    for m in re.finditer(r"\.pe-shell-links[^{]*\{([^}]*)\}", css):
+        assert "display: none" not in m.group(1), m.group(0)
+    prints = [
+        css[m.end() : css.index("\n}\n", m.end())]
+        for m in re.finditer(r"@media print \{", css)
+    ]
+    assert any(".analyst:not([open]) { display: none; }" in p for p in prints)
 
 
 def test_cta_names_the_replayed_states() -> None:

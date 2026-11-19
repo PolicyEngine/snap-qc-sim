@@ -177,6 +177,8 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
 
 /* ---- The answer: the selected state, in plain sentences ---------------- */
 #answer, #national, #fy2027, #analyst { scroll-margin-top: 64px; }
+/* Focus targets for in-page jumps (goTo in app.js), not in the tab order. */
+#answer:focus, #fy2027:focus { outline: none; }
 .answer {
   margin: 22px 0 24px; padding: 20px 24px 8px;
   border: 1px solid var(--border); border-radius: 12px;
@@ -277,8 +279,12 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
 
 @media (max-width: 640px) {
   .wrap { padding: 0 16px; }
-  .pe-shell-links { gap: 14px; }
-  .pe-shell-links a:not(.pe-shell-donate) { display: none; }
+  /* Keep Research, Model and API: tighter links fit one row at 390px, and
+     narrower screens wrap them under the logo instead of overflowing. */
+  .pe-shell-row { flex-wrap: wrap; gap: 8px 16px; }
+  .pe-shell-links { flex-wrap: wrap; gap: 6px 12px; }
+  .pe-shell-links a { font-size: 13px; }
+  .pe-shell-links .pe-shell-donate { padding: 4px 10px; }
   h1 { font-size: 1.6rem; }
   .lede { font-size: 0.95rem; }
   .answer { padding: 16px 16px 4px; margin-top: 16px; }
@@ -290,8 +296,15 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
   .analyst-body { padding: 4px 12px 6px; }
   .chart-card { padding: 14px; }
 }
+/* A wrapped sticky header is taller, so in-page targets clear it. */
+@media (max-width: 359px) {
+  #answer, #national, #fy2027, #analyst { scroll-margin-top: 100px; }
+}
+/* An open, configured analyst section prints with its results (the rule
+   above hides its inputs); a closed one prints nothing. */
 @media print {
-  .analyst { display: none; }
+  .analyst:not([open]) { display: none; }
+  .analyst > summary::before { display: none; }
   #national .table-scroll { max-height: none; overflow: visible; }
 }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

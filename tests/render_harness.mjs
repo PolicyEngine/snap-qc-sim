@@ -20,6 +20,8 @@
 // --pdelay also renders each answer with the FY 2026 delay chance set to
 //   each listed value, so the wording thresholds are tested even where no
 //   jurisdiction's simulated odds fall.
+// --stall=file makes that file's fetch never settle, to check the page
+//   renders without it.
 import fs from "node:fs";
 import vm from "node:vm";
 
@@ -31,6 +33,9 @@ const SEARCH = flags.find((f) => f.startsWith("--search="))?.slice(9);
 const ONLY = flags.find((f) => f.startsWith("--states="))?.slice(9).split(",");
 const TODAY = flags.find((f) => f.startsWith("--today="))?.slice(8);
 const PDELAY = flags.find((f) => f.startsWith("--pdelay="))?.slice(9).split(",").map(Number);
+const STALL = flags.find((f) => f.startsWith("--stall="))?.slice(8);
+// Every URL the app writes with history.replaceState, in order.
+const urls = [];
 
 // Every id the app asks for, and every file it fetches.
 const requested = new Set();
@@ -92,7 +97,7 @@ const ctx = {
   console, setTimeout, clearTimeout, performance, crypto: globalThis.crypto,
   TextDecoder, Uint8Array, Float64Array, URLSearchParams,
   location: { search: search.toString() ? "?" + search : "", hash: "" },
-  history: { replaceState() {} },
+  history: { replaceState(_s, _t, u) { urls.push(String(u)); } },
   matchMedia: () => ({ matches: false, addEventListener() {} }),
   getComputedStyle: () => ({ getPropertyValue: () => "" }),
   addEventListener() {},
@@ -101,6 +106,7 @@ const ctx = {
   fetch: async (u) => {
     const file = u.split("?")[0];
     fetched.push(file);
+    if (file === STALL) return new Promise(() => {});
     const buf = fs.readFileSync(PUB + "/" + file);
     return {
       ok: true,
@@ -140,7 +146,8 @@ electionStats = ((orig) => (st, d) => {
 globalThis.__t = {
   main, render, electionStats, simulate, fmtWords, fmtChance,
   NAT: () => NAT, DATA: () => DATA, INTERVENTIONS: () => INTERVENTIONS, ENGINE: () => ENGINE,
-  SCEN: () => SCEN,
+  SCEN: () => SCEN, ADOPT: () => ADOPT,
+  pending: () => ({ fy27: FY27_PENDING, adopt: ADOPT_PENDING }),
   errors: () => ({ INTERVENTIONS_ERROR, ARTIFACT_ERROR, ENGINE_ERROR, ADOPT_ERROR }),
 };`;
 vm.runInContext(src, ctx);
@@ -161,7 +168,16 @@ const until = (ok) => new Promise((resolve, reject) => {
 });
 await T.main();
 const n = Object.keys(T.DATA().states).length;
-await until(() => T.NAT().size === n && $("nat-takeaway").textContent);
+// The answer renders before the FY 2027 and adoption artifacts arrive; wait
+// for them (unless stalled) and for the adoption sums they feed.
+const settled = () => {
+  const p = T.pending();
+  if (p.fy27 && STALL !== "fy2027_data.json") return false;
+  if (p.adopt && STALL !== "engine_scenario_data.json") return false;
+  const ad = T.ADOPT();
+  return !ad || [...T.NAT().values()].every((r) => r.adoptStrict28 !== null || !ad.states[r.code]);
+};
+await until(() => T.NAT().size === n && $("nat-takeaway").textContent && settled());
 const fetchedBeforeToggle = [...fetched];
 if (TOGGLE) {
   $("analyst").open = true;
@@ -171,22 +187,41 @@ if (TOGGLE) {
 if (ANALYST) await until(() => T.INTERVENTIONS() && T.ENGINE());
 if (search.get("smd") === "1") await until(() => T.SCEN());
 const SHOW_ANALYST = ANALYST || TOGGLE;
+// What the link's own state got from the app's restore, before the loop
+// below sets anything by hand.
+const urlsAtLoad = [...urls];
+const smdRestored = $("lever-smd").checked;
 
 // Inline tags vanish and block tags become spaces, so "<strong>48%</strong>,"
 // reads as "48%,".
 const text = (h) =>
-  h.replace(/<\/?(?:strong|em|a|span|b|i)\b[^>]*>/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  h
+    .replace(/<\/?(?:strong|em|a|span|b|i)\b[^>]*>/g, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 // Reader paragraphs: each <p>, <li> and answer point, as plain text.
 const paras = (h) => h.split(/<\/(?:p|li|dd)>/).map(text).filter(Boolean);
+// The all-states rows as rendered: name, FY 2024, FY 2025, tier, chance of
+// a different tier, bill and bill std. dev., as a reader sees each cell.
+const cells = {};
+for (const m of tbody.innerHTML.matchAll(/<tr data-code="([A-Z]+)"[^>]*>([\s\S]*?)<\/tr>/g))
+  cells[m[1]] = [...m[2].matchAll(/<t[hd]\b[^>]*>([\s\S]*?)<\/t[hd]>/g)].map((c) => text(c[1]));
 const out = {
   takeaway: $("nat-takeaway").textContent,
   adoptNational: $("adopt-national").textContent,
+  urlsAtLoad,
+  smdRestored,
   states: {},
 };
 for (const code of Object.keys(T.DATA().states)) {
   $("state").value = code;
-  // A ?smd=1 link to this state checks the box; the app unchecks it where
-  // the state has no ungated scenario.
+  // Each state stands in for its own ?smd=1 link here (smdRestored checks
+  // the app's restore); the app unchecks the box where the state has no
+  // ungated scenario.
   if (search.get("smd") === "1") $("lever-smd").checked = true;
   T.render();
   const st = T.DATA().states[code];
@@ -221,7 +256,8 @@ for (const code of Object.keys(T.DATA().states)) {
       lock28: T.fmtWords(el.lock28),
       lockTierCost: T.fmtWords(el.lockTierCost),
     },
-    row: { ...row, pmisWords: T.fmtChance(row.pmis), billWords: T.fmtWords(row.bill) },
+    row,
+    cells: cells[code],
     ...(SHOW_ANALYST
       ? {
           live: text($("interventions-live").innerHTML),
@@ -232,10 +268,17 @@ for (const code of Object.keys(T.DATA().states)) {
           mechanism: $("mechanism").textContent,
           auditsVal: $("audits-val").textContent,
           smdOn: $("lever-smd").checked,
+          cutDisabled: $("lever-engine-cut").disabled,
         }
       : {}),
   };
 }
+// A cleared SMD box frees the cause-coded cut on the next render, however it
+// was cleared (a failed or gated load, or a state without a scenario).
+$("lever-smd").checked = false;
+$("lever-engine-cut").disabled = true;
+T.render();
+out.cutFreedOnRender = !$("lever-engine-cut").disabled;
 if (PDELAY) {
   out.synthetic = {};
   for (const p of PDELAY) {
