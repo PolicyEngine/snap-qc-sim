@@ -60,6 +60,14 @@ Policy, state-law, and tool developments after the anchor table was
 built. Same discipline: each row was read at the primary source linked
 in it; claims seen only in secondary coverage sit in queue 9 below.
 
+A note on the delay threshold (2026-11-19): CRS, Brookings and Corinth
+write it as a rate of 13.33% or higher. The enacted test is the rate
+multiplied by 1.5 being equal to or above 20 percent (7 U.S.C.
+2013(a)(2)(B)(iii), from P.L. 119-21 §10105), so the cutoff is
+13.333…%: a published two-decimal rate of 13.33% does not qualify and
+13.34% does, as `app/public/app.js` encodes. Rows below keep each
+source's own wording.
+
 | Work | Verified claim | Bears on |
 |---|---|---|
 | USDA, *Supplemental Nutrition Assistance Program: Payment Error Rates, Fiscal Year 2025* (dated 2026-06-24) | National rate 10.62% (overpayments 9.28%, underpayments 1.33%); QC tolerance threshold $57 | The simulator's locked FY2025 rates. All 53 `official_fy2025` values and `national.fy2025` in `app/public/data.json` match the table to two decimals (differential check run 2026-10-24). https://www.fns.usda.gov/sites/default/files/resource-files/snap-qcfy25-per.pdf |
@@ -67,8 +75,8 @@ in it; claims seen only in secondary coverage sit in queue 9 below.
 | CRS, *Senate Committee Reports a Farm Bill That Would Delay Onset of States Sharing SNAP Benefit Costs* (IN12723, updated 2026-10-05; still the current version on 2026-11-18) | S. 5526 would start benefit cost sharing in FY2029, keyed to the lower of the FY2026 or FY2027 rate; delay to FY2030 states at 13.33% or higher in both FY2025 and FY2026; and raise the top share from 15% to 20% from FY2031. The House-passed H.R. 7567 keeps current law. USDA has issued no regulations or guidance, and CRS's figure assumes cost sharing keys to the point estimate | The statute the simulator encodes could change before the first bill: the election pair moves from {FY2025, FY2026} to {FY2026, FY2027}, the delay test becomes a two-year conjunction, and a 20% tier enters. CRS's point-estimate assumption matches the statute: §10105 adopts the section 16(c)(2) definition (7 U.S.C. 2025(c)(2)(A)), "the sum of the point estimates" of the over- and underpayment rates, which P.L. 119-21 leaves unamended (checked 2026-11-18). What USDA has not yet set out is implementation. https://www.everycrsreport.com/reports/IN12723.html |
 | Bergh & Rosenbaum (CBPP), "New Data Underscore SNAP Cost Shift's Harm to Low-Income Families and State Budgets" (2026-07-23) | On FY2025 point estimates: 9 states and the Virgin Islands below 6%; 6 states at 5%; 16 at 10%; 13 and Guam at 15%; 6 states and DC delayed. About $9 billion shifts to states in FY2028, priced on annualized first-half FY2026 issuance. New Jersey fell from 14.33% to 6.86%, leaving the delay group for a 5% share | Independent cross-check: CBPP's delay roster (AK, DE, DC, GA, IL, NM, OR) and New York at 13.18% match the paper's. The simulator prices on FY2024 issuance (`analysis/INTERVENTIONS.md`) and reports expectations over tier odds, so reconcile issuance bases before setting CBPP's $9 billion beside the paper's summed expected bill. https://www.cbpp.org/sites/default/files/7-23-26fa.pdf |
 | Corinth (AEI COSM), "How Fixing SNAP's Payment Error Rate Formula Would Change State Cost Shares" (2026-08-19) | The rate divides error dollars by benefits paid, so an overpayment also enlarges the denominator. For a household eligible for $300, a $400 payment scores 0.25 and a $200 payment 0.50; dividing by correctly computed benefits scores both 0.33. Approximated from published FY2025 figures, every state's rate rises (0.04–5.09pp) and 16 states' FY2028 shares change, 7 of them by crossing 13.33% into the delay | A definitional sensitivity separate from sampling noise, with a perverse sign at the delay cliff: the stricter definition lowers FY2028 state bills by a net $2.70 billion. The worked example and the approximation (corrected rate = rate / (1 − over + under)) were checked by hand. The simulator encodes the statutory definition; a definitional lens is a candidate extension. https://cosm.aei.org/how-fixing-snaps-payment-error-rate-formula-would-change-state-cost-shares/ |
-| North Carolina S.L. 2026-41 (S.B. 257), §9J.14, approved 2026-07-07, creating G.S. 108A-52.2 | Passes any state benefit cost share to counties by withholding sales-tax distributions. Each county pays a flat 0.75% of its base-year sales-tax allocation plus a proportional assessment scaled by its "penalty factor", its portion of the statewide PER dollar amount. §9J.14(b) writes the FY2028 election into statute: FY2025 unless FY2026 yields a lesser obligation. Nickodem (UNC SOG, 2026-08-17) puts the FY2025 rate at 7.36% and the FY2028 share at about $150 million | The first verified sub-state pass-through, and a second measurement layer. The statute does not say how PER dollars are attributed to counties; if from QC cases, the repo's FY2024 NC file has 955 cases and 127 with errors across 100 counties, so the tier lottery recurs at the county level on one or two error cases each. The statutory election matches the simulator's minimum-obligation election semantics. https://www.ncleg.gov/EnactedLegislation/SessionLaws/PDF/2025-2026/SL2026-41.pdf · https://canons.sog.unc.edu/blog/2026/08/17/state-appropriations-act-shifts-potential-federal-snap-benefit-cost-sharing-to-north-carolina-counties/ |
-| McClurg, SNAP payment error rate tool (released 2026-06-24) | State liabilities from point estimates on FY2023 issuance, with timeliness and PAI correlations and CAPER profiles; no sampling uncertainty, election, or delay modeling | A nearby public tool. Correction (2026-11-18): this row first called tier odds under sampling noise the simulator's distinct contribution, but Bauer and Schanzenbach (Brookings, 2026-08-25, Appendix B) already compute one-year tier odds from published FY2023 rates and standard errors (sweep table below). Brookings' fifth bin is the 13.33% delay threshold, but each of its probabilities is for a single year. What remains distinct from both: resampling QC cases instead of drawing from published standard errors; the two-year structure of the FY2028 election and delay test; and the pre-registration's committed drift variants. The drift variants matter because the repo's backtest finds sampling-only nominal 90% intervals cover 48% of realized next-year rates (`analysis/PERSISTENCE_BACKTEST.md`, reconstructed-rate scale). https://snap-per.joelmcclurg.ai |
+| North Carolina S.L. 2026-41 (S.B. 257), §9J.14, approved 2026-07-07, creating G.S. 108A-52.2 | Passes any state benefit cost share to counties by withholding sales-tax distributions. Each county pays a flat 0.75% of its base-year sales-tax allocation plus a proportional assessment scaled by its "penalty factor", its portion of the statewide PER dollar amount. §9J.14(b) writes the FY2028 election into statute: FY2025 unless FY2026 yields a lesser obligation. Nickodem (UNC SOG, 2026-08-17) puts the FY2025 rate at 7.36% and the FY2028 share at about $150 million | The first sub-state pass-through this file has verified, and a second measurement layer. The statute does not say how PER dollars are attributed to counties. If DHHS attributes them from QC cases, county shares inherit sampling noise from few cases: the repo's FY2024 file has 955 North Carolina cases, 127 with counted errors, for 100 counties. The public file carries no county identifier, so how those cases fall across counties is unknown. The county assessment described here is proportional, with no county-level tier cutoffs. The statutory election matches the simulator's minimum-obligation election semantics. https://www.ncleg.gov/EnactedLegislation/SessionLaws/PDF/2025-2026/SL2026-41.pdf · https://canons.sog.unc.edu/blog/2026/08/17/state-appropriations-act-shifts-potential-federal-snap-benefit-cost-sharing-to-north-carolina-counties/ |
+| McClurg, SNAP payment error rate tool (released 2026-06-24) | State liabilities from point estimates on FY2023 issuance, with timeliness and PAI correlations and CAPER profiles; no sampling uncertainty, election, or delay modeling | A nearby public tool. Correction (2026-11-18): this row first called tier odds under sampling noise the simulator's distinct contribution, but Bauer and Schanzenbach (Brookings, 2026-08-25, Appendix B) already compute one-year tier odds from published FY2023 rates and standard errors (sweep table below). Brookings' fifth bin, 13.33% or higher, is its stand-in for the delay test (see the note above this table), and each of its probabilities is for a single year. Source by source: McClurg uses point estimates only; Brookings draws each state's rate from Normal(PER, SE) for one year; the simulator resamples QC cases and carries the draws through the two-year FY2028 election and delay test; and the pre-registration adds committed drift variants. The drift variants answer the repo's backtest, where the sampling-only (`static`) specification's nominal 90% intervals cover 48% of realized next-year rates on the reconstructed-rate scale, and 78% with SDs set to the published ~1.1pp average (`static_official_1p1`; `analysis/PERSISTENCE_BACKTEST.md`). https://snap-per.joelmcclurg.ai |
 
 ## October 2026 queue sweep (verified 2026-10-25; checked 2026-11-18)
 
@@ -187,7 +195,7 @@ effects.
 | Work | Verified claim | Bears on |
 |---|---|---|
 | Molin, "Is SNAP Screener Accurate? Testing the Calculator Against the SNAP Quality Control Data", SNAP Screener (2025-10-17; updated 2026-07). [Post](https://www.snapscreener.com/blog/qc-data) † | Tests an independent benefit calculator against 37,009 FY2023 QC records, skipping eligibility screening: 98.64% agree within $2. The validation surfaced corrections to historical utility and medical-deduction parameters | Validating benefit code against QC records predates the oracle. The six-stage, zero-tolerance protocol remains distinct. Separate from the cited `@giannella_snapqc` software |
-| Bauer & Schanzenbach, "The SNAP state cost-shift policy leaves the program's existence to chance", Brookings (2026-08-25). [Article](https://www.brookings.edu/articles/the-snap-state-cost-shift-policy-leaves-the-programs-existence-to-chance/) † | Appendix B computes the probability of each of the five OBBBA bins from FY2023 published rates and standard errors under a Normal(PER, SE) sampling distribution, without shrinkage. The fifth bin is 13.33% or higher, the delay threshold. Each probability is for a single year's draw | Overlaps the tier-lottery result, using published standard errors where the simulator resamples cases. The two-year FY2028 election and delay test are outside its calculation. This file makes no priority claim either way |
+| Bauer & Schanzenbach, "The SNAP state cost-shift policy leaves the program's existence to chance", Brookings (2026-08-25). [Article](https://www.brookings.edu/articles/the-snap-state-cost-shift-policy-leaves-the-programs-existence-to-chance/) † | Appendix B computes the probability of each of the five OBBBA bins from FY2023 published rates and standard errors under a Normal(PER, SE) sampling distribution, without shrinkage. The fifth bin is 13.33% or higher, Brookings' stand-in for the delay test (see the note above the developments table). Each probability is for a single year's draw | Overlaps the tier-lottery result, using published standard errors where the simulator resamples cases. The two-year FY2028 election and delay test are outside its calculation. This file makes no priority claim either way |
 | Bauer & Schanzenbach, "SNAP cuts in the One Big Beautiful Bill Act will significantly impair recession response", Brookings (2025-10-08). [Article](https://www.brookings.edu/articles/snap-cuts-in-the-one-big-beautiful-bill-act-will-significantly-impair-recession-response/) | Describes how a state with a high, delayed rate moves into positive cost sharing when its rate falls | The delay's perverse incentive was described in 2025 |
 | Bauer, Cole, Patt & Powell, "SNAP payment error rates by state, FY 2003–25", Brookings interactive (2026-06-25). [Interactive](https://www.brookings.edu/articles/snap-payment-error-rates-by-state-fy-2003-24/) | Historical state rates, cost-share boundaries and FY2025 placements | The June Brookings item, distinct from the August analysis |
 | Bleich, Hamad & Plata-Nino, "The Challenges of Linking SNAP State Cost Sharing to Payment Error Rates", *JAMA Health Forum* 7(10): e264880 (2026-10-15), DOI [10.1001/jamahealthforum.2026.4880](https://jamanetwork.com/journals/jama-health-forum/fullarticle/2855585) | A qualitative critique: small QC samples, random annual variation, budget unpredictability, review and coding changes, and access incentives | The measurement argument, made qualitatively |
@@ -398,22 +406,37 @@ persistence absent any behavioral response.
 
 Statements to commit before any fiscal 2027 outcome publishes; each
 rests only on the anchor table above plus this repository's artifacts.
+*Note (2026-11-19):* prediction 1 is scored on the fiscal 2026 rates,
+which the pre-registration expects around mid-2027 by precedent, so it
+must be committed before they publish. The dated notes below
+(2026-11-18) also draw on the sweep tables.
 
 1. **Ranking-stability null (Goldstein–Spiegelhalter; Kane–Staiger).**
    Absent any behavioral response, sampling variation alone reshuffles
    tier positions year to year: the simulator's FY2028 election lens
    already quantifies this repository's version (per-state tier
    probabilities under the no-response null). The rival prediction to
-   beat: observed FY2027 tier assignments are statistically
-   indistinguishable from draws under the committed no-response nulls.
-   *Note (2026-11-18):* Bauer and Schanzenbach compute the same kind of
-   one-year tier odds from published standard errors. The repo's
-   backtest finds sampling-only nominal 90% intervals cover 48% of
-   realized next-year rates (`analysis/PERSISTENCE_BACKTEST.md`), so
-   on that evidence rejecting the sampling-only baseline is likely
-   even with no response; the pre-registration also commits drift
-   variants. Rejection alone cannot say whether drift, burden or
-   measurement produced it (lane C).
+   beat: observed fiscal 2026 rates, and the tiers they imply, are
+   statistically indistinguishable from draws under the committed
+   no-response nulls. *Correction (2026-11-19):* the first draft named
+   FY2027 tier assignments; the pre-registration's committed nulls are
+   for fiscal 2026 rates.
+   *Note (2026-11-18; corrected 2026-11-19):* Bauer and Schanzenbach
+   compute the same kind of one-year tier odds from published standard
+   errors. In the repo's backtest the sampling-only (`static`)
+   specification's nominal 90% intervals cover 48% of realized
+   next-year rates on the reconstructed-rate scale, and 78% with SDs
+   at the published ~1.1pp average (`analysis/PERSISTENCE_BACKTEST.md`).
+   No registered test takes this prediction's all-state form. The
+   closest registered check is the tail-share drift trigger, which
+   classifies the year as drifted when 8 or more of 53 jurisdictions
+   fall outside their two-year band. The confirmatory test compares
+   above-cut with below-cut window states; in the pre-registration's
+   committed drift worlds its false-positive rate is 10.5% and 11.4%
+   (delay test 9.15% and 11.15%). The first version of this note said
+   rejection was likely with no response; the committed simulations do
+   not support that for the registered tests. A rejection alone cannot
+   say whether drift, burden or measurement produced it (lane C).
 2. **Burden-response direction (Homonoff–Somerville; Herd–Moynihan).**
    If states respond to cost sharing by tightening verification and
    recertification, participation falls among high-churn cases while
@@ -459,4 +482,7 @@ rests only on the anchor table above plus this repository's artifacts.
 Adjudication protocol: the fiscal 2026 pre-registration's committed
 nulls arbitrate 1; 2 and 3 are directional and need the FY2026-27
 files plus elections data — state them now, score them when the files
-publish.
+publish. *Note (2026-11-19):* those nulls are for fiscal 2026 rates.
+The registered tests compare above-cut with below-cut window states
+(confirmatory) and test the delay window (secondary); the note under
+prediction 1 says how they map to it.
