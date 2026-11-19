@@ -38,7 +38,8 @@ CHECK = """() => {
   }
   const row = document.querySelector('#nat-table tbody tr.current');
   const cells = row ? [...row.querySelectorAll('td')].map((c) => c.textContent.trim()) : null;
-  return {res, overflowX: document.documentElement.scrollWidth - innerWidth, points: document.getElementById('answer-points').innerText, lead: document.getElementById('answer-lead').innerText, cells};
+  const links = [...document.querySelectorAll('.pe-shell-links a')].filter((a) => a.offsetParent !== null).length;
+  return {res, links, overflowX: document.documentElement.scrollWidth - innerWidth, points: document.getElementById('answer-points').innerText, lead: document.getElementById('answer-lead').innerText, cells};
 }"""
 
 
@@ -54,11 +55,9 @@ def money(s):
 
 
 def chance_matches(answer, table):
-    if answer == "less than 1%":
-        return table == "0%"
-    if answer == "more than 99%":
-        return table == "100%"
-    return answer == table
+    # The table's short form rounds as the answer does and never shows 0% or 100%.
+    short = {"less than 1%": "<1%", "more than 99%": ">99%"}
+    return table == short.get(answer, answer) and table not in ("0%", "100%")
 
 
 with sync_playwright() as p:
@@ -99,7 +98,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(500)
         codes = page.eval_on_selector_all("#state option", "os => os.map(o => o.value)")
         problems, mismatches = {}, {}
-        compared = {"tier_chance": 0, "bill": 0}
+        compared = {"tier_chance": 0, "bill": 0, "bill_fy29": 0}
         for code in codes:
             page.select_option("#state", code)
             page.wait_for_function(f"new URLSearchParams(location.search).get('state') === '{code}' && document.getElementById('answer-lead').innerText.length > 0")
@@ -108,6 +107,8 @@ with sync_playwright() as p:
             issues = list(r["res"])
             if r["overflowX"] > 0:
                 issues.append(f"page overflows horizontally by {r['overflowX']}px")
+            if r["links"] == 0:
+                issues.append("header links hidden")
             if issues:
                 problems[code] = issues
             # Differential: the answer and the table row run the same baseline
@@ -132,6 +133,23 @@ with sync_playwright() as p:
                     )
                     if abs(a - t) > tol:
                         diffs.append(f"bill: answer {b.group(1)} vs table {cells[4]}")
+                # Delayed states: the row carries the FY 2029 bill.
+                b29 = re.search(
+                    r"expected FY 2029 bill is (\$0|under \$1 million|\$[\d.]+ (?:million|billion)) a year", r["points"]
+                )
+                if "FY29" in cells[4]:
+                    if not b29:
+                        diffs.append("delayed row but no FY 2029 bill in the answer")
+                    else:
+                        compared["bill_fy29"] += 1
+                        w = b29.group(1)
+                        a = 0.0 if w == "$0" else 0.25e6 if w.startswith("under") else money(w)
+                        t = money(cells[4])
+                        tol = (0.5e6 if w.endswith("million") or w == "$0" else 5e6) + (
+                            0.5e6 if "M" in cells[4] else 5e6
+                        )
+                        if abs(a - t) > tol:
+                            diffs.append(f"FY29 bill: answer {b29.group(1)} vs table {cells[4]}")
             if diffs:
                 mismatches[code] = diffs
         # A regex that stops matching the copy would skip every comparison.
