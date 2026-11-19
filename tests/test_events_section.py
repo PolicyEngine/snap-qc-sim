@@ -70,7 +70,8 @@ def test_interventions_section_copy_and_language_discipline() -> None:
         "bill do. An accounting construction: it prices the arithmetic of a "
         "smaller error pool, not any claim about how a state achieves it."
     ) in section
-    assert "Oracle ranks by each case's actual recorded error" in section
+    assert "Perfect hindsight ranks cases by their actual recorded error" in section
+    assert "the ceiling any targeting method can reach" in section
     assert "If the cut persists, FY 2028–30" in section
-    assert "Sustained-intervention construction: the same rate delta applied" in section
+    assert "Sustained construction: the same rate change, subtracted in each year" in section
     assert "causal" not in section.lower()
