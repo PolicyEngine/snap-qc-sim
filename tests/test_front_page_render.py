@@ -358,8 +358,9 @@ def test_sustained_grid_prices_delayed_states_from_fy_2029() -> None:
     for code, s in out.items():
         sus = s["sustained"]
         assert "Not shown for" not in sus, code
-        assert "statutory share" not in sus, code
-        assert "before the FY 2026 election and the delay clause" in sus, code
+        # The targeted-review result names its share for what it is.
+        assert "statutory share" not in sus + s["live"], code
+        assert "before the FY 2026 election and the delay clause" in s["live"], code
         if s["delay25"]:
             assert "FY 2028: $0 (delayed by statute)" in sus, code
             assert "FY 2029:" in sus and "FY 2029–30 cost" in sus, code
