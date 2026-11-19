@@ -170,13 +170,15 @@ def test_sampling_only_caveat_matches_the_backtest() -> None:
         "model that also uses each state's own history, to "
         f"{cov['rao_yu']}%."
     ) in js
-    # The drift option's 1.07-point SD is fitted to one year's change and
-    # was not backtested; the page says so beside the backtest.
+    # The drift option's 1.07-point SD is the robust estimate from one
+    # year's change (the classical one is 1.62) and was not backtested; the
+    # page says so beside the backtest.
     tau = json.loads((PUBLIC / "fy2027_data.json").read_bytes())["drift_tau_pp"]
-    assert f"{tau['robust']:.2f}" == "1.07"
+    assert (f"{tau['robust']:.2f}", f"{tau['classical']:.2f}") == ("1.07", "1.62")
     assert (
-        "a 1.07-point standard deviation fitted to the FY 2024→2025 change alone, "
-        "which the backtest did not test."
+        "a 1.07-point standard deviation, the robust estimate from the FY 2024→2025 "
+        "change alone (the classical estimate is 1.62 points). The backtest did not "
+        "test it."
     ) in js
 
 
@@ -344,6 +346,7 @@ HELPERS = (
     "fmtWords",
     "fmtChance",
     "fmtChanceShort",
+    "tierOf",
     "quantile",
     "tickStep",
     "textW",
@@ -458,6 +461,14 @@ def test_table_chance_matches_the_answer_wording(ps: list[float]) -> None:
     for p, long, short in zip(ps, longs, shorts):
         assert short == short_of.get(long, long), (p, long, short)
         assert short not in ("0%", "100%"), p
+
+
+def test_tier_edges_belong_to_the_higher_tier() -> None:
+    """The lede's edges as tierOf applies them: under 6% pays nothing, 6% to
+    under 8% pays 5%, 8% to under 10% pays 10%, and 10% or more pays 15%."""
+    rates = [0, 5.99, 6, 7.99, 8, 9.99, 10, 13.33, 13.34, 40]
+    tiers = _run_helpers([["tierOf", r] for r in rates])
+    assert tiers == [0, 0, 5, 5, 10, 10, 15, 15, 15, 15]
 
 
 @settings(max_examples=5, deadline=None)
@@ -606,7 +617,11 @@ def test_delay_rule_names_the_fy2025_and_fy2026_rates() -> None:
     FY 2026 rate; no other year's rate delays a bill."""
     html, js = INDEX.read_text(), _app_text()
     joined = re.sub(r"`\s*\+\s*`", "", js)
-    assert "An FY 2025 or FY 2026 rate above 13.33%" in re.sub(r"\s+", " ", html)
+    # The lede names the line at first use; the answer's draw copy uses it.
+    assert (
+        "An FY 2025 or FY 2026 rate above 13.33%, the delay line, delays the first bill"
+        in re.sub(r"\s+", " ", html)
+    )
     # The statute's test (rate x 1.5 >= 20%), then its two-decimal reading;
     # simulated draws are continuous, so the draw copy says "the delay line".
     assert (

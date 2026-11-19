@@ -22,6 +22,8 @@
 //   jurisdiction's simulated odds fall.
 // --stall=file makes that file's fetch never settle, to check the page
 //   renders without it.
+// --late=file holds that file's fetch until the all-states pass has
+//   finished, so the app's late-arrival paths run.
 import fs from "node:fs";
 import vm from "node:vm";
 
@@ -34,6 +36,9 @@ const ONLY = flags.find((f) => f.startsWith("--states="))?.slice(9).split(",");
 const TODAY = flags.find((f) => f.startsWith("--today="))?.slice(8);
 const PDELAY = flags.find((f) => f.startsWith("--pdelay="))?.slice(9).split(",").map(Number);
 const STALL = flags.find((f) => f.startsWith("--stall="))?.slice(8);
+const LATE = flags.find((f) => f.startsWith("--late="))?.slice(7);
+// When a --late file was released: the all-states rows existing then.
+let lateReleasedAt = null;
 // Every URL the app writes with history.replaceState, in order.
 const urls = [];
 
@@ -107,6 +112,20 @@ const ctx = {
     const file = u.split("?")[0];
     fetched.push(file);
     if (file === STALL) return new Promise(() => {});
+    if (file === LATE)
+      await new Promise((resolve) => {
+        const full = () => {
+          const t = ctx.__t;
+          const n = t?.DATA() && Object.keys(t.DATA().states).length;
+          return n && t.NAT().size === n && $("nat-note").textContent === "";
+        };
+        const tick = () => {
+          if (!full()) return setTimeout(tick, 25);
+          lateReleasedAt = ctx.__t.NAT().size;
+          resolve();
+        };
+        tick();
+      });
     const buf = fs.readFileSync(PUB + "/" + file);
     return {
       ok: true,
@@ -155,13 +174,13 @@ const T = ctx.__t;
 
 // An artifact that fails its integrity check stops the run at once,
 // naming the artifact, instead of waiting out the timeout.
-const until = (ok) => new Promise((resolve, reject) => {
+const until = (ok, ms = 900000) => new Promise((resolve, reject) => {
   const t0 = Date.now();
   const tick = () => {
     const bad = Object.entries(T.errors()).find(([, e]) => e);
     if (bad) return reject(new Error(`${bad[0]}: ${bad[1].message}`));
     if (ok()) return resolve();
-    if (Date.now() - t0 > 900000) return reject(new Error("timeout"));
+    if (Date.now() - t0 > ms) return reject(new Error("timeout"));
     setTimeout(tick, 25);
   };
   tick();
@@ -177,7 +196,21 @@ const settled = () => {
   const ad = T.ADOPT();
   return !ad || [...T.NAT().values()].every((r) => r.adoptStrict28 !== null || !ad.states[r.code]);
 };
-await until(() => T.NAT().size === n && $("nat-takeaway").textContent && settled());
+await until(() => T.NAT().size === n && $("nat-takeaway").textContent && settled(), LATE ? 300000 : 900000);
+// Let the render queued by the last arrival run (queue() waits 16 ms),
+// then record what the app itself shows for the state it loaded, before
+// anything below re-renders by hand.
+await new Promise((r) => setTimeout(r, 250));
+const atLoad = {
+  code: $("state").value,
+  lead: $("answer-lead").textContent,
+  fy27: $("fy2027-body").textContent,
+  takeaway: $("nat-takeaway").textContent,
+  adoptNational: $("adopt-national").textContent,
+  adoption: $("adoption-body").textContent,
+  mechanism: $("mechanism").textContent,
+  lateReleasedAt,
+};
 const fetchedBeforeToggle = [...fetched];
 if (TOGGLE) {
   $("analyst").open = true;
@@ -215,6 +248,7 @@ const out = {
   adoptNational: $("adopt-national").textContent,
   urlsAtLoad,
   smdRestored,
+  atLoad,
   states: {},
 };
 for (const code of Object.keys(T.DATA().states)) {

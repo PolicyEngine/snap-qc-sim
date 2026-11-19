@@ -297,7 +297,7 @@ h2 { font-size: 1.05rem; margin: 0 0 4px; }
   .chart-card { padding: 14px; }
 }
 /* A wrapped sticky header is taller, so in-page targets clear it. */
-@media (max-width: 359px) {
+@media (max-width: 379px) {
   #answer, #national, #fy2027, #analyst { scroll-margin-top: 100px; }
 }
 /* An open, configured analyst section prints with its results (the rule

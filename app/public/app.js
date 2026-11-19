@@ -913,9 +913,11 @@ function driftElectionLine(code, el) {
   if (el.lockShare === 0)
     return `With drift, at the published-rate baseline, ${name} still owes nothing for FY 2028; ${cross}, and its ` +
       `expected FY 2029 bill is ${fmtM(el.bill29)}/yr.` + tail;
+  // Both bills net the delay chance (lock28 counts it too), as the answer says.
+  const both = el.pDelay26 >= 0.005 ? ", both counting the chance of a delay" : "";
   return `With drift, at the published-rate baseline, ${possessive(name)} expected FY 2028 bill electing the better of ` +
     `its FY 2025 and FY 2026 rates is ${fmtM(el.elect28)}/yr, against ${fmtM(el.lock28)}/yr keeping its FY 2025 rate ` +
-    `(an expected saving of ${fmtM(Math.max(0, el.lock28 - el.elect28))}/yr); ${cross}, and the expected FY 2029 bill ` +
+    `(an expected saving of ${fmtM(Math.max(0, el.lock28 - el.elect28))}/yr)${both}; ${cross}, and the expected FY 2029 bill ` +
     `is ${fmtM(el.bill29)}/yr.` + tail;
 }
 
@@ -1362,11 +1364,11 @@ function renderAdoption(code, st, elec, drift) {
   const excludedN = st.verified ? st.n - st.verified : 0;
   const verifiedNote = st.verified
     ? `The Axiom engine already reproduces this state's recorded FY 2024 benefit arithmetic case-exactly for all ` +
-      `${st.verified} replayable reviews` +
       (excludedN
-        ? `, ${st.verified} of the file's ${st.n}; the other ${excludedN} are SSI-CAP standardized-benefit cases, ` +
-          `excluded as an enumerated program-structure class`
-        : `, every case in its file`) +
+        ? `${st.verified} replayable reviews in its file of ${st.n}; the other ${excludedN} are SSI-CAP (Supplemental ` +
+          `Security Income Combined Application Project) standardized-benefit cases, excluded as an enumerated ` +
+          `program-structure class`
+        : `${st.verified} reviews in its file`) +
       ` (the Axiom rules engine verification view in these tools). Eligibility findings are taken from the file as ` +
       `inputs, so eligibility is untested. Adoption means computing benefits through the engine, not only replaying them.`
     : `An encoding of this state's rules has not yet been replayed against its QC file; the scenario above uses its own file's ` +
@@ -1437,10 +1439,14 @@ function renderInterventions(code, st, result) {
   const engineCaveat = engineOn
     ? '<p class="hint">The sustained grid excludes the cause-coded cut.</p>'
     : "";
+  // FY 2029 keys to the FY 2026 rate (and is $0 if that rate also delays);
+  // FY 2030 keys to the FY 2027 rate, which no delay touches. The grid
+  // prices each year on its own rate, so its figures can miss either way.
   const delayNote = election.delay25
-    ? `<p class="hint">${possessive(nameOf(code))} FY 2025 rate tops 13.33%, so the delay clause sets its FY 2028 ` +
-      `bill to $0, and the grid does not model the delay. Its FY 2029 bill keys to its FY 2026 rate and is $0 if that ` +
-      `rate also tops 13.33%, so the FY 2029–30 figures overstate its exposure.</p>`
+    ? `<p class="hint">${possessive(nameOf(code))} FY 2025 rate is above 13.33%, so the delay clause sets its ` +
+      `FY 2028 bill to $0, as shown. Its FY 2029 bill keys to its FY 2026 rate and is $0 if that rate is also above ` +
+      `13.33%; its FY 2030 bill keys to its FY 2027 rate. The grid prices FY 2029 and FY 2030 on each year's own ` +
+      `simulated rate, so those figures can sit above or below what it would owe.</p>`
     : "";
   const label = rows.length === 2
     ? "Precomputed at 25% and 50% effectiveness"
@@ -1548,7 +1554,7 @@ function renderAnswer(code, st, draws) {
     $("answer-lead"),
     el.delay25
       ? `${its} FY 2025 payment error rate is <strong>${pct2(fy25)}</strong>, in the <strong>${tier}% cost-share ` +
-        `tier</strong> but above 13.33%, so it owes <strong>nothing for FY 2028</strong>. Its first bill comes in ` +
+        `tier</strong> and above 13.33%, the delay line, so it owes <strong>nothing for FY 2028</strong>. Its first bill comes in ` +
         `FY 2029, set by its FY 2026 rate, unless that rate also tops 13.33%; then the first bill moves to FY 2030, ` +
         `set by its FY 2027 rate. A fresh FY 2026 sample reaches the delay line ` +
         `<strong>${fmtChance(el.pDelay26)} of the time</strong>.`
@@ -1575,16 +1581,19 @@ function renderAnswer(code, st, draws) {
     "state rates (FY 2021 excluded), 90% ranges around the prior year's rate built from one year's sampling noise " +
     "caught the next year's rate 48% of the time. Counting both years' sampling noise raised that to 64%; adding a " +
     "modeled year-to-year movement term to one year's noise, to 81%; and a model that also uses each state's own " +
-    "history, to 85%. The drift option in the analyst tools adds a separate estimate of that movement, a 1.07-point " +
-    "standard deviation fitted to the FY 2024→2025 change alone, which the backtest did not test.";
+    "history, to 85%. The drift option in the analyst tools adds a separate estimate of that movement: a 1.07-point " +
+    "standard deviation, the robust estimate from the FY 2024→2025 change alone (the classical estimate is 1.62 " +
+    "points). The backtest did not test it.";
   if (el.delay25) {
-    // Every delayed state's FY 2025 tier is 15%, so a different tier is a
-    // lower one, below the delay line.
+    // Every delayed state's FY 2025 tier is 15%, so a different tier is
+    // below 10%, under the delay line: such a rate sets an FY 2029 bill at
+    // that tier instead of delaying the first bill again ($0 for FY 2029).
     points.push([
       "How sure",
       `FY 2025 is published, so the FY 2028 delay is settled. For FY 2026 this page simulates the rate: ${sample} lands ` +
-        `in a different tier <strong>${fmtChance(1 - sm.pt[tier])} of the time</strong>; any such tier is lower and ` +
-        `would set a smaller FY 2029 bill. 90% of such samples fall between ${pct2(q05)} and ${pct2(q95)}. ${noiseOnly}`,
+        `in a different tier <strong>${fmtChance(1 - sm.pt[tier])} of the time</strong>. Every other tier is below ` +
+        `10%, under the delay line, so such a rate would not delay the first bill again; it would set an FY 2029 bill ` +
+        `at that lower tier. 90% of simulated samples fall between ${pct2(q05)} and ${pct2(q95)}. ${noiseOnly}`,
     ]);
   } else {
     const nearest = [6, 8, 10].reduce((b, v) => (Math.abs(v - fy25) < Math.abs(b - fy25) ? v : b));
@@ -1774,8 +1783,15 @@ function renderAnalyst(code, st, plain) {
   const elecS = electionStats(st, scen);
   // elec runs on the drift-added published-rate baseline; with drift on it
   // gives the election comparison the answer gives with sampling noise only.
+  // Drift checked without its estimate (still loading, or failed): say so
+  // rather than show undrifted figures as if drift were on.
+  const driftMissing = $("lever-drift").checked && !FY27
+    ? FY27_PENDING
+      ? " Drift is checked, but its estimate is still loading; these figures exclude drift until it arrives."
+      : " Drift is checked, but its estimate (fy2027_data.json) failed to load; these figures exclude drift."
+    : "";
   $("mechanism").textContent =
-    mechanismLine(scenarioOn, driftOn) + (driftOn ? " " + driftElectionLine(code, elec) : "");
+    mechanismLine(scenarioOn, driftOn) + (driftOn ? " " + driftElectionLine(code, elec) : "") + driftMissing;
   const sb = summarize(base, issuance);
   const ss = summarize(scen, issuance);
   // scen is the intervention's draws with the same drift as the tiles, so
@@ -1826,12 +1842,9 @@ function render() {
     tr.classList.toggle("current", tr.dataset.code === code)
   );
   // Closed analyst tools skip their simulations; opening them re-renders.
-  // With drift checked they wait for fy2027_data.json, which carries the
-  // drift estimate, rather than drop drift silently.
-  if ($("analyst").open) {
-    if ($("lever-drift").checked && FY27_PENDING) $("mechanism").textContent = "Loading the drift estimate…";
-    else renderAnalyst(code, st, plain);
-  }
+  // With drift checked before fy2027_data.json (the drift estimate) arrives,
+  // they render without drift and say so; its arrival re-renders them.
+  if ($("analyst").open) renderAnalyst(code, st, plain);
   writeUrl();
 }
 
@@ -1839,9 +1852,9 @@ async function main() {
   if (FRAMED) document.documentElement.classList.add("framed");
   // The answer and the table render on data.json alone. The FY 2027 section's
   // artifact and the adoption artifact (186 KB, whose national total the
-  // table pass sums for the analyst tools) start loading with the page and
-  // fill in when they arrive. The other analyst artifacts (about 4 MB) load
-  // when the tools first open.
+  // table pass sums for the analyst tools) start loading once data.json
+  // arrives and fill in when they do. The other analyst artifacts (about
+  // 4 MB) load when the tools first open.
   DATA = await (await fetch("data.json?v=" + ASSET_V)).json();
   const fy27Load = fetch("fy2027_data.json?v=" + ASSET_V).then((r) => {
     if (!r.ok) throw new Error("FY 2027 artifact fetch failed");

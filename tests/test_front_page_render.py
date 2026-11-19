@@ -68,6 +68,7 @@ def _render(
     today: str | None = None,
     pdelay: str | None = None,
     stall: str | None = None,
+    late: str | None = None,
 ) -> dict:
     node = shutil.which("node")
     if not node:
@@ -91,6 +92,8 @@ def _render(
         args.append(f"--pdelay={pdelay}")
     if stall:
         args.append(f"--stall={stall}")
+    if late:
+        args.append(f"--late={late}")
     out = subprocess.run(
         args, capture_output=True, text=True, timeout=1800, check=False
     )
@@ -192,8 +195,12 @@ def test_bill_spread_is_bounded() -> None:
         sd, bill, base = s["row"]["billSd"], s["row"]["bill"], s["issuance"]
         assert 0 <= sd <= 0.075 * base + 1e-6, code
         h = 0.05 * base
-        theta = (bill / h) % 1
-        assert sd >= h * (theta * (1 - theta)) ** 0.5 * (1 - 1e-6) - 1e-6, code
+        steps = bill / h
+        # A mean on a tier cost (every draw the same tier) has no lower
+        # bound beyond zero; summation error must not make one up.
+        if abs(steps - round(steps)) > 1e-6:
+            theta = steps % 1
+            assert sd >= h * (theta * (1 - theta)) ** 0.5 * (1 - 1e-6), code
         if s["delay25"] and s["expect"]["pDelay26Raw"] == 1:
             assert sd == 0 and bill == 0, code
 
@@ -365,6 +372,13 @@ def test_sustained_grid_prices_delayed_states_from_fy_2029() -> None:
             assert "FY 2028: $0 (delayed by statute)" in sus, code
             assert "FY 2029:" in sus and "FY 2029–30 cost" in sus, code
             assert "three-year cost" not in sus, code
+            # A different FY 2026 tier is below the delay line, so it sets an
+            # FY 2029 bill instead of delaying again; it is not "smaller".
+            assert "would not delay the first bill again" in s["points"], code
+            assert "smaller FY 2029 bill" not in s["points"], code
+            # The grid note gives no direction it cannot support.
+            assert "overstate" not in sus, code
+            assert "its FY 2030 bill keys to its FY 2027 rate" in sus, code
             # The tile says when the first bill moves, never a bare
             # "first bill FY 2029".
             assert "first bill FY 2029" not in s["tiles"][1], code
@@ -382,14 +396,16 @@ def test_adoption_note_counts_the_replayed_cases() -> None:
             assert "has not yet been replayed" in s["adoption"], code
             continue
         checked.add(bool(st["n"] - st["verified"]))
-        assert f"for all {st['verified']} replayable reviews" in s["adoption"], code
         if st["n"] > st["verified"]:
             assert (
-                f"{st['verified']} of the file's {st['n']}; the other "
-                f"{st['n'] - st['verified']} are SSI-CAP standardized-benefit cases"
+                f"for all {st['verified']} replayable reviews in its file of {st['n']}; "
+                f"the other {st['n'] - st['verified']} are SSI-CAP (Supplemental "
+                "Security Income Combined Application Project) standardized-benefit cases"
             ) in s["adoption"], code
         else:
-            assert "every case in its file" in s["adoption"], code
+            assert f"for all {st['verified']} reviews in its file" in s["adoption"], (
+                code
+            )
         assert "eligibility is untested" in s["adoption"], code
     # States with and without SSI-CAP exclusions.
     assert checked == {True, False}
@@ -492,8 +508,11 @@ def test_analyst_settings_leave_the_answer_unchanged() -> None:
 @pytest.mark.parametrize("stall", ["engine_scenario_data.json", "fy2027_data.json"])
 def test_answer_and_table_render_before_the_side_artifacts(stall: str) -> None:
     """Neither the adoption nor the FY 2027 artifact holds up the answer or
-    the table; each panel says it is loading until its file arrives."""
-    out = _render(920, True, states="CO,GA", stall=stall)
+    the table; each panel says it is loading until its file arrives. With
+    drift checked before its estimate arrives, the analyst tools render
+    without drift and say so, rather than keep the previous state's
+    figures."""
+    out = _render(920, True, "?engine=1&drift=1", states="CO,GA", stall=stall)
     for code, s in out["states"].items():
         assert not s["lead"].startswith("Loading"), code
         assert len(s["cells"]) == 7, code
@@ -503,6 +522,33 @@ def test_answer_and_table_render_before_the_side_artifacts(stall: str) -> None:
         else:
             assert s["fy27"] == "Loading the FY 2027 projections…", code
             assert "Loading" not in s["adoption"], code
+            assert (
+                "its estimate is still loading; these figures exclude drift"
+                in (s["mechanism"])
+            ), code
+            assert "Drift on" not in s["mechanism"], code
+            # The tiles are this state's, not left from the one before.
+            assert s["tiles"][0].endswith("/yr"), code
+    if stall == "fy2027_data.json":
+        tiles = {code: s["tiles"][0] for code, s in out["states"].items()}
+        assert len(set(tiles.values())) == len(tiles), tiles
+
+
+@pytest.mark.parametrize("late", ["engine_scenario_data.json", "fy2027_data.json"])
+def test_late_artifacts_fill_in_without_a_reload(late: str) -> None:
+    """An artifact that arrives after the all-states pass still reaches the
+    page: the app re-renders the state it loaded, and a late adoption file
+    fills every row's national-total inputs and the analyst total. The
+    snapshot is taken before the harness re-renders anything by hand."""
+    out = _render(920, True, "?engine=1&drift=1", states="CO,GA", late=late)
+    at = out["atLoad"]
+    assert at["lateReleasedAt"] == 2  # held until both rows existed
+    assert at["code"] == "CO"
+    assert not at["fy27"].startswith("Loading"), at["fy27"][:80]
+    assert "Loading" not in at["adoption"], at["adoption"][:80]
+    assert "at baseline, with no drift" in at["adoptNational"]
+    assert "Drift on" in at["mechanism"]
+    assert "still loading" not in at["mechanism"]
 
 
 def test_a_prototype_key_in_the_link_falls_back_to_colorado() -> None:
