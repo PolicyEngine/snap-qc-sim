@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-11-19
+date: 2026-11-20
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -154,9 +154,10 @@ half of states each year for exceeding the national average
 [@gao2007errors]; from fiscal 2004 the new one established liability
 only where, "for the second or subsequent consecutive fiscal year, a
 95 percent statistical probability exists" that a state's rate exceeds
-105 percent of the national performance measure, the sum of each
-state's rate times its share of the dollar value of national
-allotments [@pl107171; @fns2003interim]. That redesign wrote sampling
+105 percent of the national performance measure, which the Food and
+Nutrition Act defines as the sum of each state's rate times its share
+of the dollar value of national allotments (7 U.S.C. § 2025(c)(6)(A))
+[@pl107171; @fns2003interim]. That redesign wrote sampling
 uncertainty into the liability rule itself, and the rule remains in
 force (7 U.S.C. § 2025(c)(1)(C)). Medicaid's eligibility disallowance
 does the same today: CMS subtracts a 3 percent allowable threshold
@@ -245,28 +246,30 @@ prediction artifact follows the forecasting-before-results line
 expert forecasts of experimental results. Nosek and colleagues give, as
 a case where preregistration stays possible with preexisting data, an
 economist predicting government data that exist but have not been
-released, and ask that registrations report what was known in advance
-[@nosek2018preregistration]. Separately, the US COVID-19 Forecast Hub
+released [@nosek2018preregistration]. Separately, the US COVID-19 Forecast Hub
 time-stamped every submitted model forecast in a public GitHub
 repository and, from February 2021, tagged the repository version
 behind each week's ensemble [@cramer2022hub]. The fiscal 2026
-pre-registration (@sec-fy2025) commits per-state predictions of
-measured fiscal 2026 rates, SHA-256-pinned, to this paper's public
+pre-registration (@sec-fy2025) commits per-state no-response null
+predictions of measured fiscal 2026 rates, SHA-256-pinned, to this paper's public
 repository before any official fiscal 2026 rate exists. In
 rules-as-code work, Mérigoux and colleagues checked their Catala
 encoding of French family benefits against the government's official
 online simulator, and read the simulator's OpenFisca source for a case
 it did not cover [@merigoux2021catala]. Molin has checked a public
 SNAP benefit calculator against the 2023 QC data: given each case's
-file fields, with eligibility tests skipped and the calculator's own
-state parameters, it came within \$2 of the "actual benefit amount"
-for 36,507 of the 37,009 cases left after filtering (98.64%)
+file fields, with eligibility tests skipped and the calculator's
+October 2022 state options, corrected in a few states whose utility
+allowances or standard medical deductions were slightly off, it came
+within \$2 of the "actual benefit amount" for 36,507 of the 37,009
+cases left after filtering (98.64%)
 [@molin2025screener]. @sec-oracle compares six values per case, from
 gross income to the benefit Mathematica computes for USDA, at zero
 dollar tolerance for 6,081 of 6,194 fiscal 2024 cases in seven states.
-The harness reads the QC-calculated medical and child-support
+The harness reads intermediates from the file as inputs, among them
+the QC-calculated medical, dependent-care and child-support
 deductions, the recorded utility allowance and the recorded
-categorical-eligibility status as inputs, so parity certifies
+categorical-eligibility status, so parity certifies
 downstream benefit arithmetic given those intermediates, not
 independent derivation of every state-policy path (@sec-oracle-scope).
 
@@ -444,9 +447,12 @@ sequence does not always close the gap: in Colorado, `FSBEN` ends within
 $5 of `BENFIX` in 797 of 856 cases; 21 of the other 59 are prorated
 allotments, which the full-month `FSBEN` does not reflect. The comparison also supplies several
 intermediates directly from the file rather than deriving them from raw
-facts: the QC-calculated medical and
-child-support deduction amounts, the recorded utility allowance, and the
-recorded categorical-eligibility status; eligibility screens receive
+facts, among them the QC-calculated medical, dependent-care and
+child-support deduction amounts, the recorded utility allowance, the
+recorded categorical-eligibility status, the unit's elderly-or-disabled
+status from the file's constructed counts and, in five of the seven
+states, the recorded homeless shelter deduction; eligibility screens
+receive
 passing defaults, since every filed case was enrolled.
 
 Parity therefore certifies the following: that the encoded computation
@@ -455,8 +461,8 @@ allotment lookup, rounding — agrees exactly with the benefit computation
 recorded in the edited file, over the full diversity of 6,081 real case
 configurations, parameter values, and boundary conditions. It is an
 agreement between two implementations of the same rules, closer in kind
-to the cross-model comparisons this method extends than to independent
-adjudication of case outcomes; what distinguishes it from ordinary
+to cross-model comparison than to independent adjudication of case
+outcomes; what distinguishes it from ordinary
 cross-model comparison is the counterparty (a computation Mathematica
 runs for USDA on the edited case records), the case realism, and the
 zero-tolerance bar. It does not certify independent
