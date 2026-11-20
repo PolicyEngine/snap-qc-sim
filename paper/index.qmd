@@ -5,7 +5,7 @@ author:
     affiliations:
       - name: PolicyEngine
     email: max@policyengine.org
-date: 2026-10-24
+date: 2026-11-20
 bibliography: references.bib
 abstract: |
   Beginning in fiscal year 2028, each state's Supplemental Nutrition
@@ -126,7 +126,10 @@ of measured rates under the cost-sharing formula (@sec-simulate), public
 at policyengine.org/us/snap-payment-error-simulator. The simulator's
 central output is a measurement result: near tier boundaries, sampling
 noise alone gives several states nearly even odds of a different cost
-tier than their point rate implies.
+tier than their point rate implies. @sec-related places that result
+beside earlier resampling of QC data
+[@hand1990resampling; @fns2019feasibility] and one-year tier odds
+computed from published standard errors [@bauer2026chance].
 
 The analysis pipeline, simulator, and this manuscript live in one public
 repository; a fact catalog maps every quantitative claim to a committed
@@ -146,15 +149,65 @@ fiscal 1983–85, with waiver machinery absorbing the disputes that
 followed [@gao1984liability]. A National Research Council panel
 convened to rethink that system concluded it needed replacing
 [@nrc1987rethinking], and the 2002 Farm Bill narrowed liability to
-persistently high-error states: where the prior rule had sanctioned
-roughly half of states each year for exceeding the national average,
-the new one required a 95 percent statistical probability that a
-state's rate exceeded 105 percent of the national average for two
-consecutive years [@gao2007errors]. That redesign wrote sampling
-uncertainty into the liability rule itself; the 2025 statute reverses
-the narrowing at larger scale and prices point estimates. This paper
-runs the measurement analysis that difference demands: case-level
-noise quantification against the tiers the money now hangs on.
+persistently high-error states. The prior rule had sanctioned roughly
+half of states each year for exceeding the national average
+[@gao2007errors]; from fiscal 2004 the new one established liability
+only where, "for the second or subsequent consecutive fiscal year, a
+95 percent statistical probability exists" that a state's rate exceeds
+105 percent of the national performance measure, which the Food and
+Nutrition Act defines as the sum of each state's rate times its share
+of the dollar value of national allotments (7 U.S.C. § 2025(c)(6)(A))
+[@pl107171; @fns2003interim]. That redesign wrote sampling
+uncertainty into the liability rule itself, and the rule remains in
+force (7 U.S.C. § 2025(c)(1)(C)). Medicaid's eligibility disallowance
+does the same today: CMS subtracts a 3 percent allowable threshold
+from the lower bound of the 95 percent confidence interval for a
+state's eligibility improper payment rate, excluding underpayments
+[@cfr42-431-1010]. The 2025 statute adds a state share of benefit
+costs beside that liability rule (Pub. L. No. 119-21 § 10105; 7 U.S.C.
+§ 2013(a)(2)). The share's tiers use the payment error rate as the
+Food and Nutrition Act defines it, "the sum of the point estimates" of
+the overpayment and underpayment rates (7 U.S.C. § 2025(c)(2)(A)),
+with no probability test. The Congressional Research Service, in an
+Insight updated October 5, 2026, notes that "USDA has not issued
+regulations or guidance on how state cost-sharing of SNAP will be
+implemented" [@crs2026in12723]. This paper
+quantifies the sampling noise around those point estimates at case
+level, against the tiers the money now hangs on.
+
+Resampling QC data has its own record. Hand bootstrapped quality
+control data from Oregon's Food Stamp Program to study how departures
+from linearity, constant variance and normality affect the efficiency
+of the regression estimator of the error rate [@hand1990resampling]. A
+feasibility study for FNS drew 200 replicate subsamples of the 2016 QC
+database, a year whose official rates FNS withheld over data-quality
+concerns, for each of four sample-size reductions. From each replicate
+it computed approximate national and state error rates, defined as the
+weighted share of households with an error above the tolerance rather
+than as dollars in error, and it measured their spread around the
+full-file estimate: the variability smaller samples would add, not
+total uncertainty [@fns2019feasibility, Appendix F]. Under the 2025
+tiers, Bauer and Schanzenbach compute the probability that each
+state's fiscal 2023 rate, redrawn from a normal distribution centered
+on the published rate with the published standard error as its
+spread, lands in each of five bins; their fifth bin, 13.33 percent or
+higher, stands in for the delay test [@bauer2026chance, Appendix B].
+Each probability
+is for a single year's draw, independent across years; the FY2028
+election between the fiscal 2025 and 2026 rates, and which of those
+years' rates triggers the delay, are outside that calculation. This
+paper resamples each state's fiscal 2024 cases and carries the draws
+through both (@sec-simulate, @sec-fy2025). The delay clause's incentive
+has also been described. Bauer and Schanzenbach, after setting out the
+delays tied to the fiscal 2025 and 2026 rates, note that a fall from
+above the delay threshold to between 6 percent and the threshold will
+trigger a share of 5 to 15 percent [@bauer2025recession]. The delay
+test reads only the fiscal 2025 and 2026 rates, so a state above the
+threshold in fiscal 2024 that falls below it in both test years enters
+the tiers in fiscal 2028. Bergh and Rosenbaum argue that this
+effectively punishes New Jersey, whose rate
+fell from 14.33 percent in fiscal 2024 to 6.86 percent in fiscal 2025
+and which may now owe 5 percent [@bergh2026newdata].
 
 The measurement system also has a documented behavioral record. After
 a nationwide USDA Inspector General audit, the Department of Justice
@@ -189,12 +242,36 @@ recertification periods as an error-relevant intervention, not only a
 workload one. The event-study machinery follows the synthetic-control
 canon [@abadie2010synthetic; @abadie2021using], and the committed
 prediction artifact follows the forecasting-before-results line
-[@dellavigna2018predicting; @dellavigna2020forecasting] with a different object: model-derived,
-hash-pinned predictions for a policy regime rather than elicited expert
-forecasts for experiments. The verification oracle framing extends
-rules-as-code correctness work [@merigoux2021catala] by holding
-encodings to an external administrative record rather than to internal
-consistency.
+[@dellavigna2018predicting; @dellavigna2020forecasting], which elicits
+expert forecasts of experimental results. Nosek and colleagues give, as
+a case where preregistration stays possible with preexisting data, an
+economist predicting government data that exist but have not been
+released [@nosek2018preregistration]. Separately, the US COVID-19 Forecast Hub
+time-stamped every submitted model forecast in a public GitHub
+repository and, from February 2021, tagged the repository version
+behind each week's ensemble [@cramer2022hub]. The fiscal 2026
+pre-registration (@sec-fy2025) commits per-state no-response null
+predictions of measured fiscal 2026 rates, SHA-256-pinned, to this paper's public
+repository before any official fiscal 2026 rate exists. In
+rules-as-code work, Mérigoux and colleagues checked their Catala
+encoding of French family benefits against the government's official
+online simulator, and read the simulator's OpenFisca source for a case
+it did not cover [@merigoux2021catala]. Molin has checked a public
+SNAP benefit calculator against the 2023 QC data: given each case's
+file fields, with eligibility tests skipped and the calculator's
+October 2022 state options, corrected in a few states whose utility
+allowances or standard medical deductions were slightly off, it came
+within \$2 of the "actual benefit amount" for 36,507 of the 37,009
+cases left after filtering (98.64%)
+[@molin2025screener]. @sec-oracle compares six values per case, from
+gross income to the benefit Mathematica computes for USDA, at zero
+dollar tolerance for 6,081 of 6,194 fiscal 2024 cases in seven states.
+The harness reads intermediates from the file as inputs, among them
+the QC-calculated medical, dependent-care and child-support
+deductions, the recorded utility allowance and the recorded
+categorical-eligibility status, so parity certifies
+downstream benefit arithmetic given those intermediates, not
+independent derivation of every state-policy path (@sec-oracle-scope).
 
 ## The QC system and the money attached to it {#sec-qc}
 
@@ -294,10 +371,12 @@ logic — has a recognized validation problem: against what do you test the
 encoding? Unit tests encode the encoder's own reading of the law, and
 cross-model comparisons inherit both models' assumptions; the literature
 has approached validation by compiling legal text alongside experts
-[@merigoux2021catala; @oecd2020cracking] and, closest to this paper, by
-testing an independent encoding of the French tax code against the tax
-authority's own published test cases [@merigoux2021compiler].
-Administrative QC data extends that strategy to a benefits program at
+[@merigoux2021catala; @oecd2020cracking] and by checking a new
+compiler for the French tax authority's existing income tax program
+against the authority's private test suite and generated test cases
+[@merigoux2021compiler]; for SNAP, a public
+benefit calculator has been checked against QC records
+[@molin2025screener]. Administrative QC data supports that strategy at
 case level: tens of thousands of real cases per year, each carrying
 edited inputs and the benefit chain Mathematica computes for USDA from
 the edited record.
@@ -368,9 +447,12 @@ sequence does not always close the gap: in Colorado, `FSBEN` ends within
 $5 of `BENFIX` in 797 of 856 cases; 21 of the other 59 are prorated
 allotments, which the full-month `FSBEN` does not reflect. The comparison also supplies several
 intermediates directly from the file rather than deriving them from raw
-facts: the QC-calculated medical and
-child-support deduction amounts, the recorded utility allowance, and the
-recorded categorical-eligibility status; eligibility screens receive
+facts, among them the QC-calculated medical, dependent-care and
+child-support deduction amounts, the recorded utility allowance, the
+recorded categorical-eligibility status, the unit's elderly-or-disabled
+status from the file's constructed counts and, in five of the seven
+states, the recorded homeless shelter deduction; eligibility screens
+receive
 passing defaults, since every filed case was enrolled.
 
 Parity therefore certifies the following: that the encoded computation
@@ -379,8 +461,8 @@ allotment lookup, rounding — agrees exactly with the benefit computation
 recorded in the edited file, over the full diversity of 6,081 real case
 configurations, parameter values, and boundary conditions. It is an
 agreement between two implementations of the same rules, closer in kind
-to the cross-model comparisons this method extends than to independent
-adjudication of case outcomes; what distinguishes it from ordinary
+to cross-model comparison than to independent adjudication of case
+outcomes; what distinguishes it from ordinary
 cross-model comparison is the counterparty (a computation Mathematica
 runs for USDA on the edited case records), the case realism, and the
 zero-tolerance bar. It does not certify independent
@@ -774,7 +856,10 @@ an attribution. All figures quote the committed simulation artifact.
 (@fig-co, @tbl-boundary). With no policy change at all, the probability
 that a fresh QC-style sample lands in a different cost-share tier than
 the official point rate implies is 46–50% for the five states nearest
-boundaries.
+boundaries. Bauer and Schanzenbach compute one-year bin probabilities
+of the same kind from fiscal 2023 rates and their published standard
+errors [@bauer2026chance, Appendix B]; the draws here resample fiscal
+2024 cases.
 
 ![Colorado's simulated measured-rate distribution (100,000 resampled
 QC-style measurements, official error definition, centered on the
@@ -784,7 +869,9 @@ and its fiscal 2025 rate, 10.09%, sits above it; 52% of simulated
 measurements fall below the boundary and 48% above. Generated by the
 committed `paper/generate_figures.py` (seed 11).](figures/co_measured_rate.svg){#fig-co}
 
-The formula maps a point estimate to a tier with no
+The formula maps the payment error rate, which the statute defines as
+a sum of point estimates (7 U.S.C. §§ 2013(a)(2)(A), 2025(c)(2)(A)), to
+a tier with no
 adjustment for sampling uncertainty; near a boundary, tier assignment
 turns as much on the sampling draw as on the underlying rate. This is
 the accountability-measurement problem documented for school
@@ -988,7 +1075,9 @@ expected FY2028 bill by $16M to $23M a year from a $159M baseline,
 with the election-win probability rising from 52% to 74–82%.
 
 The formula does not price error reduction monotonically, and the delay
-clause is why. New York, at 13.18%, sits just under the 13.33%
+clause is why, as Bauer and Schanzenbach [-@bauer2025recession] and,
+for New Jersey, Bergh and Rosenbaum [-@bergh2026newdata] have
+described. New York, at 13.18%, sits just under the 13.33%
 threshold: at baseline, 42% of simulated fiscal 2026 measurements cross
 it and defer the first bill, holding the expected FY2028 bill to $630M
 against a $1.08B locked tier value. The broad scenario moves New York's
