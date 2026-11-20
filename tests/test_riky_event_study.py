@@ -183,6 +183,25 @@ def test_committed_pooled_placebos_equal_single_state_placebos() -> None:
         assert pooled["rank_denominator"] == 43
 
 
+def test_riky_fixture_pooled_placebos_equal_single_state_placebos() -> None:
+    """The identity follows from the procedure, not from the committed data.
+
+    On the fixture panel both units' primary placebo fits take the same donor
+    pool, years and outcomes, so each donor's two pseudo-effects coincide and
+    the pooled placebo equals them.
+    """
+    result = event_study.build_riky_results(_fixture_panel())
+    donors = result["scope"]["donor_pool"]
+    outcomes = result["pooled"]["permutation_inference"]
+    assert outcomes
+    for outcome, pooled in outcomes.items():
+        ri = result["units"]["RI"]["permutation_inference"][outcome]["placebo_effects"]
+        ky = result["units"]["KY"]["permutation_inference"][outcome]["placebo_effects"]
+        assert sorted(ri) == donors
+        assert ri == ky
+        assert pooled["placebo_effects"] == ri
+
+
 def test_riky_serializer_reproduces_committed_bytes() -> None:
     """serialize_results must rebuild the committed bytes from parsed values.
 
