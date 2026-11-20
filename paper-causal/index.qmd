@@ -3,7 +3,7 @@ title: "What a system replacement does to measured error: three SNAP eligibility
 author:
   - name: Max Ghenis
     affiliation: PolicyEngine
-date: 2026-08-17
+date: 2026-11-20
 abstract: |
   State reviewers re-work a monthly sample of active SNAP cases, record every dollar paid in error, and code why. Those quality-control files, public back to fiscal 2012, carry error dollars the reviewers attribute to the computing apparatus for every state and year under one federal definition. This paper uses them as an outcome panel for three eligibility-system replacements, Rhode Island's UHIP (September 2016), Kentucky's Benefind (February 2016), and Oregon's ONE expansion (February 2021), each estimated against a synthetic control drawn from states with no recorded migration in a public event registry, with permutation inference and a decision rule frozen before estimation. The estimand is the bundled system replacement as implemented. Rhode Island's computing-apparatus error dollars rise \$2.90 per weighted case-month (permutation p = 0.023, first of 43; a post-results Bonferroni comparison across the three unit tests gives an adjusted p of 0.070) while the client-caused placebo does not fire (p = 0.233), concentrated in fiscal 2017 through 2019, the pre-named consequence window inside the September 2016 to December 2019 interval for which the Food and Nutrition Service later billed the state \$37.3 million; Kentucky shows no protocol-defined signal; Oregon's placebo fires inside the pandemic window and the rule refuses attribution. A second frozen protocol decomposes the Rhode Island signal by cause code: computer-generated mass-change error is the inferential channel that moves, at \$2.08 per case-month with the donor refit across all outcomes and \$2.14 with the parent's donor held fixed (p = 0.023 and first of 43 placebo states under both), while information-disregarded error, the other inferential channel, does not separate from the donor under either; worker and data-entry error fall below the count gate and are reported descriptively. The decomposition also shows that the design's placebo status depends on which outcomes share the donor fit: under the joint refit the client placebo moves to p = 0.023 and the parent rule returns `no_protocol_defined_signal` for the channel; under a fixed-donor estimator that reproduces the parent's placebo exactly, the same rule returns `signal`. Both estimators are reported and neither is privileged.
 bibliography: references.bib
@@ -70,10 +70,25 @@ accusations [@peeters2023administrative]. The registry this paper
 draws on holds an older United States record. Colorado launched an
 unfinished eligibility system in 2004 and faced a class action over
 lost benefits. Indiana canceled a \$1.16 billion modernization in
-2009 after denials rose 54 percent. Each of these records ends at its
-own state's border, on its own terms. The quality-control files add
-what a single-state record cannot: one outcome definition, every
-state, every year.
+2009 after denials rose 54 percent. Wu and Meyer estimate what that
+modernization did to SNAP, TANF and Medicaid enrollment
+[@wu2023certification]. From October 2007 to May 2008 Indiana moved
+59 of its 92 counties, in three waves, to IBM-assisted processing of
+applications and recertifications. The state kept final eligibility
+determinations. Four quarters after the switch, treated counties had
+15 percent fewer SNAP participants than untreated Indiana counties.
+The switch screened out needier recipients at exit and less needy
+applicants at entry. In robustness checks, Wu and Meyer add border
+counties in four neighboring states to the SNAP enrollment comparison
+and fit a synthetic Indiana from other states. They treat payment
+errors descriptively and, because the public QC files identify only
+the state, compare Indiana with the nation. Their chart shows SNAP
+payment error rates for fiscal 2002–13 in percent of benefit dollars.
+This paper takes
+cause-coded QC error dollars as its outcome and estimates three
+migrations, each against a synthetic control. The quality-control
+files record those dollars under one federal definition for every
+state and year.
 
 The outcome belongs to accountability measurement. Kane and Staiger
 showed school ratings reward and punish sampling variation
@@ -140,7 +155,7 @@ For each treated state, nonnegative donor weights summing to one minimize the pr
 
 The estimator infers by permutation in space. The estimator refits every donor state as pseudo-treated on the remaining donors under the identical year assignment and ranks the absolute treated effect among the absolute placebo effects, ties counting against the signal. The p-value is (1 + exceedances)/(1 + placebos): 42 placebos for Rhode Island and Kentucky, so the smallest p is 1/43 = 0.023, and 34 for Oregon, 1/35 = 0.029. These p-values compare the estimate with placebo runs inside a pre-named pool and carry no large-sample standard error. The Rhode Island–Kentucky pool holds every state and the District of Columbia less the nine registry states. The Oregon protocol also removes the jurisdictions on the FY2024 or FY2025 statutory delay rosters, a pre-named set with high recent measured error rates; because those rosters rest partly on rates measured after the launch, the Oregon estimate is conditional on the pre-named pool.
 
-A unit earns the verdict "signal" only when its strict-outcome permutation p falls below 0.10 and its client-placebo p stays at or above 0.10; otherwise the verdict is "no protocol-defined signal", and the total-rate outcome cannot change either. The pooled statistic, the equal-weight mean of the Rhode Island and Kentucky effects, ranks against pooled placebos built the same way, and its verdict does not replace the unit verdicts. Because FNS billed Rhode Island through December 2019, the protocol names FY2017–19 as the consequence window and reports the mean strict gap there against the later post-years, FY2020 and FY2022–24, a descriptive and verdict-inert check; the billing record enters no estimate.
+A unit earns the verdict "signal" only when its strict-outcome permutation p falls below 0.10 and its client-placebo p stays at or above 0.10; otherwise the verdict is "no protocol-defined signal", and the total-rate outcome cannot change either. The pooled statistic, the equal-weight mean of the Rhode Island and Kentucky effects, ranks against each donor state's placebo effect averaged over the two units' procedures, as the protocol specifies. The two units' primary placebo fits take identical inputs, so the reference reduces to the single-state placebo distribution (@sec-pooled), and the pooled verdict does not replace the unit verdicts. Because FNS billed Rhode Island through December 2019, the protocol names FY2017–19 as the consequence window and reports the mean strict gap there against the later post-years, FY2020 and FY2022–24, a descriptive and verdict-inert check; the billing record enters no estimate.
 
 The three unit-level tests form a family, and neither parent protocol
 corrects across them; each unit carries its own verdict at 0.10 with
@@ -232,9 +247,11 @@ The launch shares its calendar with the pandemic. Oregon's panel runs FY2017–2
 
 : Oregon — primary outcomes and pandemic sensitivities; verdict `no_protocol_defined_signal`, placebo fired. {#tbl-or}
 
-## Pooled inference
+## Pooled inference {#sec-pooled}
 
-The pooled Rhode Island–Kentucky statistic is the equal-weight mean of the two state effects: +\$1.16 per case-month on the strict outcome (rank 4 of 43, p = 0.093) and −\$0.29 on the client placebo (rank 43 of 43, p = 1.0). The unit rule, applied unchanged to the pooled strict and client statistics, returns `signal`. Three of the 42 placebo statistics match or exceed the pooled strict effect in absolute value. The pooled client effect is the smallest of all 43 because the two states' client movements, +\$3.96 and −\$4.53, nearly cancel. The total rate falls 0.57 percentage points (p = 0.744) and cannot change the verdict.
+The pooled Rhode Island–Kentucky statistic is the equal-weight mean of the two state effects: +\$1.16 per case-month on the strict outcome (rank 4 of 43, p = 0.093) and −\$0.29 on the client placebo (rank 43 of 43, p = 1.0). The unit rule, applied unchanged to the pooled strict and client statistics, returns `signal`. Three of the 42 single-state placebo effects match or exceed the pooled strict effect in absolute value. The pooled client effect is the smallest of all 43 because the two states' client movements, +\$3.96 and −\$4.53, nearly cancel. The total rate falls 0.57 percentage points (p = 0.744) and cannot change the verdict.
+
+The reference behind that p-value holds single-state effects. The protocol builds each donor state's pooled placebo by averaging the state's pseudo-effects under the Rhode Island and Kentucky procedures. The two units' primary placebo fits take identical inputs: the same donor pool, the same primary pre- and post-treatment years and the same outcomes, and neither treated state is a donor. Each unit's procedure refits every donor as pseudo-treated on the remaining donors with the protocol's deterministic optimizer, so a donor's two pseudo-effects are identical: all 42 match exactly on every outcome (`analysis/riky_event_study_results.json`). The pooled statistic, a mean of two treated effects, therefore ranks against 42 single-state placebo effects. The frozen protocol supplies no two-unit placebo reference and this paper constructs none; the pooled verdict above stands as the protocol defines it.
 
 The pooled verdict stands apart from the two unit verdicts. It averages a +\$2.90 `signal` with a −\$0.58 `no_protocol_defined_signal`; it neither upgrades Kentucky nor averages away Rhode Island's concentration in FY2017–19. It answers one question, whether the two 2016 launches together moved computing-apparatus error dollars against a common pool.
 
@@ -308,8 +325,8 @@ files, which the repository does not distribute; it commits their
 SHA-256 hashes and loaders, the regeneration tests skip when the
 hash-audited local cache is absent, and they compare values, not bytes,
 when it is present. The paper's tables were generated from the
-artifacts at repository commit `4aafd06`; revision 3 leaves every
-quoted value unchanged.
+artifacts at repository commit `4aafd06`; revisions 3 and 4 leave
+every quoted value unchanged.
 
 ## Data availability
 
@@ -326,7 +343,7 @@ the repository itself.
 
 ## Limitations
 
-One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and the design section reports its Bonferroni and Holm arithmetic.
+One treated state per event, and two in the pool, bound what any test here can resolve. The design ranks each estimate among placebo runs on a named donor set: 42 donors for Rhode Island and Kentucky, 34 for Oregon. The smallest p-value the design can return is 1/43 = 0.023 or 1/35 = 0.029, and Rhode Island's strict estimate and Oregon's client-caused placebo both sit at that floor. Each p-value conditions on the pool and carries no large-sample standard error. The pooled test ranks a two-state mean against single-state placebo effects (@sec-pooled), so its p-value carries no two-unit calibration. The three unit tests carry no pre-registered familywise correction; the family disclosure was declared after the results, and the design section reports its Bonferroni and Holm arithmetic.
 
 The decomposition runs on 325, 206, and 482 adjudicated Rhode Island error cases in fiscal 2017 through 2019. The protocol admits a channel to inference only when its code appears at least 30 times in each year. Mass-change (139, 93, 98), information-disregarded (84, 51, 137), and a defect-or-mass-change composite pass. Program defect (44, 12, 21), data entry (5, 13, 18), arithmetic (7, 3, 14), and user error (1, 4, 8) appear as effect sizes without p-values. Recertification codes 23 through 25 first appear in fiscal 2024, so that channel has no cases in the Rhode Island window.
 
